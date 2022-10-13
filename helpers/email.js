@@ -13,13 +13,16 @@ const nodemailer = require("nodemailer");
 const dev = require("../config/dev");
 
 
+/**
+ * Allows to send mail to an email address. include email, subject and text.
+ */
 function sendMail(email,subject,text) {
   let transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: "hotmail",
     auth: {
       type: "login",
-      user: dev.gmailUser,
-      pass: dev.gmailAppPass,
+      user: dev.outlookUser,
+      pass: dev.outlookPass,
 
     },
     tls: {
@@ -28,7 +31,7 @@ function sendMail(email,subject,text) {
   })
 
   let mailOptions = {
-    from: dev.gmailUser,
+    from: dev.outlookUser,
     to: email,
     subject: subject,
     text: text,

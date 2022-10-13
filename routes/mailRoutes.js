@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const mail = require("../helpers/email");
 
-//send an email
+//send an email, example: api/send_mail?email=educado.aau.dk@gmail.com&subject=congratulations&text=you did it
 router.get("/send_mail", async (req, res) => {
   setTimeout(async () => {
     try{
@@ -15,6 +15,7 @@ router.get("/send_mail", async (req, res) => {
   }, 1500);
 });
 
+/*
 //send mail that tells the user that the application has been received
 router.get("/send_mail/awaiting_approval", async (req, res) => {
   setTimeout(async () => {
@@ -55,7 +56,7 @@ router.get("/send_mail/reject_application", async (req, res) => {
       res.send(error.message);
     }
   }, 1500);
-});
+});*/
 
 
 module.exports = router;
