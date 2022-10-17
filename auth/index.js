@@ -3,7 +3,7 @@ const Password = require('../helpers/Password')
 const { userList } = require('../users')
 
 const buildMakeAuthHandler = require('./authHandler')
-const makeAuthEndpointHandler = require('./authEndpointHandler')
+const makeAuthEndpointHandler = require('./authController')
 
 const makeAuthHandler = buildMakeAuthHandler({ Password, Token })
 

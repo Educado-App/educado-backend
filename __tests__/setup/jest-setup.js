@@ -16,10 +16,8 @@ const mongod =
     })
 
 module.exports = async () => {
-    if (!mongod.runningInstance) {
-        await mongod.start()
-    }
-
+    await mongod.ensureInstance()
+    
     const mongoConfig = {
         mongoDBName: 'jest',
         mongoUri: mongod.getUri()

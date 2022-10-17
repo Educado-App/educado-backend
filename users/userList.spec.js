@@ -8,7 +8,7 @@ const { userList } = require(".")
 describe("User List", () => {
 
     beforeAll(() => connectDb())
-    beforeEach(async () => await userList.remove({}))
+    afterEach(async () => await userList.remove({}))
 
     it("successfully adds a user to the db", async () => {
         const fakeUser = makeFakeUser()

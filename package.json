@@ -10,13 +10,15 @@
   "scripts": {
     "start": "node index.js",
     "server": "nodemon index.js",
-    "test": "jest src --watch",
+    "test": "jest --runInBand",
     "dev": "npm run server",
     "prod": "npm run server"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ajv": "^8.11.0",
+    "ajv-formats": "^2.1.1",
     "aws-sdk": "^2.1083.0",
     "bcrypt": "^5.0.1",
     "cli": "^1.0.1",
@@ -32,7 +34,6 @@
     "multer": "^1.4.2",
     "multer-s3": "^2.10.0",
     "nodemailer": "^6.8.0",
-    "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.6",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0"

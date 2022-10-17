@@ -1,28 +1,31 @@
+const keys = require("../config/dev")
+const nodemailer = require("nodemailer")
+
 module.exports = Object.freeze({
-    isValid
+  isValid,
+  send: sendMail
 })
 
 function isValid(email) {
-    const regEx = new RegExp("^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}")
-    return regEx.test(email)
+  const regEx = new RegExp("^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}")
+  return regEx.test(email)
 }
 
 
-//functions for the mailroutes file
-const nodemailer = require("nodemailer");
-const dev = require("../config/dev");
+async function sendMail({
+  subject,
+  from = keys.gmailUser,
+  to, 
+  text,
+  html
+}) {
 
-
-/**
- * Allows to send mail to an email address. include email, subject and text.
- */
-function sendMail(email,subject,text) {
-  let transporter = nodemailer.createTransport({
-    service: "hotmail",
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
     auth: {
       type: "login",
-      user: dev.outlookUser,
-      pass: dev.outlookPass,
+      user: keys.gmailUser,
+      pass: keys.gmailAppPass,
 
     },
     tls: {
@@ -30,23 +33,16 @@ function sendMail(email,subject,text) {
     }
   })
 
-  let mailOptions = {
-    from: dev.outlookUser,
-    to: email,
+  const mailOptions = {
     subject: subject,
+    from: from,
+    to: to,
     text: text,
+    html: html
   }
 
-transporter.sendMail(mailOptions, function (err, success) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Email sent successfully");
-    }
-  })
+  await transporter.sendMail(mailOptions)
 }
-
-module.exports = {sendMail};
 
 
 

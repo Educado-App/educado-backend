@@ -7,7 +7,10 @@ module.exports = async function connectDb() {
         connection ||
         await mongoose.connect(
             global.__MONGO_URI__,
-            { useNewUrlParser: true }
+            {
+                useNewUrlParser: true,
+                useFindAndModify: false
+            }
         )
     //db = db || connection.db(global.__MONGO_DB_NAME__)
 }

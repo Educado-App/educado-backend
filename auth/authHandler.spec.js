@@ -7,7 +7,8 @@ const { authHandler } = require('.')
 describe('Authentication Handler', () => {
 
     beforeAll(() => connectDb())
-
+    afterEach(async () => await userList.remove({}))
+    
     it("succesfully authenticates a valid user", async () => {
         const fakeUser = makeFakeUser()
         

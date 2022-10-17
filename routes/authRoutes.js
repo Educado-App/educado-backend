@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
 
-const makeExpressCallback = require('../middlewares/expressCallback')
+const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth')
 
 // Services
