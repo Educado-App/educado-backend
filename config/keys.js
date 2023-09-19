@@ -2,9 +2,9 @@ const dotenv = require("dotenv");
 
 // Load environment variables based on NODE_ENV
 if (process.env.NODE_ENV === "production") {
-  dotenv.config({ path: ".env.prod" });
+  dotenv.config({ path: "./config/.env.prod" });
 } else {
-  dotenv.config({ path: ".env" });
+  dotenv.config({ path: "./config/.env" });
 }
 
 // Access the environment variables
