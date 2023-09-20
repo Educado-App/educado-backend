@@ -3,3 +3,4 @@ config/dev.js
 *.DS_Store
 package-lock.json
 dev.js
+.env
