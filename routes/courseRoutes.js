@@ -8,6 +8,7 @@ const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
+const { UserModel } = require("../models/User");
 
 // Content Creator Application Route
 router.post("/course/", async (req, res) => {
@@ -76,11 +77,12 @@ router.post("/course/update", requireLogin, async (req, res) => {
   res.send("Course Update Complete");
 });
 
-// Get all courses for user
+/** Get all courses for user
 router.get("/course/getall", async (req, res) => {
   const list = await CourseModel.find({ _user: req.user.id });
   res.send(list);
 });
+**/
 
 // Get all courses for user
 router.get("/course/eml/getall", async (req, res) => {
@@ -322,7 +324,7 @@ router.post("/section/delete", requireLogin, async (req, res) => {
   res.send(sectionIds);
 });
 
-//Create Component
+// Create Component
 router.post("/component/create", async (req, res) => {
   const { type, section_id } = req.body; // Or query?...
 
@@ -436,5 +438,52 @@ router.get("/course/delete_all", requireLogin, async (req, res) => {
   });
   res.send("Completed");
 });
+
+// User route
+router.post("/user/", async (req, res) => {
+  const { googleID } = req.body;
+
+  const user = new UserModel({
+    googleID: googleID,
+    email: email,
+    password: password,
+    joinedAt: Date.now(),
+    modifiedAt: Date.now(),
+    subscriptions: []
+  });
+
+  try {
+    await user.save();
+    res.send(user);
+  } catch (err) {
+    res.status(422).send(err);
+  }
+});
+
+// Subscribe to course 
+
+router.post("/course/subscribe",  async (req, res) => {
+  const {subscriptions } = req.body;
+
+  course = await CourseModel.findById(course_id);
+
+  list = UserModel.findOne({ _id: subscriptions});
+
+  list.push(course);
+
+});
+
+// Get users subscriptions
+
+router.get("/user/subscription/getAll", async (req, res) => {
+  const { subscriptions } = req.body;
+  let list = [];
+  for (let i = 0; i < subscriptions.length; i++) {
+      const temp = await UserModel.findOne({ _id: subscriptions[i] });
+      list.push(temp);
+  }
+  res.send(list);
+});
+
 
 module.exports = router;
