@@ -3,7 +3,5 @@ config/dev.js
 *.DS_Store
 package-lock.json
 dev.js
-
-# enviroment
 .env
-.env.*
+config/gcp_service.json
