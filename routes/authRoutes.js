@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
+const {User} = require("../models/User"); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth')
@@ -25,17 +26,37 @@ router.get("/auth/google/callback",
   }
 );
 
-// Logout simulation
-router.get("/auth/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
-});
+// Login
+router.get("/auth/login", async (req, res) => {
+  try {
+    // Searching for a single user in the database, with the email provided in the request body
+    const user = await User.findOne({ email: req.body.email });
+    // If email is found, compare the password provided in the request body with the password in the database
+    if(user) {
+      result = req.body.password === user.password
+    } else {
+      res.send("Incorrect credentials");
+    }
 
-// Show current user simulation
-router.get("/auth/current_user", (req, res) => {
-  setTimeout(() => {
-    res.send(req.user);
-  }, 1500);
-});
+    if(result) {
+      res.redirect("/");
+    } else {
+      res.send("Incorrect password");
+    }
+  } catch (error) { res.status(400).json({ error: error.message }) }});
 
-module.exports = router
+
+  // Logout simulation
+  router.get("/auth/logout", (req, res) => {
+    req.logout();
+    res.redirect("/");
+  });
+
+  // Show current user simulation
+  router.get("/auth/current_user", (req, res) => {
+    setTimeout(() => {
+      res.send(req.user);
+    }, 1500);
+  });
+
+  module.exports = router
