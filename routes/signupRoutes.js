@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
-const { UserModel } = require("../models/User");
+const {User} = require("../models/User");
 
 // Content Creator Application Route
 router.post("/content-creator", async (req, res) => {
@@ -34,7 +34,7 @@ router.post("/user", async (req, res) => {
   try {
     //validateEmail(form.email);
     //validateName(form.name);
-    const doc = UserModel(form);
+    const doc = User(form);
     const created = await doc.save();
 
     res.status(201);
