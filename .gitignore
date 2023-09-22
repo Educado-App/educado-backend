@@ -5,3 +5,6 @@ package-lock.json
 dev.js
 .env
 config/educado-399008-c718daa031b8.json
+config/gcp_service.json
+config/keys.js
+config/keys.js
