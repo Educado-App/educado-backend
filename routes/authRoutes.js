@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
-const {User} = require("../models/User"); // Import User model
+const { User } = require("../models/User"); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth')
@@ -32,31 +32,32 @@ router.get("/auth/login", async (req, res) => {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
-    if(user) {
-      result = req.body.password === user.password
+    if (!user) {
+      return res.status(401).json({ "error": "Incorrect credentials" });
     } else {
-      res.send("Incorrect credentials");
+      result = (req.body.password === user.password)
     }
-
-    if(result) {
-      res.redirect("/");
+    // If the passwords match, return a success message
+    if (result) {
+      return res.status(202).json({ "message": "Login successful" });
     } else {
-      res.send("Incorrect password");
+      return res.status(401).json({ "error": "Incorrect credentials" });
     }
-  } catch (error) { res.status(400).json({ error: error.message }) }});
+  } catch { return res.status(404).json({ "error": "Error" }) }
+});
 
 
-  // Logout simulation
-  router.get("/auth/logout", (req, res) => {
-    req.logout();
-    res.redirect("/");
-  });
+// Logout simulation
+router.get("/auth/logout", (req, res) => {
+  req.logout();
+  res.redirect("/");
+});
 
-  // Show current user simulation
-  router.get("/auth/current_user", (req, res) => {
-    setTimeout(() => {
-      res.send(req.user);
-    }, 1500);
-  });
+// Show current user simulation
+router.get("/auth/current_user", (req, res) => {
+  setTimeout(() => {
+    res.send(req.user);
+  }, 1500);
+});
 
-  module.exports = router
+module.exports = router
