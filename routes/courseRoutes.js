@@ -54,6 +54,16 @@ router.post("/courses", async (req, res) => {
   }
 });
 
+router.get("/course/getHome", async (req, res) => {
+
+  res.send(getHome(req, res));
+});
+
+function getHome(req, res){
+  return "hello course";
+}
+
+
 // Update Course
 router.post("/course/update", requireLogin, async (req, res) => {
   const { course } = req.body;
