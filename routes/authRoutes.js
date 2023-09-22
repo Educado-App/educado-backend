@@ -39,7 +39,7 @@ router.get("/auth/login", async (req, res) => {
     }
     // If the passwords match, return a success message
     if (result) {
-      return res.status(200).json({ "message": "Login successful" });
+      return res.status(202).json({ "message": "Login successful" });
     } else {
       return res.status(401).json({ "error": "Incorrect credentials" });
     }
