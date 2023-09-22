@@ -5,3 +5,4 @@ package-lock.json
 dev.js
 config/.env
 config/gcp_service.json
+*.idea
