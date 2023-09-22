@@ -6,7 +6,7 @@ const { UserModel } = require("../models/User");
 // Middlewares
 const requireLogin = require("../middlewares/requireLogin");
 
-router.deleteUser("/delete/:id", async (req, res) => {
+router.deleteUser("/delete/:id", requireLogin, async (req, res) => {
   try {
     // Get the authenticated user's ID from req.user.id
     const { id } = req.params;
