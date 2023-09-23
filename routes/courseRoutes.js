@@ -60,6 +60,7 @@ router.get("/course/getHome", async (req, res) => {
   res.send("Hello course");
 });
 
+//Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user 
 router.get("/course/getSubscribedCourses", async (req, res) => {
   const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById('650c26466fe6094f6214a4a4', 'subscriptions -_id'))).subscriptions;
   //const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById(req.user.id, 'subscriptions -_id'))).subscriptions;
