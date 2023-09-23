@@ -4,6 +4,7 @@ const router = require("express").Router();
 const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
+const { UserModel } = require("../models/User");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
@@ -56,12 +57,16 @@ router.post("/courses", async (req, res) => {
 
 router.get("/course/getHome", async (req, res) => {
 
-  res.send(getHome(req, res));
+  res.send("Hello course");
 });
 
-function getHome(req, res){
-  return "hello course";
-}
+router.get("/course/getSubscribedCourses", async (req, res) => {
+  const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById('650c26466fe6094f6214a4a4', 'subscriptions -_id'))).subscriptions;
+  //const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById(req.user.id, 'subscriptions -_id'))).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+  console.log(list)
+  res.send(list);
+});
 
 
 // Update Course
