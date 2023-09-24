@@ -32,8 +32,8 @@ router.post("/user", async (req, res) => {
   }
 
   try {
-    //validateEmail(form.email);
-    //validateName(form.name);
+    validateEmail(form.email);
+    validateName(form.name);
     const doc = User(form);
     const created = await doc.save();
 
@@ -84,7 +84,7 @@ function validateName(input) {
    * and ending with a sequence of any letters (at least one name). 
    */
   if(!(input.match(/^(\p{L}+[ -'])*\p{L}+$/u))){
-    throw new Error("Name must contain only letters (seperate names with spaces)");
+    throw new Error("Name must contain only letters (seperate names with spaces, - or ')");
   }
 
   return true;
