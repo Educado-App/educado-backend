@@ -51,8 +51,8 @@ function validateEmail(input) {
   if (isMissing(input)) {
     throw new Error("Email is required");
   }
-  if (input.length < 3) {
-    throw new Error("Email must be at least 3 characters");
+  if (input.length < 6) {
+    throw new Error("Email must be at least 6 characters");
   }
   if (!input.includes("@") || !input.includes(".")) {
     throw new Error("Email must contain '@' and '.'");
