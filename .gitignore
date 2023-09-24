@@ -4,3 +4,6 @@ config/dev.js
 package-lock.json
 dev.js
 .env
+config/educado-*.json
+config/gcp_service.json
+config/keys.js
