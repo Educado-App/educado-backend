@@ -8,3 +8,6 @@ dev.js
 # enviroment
 .env
 .env.*
+config/educado-*.json
+config/gcp_service.json
+config/keys.js
