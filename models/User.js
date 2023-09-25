@@ -9,7 +9,7 @@ const userSchema = new Schema({
   password: String,
   joinedAt: Date,
   modifiedAt: Date,
-  _subscriptions: [{ type: Schema.Types.ObjectId, ref: "Course" }]
+  subscriptions: [String]
 });
 
 const UserModel = mongoose.model("users", userSchema);

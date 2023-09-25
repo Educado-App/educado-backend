@@ -9,7 +9,6 @@ const { Schema } = mongoose;
 const courseSchema = new Schema({
   title: String,
   description: String,
-  _user: { type: Schema.Types.ObjectId, ref: "User" },
   dateCreated: Date,
   dateUpdated: Date,
   coverImg: String,
