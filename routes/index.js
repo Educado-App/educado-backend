@@ -7,6 +7,7 @@ const AuthRoutes = require('./authRoutes')
 const SignupRoutes = require('./signupRoutes')
 const ApplicationRoutes = require('./applicationRoutes')
 const MailRoutes = require('./mailRoutes')
+const UserRoutes = require('./userRoutes')
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -19,5 +20,6 @@ router.use('/api', AuthRoutes)
 router.use('/api/signup', SignupRoutes)
 router.use('/api/applications', ApplicationRoutes)
 router.use('/api/mail',MailRoutes)
+router.use('/api/user', UserRoutes)
 
 module.exports = router
