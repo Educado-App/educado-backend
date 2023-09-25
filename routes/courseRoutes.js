@@ -9,6 +9,7 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { UserModel } = require("../models/User");
+const { IdentityStore } = require("aws-sdk");
 
 // Content Creator Application Route
 router.post("/course/", async (req, res) => {
@@ -462,19 +463,14 @@ router.post("/user/", async (req, res) => {
 
 // Subscribe to course 
 
-router.post("/course/subscribe",  async (req, res) => {
-  const {subscriptions } = req.body;
-
-  course = await CourseModel.findById(course_id);
-
-  list = UserModel.findOne({ _id: subscriptions});
-
-  list.push(course);
+router.post("/course/:id/subscribe",  async (req, res) => {
+  //const {user_id, id} = req.body;
+  
+  UserModel.updateOne({_id: "650d899d3bbf599a6125fdff", $push: { subscriptions: "650c26466fe6094f6214a4a4" }}, )
 
 });
 
 // Get users subscriptions
-
 router.get("/user/subscription/getAll", async (req, res) => {
   const { subscriptions } = req.body;
   let list = [];

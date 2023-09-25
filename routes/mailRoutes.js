@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const mail = require("../helpers/email");
+const mail = require("../helpers/Email");
 
 //send an email
 router.get("/send_mail", async (req, res) => {
