@@ -466,15 +466,28 @@ router.post("/user/", async (req, res) => {
   }
 });
 
-// Subscribe to course 
+// Subscribe to course TODO: check for duplicates
 
 router.post("/course/:id/subscribe",  async (req, res) => {
-  const {user_id, course_id} = req.body;
-  
-  UserModel.findOneAndUpdate(
-    { _id: user_id}, 
-    { $push: { subscribtions: course_id}
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $push: { subscriptions: course_id} }))
+    .save;
+
+  user = await UserModel.findById(user_id);
+  res.send(user)
+
 });
+
+router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $pull: { subscriptions: course_id} }))
+    .save;
 
   user = await UserModel.findById(user_id);
   res.send(user)
@@ -482,14 +495,16 @@ router.post("/course/:id/subscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/user/subscription/getAll", async (req, res) => {
-  const {user_id } = req.body
+router.get("/user/subscriptions/getAll", async (req, res) => {
+  const {user_id} = req.body
 
-  const subscribtions = UserModel.find({_id: user_id}).subscriptions;
+  const sub = UserModel.findOne({ _id: user_id }, 
+    { subscriptions: course_id} );
 
   let subscription_list = [];
-  for (let i = 0; i < subscribtions.length; i++) {
-      const course = await UserModel.find({_id: user_id}).subscriptions[i];
+
+  for (let i = 0; i < sub.length; i++) {
+      const course = await user.subscriptions[i];
       list.push(course);
   }
   res.send(subscription_list);
