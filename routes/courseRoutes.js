@@ -453,4 +453,64 @@ router.get("/course/delete_all", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
+// User route
+router.post("/user/", async (req, res) => {
+  const { googleID } = req.body;
+
+  const user = new UserModel({
+    googleID: googleID,
+    email: email,
+    password: password,
+    joinedAt: Date.now(),
+    modifiedAt: Date.now(),
+    subscriptions: []
+  });
+
+  try {
+    await user.save();
+    res.send(user);
+  } catch (err) {
+    res.status(422).send(err);
+  }
+});
+
+// Subscribe to course TODO: check for duplicates
+
+router.post("/course/:id/subscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $push: { subscriptions: course_id} }))
+    .save;
+
+  user = await UserModel.findById(user_id);
+  res.send(user)
+
+});
+
+router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $pull: { subscriptions: course_id} }))
+    .save;
+
+  user = await UserModel.findById(user_id);
+  res.send(user)
+
+});
+
+// Get users subscriptions
+router.get("/user/subscriptions/getAll", async (req, res) => {
+  const {user_id} = req.body
+  const subscribedCourses = (await UserModel.findById(user_id, 'subscriptions -_id')).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+
+  console.log(list)
+  res.send(list);
+});
+
+
 module.exports = router;
