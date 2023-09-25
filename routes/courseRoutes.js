@@ -9,7 +9,7 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 
-// Content Creator Application Route
+//DON'T USE THIS ROUTE, USE /courses
 router.post("/course/", async (req, res) => {
   const { title, description, category } = req.body;
 
