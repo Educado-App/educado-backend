@@ -41,6 +41,7 @@ router.post("/courses", async (req, res) => {
     category: category,
     level: level,
     description: description,
+    //temporarily commented out as login has not been fully implemented yet
     //_user: req.user.id,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
