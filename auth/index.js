@@ -1,5 +1,5 @@
-const Token = require('../helpers/Token')
-const Password = require('../helpers/Password')
+const Token = require('../helpers/token')
+const Password = require('../helpers/password')
 const { userList } = require('../users')
 
 const buildMakeAuthHandler = require('./authHandler')
