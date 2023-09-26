@@ -4,7 +4,7 @@ const router = require("express").Router();
 const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
-const { UserModel } = require("../models/User");
+const { User } = require("../models/User");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
@@ -479,12 +479,12 @@ router.post("/user/", async (req, res) => {
 router.post("/course/:id/subscribe",  async (req, res) => {
   const { user_id, course_id} = req.body;
 
-  (await UserModel.findOneAndUpdate(
+  (await User.findOneAndUpdate(
     { _id: user_id }, 
     { $push: { subscriptions: course_id} }))
     .save;
 
-  user = await UserModel.findById(user_id);
+  user = await User.findById(user_id);
   res.send(user)
 
 });
@@ -492,12 +492,12 @@ router.post("/course/:id/subscribe",  async (req, res) => {
 router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
   const { user_id, course_id} = req.body;
 
-  (await UserModel.findOneAndUpdate(
+  (await User.findOneAndUpdate(
     { _id: user_id }, 
     { $pull: { subscriptions: course_id} }))
     .save;
 
-  user = await UserModel.findById(user_id);
+  user = await User.findById(user_id);
   res.send(user)
 
 });
@@ -505,10 +505,9 @@ router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
 // Get users subscriptions
 router.get("/user/subscriptions/getAll", async (req, res) => {
   const {user_id} = req.body
-  const subscribedCourses = (await UserModel.findById(user_id, 'subscriptions -_id')).subscriptions;
+  const subscribedCourses = (await User.findById(user_id, 'subscriptions -_id')).subscriptions;
   const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
 
-  console.log(list)
   res.send(list);
 });
 
