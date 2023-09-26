@@ -9,7 +9,7 @@ const { Schema } = mongoose;
 const courseSchema = new Schema({
   title: String,
   description: String,
-  _creator: { type: Schema.Types.ObjectId, ref: "Creator" },
+  creator: { type: Schema.Types.ObjectId, ref: "Creator" },
   dateCreated: Date,
   dateUpdated: Date,
   coverImg: String,
