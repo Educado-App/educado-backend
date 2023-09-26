@@ -12,7 +12,11 @@
     "server": "nodemon index.js",
     "test": "jest --runInBand",
     "dev": "npm run server",
-    "prod": "npm run server"
+    "prod": "npm run server",
+    "docker": "docker-compose up -d",
+    "docker_down": "docker-compose down",
+    "docker_build": "docker-compose up -d --build",
+    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb"
   },
   "author": "",
   "license": "ISC",
