@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
+const { signAccessToken } = require('../helpers/token')
 
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth')
@@ -27,7 +28,8 @@ router.get("/auth/google/callback",
 );
 
 // Login
-router.get("/auth/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
+  console.log("/api/auth/login received request")
   try {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
@@ -39,7 +41,7 @@ router.get("/auth/login", async (req, res) => {
     }
     // If the passwords match, return a success message
     if (result) {
-      return res.status(202).json({ "message": "Login successful" });
+      return res.status(202).json({ "accessToken": "Login Successful" });
     } else {
       return res.status(401).json({ "error": "Incorrect credentials" });
     }
