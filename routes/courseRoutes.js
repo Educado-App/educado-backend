@@ -57,7 +57,7 @@ router.post("/courses", async (req, res) => {
 
 router.get("/course/getHome", async (req, res) => {
 
-  res.send("Hello course");
+  res.send(["Hello course","Hello course 242424","Hello test"]);
 });
 
 //Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user 
