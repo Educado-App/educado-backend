@@ -19,14 +19,12 @@ Below is a short guide explaining how to set up and run Educado in development m
     - run `node --version`
     - if version == v16.14.2, then all is good :)
     - if version is NOT v16.14.2 then do the following
-        - Ensure that you have npm installed
-        - run `npm install -g n` to install node version manager 
-        - when installed, run `n stable`, to install latest stable version of node 
+        - Find the newest stable node version on the web and download it
 
 ### Setting up local repository
-- Go to GitLab page and clone (with ssh) the Colibri repository
-- Create dev.js file for development keys in /config directory
-- Get dev keys from Daniel/Jacob and insert into dev.js file and save
+- Clone the repository
+- Create .env file for development keys in /config directory
+- Get dev keys from Daniel/Jacob and insert into .env file and save
 The dev keys contain the following values:
 1. googleClientID
 2. googleClientSecret
@@ -35,15 +33,12 @@ The dev keys contain the following values:
 5. s3 Bucket name
 
 ### Installing node dependencies 
-- Navivate into the cloned repository
+- Navigate into the cloned repository
 - In root folder of the repo run `npm install`
-- Navigate into the client-web directory
-- Run `npm install` again
-
 
 ### Run app in development mode
 - Run `npm run dev` to start application 
-- By default the web-client runs on ://localhohst:3000
+- By default the web-client runs on ://localhohst:8888
 - ...and rest api runs on ://localhost:8888
 - Local proxy (from client-web) handles communnication link between them
 
