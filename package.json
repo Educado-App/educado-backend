@@ -12,7 +12,11 @@
     "server": "nodemon index.js",
     "test": "jest --runInBand",
     "dev": "npm run server",
-    "prod": "npm run server"
+    "prod": "npm run server",
+    "docker": "docker-compose up -d",
+    "docker_down": "docker-compose down",
+    "docker_build": "docker-compose up -d --build",
+    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb"
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +34,7 @@
     "express": "^4.17.1",
     "http-proxy-middleware": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
+    "mongodb": "^6.1.0",
     "mongoose": "^5.10.9",
     "multer": "^1.4.2",
     "multer-s3": "^2.10.0",
