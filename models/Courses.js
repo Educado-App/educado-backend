@@ -15,6 +15,7 @@ const courseSchema = new Schema({
   category: String,
   published: Boolean,
   sections: [{ type: Schema.Types.ObjectId, ref: "Component" }],
+  creator: [{ type: Schema.Types.ObjectId, ref: "ContentCreator" }]
 });
 
 const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema
