@@ -1,7 +1,9 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
-const { signAccessToken } = require('../helpers/token')
+const bcrypt = require("bcrypt"); // Import bcrypt library module
+const jwt = require("jsonwebtoken"); // Import jsonwebtoken library module
+const keys = require("../config/keys"); // Import keys from config/keys.js
 
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth')
@@ -35,14 +37,23 @@ router.post("/auth/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
+      // If the email is not found, return an error message
       return res.status(401).json({ "error": "Incorrect credentials" });
     } else {
-      result = (req.body.password === user.password)
+      // If the email is found, compare the passwords
+      result = (await bcrypt.compare(req.body.password, user.password))
     }
     // If the passwords match, return a success message
     if (result) {
-      return res.status(202).json({ "accessToken": "Login Successful" });
+      // Create a token for the user
+      const token = jwt.sign({ email: user.email, id: user._id }, keys.jwt_secret, { expiresIn: "1h" })
+      // Return the token
+      return res.status(202).json({
+        status: 'login successful',
+        accessToken: token
+      });
     } else {
+      // If the passwords do not match, return an error message
       return res.status(401).json({ "error": "Incorrect credentials" });
     }
   } catch { return res.status(404).json({ "error": "Error" }) }
