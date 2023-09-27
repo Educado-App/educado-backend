@@ -10,33 +10,37 @@ const { CourseModel } = require("../models/Courses")
 const { ComponentModel } = require("../models/Components")
 
 router.get("/download-s3", requireLogin, async (req, res) => {
+  // config
   aws.config.setPromisesDependency();
   aws.config.update({
     region: "eu-central-1",
   });
 
+  // create new S3 instance
   const s3 = new aws.S3();
 
+  // get s3link from query
   const { s3link } = req.query;
-  let link;
   if (!s3link) {
     res.send("no image found");
     return;
-  } else {
-    const download = {
-      Bucket: keys.s3Bucket,
-      Key: s3link,
-    };
-
-    try {
-      const data = await s3.getObject(download).promise();
-      const encoded = data.Body.toString("base64");
-      res.send({ img: encoded });
-    } catch (e) {
-      console.log(e);
-    }
   }
-});
+
+  // create download object
+  const objectSpecs = {
+    Bucket: keys.s3Bucket,
+    Key: s3link,
+  };
+
+  try {
+    const data = await s3.getObject(objectSpecs).promise();
+    const encoded = data.Body.toString("base64");
+    res.send({ img: encoded });
+  } catch (e) {
+    console.log(e);
+  }
+}
+);
 
 router.get("/api/download-s3-image", requireLogin, async (req, res) => {
   aws.config.setPromisesDependency();
