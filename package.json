@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "server": "nodemon index.js",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --forceExit",
     "dev": "npm run server",
     "prod": "npm run server",
     "docker": "docker-compose up -d",
