@@ -104,12 +104,17 @@ router.get("/course/eml/getall", async (req, res) => {
   res.send(list);
 });
 
-// FIXME: no error handling, just needed the endpoint - Mvh. Frederik
+// Get course by id
 router.get("/course/:id", async (req, res) => {
   const { id } = req.params; // destructure params
-  const course = await CourseModel.findById(id);
-  res.send(course);
-})
+
+  try {
+    const course = await CourseModel.findById(id);
+    res.send(course);
+  } catch (error) {
+    res.status(404).send({ error: "Course not found" });
+  }
+});
 
 // Update course title
 router.post("/course/update/title", async (req, res) => {
