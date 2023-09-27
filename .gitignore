@@ -1,7 +1,16 @@
 node_modules
 config/dev.js
+config/educado-*.json
+config/gcp_service.json
+config/keys.js
+
 *.DS_Store
 package-lock.json
 dev.js
 config/.env
-config/gcp_service.json
+*.idea
+
+# enviroment
+.env
+.env.*
+
