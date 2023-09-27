@@ -1,7 +1,7 @@
-/*const connectDb = require('../__tests__/fixtures/db')
-
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const connectDb = require('../__tests__/fixtures/db')
 const makeFakeUser = require("../__tests__/fixtures/fakeUser")
-
 const { userList } = require(".")
 
 
@@ -23,7 +23,6 @@ describe("User List", () => {
         const removedCount = await userList.remove(added)
 
         expect(removedCount).toBe(1)
-
     })
 
     it("finds a user by email", async () => {
@@ -35,8 +34,24 @@ describe("User List", () => {
 
         expect(found).not.toBeNull()
         expect(found.email).toBe(fakeUser.email)
-
     })
 
+    it("can update a user's email", async () => {
+        const fakeUser = makeFakeUser();
+        await userList.add(fakeUser);
+
+        const updatedUser = await userList.updateEmail(fakeUser.email, "newemail@example.com");
+
+        expect(updatedUser.email).toBe("newemail@example.com");
+    });
+
+    it("can update a user's name", async () => {
+        const fakeUser = makeFakeUser();
+        await userList.add(fakeUser);
+    
+        const updatedUser = await userList.updateName(fakeUser.name, "New Name");
+    
+        expect(updatedUser.name).toBe("New Name");
+    });
+    
 })
-*/
