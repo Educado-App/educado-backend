@@ -19,4 +19,5 @@ const ContentCreatorApplication = mongoose.model(
   ContentCreatorSchema
 );
 
+
 module.exports = { ContentCreatorApplication };

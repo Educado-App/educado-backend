@@ -62,21 +62,6 @@ router.post("/courses", async (req, res) => {
   }
 });
 
-router.get("/course/getHome", async (req, res) => {
-
-  res.send("Hello course");
-});
-
-//Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user 
-router.get("/course/getSubscribedCourses", async (req, res) => {
-  const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById('650c26466fe6094f6214a4a4', 'subscriptions -_id'))).subscriptions;
-  //const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById(req.user.id, 'subscriptions -_id'))).subscriptions;
-  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
-  console.log(list)
-  res.send(list);
-});
-
-
 // Update Course
 router.post("/course/update", requireLogin, async (req, res) => {
   const { course } = req.body;
@@ -244,7 +229,7 @@ router.post("/section/create", requireLogin, async (req, res) => {
 });
 
 // Get all sections
-router.post("/course/getallsections", requireLogin, async (req, res) => {
+router.post("/course/sections", requireLogin, async (req, res) => {
   const { sections } = req.body;
   let list = [];
   for (let i = 0; i < sections.length; i++) {
@@ -513,7 +498,7 @@ router.post("/course/unsubscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/user/subscriptions/getAll", async (req, res) => {
+router.get("/user/subscriptions/all", async (req, res) => {
   const {user_id} = req.body
   const subscribedCourses = (await User.findById(user_id, 'subscriptions -_id')).subscriptions;
   const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
