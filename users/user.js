@@ -1,11 +1,13 @@
 module.exports = function buildMakeUser({ Email, Password }) {
 
-	return function makeUser({
-		email,
-		password,
-		joinedAt = new Date(),
-		modifiedAt = new Date()
-	} = {}) {
+    return function makeUser({
+        email,
+        password,
+        joinedAt = new Date(),
+        modifiedAt = new Date(),
+        firstName = "Fake first name",
+		lastName = "Fake last name"
+    } = {}) {
 
 		if (!Email.isValid(email)) throw new Error('User must have a valid email');
 
@@ -15,12 +17,14 @@ module.exports = function buildMakeUser({ Email, Password }) {
 
 		const encrypted = Password.encrypt(password);
 
-		return Object.freeze({
-			email: email,
-			password: encrypted,
-			joinedAt: joinedAt,
-			modifiedAt: modifiedAt
-		});
+        return Object.freeze({
+            email: email,
+            password: encrypted,
+            joinedAt: joinedAt,
+            modifiedAt: modifiedAt,
+            firstName: firstName,
+			lastName: lastName
+        })
 
 	};
 };
