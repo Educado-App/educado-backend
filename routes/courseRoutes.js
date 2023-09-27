@@ -474,9 +474,10 @@ router.post("/user/", async (req, res) => {
   }
 });
 
-// Subscribe to course TODO: check for duplicates
+// Subscribe to course 
+// TODO: check for duplicates
 
-router.post("/course/:id/subscribe",  async (req, res) => {
+router.post("/course/subscribe",  async (req, res) => {
   const { user_id, course_id} = req.body;
 
   (await User.findOneAndUpdate(
@@ -484,12 +485,13 @@ router.post("/course/:id/subscribe",  async (req, res) => {
     { $push: { subscriptions: course_id} }))
     .save;
 
-  user = await User.findById(user_id);
+  let user = await User.findById(user_id);
   res.send(user)
 
 });
 
-router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
+// Unsubscribe to course
+router.post("/course/unsubscribe",  async (req, res) => {
   const { user_id, course_id} = req.body;
 
   (await User.findOneAndUpdate(
@@ -497,7 +499,7 @@ router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
     { $pull: { subscriptions: course_id} }))
     .save;
 
-  user = await User.findById(user_id);
+  let user = await User.findById(user_id);
   res.send(user)
 
 });
