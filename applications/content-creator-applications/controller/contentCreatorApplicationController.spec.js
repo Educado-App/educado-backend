@@ -71,6 +71,6 @@ describe('Content Creator Application Controller', () => {
         expect(response.data.approved).toBe(true)
 
     })
-    xit('declines a single content creator application', async () => { })
+    //xit('declines a single content creator application', async () => { })
 
 })
