@@ -5,14 +5,9 @@ module.exports = function makeUserList(db_model) {
         add,
         remove,
         findOneByEmail,
-        findOneById,
         updateEmail,
         updateName,
     });
-
-    async function findOneById(id) {
-        return await db_model.findById(id);
-    }
 
     async function add(user) {
         return await db_model.create(user);
