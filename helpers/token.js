@@ -8,13 +8,13 @@ module.exports = Object.freeze({
 })
 
 function signAccessToken(payload = {}) {
-    return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: config.ACCESS_TOKEN_MAX_AGE })
+    return jwt.sign(payload, config.tokenSecret, { expiresIn: config.refreshTokenMaxAge })
 }
 
 function signRefreshToken(payload = {}) {
-    return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: config.REFRESH_TOKEN_MAX_AGE })
+    return jwt.sign(payload, config.tokenSecret, { expiresIn: config.refreshTokenMaxAge })
 }
 
 function verify(token) {
-    return jwt.verify(token, config.TOKEN_SECRET)
+    return jwt.verify(token, config.tokenSecret)
 }
