@@ -8,6 +8,7 @@ const SignupRoutes = require('./signupRoutes')
 const ApplicationRoutes = require('./applicationRoutes')
 const MailRoutes = require('./mailRoutes')
 const UserRoutes = require('./userRoutes')
+const bucketRoutesGCP = require('./bucketRoutesGCP')
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -16,6 +17,7 @@ router.get('/api', (req, res) => {
 
 router.use('/api', CourseRoutes)
 router.use('', AWSRoutes)
+router.use('', bucketRoutesGCP)
 router.use('/api', AuthRoutes)
 router.use('/api/signup', SignupRoutes)
 router.use('/api/applications', ApplicationRoutes)
