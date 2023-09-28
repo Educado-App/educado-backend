@@ -2,8 +2,6 @@ const router = require("express").Router();
 const multer = require("multer");
 const { Storage } = require("@google-cloud/storage");
 
-
-
 // Models
 const { CourseModel } = require("../models/Courses");
 const { ComponentModel } = require("../models/Components");
@@ -11,7 +9,7 @@ const { ComponentModel } = require("../models/Components");
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 100 * 1024 * 1024, // no larger than 5mb
+    fileSize: 5 * 1024 * 1024, // no larger than 5mb
   },
 });
 
@@ -44,48 +42,92 @@ router.get("/download", async (req, res) => {
 
 //upload image to GCP bucket
 // Upload file to GCP bucket
-router.post("/upload", upload.single('file'), async (req, res) => {
-// router.post("/upload", async (req, res) => {
-  const storage = new Storage();
-
-//   const bucketName = req.bucketName;
-//   //console.log("bucketName:", bucketName);
-//   const fileName = req.fileName;
-
-  console.log("req params:", req.params);
-    console.log("req body:", req.body);
-
-    res.send("uploading file");
-    return;
-  // The path to your file to upload
-  const filePath = "";
-
-  // The new ID for your GCS file
-  const destFileName = fileName;
+router.post("/upload", upload.single("file"), async (req, res) => {
+  const multerFile = req.file;
+  const { fileName, bucketName } = req.body;
+  const buffer = req.file.buffer;
 
   console.log("fileName:", fileName);
-    console.log("bucketName:", bucketName);
+  console.log("bucketName:", bucketName);
+  console.log("multerFile:", multerFile);
 
-  async function uploadFile() {
-    const options = {
-      destination: destFileName,
-      // Optional:
-      // Set a generation-match precondition to avoid potential race conditions
-      // and data corruptions. The request to upload is aborted if the object's
-      // generation number does not match your precondition. For a destination
-      // object that does not yet exist, set the ifGenerationMatch precondition to 0
-      // If the destination object already exists in your bucket, set instead a
-      // generation-match precondition using its generation number.
-      // preconditionOpts: {ifGenerationMatch: generationMatchPrecondition},
-    };
-
-    await storage.bucket(bucketName).upload(filePath, options);
-    console.log(`${filePath} uploaded to ${bucketName}`);
+  if (!multerFile) {
+    res.status(400).send("No file uploaded.");
+    return;
   }
 
+  const storage = new Storage();
+
+  //upload to bucket
+
   uploadFile().catch(console.error);
-  // [END storage_upload_file]
-  ///
+
+  async function uploadFile() {
+    // Uploads a local file to the bucket
+    await storage
+      .bucket("")
+      .file(fileName)
+      .save(buffer, {
+        metadata: {
+          contentType: multerFile.mimetype,
+        },
+      });
+
+    console.log(`${fileName} uploaded to ${bucketName}.`);
+  }
 });
+
+//create bucket in GCP
+router.post("/bucket/create", async (req, res) => {
+  // [START storage_create_bucket]
+  /**
+   * TODO(developer): Uncomment the following lines before running the sample.
+   */
+  // The ID of your GCS bucket
+  // const bucketName = 'your-unique-bucket-name';
+
+  // Imports the Google Cloud client library
+
+  // Creates a client
+  // The bucket in the sample below will be created in the project asscociated with this client.
+  // For more information, please see https://cloud.google.com/docs/authentication/production or https://googleapis.dev/nodejs/storage/latest/Storage.html
+  const storage = new Storage();
+
+  const bucketName = req.body.bucketName;
+
+  if (!bucketName) {
+    res.status(400).send("No bucket name provided.");
+    return;
+  }
+
+  async function createBucket() {
+
+    const [bucket] = await storage.createBucket(bucketName);
+
+    console.log(`Bucket ${bucket.name} created.`);
+  }
+
+  createBucket().catch(console.error);
+  // [END storage_create_bucket]
+});
+
+//list buckets
+router.get("/bucket/list", async (req, res) => {
+    console.log("GETTING ALL BUCKET LISTS")
+    const storage = new Storage();
+
+
+  async function listBuckets() {
+    const [buckets] = await storage.getBuckets();
+    console.log('Buckets:');
+    buckets.forEach(bucket => {
+      console.log(bucket.name);
+
+    });
+  }
+
+  listBuckets().catch(console.error);
+  
+})
 
 module.exports = router;
