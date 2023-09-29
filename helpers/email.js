@@ -1,4 +1,4 @@
-const keys = require("../config/dev")
+const keys = require("../config/keys")
 const nodemailer = require("nodemailer")
 
 module.exports = Object.freeze({

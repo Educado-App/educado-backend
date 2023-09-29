@@ -8,6 +8,8 @@ const { Schema } = mongoose;
 // Class description
 const courseSchema = new Schema({
   title: String,
+  category: String,
+  level: String,
   description: String,
   _user: { type: Schema.Types.ObjectId, ref: "User" },
   dateCreated: Date,

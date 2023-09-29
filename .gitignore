@@ -7,3 +7,4 @@ dev.js
 # enviroment
 .env
 .env.*
+config/*.json

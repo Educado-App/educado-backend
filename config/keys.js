@@ -1,8 +1,19 @@
-// Figure out what set of credentials to return...
+const dotenv = require("dotenv");
+
+// Load environment variables based on NODE_ENV
 if (process.env.NODE_ENV === "production") {
-  // We are in production. Return the production set of keys
-  module.exports = require("./prod");
+  dotenv.config({ path: "./config/.env.prod" });
 } else {
-  // We are in development. Return the development keys
-  module.exports = require("./dev");
+  dotenv.config({ path: "./config/.env" });
 }
+
+// Access the environment variables
+const keys = {
+  googleClientID: process.env.GOOGLE_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  mongoURI: process.env.MONGO_URI,
+  cookieKey: process.env.COOKIE_KEY,
+  bucketKey: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+};
+
+module.exports = keys;

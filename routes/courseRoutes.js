@@ -9,15 +9,15 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 
-// Content Creator Application Route
+//DON'T USE THIS ROUTE, USE /courses
 router.post("/course/", async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, category } = req.body;
 
   const course = new CourseModel({
     title: title,
     description: description,
-    category: "",
-    _user: req.user.id,
+    category: category,
+    //_user: req.user.id,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
@@ -34,13 +34,15 @@ router.post("/course/", async (req, res) => {
 // Course routes
 
 router.post("/courses", async (req, res) => {
-  const { title, description } = req.body;
+  const { title, category, level, description } = req.body;
 
   const course = new CourseModel({
     title: title,
+    category: category,
+    level: level,
     description: description,
-    category: "",
-    _user: req.user.id,
+    //temporarily commented out as login has not been fully implemented yet
+    //_user: req.user.id,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
