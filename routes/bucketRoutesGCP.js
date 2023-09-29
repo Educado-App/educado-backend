@@ -1,10 +1,25 @@
 const router = require("express").Router();
 const multer = require("multer");
 const { Storage } = require("@google-cloud/storage");
+const fs = require("fs");
+
+const dotenv = require("dotenv");
 
 // Models
 const { CourseModel } = require("../models/Courses");
 const { ComponentModel } = require("../models/Components");
+
+dotenv.config({ path: "./config/.env" });
+
+const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+// Creates a client
+const storage = new Storage({
+  projectId: credentials.project_id,
+  keyFilename: credentials,
+});
+
+const bucketName = "educado-bucket";
+const dir = "./_temp_bucketFiles";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -15,40 +30,72 @@ const upload = multer({
 
 // Get image from GCP bucket
 router.get("/download", async (req, res) => {
-  // Creates a client using Application Default Credentials
 
-  // Creates a client
-  const storage = new Storage();
-
-  const { fileName, bucketName } = req.body;
-
-  async function downloadFile() {
-    const options = {
-      destination: fileName,
-    };
-
+  console.log("GETTING IMAGE FROM BUCKET");
+  try {
+    const fileName = req.body.fileName;
     console.log("fileName:", fileName);
     console.log("bucketName:", bucketName);
+    const options = {
+      destination: `${dir}/${fileName}`,
+    };
 
-    // Downloads the file
-    await storage.bucket(bucketName).file(fileName).download(options);
+    //if directory does not exist, create it
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
 
-    console.log(`gs://${bucketName}/${fileName} downloaded to ${fileName}.`);
+    //clear directory
+    fs.readdir(dir, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlinkSync(`${dir}/${file}`);
+      }
+    });
+
+    // Download the file and convert it to bytes to send it to the frontend
+    await storage
+      .bucket(bucketName)
+      .file(fileName)
+      .download(options).catch(err => {
+        console.log(err);
+        res.status(400).send(`Error: ${err.message}`);
+      });
+
+    // Read the file
+    const fileContents = fs.readFileSync(`${dir}/${fileName}`);
+    console.log("fileContents:", fileContents);
+
+    // Convert to Base64 and send to frontend
+
+    //clear directory
+    fs.readdir(dir, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        fs.unlinkSync(`${dir}/${file}`);
+      }
+    });
+
+    const base64 = fileContents.toString("base64");
+    res.status(200).send(base64);
+
+  } catch (err) {
+    console.log(err);
+    // Return a more specific error message
+    res.status(400).send(`Error: ${err.message}`);
   }
-
-  downloadFile().catch(console.error);
-  // [END storage_download_file]
 });
 
-//upload image to GCP bucket
 // Upload file to GCP bucket
 router.post("/upload", upload.single("file"), async (req, res) => {
   const multerFile = req.file;
-  const { fileName, bucketName } = req.body;
+  const fileName = req.body.fileName;
+  const bucketName = "educado-bucket";
   const buffer = req.file.buffer;
 
   console.log("fileName:", fileName);
-  console.log("bucketName:", bucketName);
   console.log("multerFile:", multerFile);
 
   if (!multerFile) {
@@ -56,16 +103,13 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     return;
   }
 
-  const storage = new Storage();
-
   //upload to bucket
-
   uploadFile().catch(console.error);
 
   async function uploadFile() {
     // Uploads a local file to the bucket
     await storage
-      .bucket("")
+      .bucket(bucketName)
       .file(fileName)
       .save(buffer, {
         metadata: {
@@ -75,59 +119,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     console.log(`${fileName} uploaded to ${bucketName}.`);
   }
+  res.send(`${fileName} uploaded to bucket ${bucketName}`);
 });
-
-//create bucket in GCP
-router.post("/bucket/create", async (req, res) => {
-  // [START storage_create_bucket]
-  /**
-   * TODO(developer): Uncomment the following lines before running the sample.
-   */
-  // The ID of your GCS bucket
-  // const bucketName = 'your-unique-bucket-name';
-
-  // Imports the Google Cloud client library
-
-  // Creates a client
-  // The bucket in the sample below will be created in the project asscociated with this client.
-  // For more information, please see https://cloud.google.com/docs/authentication/production or https://googleapis.dev/nodejs/storage/latest/Storage.html
-  const storage = new Storage();
-
-  const bucketName = req.body.bucketName;
-
-  if (!bucketName) {
-    res.status(400).send("No bucket name provided.");
-    return;
-  }
-
-  async function createBucket() {
-
-    const [bucket] = await storage.createBucket(bucketName);
-
-    console.log(`Bucket ${bucket.name} created.`);
-  }
-
-  createBucket().catch(console.error);
-  // [END storage_create_bucket]
-});
-
-//list buckets
-router.get("/bucket/list", async (req, res) => {
-    console.log("GETTING ALL BUCKET LISTS")
-    const storage = new Storage();
-
-
-  async function listBuckets() {
-    const [buckets] = await storage.getBuckets();
-    console.log('Buckets:');
-    buckets.forEach(bucket => {
-      console.log(bucket.name);
-
-    });
-  }
-
-  listBuckets().catch(console.error);
-  
-})
 
 module.exports = router;
