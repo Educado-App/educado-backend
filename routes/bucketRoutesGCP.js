@@ -32,8 +32,14 @@ const upload = multer({
 router.get("/download", async (req, res) => {
 
   console.log("GETTING IMAGE FROM BUCKET");
+
+  if (!req.query.fileName) {
+    res.status(400).send("No file name provided. use this format: /download?fileName=fileName");
+    return;
+  }
+
   try {
-    const fileName = req.body.fileName;
+    const fileName = req.query.fileName;
     console.log("fileName:", fileName);
     console.log("bucketName:", bucketName);
     const options = {
