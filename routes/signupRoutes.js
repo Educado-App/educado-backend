@@ -1,7 +1,7 @@
 const router = require("express").Router();
+const { encrypt } = require("../helpers/Password");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
-const bcrypt = require("bcrypt");
 
 // Content Creator Application Route
 router.post("/content-creator", async (req, res) => {
@@ -36,10 +36,8 @@ router.post("/user", async (req, res) => {
     validateEmail(form.email);
     validateName(form.name);
 
-    // Salt rounds can be changed according to the security needs of the application
-    const saltRounds = 10;
     // Hashing the password for security
-    const hashedPassword = await bcrypt.hash(form.password, saltRounds);
+    const hashedPassword = encrypt(form.password);
     //Overwriting the plain text password with the hashed password 
     form.password = hashedPassword;
 

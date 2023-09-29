@@ -6,7 +6,9 @@ const jwt = require("jsonwebtoken"); // Import jsonwebtoken library module
 const keys = require("../config/keys"); // Import keys from config/keys.js
 
 const { makeExpressCallback } = require('../helpers/express')
-const { authEndpointHandler } = require('../auth')
+const { authEndpointHandler } = require('../auth');
+const { signAccessToken } = require('../helpers/token');
+const { compare } = require('../helpers/Password');
 
 // Services
 require("../services/passport");
@@ -32,31 +34,47 @@ router.get("/auth/google/callback",
 // Login
 router.post("/auth/login", async (req, res) => {
   console.log("/api/auth/login received request")
+  console.log(req.body)
   try {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
+    console.log("User: " + user)
     if (!user) {
       // If the email is not found, return an error message
-      return res.status(401).json({ "error": "Incorrect credentials" });
+      console.log("User not found")
+      return res.status(404).json({
+        "message": "User not found"
+      });
     } else {
       // If the email is found, compare the passwords
-      result = (await bcrypt.compare(req.body.password, user.password))
+      result = compare(req.body.password, user.password)
     }
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
-      const token = jwt.sign({ email: user.email, id: user._id }, keys.jwt_secret, { expiresIn: "1h" })
+      const token = signAccessToken({ id: user.id });
       // Return the token
       return res.status(202).json({
         status: 'login successful',
-        accessToken: token
+        accessToken: token,
+        user: {
+          name: user.name,
+          email: user.email,
+        },
       });
     } else {
       // If the passwords do not match, return an error message
-      return res.status(401).json({ "error": "Incorrect credentials" });
+      return res.status(401).json({
+        "message": "Incorrect password" 
+      });
     }
-  } catch { return res.status(404).json({ "error": "Error" }) }
+  } catch (err) { 
+    console.log(err)
+    return res.status(500).json({ 
+      "error": { "code": 500, "message": "Server could not be reached" }
+    });
+  }
 });
 
 
