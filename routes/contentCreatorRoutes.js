@@ -11,7 +11,7 @@ const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 
-router.delete("/content-creator/delete/:id", async (req, res) => {
+router.delete("/profile/delete/:id", async (req, res) => {
     try {
       // Get the authenticated creator's ID from req.creator.id
       const { id } = req.params;
