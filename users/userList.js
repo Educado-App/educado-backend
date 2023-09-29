@@ -6,7 +6,8 @@ module.exports = function makeUserList(db_model) {
         remove,
         findOneByEmail,
         updateEmail,
-        updateName,
+        updateFirstName,
+        updateLastName,
     });
 
     async function add(user) {
@@ -27,9 +28,14 @@ module.exports = function makeUserList(db_model) {
         return updatedUser;
     }
 
-    async function updateName(name, newName) {
-        const updatedUser = await db_model.findOneAndUpdate({name: name}, {name: newName}, {new: true})
+    async function updateFirstName(firstName, newFirstName) {
+        const updatedUser = await db_model.findOneAndUpdate({firstName: firstName}, {firstName: newFirstName}, {new: true})
         return updatedUser;
     }
-    
+
+    async function updateLastName(lastName, newLastName) {
+        const updatedUser = await db_model.findOneAndUpdate({lastName: lastName}, {lastName: newLastName}, {new: true})
+        return updatedUser;
+    }
+
 };
