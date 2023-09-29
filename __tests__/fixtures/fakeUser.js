@@ -10,6 +10,7 @@ module.exports = function makeFakeUser() {
         googleID: "1234567891011",
         joinedAt: new Date(),
         modifiedAt: new Date(),
-        name: "Fake User"
+        firstName: "Fake first name",
+        lastName: "Fake last name"
     }
 }
