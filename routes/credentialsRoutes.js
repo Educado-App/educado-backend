@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
      
     const contentCreator = await ContentCreatorApplication.findOne({ email: email })
     if(!contentCreator){
-      console.log("No User")
+      console.log("Wrong User")
       const error = new Error("An account with this email does not exist!");
       res.status(401);
       error.statusCode = 401;
@@ -43,9 +43,13 @@ router.post("/login", async (req, res) => {
       throw error;
       
     }
+    
+
     if (password == contentCreator.password && email == contentCreator.email){
-    res.status(200).json({ email: contentCreator.email, password: contentCreator.password});
-    console.log("Successful Login")
+      const token = jwt.sign({email: contentCreator.email, password: contentCreator.password},'secretfortoken',{ expiresIn: '3h' });
+
+      res.status(200).json({ token: token, email: contentCreator.email, password: contentCreator.password, name: contentCreator.name});
+      console.log("Successful Login")
     }
   } catch (err) {
     if(!err.statusCode) {
