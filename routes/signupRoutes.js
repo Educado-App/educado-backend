@@ -32,8 +32,9 @@ router.post("/user", async (req, res) => {
   }
 
   try {
+    validateName(form.firstName);
+    validateName(form.lastName);
     validateEmail(form.email);
-    validateName(form.name);
     const doc = User(form);
     const created = await doc.save();
 
@@ -74,7 +75,7 @@ function validateName(input) {
   if (isMissing(input)) {
     throw new Error("Name is required");
   }
-  if (input.length < 2 || input.length > 50) {
+  if (input.length < 1 || input.length > 50) {
     throw new Error("Name must be between 2 and 50 characters");
   }
   /**
