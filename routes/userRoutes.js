@@ -25,7 +25,7 @@ router.delete("/delete/:id", requireLogin, async (req, res) => {
 });
 
 // Update User Email route
-router.put("/update-email/:id", async (req, res) => {
+router.put("/update-email/:id", requireLogin, async (req, res) => {
   try {
     // Get the authenticated user's ID from req.user.id
     const { id } = req.params;
@@ -55,7 +55,7 @@ router.put("/update-email/:id", async (req, res) => {
 });
 
 // Update User first name route
-router.put("/update-first_name/:id", async (req, res) => {
+router.put("/update-first_name/:id", requireLogin, async (req, res) => {
   try {
     // Get the authenticated user's ID from req.user.id
     const { id } = req.params;
@@ -85,7 +85,7 @@ router.put("/update-first_name/:id", async (req, res) => {
 });
 
 // Update User last name route
-router.put("/update-last_name/:id", async (req, res) => {
+router.put("/update-last_name/:id", requireLogin, async (req, res) => {
   try {
     // Get the authenticated user's ID from req.user.id
     const { id } = req.params;

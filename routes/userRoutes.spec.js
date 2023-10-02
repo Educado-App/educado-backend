@@ -7,6 +7,14 @@ const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
+
+// Mock authentication middleware
+app.use((req, res, next) => {
+    // Create a mock user object for testing
+    req.user = { id: 'mockUserId', /* Add other user properties as needed */ };
+    next();
+  });
+
 app.use('/api/user', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
