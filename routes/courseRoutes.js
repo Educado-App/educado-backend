@@ -1,13 +1,21 @@
 const router = require("express").Router();
 
+const express = require('express');
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 // Models
 const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
+const { User } = require("../models/User");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
+const { UserModel } = require("../models/User");
+const { IdentityStore } = require("aws-sdk");
 
 // Content Creator Application Route
 router.post("/course/", async (req, res) => {
@@ -76,11 +84,12 @@ router.post("/course/update", requireLogin, async (req, res) => {
   res.send("Course Update Complete");
 });
 
-// Get all courses for user
+/** Get all courses for user
 router.get("/course/getall", async (req, res) => {
   const list = await CourseModel.find({ _user: req.user.id });
   res.send(list);
 });
+**/
 
 // Get all courses for user
 router.get("/course/eml/getall", async (req, res) => {
@@ -220,7 +229,7 @@ router.post("/section/create", requireLogin, async (req, res) => {
 });
 
 // Get all sections
-router.post("/course/getallsections", requireLogin, async (req, res) => {
+router.post("/course/sections", requireLogin, async (req, res) => {
   const { sections } = req.body;
   let list = [];
   for (let i = 0; i < sections.length; i++) {
@@ -322,7 +331,7 @@ router.post("/section/delete", requireLogin, async (req, res) => {
   res.send(sectionIds);
 });
 
-//Create Component
+// Create Component
 router.post("/component/create", async (req, res) => {
   const { type, section_id } = req.body; // Or query?...
 
@@ -436,5 +445,66 @@ router.get("/course/delete_all", requireLogin, async (req, res) => {
   });
   res.send("Completed");
 });
+
+// User route
+router.post("/user/", async (req, res) => {
+  const { googleID } = req.body;
+
+  const user = new UserModel({
+    googleID: googleID,
+    email: email,
+    password: password,
+    joinedAt: Date.now(),
+    modifiedAt: Date.now(),
+    subscriptions: []
+  });
+
+  try {
+    await user.save();
+    res.send(user);
+  } catch (err) {
+    res.status(422).send(err);
+  }
+});
+
+// Subscribe to course 
+// TODO: check for duplicates
+
+router.post("/course/subscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await User.findOneAndUpdate(
+    { _id: user_id }, 
+    { $push: { subscriptions: course_id} }))
+    .save;
+
+  let user = await User.findById(user_id);
+  res.send(user)
+
+});
+
+// Unsubscribe to course
+router.post("/course/unsubscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await User.findOneAndUpdate(
+    { _id: user_id }, 
+    { $pull: { subscriptions: course_id} }))
+    .save;
+
+  let user = await User.findById(user_id);
+  res.send(user)
+
+});
+
+// Get users subscriptions
+router.get("/user/subscriptions/all", async (req, res) => {
+  const {user_id} = req.body
+  const subscribedCourses = (await User.findById(user_id, 'subscriptions -_id')).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+
+  res.send(list);
+});
+
 
 module.exports = router;

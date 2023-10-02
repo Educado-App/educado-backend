@@ -9,15 +9,15 @@ const { Schema } = mongoose;
 const courseSchema = new Schema({
   title: String,
   description: String,
-  _user: { type: Schema.Types.ObjectId, ref: "User" },
   dateCreated: Date,
   dateUpdated: Date,
   coverImg: String,
   category: String,
   published: Boolean,
   sections: [{ type: Schema.Types.ObjectId, ref: "Component" }],
+  creator: [{ type: Schema.Types.ObjectId, ref: "Creator" }]
 });
 
-const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema
+const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseSchema
 
 module.exports = { CourseModel }
