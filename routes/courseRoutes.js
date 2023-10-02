@@ -92,7 +92,7 @@ router.get("/course/getall", async (req, res) => {
 **/
 
 // Get all courses for user
-router.get("/course/eml/getall", async (req, res) => {
+router.get("/course/all", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
 });
@@ -468,7 +468,6 @@ router.post("/user/", async (req, res) => {
 });
 
 // Subscribe to course 
-// TODO: check for duplicates
 
 router.post("/course/subscribe",  async (req, res) => {
   const { user_id, course_id} = req.body;

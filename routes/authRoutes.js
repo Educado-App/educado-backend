@@ -8,7 +8,7 @@ const keys = require("../config/keys"); // Import keys from config/keys.js
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
-const { compare } = require('../helpers/Password');
+const { compare } = require('../helpers/password');
 
 // Services
 require("../services/passport");
@@ -61,6 +61,7 @@ router.post("/auth/login", async (req, res) => {
         user: {
           name: user.name,
           email: user.email,
+          id: user.id,
         },
       });
     } else {
