@@ -1,6 +1,10 @@
 module.exports = {
 
-  // E00 - General authentication errors
+  // E00 - General errors
+  E0000: {
+    code: 'E0000',
+    message: 'Unknown error'
+  },
   E0001: {
     code: 'E0001',
     message: 'Authentication token is invalid or expired.'
@@ -48,6 +52,30 @@ module.exports = {
   E0205: {
     code: 'E0205',
     message: 'Could not send a verification email. Please try again later.'
+  },
+  E0206: {
+    code: 'E0206',
+    message: 'Email must contain "@" and ".".'
+  },
+  E0207: {
+    code: 'E0207',
+    message: 'Email must be at least 6 characters.'
+  },
+  E0208: {
+    code: 'E0208',
+    message: 'Email is required.'
+  },
+  E0209: {
+    code: 'E0209',
+    message: 'First and last name are required.'
+  },
+  E0210: {
+    code: 'E0210',
+    message: 'Names must be between 1 and 50 characters.'
+  },
+  E0211: {
+    code: 'E0211',
+    message: 'Name must only contain letters, spaces, hyphens and apostrophes.'
   },
 
   // E03 - Logout errors

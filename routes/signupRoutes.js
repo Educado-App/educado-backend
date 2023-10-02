@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
+const errorCodes = require("../helpers/errorCodes");
 
 // Content Creator Application Route
 router.post("/content-creator", async (req, res) => {
@@ -32,31 +33,40 @@ router.post("/user", async (req, res) => {
   }
 
   try {
+    // Validate user info
     validateName(form.firstName);
     validateName(form.lastName);
-    validateEmail(form.email);
+    const emailValid = await validateEmail(form.email);
+
+    if(!emailValid) {
+      throw errorCodes['E0000'];
+    }
+
+    // Save user
     const doc = User(form);
     const created = await doc.save();
-
     res.status(201);
     res.send(created);
   } catch (error) {
+    console.log(error);
     res.status(400);
-    res.send("Error: " + error.message);
+    res.send({
+      error: error
+    });
   }
 });
 
 module.exports = router;
 
-function validateEmail(input) {
+async function validateEmail(input) {
   if (isMissing(input)) {
-    throw new Error("Email is required");
+    throw errorCodes['E0208']; // Email is required
   }
   if (input.length < 6) {
-    throw new Error("Email must be at least 6 characters");
+    throw errorCodes['E0207']; // Email must be at least 6 characters
   }
   if (!input.includes("@") || !input.includes(".")) {
-    throw new Error("Email must contain '@' and '.'");
+    throw errorCodes['E0206']; // Email must contain "@" and "."
   }
   /**
    * Email must contain a sequence of any letters, numbers or dots
@@ -65,7 +75,10 @@ function validateEmail(input) {
    * extension letters.
    */
   if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input))) {
-    throw new Error("Invalid email")
+    throw errorCodes['E0203']; // Invalid email format
+  }
+  if (await User.findOne({email: input}) != null) {
+    throw errorCodes['E0201']; // User with the provided email already exists
   }
 
   return true;
@@ -73,11 +86,12 @@ function validateEmail(input) {
 
 function validateName(input) {
   if (isMissing(input)) {
-    throw new Error("Name is required");
+    throw errorCodes['E0209']; // First and last name are required
   }
   if (input.length < 1 || input.length > 50) {
-    throw new Error("Name must be between 2 and 50 characters");
+    throw errorCodes['E0210']; // Names must be between 1 and 50 characters
   }
+ 
   /**
    * Name can contain a sequence of any letters (including foreign 
    * language letters such as ñ, Д, and 盘) followed by
@@ -85,14 +99,12 @@ function validateName(input) {
    * and ending with a sequence of any letters (at least one name). 
    */
   if(!(input.match(/^(\p{L}+[ -'])*\p{L}+$/u))){
-    throw new Error("Name must contain only letters (seperate names with spaces, - or ')");
+    throw errorCodes['E0211']; // Name must only contain letters, spaces, hyphens and apostrophes.
   }
 
   return true;
 }
 
-
 function isMissing(input) {
   return input === undefined || input === null || input === "";
 }
-
