@@ -2,8 +2,10 @@ const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
 
-const { makeExpressCallback } = require('../helpers/express')
-const { authEndpointHandler } = require('../auth')
+const { makeExpressCallback } = require('../helpers/express');
+const { authEndpointHandler } = require('../auth');
+
+const errorCodes = require('../helpers/errorCodes');
 
 // Services
 require("../services/passport");
@@ -33,17 +35,21 @@ router.get("/auth/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
-      return res.status(401).json({ "error": "Incorrect credentials" });
-    } else {
-      result = (req.body.password === user.password)
+      // Invalid email or password
+      return res.status(401).json({ 'error': errorCodes['E0101'] });
     }
-    // If the passwords match, return a success message
-    if (result) {
-      return res.status(202).json({ "message": "Login successful" });
-    } else {
-      return res.status(401).json({ "error": "Incorrect credentials" });
+      
+    const passwordCorrect = (req.body.password === user.password);
+    // If the passwords don't match, return an error
+    if (!passwordCorrect) {
+      // Invalid email or password
+      return res.status(401).json({ 'error': errorCodes['E0101'] });
     }
-  } catch { return res.status(404).json({ "error": "Error" }) }
+    // All validation passed, log in the user
+    return res.status(202).json({ "message": "Login successful" });
+  } catch {
+    return res.status(404).json({ "error": "Error" })
+  }
 });
 
 
