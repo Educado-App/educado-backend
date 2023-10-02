@@ -98,8 +98,9 @@ router.get("/download", async (req, res) => {
 router.post("/upload", upload.single("file"), async (req, res) => {
   const multerFile = req.file;
   const fileName = req.body.fileName;
-  const bucketName = "educado-bucket";
   const buffer = req.file.buffer;
+
+  console.log("buffer:", buffer);
 
   console.log("fileName:", fileName);
   console.log("multerFile:", multerFile);
