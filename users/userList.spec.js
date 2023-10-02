@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const connectDb = require('../__tests__/fixtures/db')
-const makeFakeUser = require("../__tests__/fixtures/fakeUser")
-const { userList } = require(".")
+const makeFakeUser = require('../__tests__/fixtures/fakeUser')
+const { userList } = require('.')
 
 
 describe("User List", () => {
