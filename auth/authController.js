@@ -17,11 +17,11 @@ module.exports = function makeAuthEndpointHandler(authHandler) {
     }
 
     async function postUser(httpRequest) {
-        user = httpRequest.body
+        user = httpRequest.body;
 
         try {
             const response = await authHandler.authenticate(user)
-
+            
             return {
                 success: true,
                 status: 200,
@@ -29,7 +29,7 @@ module.exports = function makeAuthEndpointHandler(authHandler) {
             }
 
         } catch (error) {
-
+            
             return {
                 success: false,
                 status: 400,

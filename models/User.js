@@ -4,7 +4,6 @@ const Schema = mongoose.Schema
 
 // Class description
 const userSchema = new Schema({
-  googleID: String,
   email: String,
   password: String,
   joinedAt: Date,

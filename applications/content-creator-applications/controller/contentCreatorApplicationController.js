@@ -55,10 +55,9 @@ module.exports = function makeContentCreatorApplicationController({ contentCreat
 
             const created = await contentCreatorApplicationList.add({
                 id: validCCApplication.getId(),
-                firstName: validCCApplication.getFirstName(),
-                lastName: validCCApplication.getLastName(),
+                name: validCCApplication.getName(),
                 email: validCCApplication.getEmail(),
-                motivation: validCCApplication.getMotivation(),
+                password: validCCApplication.getPassword(),
                 approved: validCCApplication.isApproved(),
                 rejectionReason: validCCApplication.getRejectReason(),
                 createdAt: validCCApplication.getCreatedAt(),
