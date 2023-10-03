@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const connectDb = require('../__tests__/fixtures/db')
-const makeFakeUser = require("../__tests__/fixtures/fakeUser")
-const { userList } = require(".")
+const makeFakeUser = require('../__tests__/fixtures/fakeUser')
+const { userList } = require('.')
 
 
 describe("User List", () => {
@@ -45,13 +45,22 @@ describe("User List", () => {
         expect(updatedUser.email).toBe("newemail@example.com");
     });
 
-    it("can update a user's name", async () => {
+    it("can update a user's first name", async () => {
         const fakeUser = makeFakeUser();
         await userList.add(fakeUser);
     
-        const updatedUser = await userList.updateName(fakeUser.name, "New Name");
+        const updatedUser = await userList.updateFirstName(fakeUser.firstName, "New First Name");
     
-        expect(updatedUser.name).toBe("New Name");
+        expect(updatedUser.firstName).toBe("New First Name");
+    });
+
+    it("can update a user's last name", async () => {
+        const fakeUser = makeFakeUser();
+        await userList.add(fakeUser);
+    
+        const updatedUser = await userList.updateLastName(fakeUser.lastName, "New Last Name");
+    
+        expect(updatedUser.lastName).toBe("New Last Name");
     });
     
 })

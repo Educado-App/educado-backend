@@ -4,11 +4,11 @@ const { Schema } = mongoose;
 
 // Class description
 const userSchema = new Schema({
-  name: {
+  firstName: {
     type: String,
-    required: [true, "Name is required"],
-    minLength: [2, "Name must be at least 2 characters"],
-    maxLength: [50, "Name must be at most 50 characters"],
+    required: [true, "First name is required"],
+    minLength: [2, "First name must be at least 2 characters"],
+    maxLength: [50, "First name must be at most 50 characters"],
     validate: {
       validator: (name) => {
         /**
@@ -19,7 +19,25 @@ const userSchema = new Schema({
          */
         return /^(\p{L}+[ -'])*\p{L}+$/u.test(name);
       },
-      message: "Invalid name"
+      message: "Invalid first name"
+    }
+  },
+  lastName: {
+    type: String,
+    required: [true, "Last name is required"],
+    minLength: [2, "Last name must be at least 2 characters"],
+    maxLength: [50, "Last name must be at most 50 characters"],
+    validate: {
+      validator: (name) => {
+        /**
+         * Name can contain a sequence of any letters (including foreign 
+         * language letters such as ñ, Д, and 盘) followed by
+         * a space, hyphen or apostrophe, repeated any number of times,
+         * and ending with a sequence of any letters (at least one name). 
+         */
+        return /^(\p{L}+[ -'])*\p{L}+$/u.test(name);
+      },
+      message: "Invalid last name"
     }
   },
   email: {
