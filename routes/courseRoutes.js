@@ -92,7 +92,7 @@ router.get("/course/getall", async (req, res) => {
 **/
 
 // Get all courses for user
-router.get("/course/all", async (req, res) => {
+router.get("/courses/all", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
 });
@@ -469,9 +469,8 @@ router.post("/user/", async (req, res) => {
 
 // Subscribe to course 
 
-router.post("/course/:id/subscribe",  async (req, res) => {
-  const { user_id } = req.body;
-  const { course_id } = req.params.id;
+router.post("/course/subscribe",  async (req, res) => {
+  const { user_id, course_id } = req.body;
 
   (await User.findOneAndUpdate(
     { _id: user_id }, 
@@ -505,6 +504,19 @@ router.get("/user/subscriptions/all", async (req, res) => {
 
   res.send(list);
 });
+
+
+// Check if in database
+async function checkIfSubscribed(userId, courseId) {
+  const subscribedCourses = (await User.findById(userId, 'subscriptions -_id')).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+
+  if(list.include(courseId)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 
 module.exports = router;
