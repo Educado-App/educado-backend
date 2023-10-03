@@ -14,6 +14,7 @@ const keys = {
   mongoURI: process.env.MONGO_URI_TEST,
   cookieKey: process.env.COOKIE_KEY,
   bucketKey: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  TOKEN_SECRET: process.env.TOKEN_SECRET,
 };
 
 module.exports = keys;
