@@ -27,12 +27,11 @@ const fakeUser = makeFakeUser();
 
 describe('Update User Email Route', () => {
 
-    let db; // Store the database connection
+    let db;
 
     beforeAll(async () => {
-        db = await connectDb(); // Connect to the database
+        db = await connectDb();
 
-        // Insert the fake user into the database
         await db.collection('users').insertOne(fakeUser);
     });
 
@@ -45,7 +44,6 @@ describe('Update User Email Route', () => {
         .send({ newEmail })
         .expect(200);
 
-        // Verify the response body
         expect(response.body.message).toBe('Email updated successfully');
         expect(response.body.user.email).toBe(newEmail);
     });
@@ -54,7 +52,6 @@ describe('Update User Email Route', () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
         const newEmail = 'newemail@example.com';
 
-        // Send a PUT request to the update-email endpoint with a non-existent user ID
         await request('http://localhost:5000')
         .put('/api/user/update-email/' + nonExistentUserId)
         .send({ newEmail })
@@ -62,7 +59,6 @@ describe('Update User Email Route', () => {
     });
 
     it('updates user first name successfully', async () => {
-        // Send a PUT request to the update-first_name endpoint using the inserted user's ID
         await request('http://localhost:5000')
           .put(`/api/user/update-first_name/${fakeUser._id}`)
           .send({ newFirstName: 'NewFirstName' })
@@ -70,20 +66,16 @@ describe('Update User Email Route', () => {
     });
 
     it('handles user not found error for update-first_name', async () => {
-        // Create a non-existent user ID
         const nonExistentUserId = new mongoose.Types.ObjectId();
     
-        // Send a PUT request to the update-first_name endpoint with a non-existent user ID
         await request('http://localhost:5000')
             .put(`/api/user/update-first_name/${nonExistentUserId}`)
             .send({ newFirstName: 'NewFirstName' })
             .expect(404);
     
-        // Your assertions and expectations based on the response...
         });
     
     it('updates user last name successfully', async () => {
-    // Send a PUT request to the update-last_name endpoint using the inserted user's ID
     await request('http://localhost:5000')
         .put(`/api/user/update-last_name/${fakeUser._id}`)
         .send({ newLastName: 'NewLastName' })
@@ -91,10 +83,8 @@ describe('Update User Email Route', () => {
     });
 
     it('handles user not found error for update-last_name', async () => {
-    // Create a non-existent user ID
     const nonExistentUserId = new mongoose.Types.ObjectId();
 
-    // Send a PUT request to the update-last_name endpoint with a non-existent user ID
     await request('http://localhost:5000')
         .put(`/api/user/update-last_name/${nonExistentUserId}`)
         .send({ newLastName: 'NewLastName' })
