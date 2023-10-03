@@ -17,7 +17,7 @@ module.exports = {
   // E01 - Login errors
   E0101: {
     code: 'E0101',
-    message: 'Invalid username or password'
+    message: 'Invalid email'
   },
   E0102: {
     code: 'E0102',
@@ -31,7 +31,11 @@ module.exports = {
     code: 'E0104',
     message: 'Account is suspended or blocked by and administrator.'
   },
-
+  E0105: {
+    code: 'E0105',
+    message: 'Invalid password'
+  },
+  
   // E02 - Signup errors
   E0201: {
     code: 'E0201',
