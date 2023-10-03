@@ -469,8 +469,9 @@ router.post("/user/", async (req, res) => {
 
 // Subscribe to course 
 
-router.post("/course/subscribe",  async (req, res) => {
-  const { user_id, course_id} = req.body;
+router.post("/course/:id/subscribe",  async (req, res) => {
+  const { user_id } = req.body;
+  const { course_id } = req.params.id;
 
   (await User.findOneAndUpdate(
     { _id: user_id }, 
