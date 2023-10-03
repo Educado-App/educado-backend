@@ -25,7 +25,7 @@ const server = app.listen(PORT, () => {
 
 const fakeUser = makeFakeUser();
 
-describe('Update User Email Route', () => {
+describe('User routes', () => {
 
     let db;
 
@@ -76,20 +76,34 @@ describe('Update User Email Route', () => {
         });
     
     it('updates user last name successfully', async () => {
-    await request('http://localhost:5000')
-        .put(`/api/user/update-last_name/${fakeUser._id}`)
-        .send({ newLastName: 'NewLastName' })
-        .expect(200);
+        await request('http://localhost:5000')
+            .put(`/api/user/update-last_name/${fakeUser._id}`)
+            .send({ newLastName: 'NewLastName' })
+            .expect(200);
     });
 
     it('handles user not found error for update-last_name', async () => {
-    const nonExistentUserId = new mongoose.Types.ObjectId();
+        const nonExistentUserId = new mongoose.Types.ObjectId();
 
-    await request('http://localhost:5000')
-        .put(`/api/user/update-last_name/${nonExistentUserId}`)
-        .send({ newLastName: 'NewLastName' })
-        .expect(404);
+        await request('http://localhost:5000')
+            .put(`/api/user/update-last_name/${nonExistentUserId}`)
+            .send({ newLastName: 'NewLastName' })
+            .expect(404);
     });
+
+    it('deletes user successfully', async () => {
+        await request('http://localhost:5000')
+        .delete(`/api/user/delete/${fakeUser._id}`)
+        .expect(200);
+    });
+    
+    it('handles user not found error for delete', async () => {
+        const nonExistentUserId = new mongoose.Types.ObjectId();
+
+        await request('http://localhost:5000')
+            .delete(`/api/user/delete/${nonExistentUserId}`)
+            .expect(404);
+    });    
 
     afterAll((done) => {
         server.close(done);
