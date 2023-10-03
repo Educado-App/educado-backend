@@ -4,6 +4,7 @@ const { User } = require("../models/User"); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
+const auth = require('../helpers/password');
 
 const errorCodes = require('../helpers/errorCodes');
 
@@ -29,21 +30,22 @@ router.get("/auth/google/callback",
 );
 
 // Login
-router.get("/auth/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
   try {
+    console.log(req.body);
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
-    // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
-      // Invalid email or password
+      // Invalid email 
       return res.status(401).json({ 'error': errorCodes['E0101'] });
     }
-      
-    const passwordCorrect = (req.body.password === user.password);
+    // If email is found, compare the password provided in the request body with the password in the database
+    const passwordCorrect = auth.compare(req.body.password, user.password);
+
     // If the passwords don't match, return an error
     if (!passwordCorrect) {
-      // Invalid email or password
-      return res.status(401).json({ 'error': errorCodes['E0101'] });
+      // Invalid  password
+      return res.status(401).json({ 'error': errorCodes['E0105'] });
     }
     // All validation passed, log in the user
     return res.status(202).json({ "message": "Login successful" });

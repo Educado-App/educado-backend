@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
 const errorCodes = require("../helpers/errorCodes");
+const auth = require("../helpers/password");
 
 // Content Creator Application Route
 router.post("/content-creator", async (req, res) => {
@@ -34,19 +35,19 @@ router.post("/user", async (req, res) => {
 
   try {
     // Validate user info
-    validateName(form.firstName);
-    validateName(form.lastName);
+    const nameValid = validateName(form.firstName) &&
+                      validateName(form.lastName);
+                      
     const emailValid = await validateEmail(form.email);
 
-    if(!emailValid) {
-      throw errorCodes['E0000'];
-    }
-
-    // Save user
-    const doc = User(form);
-    const created = await doc.save();
-    res.status(201);
-    res.send(created);
+    if(nameValid && emailValid) {
+      form.password = auth.encrypt(form.password);
+      const doc = User(form);
+      const created = await doc.save();  // Save user
+      res.status(201);
+      res.send(created);
+    } 
+  
   } catch (error) {
     console.log(error);
     res.status(400);
