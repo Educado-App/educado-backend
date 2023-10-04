@@ -1,4 +1,4 @@
-const { encrypt } = require('../../helpers/Password');
+const { encrypt } = require('../../helpers/password');
 
 module.exports = function makeFakeUser() {
 
