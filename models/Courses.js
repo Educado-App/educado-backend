@@ -17,7 +17,7 @@ const courseSchema = new Schema({
   coverImg: String,
   category: String,
   published: Boolean,
-  sections: [{ type: Schema.Types.ObjectId, ref: "Component" }],
+  sections: [{ type: Schema.Types.ObjectId, ref: "Section" }],
 });
 
 const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema

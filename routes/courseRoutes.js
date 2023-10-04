@@ -198,11 +198,11 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 });
 
 // Section routes
-
-router.post("/section/create", requireLogin, async (req, res) => {
-  const { title, course_id } = req.body; // Or query?...
-
+router.post("/section/create/:section_id", /*requireLogin,*/ async (req, res) => {
+  const {title} = req.body; //Handles the data in "data" from the request
+  const course_id = req.params.section_id; //Handles the data in "params" from the request
   const section = new SectionModel({
+    parentCourse: course_id,
     title: title,
     description: "",
     dateCreated: Date.now(),
@@ -230,6 +230,18 @@ router.post("/course/getallsections", requireLogin, async (req, res) => {
     list.push(temp);
   }
   res.send(list);
+});
+
+/**
+ * Get section by id
+ * 
+ * @param {string} id - section id
+ * @returns {object} section
+ */
+router.get("/section/:id", async (req, res) => {
+  const { id } = req.params; // destructure params
+  const section = await SectionModel.findById(id);
+  res.send(section);
 });
 
 // Update section title

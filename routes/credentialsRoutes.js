@@ -50,6 +50,7 @@ router.post("/login", async (req, res) => {
 
       res.status(200).json({ token: token, email: contentCreator.email, password: contentCreator.password, name: contentCreator.name});
       console.log("Successful Login")
+      console.log(token)
     }
   } catch (err) {
     if(!err.statusCode) {
