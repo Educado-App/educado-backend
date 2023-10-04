@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Class description
-const ContentCreatorSchema = new Schema({
+const contentCreatorSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true },
@@ -14,10 +14,10 @@ const ContentCreatorSchema = new Schema({
   modifiedAt: { type: Date },
 });
 
-const ContentCreatorApplication = mongoose.model(
-  "Content-Creator-Application",
-  ContentCreatorSchema
+const ContentCreator = mongoose.model(
+  "contentCreator",
+  contentCreatorSchema
 );
 
 
-module.exports = { ContentCreatorApplication };
+module.exports = { ContentCreator };

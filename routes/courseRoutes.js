@@ -446,16 +446,6 @@ router.post("/component/delete", requireLogin, async (req, res) => {
   res.send(componentIds);
 });
 
-router.post("/eml/course/getallsections", async (req, res) => {
-  const { sections } = req.body;
-  let list = [];
-  for (let i = 0; i < sections.length; i++) {
-    const temp = await SectionModel.findOne({ _id: sections[i] });
-    list.push(temp);
-  }
-  res.send(list);
-});
-
 // Delete all documents for user
 router.get("/course/delete_all", requireLogin, async (req, res) => {
   await CourseModel.deleteMany({ _user: req.user.id }, (err) => {
@@ -490,6 +480,9 @@ router.post("/user/", async (req, res) => {
     res.status(422).send(err);
   }
 });
+
+
+
 
 // Subscribe to course 
 
@@ -545,6 +538,49 @@ router.get("/user/subscriptions/all", async (req, res) => {
   }
 });
 
+/** New (Louise) */
+
+router.get("/course/:id/sections/all", async (req, res) => {
+  const { id } = req.params; // destructure params
+  const sections = await SectionModel.find({ parentCourse: id} );
+
+  res.send(sections);
+});
+
+router.get("/course/:courseId/section/:sectionId", async (req, res) => {
+  const { courseId, sectionId } = req.params; // destructure params
+
+  // Find a specific section within the given course by both IDs
+  const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
+  res.send(section);
+});
+
+router.get("/course/:courseId/section/:sectionId/exercises/all", async (req, res) => {
+  const { courseId, sectionId } = req.params; // destructure params
+
+  // Find a specific section within the given course by both IDs
+  const exercises = await ExerciseModel.find({ parentSection: sectionId });
+  res.send(exercises);
+});
+
+router.get('/user', async (req, res) => {
+    
+  try {
+
+    const { course_id, user_id } = req.query; 
+    const user = await User.findOne({ _id: user_id, subscriptions: course_id });
+
+    if(user == null) {
+      res.send("false");
+    } else {
+      res.send("true");
+    }
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 
