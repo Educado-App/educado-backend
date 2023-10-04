@@ -28,15 +28,14 @@ describe('Signup User route', () => {
     db = await connectDb(); // Connect to the database
 
     // Insert the fake user into the database
-    //await db.collection('users').insertOne(fakeUser);
+    await db.collection('users').insertOne(fakeUser);
   });
 
   it('Check that the endpoint saves the user in the database', async () => {
     const input = {
       name: "test user",
-      email: fakeUser.email,
+      email: "test@email.com",
       password: "ABC123456!",
-      confirmPassword: "ABC123456!",
     };
 
     const response = await request('http://localhost:5000')
@@ -147,6 +146,21 @@ describe('Signup User route', () => {
     // Verify that the password is not stored as plain text
     const user = await db.collection('users').findOne({ email: "test user" });
     expect(user).not.toBe("abc123456!");
+  });
+
+
+  it('Test that emails must be unique when registering', async () => {
+    const input = {
+      name: "test",
+      email: fakeUser.email,
+      password: "abc123456!",
+    };
+
+    const response = await request('http://localhost:5000')
+      .post('/api/signup/user')
+      .send(input)
+      .expect(400);
+
   });
 
   afterAll((done) => {
