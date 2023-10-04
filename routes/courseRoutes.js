@@ -84,17 +84,41 @@ router.post("/course/update", requireLogin, async (req, res) => {
   res.send("Course Update Complete");
 });
 
-/** Get all courses for user
-router.get("/course/getall", async (req, res) => {
-  const list = await CourseModel.find({ _user: req.user.id });
-  res.send(list);
-});
-**/
-
-// Get all courses for user
+//Get all courses
 router.get("/courses/all", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
+});
+
+
+// Get all courses id
+router.get("/courses/all/id", async (req, res) => {
+
+  try {
+    // Searching for all courses in database
+    const course = await CourseModel.find();
+    console.log("ID: " + course._id);
+    if (!course) {
+      // If no course is found, return an error message
+      console.log("No courses found")
+      return res.status(404).json({
+        "message": "No courses found"
+      });
+    } else {
+      console.log("ID: " + course.id);
+      return res.status(202).json({
+        status: 'course fetched successful',
+        course: {
+          id: course.id,
+        },
+      });
+  }
+  } catch (err) { 
+    console.log(err)
+    return res.status(500).json({ 
+      "error": { "code": 500, "message": "Server could not be reached" }
+    });
+  }
 });
 
 // FIXME: no error handling, just needed the endpoint - Mvh. Frederik
@@ -470,53 +494,42 @@ router.post("/user/", async (req, res) => {
 // Subscribe to course 
 
 router.post("/course/subscribe",  async (req, res) => {
-  const { user_id, course_id } = req.body;
+  const { userId, courseId } = req.body;
 
   (await User.findOneAndUpdate(
-    { _id: user_id }, 
-    { $push: { subscriptions: course_id} }))
+    { _id: userId }, 
+    { $push: { subscriptions: courseId} }))
     .save;
 
-  let user = await User.findById(user_id);
+  let user = await User.findById(userId);
   res.send(user)
 
 });
 
 // Unsubscribe to course
 router.post("/course/unsubscribe",  async (req, res) => {
-  const { user_id, course_id} = req.body;
+  const { userId, courseId} = req.body;
 
   (await User.findOneAndUpdate(
-    { _id: user_id }, 
-    { $pull: { subscriptions: course_id} }))
+    { _id: userId }, 
+    { $pull: { subscriptions: courseId} }))
     .save;
 
-  let user = await User.findById(user_id);
+  let user = await User.findById(userId);
   res.send(user)
 
 });
 
 // Get users subscriptions
 router.get("/user/subscriptions/all", async (req, res) => {
-  const {user_id} = req.body
-  const subscribedCourses = (await User.findById(user_id, 'subscriptions -_id')).subscriptions;
+  const {userId} = req.body;
+  const subscribedCourses = (await User.findById(userId, 'subscriptions -_id')).subscriptions;
   const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
 
   res.send(list);
 });
 
 
-// Check if in database
-async function checkIfSubscribed(userId, courseId) {
-  const subscribedCourses = (await User.findById(userId, 'subscriptions -_id')).subscriptions;
-  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
-
-  if(list.include(courseId)) {
-    return true;
-  } else {
-    return false;
-  }
-}
 
 
 module.exports = router;
