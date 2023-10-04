@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { encrypt } = require("../helpers/Password");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
 
@@ -34,6 +35,12 @@ router.post("/user", async (req, res) => {
   try {
     validateEmail(form.email);
     validateName(form.name);
+
+    // Hashing the password for security
+    const hashedPassword = encrypt(form.password);
+    //Overwriting the plain text password with the hashed password 
+    form.password = hashedPassword;
+
     const doc = User(form);
     const created = await doc.save();
 

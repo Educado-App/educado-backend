@@ -1,9 +1,14 @@
 const router = require('express').Router()
 const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
+const bcrypt = require("bcrypt"); // Import bcrypt library module
+const jwt = require("jsonwebtoken"); // Import jsonwebtoken library module
+const keys = require("../config/keys"); // Import keys from config/keys.js
 
 const { makeExpressCallback } = require('../helpers/express')
-const { authEndpointHandler } = require('../auth')
+const { authEndpointHandler } = require('../auth');
+const { signAccessToken } = require('../helpers/Token');
+const { compare } = require('../helpers/Password');
 
 // Services
 require("../services/passport");
@@ -27,23 +32,47 @@ router.get("/auth/google/callback",
 );
 
 // Login
-router.get("/auth/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
   try {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
-      return res.status(401).json({ "error": "Incorrect credentials" });
+      // If the email is not found, return an error message
+      
+      return res.status(404).json({
+        "message": "User not found"
+      });
     } else {
-      result = (req.body.password === user.password)
+      // If the email is found, compare the passwords
+      
+      result = compare(req.body.password, user.password)
     }
     // If the passwords match, return a success message
     if (result) {
-      return res.status(202).json({ "message": "Login successful" });
+      // Create a token for the user
+      const token = signAccessToken({ id: user.id });
+      // Return the token
+      return res.status(202).json({
+        status: 'login successful',
+        accessToken: token,
+        user: {
+          name: user.name,
+          email: user.email,
+        },
+      });
     } else {
-      return res.status(401).json({ "error": "Incorrect credentials" });
+      // If the passwords do not match, return an error message
+      return res.status(401).json({
+        "message": "Incorrect password" 
+      });
     }
-  } catch { return res.status(404).json({ "error": "Error" }) }
+  } catch (err) { 
+    // If the server could not be reached, return an error message
+    return res.status(500).json({ 
+      "error": { "code": 500, "message": "Server could not be reached" }
+    });
+  }
 });
 
 
