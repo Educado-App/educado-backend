@@ -1,23 +1,34 @@
 const router = require("express").Router();
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
+const bcrypt = require('bcrypt');
 
 const jwt = require("jsonwebtoken");
 
 // Content Creator Application Route
 router.post("/signup", async (req, res) => {
-  const form = req.body;
+  bcrypt.hash(req.body.password, 5)
+  .then(hash => {
+    req.body.password = hash;
+    const form = req.body;
 
-  // Validate form ...
-  try {
     const doc = ContentCreatorApplication(form);
-    const created = await doc.save();
+    const created = doc.save();
 
     res.status(201);
     res.send(created);
+  })
+
+  try {
+    console.log(req.body.password)
+    
   } catch (error) {
     res.status(400);
     res.send(error.message);
   }
+  
+
+  // Validate form ...
+  
 });
 
 router.post("/login", async (req, res) => {
