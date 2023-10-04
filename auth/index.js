@@ -1,4 +1,3 @@
-const Token = require('../helpers/Token')
 const Password = require('../helpers/Password')
 const { userList } = require('../users')
 

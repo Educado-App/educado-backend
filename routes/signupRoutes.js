@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { encrypt } = require("../helpers/Password");
+const { patterns } = require("../helpers/patterns");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
 
@@ -47,14 +48,28 @@ router.post("/user", async (req, res) => {
     res.status(201);
     res.send(created);
   } catch (error) {
+    console.log(error)
+    switch(error) {
+      case "unique" | "user defined":
+        res.status(400);
+        res.send("Error 400: Email already exists");
+        return;
+      case "required":
+        res.status(400);
+        res.send("Error 400: Email is required");
+        return;
+      default:
+        break;
+    }
     res.status(400);
-    res.send("Error: " + error.message);
+    res.send({ message: error.message });
   }
 });
 
 module.exports = router;
 
 function validateEmail(input) {
+  const emailPattern = patterns.email;
   if (isMissing(input)) {
     throw new Error("Email is required");
   }
@@ -70,7 +85,7 @@ function validateEmail(input) {
    * followed by a dot, followed by a sequence of two to four domain 
    * extension letters.
    */
-  if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input))) {
+  if (!(emailPattern.test(input))) {
     throw new Error("Invalid email")
   }
 

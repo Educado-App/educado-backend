@@ -35,7 +35,7 @@ const userSchema = new Schema({
          * followed by a dot, followed by a sequence of two to four domain 
          * extension letters.
          */
-        return /^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}/.test(email);
+        return patterns.email.test(email);
       },
       message: "Invalid email"
     },
