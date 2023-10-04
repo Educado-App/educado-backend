@@ -35,18 +35,13 @@ router.post("/login", async (req, res) => {
      
     if(!contentCreator){
       console.log("Wrong User")
-      const error = new Error("An account with this email does not exist!");
-      res.status(401);
-      error.statusCode = 401;
-      throw error;
+      res.status(404).json({ msg: "An Account with this email does not exist"  });
     }
     
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
-      const error = new Error("Wrong password");
-      res.status(401);
-      error.statusCode = 401;
-      throw error;
+      res.status(404).json({ msg: "Wrong Password" });
+
     }
     
     if (compare(password, contentCreator.password) && email == contentCreator.email){
