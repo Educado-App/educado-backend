@@ -8,6 +8,7 @@ const SignupRoutes = require('./signupRoutes')
 const ApplicationRoutes = require('./applicationRoutes')
 const MailRoutes = require('./mailRoutes')
 const UserRoutes = require('./userRoutes')
+const requireLogin = require('../middlewares/requireLogin')
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
