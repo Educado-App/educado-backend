@@ -9,6 +9,7 @@ const ApplicationRoutes = require('./applicationRoutes')
 const MailRoutes = require('./mailRoutes')
 const UserRoutes = require('./userRoutes')
 const requireLogin = require('../middlewares/requireLogin')
+const TestRoutes = require('../routes/testRoutes')
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -20,7 +21,10 @@ router.use('', AWSRoutes)
 router.use('/api', AuthRoutes)
 router.use('/api/signup', SignupRoutes)
 router.use('/api/applications', ApplicationRoutes)
-router.use('/api/mail',MailRoutes)
+router.use('/api/mail', MailRoutes)
 router.use('/api/user', UserRoutes)
+
+// Test route
+router.use('/api/test', TestRoutes)
 
 module.exports = router
