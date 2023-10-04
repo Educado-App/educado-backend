@@ -85,7 +85,7 @@ router.post("/course/update", requireLogin, async (req, res) => {
 });
 
 //Get all courses
-router.get("/courses/all", async (req, res) => {
+router.get("/courses", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
 });
@@ -494,39 +494,55 @@ router.post("/user/", async (req, res) => {
 // Subscribe to course 
 
 router.post("/course/subscribe",  async (req, res) => {
-  const { userId, courseId } = req.body;
+  const { user_id, course_id } = req.body;
+
 
   (await User.findOneAndUpdate(
-    { _id: userId }, 
-    { $push: { subscriptions: courseId} }))
+    { _id: user_id }, 
+    { $push: { subscriptions: course_id} }))
     .save;
 
-  let user = await User.findById(userId);
+  let user = await User.findById(user_id);
   res.send(user)
 
 });
 
 // Unsubscribe to course
 router.post("/course/unsubscribe",  async (req, res) => {
-  const { userId, courseId} = req.body;
+  const { user_id, course_id} = req.body;
 
   (await User.findOneAndUpdate(
-    { _id: userId }, 
-    { $pull: { subscriptions: courseId} }))
+    { _id: user_id }, 
+    { $pull: { subscriptions: course_id} }))
     .save;
 
-  let user = await User.findById(userId);
+  let user = await User.findById(user_id);
   res.send(user)
 
 });
 
 // Get users subscriptions
 router.get("/user/subscriptions/all", async (req, res) => {
-  const {userId} = req.body;
-  const subscribedCourses = (await User.findById(userId, 'subscriptions -_id')).subscriptions;
-  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+  try {
+    const { user_id } = req.query;
+    
+    // Find the user by _id and select the 'subscriptions' field
+    const user = await User.findById(user_id).select('subscriptions');
 
-  res.send(list);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const subscribedCourses = user.subscriptions;
+
+    // Find courses based on the subscribed course IDs
+    const list = await CourseModel.find({ '_id': { $in: subscribedCourses } });
+
+    res.send(list);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 
