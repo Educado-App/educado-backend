@@ -13,6 +13,10 @@ module.exports = {
     code: 'E0002',
     message: 'Users role does not have the necessary permissions for this action'
   },
+  E0003: {
+    code: 'E0003',
+    message: 'Server could not be reached'
+  },
 
   // E01 - Login errors
   E0101: {
@@ -80,6 +84,10 @@ module.exports = {
   E0211: {
     code: 'E0211',
     message: 'Name must only contain letters, spaces, hyphens and apostrophes.'
+  },
+  E0212: {
+    code: 'E0212',
+    message: 'Password is required.'
   },
 
   // E03 - Logout errors

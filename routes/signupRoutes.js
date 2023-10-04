@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { encrypt } = require("../helpers/Password");
+const { encrypt } = require("../helpers/password");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
 const errorCodes = require("../helpers/errorCodes");
@@ -27,19 +27,17 @@ router.post("/user", async (req, res) => {
   form.modifiedAt = Date.now();
 
   // Validate form ...
-  if(isMissing(form.password)){
-    res.status(400);
-    res.send("Error 400: Password is required");
-    return;
-  }
+  
 
   try {
     // Validate user info
+    if(isMissing(form.password)){
+      throw errorCodes['E0212']; // Password is required
+    }
     const nameValid = validateName(form.firstName) &&
                       validateName(form.lastName);
                       
     const emailValid = await validateEmail(form.email);
-
 
     if(nameValid && emailValid) {
       // Hashing the password for security
