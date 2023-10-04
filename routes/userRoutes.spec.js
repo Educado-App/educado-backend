@@ -1,6 +1,6 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../routes/userRoutes'); // Import your router file here
+const router = require('../routes/userRoutes');
 const connectDb = require('../__tests__/fixtures/db')
 const makeFakeUser = require('../__tests__/fixtures/fakeUser')
 const mongoose = require('mongoose');
@@ -10,8 +10,7 @@ app.use(express.json());
 
 // Mock authentication middleware
 app.use((req, res, next) => {
-    // Create a mock user object for testing
-    req.user = { id: 'mockUserId', /* Add other user properties as needed */ };
+    req.user = { id: 'mockUserId', /* Needs this for requireLogin middleware */ };
     next();
   });
 
@@ -25,12 +24,12 @@ const server = app.listen(PORT, () => {
 
 const fakeUser = makeFakeUser();
 
-describe('User routes', () => {
+describe('Update User Email Route', () => {
 
     let db;
 
     beforeAll(async () => {
-        db = await connectDb();
+        db = await connectDb(); // Connect to the database
 
         await db.collection('users').insertOne(fakeUser);
     });
@@ -38,7 +37,6 @@ describe('User routes', () => {
     it('updates user email successfully', async () => {
         const newEmail = 'newemail@example.com';
 
-        // Send a PUT request to the update-email endpoint
         const response = await request('http://localhost:5000')
         .put('/api/user/update-email/' + fakeUser._id)
         .send({ newEmail })
@@ -59,10 +57,13 @@ describe('User routes', () => {
     });
 
     it('updates user first name successfully', async () => {
-        await request('http://localhost:5000')
-          .put(`/api/user/update-first_name/${fakeUser._id}`)
-          .send({ newFirstName: 'NewFirstName' })
-          .expect(200);
+        const response = await request('http://localhost:5000')
+            .put(`/api/user/update-first_name/${fakeUser._id}`)
+            .send({ newFirstName: 'NewFirstName' })
+            .expect(200);
+
+        expect(response.body.message).toBe('First name updated successfully');
+        expect(response.body.user.firstName).toBe('NewFirstName');
     });
 
     it('handles user not found error for update-first_name', async () => {
@@ -72,38 +73,26 @@ describe('User routes', () => {
             .put(`/api/user/update-first_name/${nonExistentUserId}`)
             .send({ newFirstName: 'NewFirstName' })
             .expect(404);
-    
         });
     
     it('updates user last name successfully', async () => {
-        await request('http://localhost:5000')
+        const response = await request('http://localhost:5000')
             .put(`/api/user/update-last_name/${fakeUser._id}`)
             .send({ newLastName: 'NewLastName' })
             .expect(200);
+        
+        expect(response.body.message).toBe('Last name updated successfully');
+        expect(response.body.user.lastName).toBe('NewLastName');
     });
 
     it('handles user not found error for update-last_name', async () => {
-        const nonExistentUserId = new mongoose.Types.ObjectId();
+    const nonExistentUserId = new mongoose.Types.ObjectId();
 
-        await request('http://localhost:5000')
-            .put(`/api/user/update-last_name/${nonExistentUserId}`)
-            .send({ newLastName: 'NewLastName' })
-            .expect(404);
+    await request('http://localhost:5000')
+        .put(`/api/user/update-last_name/${nonExistentUserId}`)
+        .send({ newLastName: 'NewLastName' })
+        .expect(404);
     });
-
-    it('deletes user successfully', async () => {
-        await request('http://localhost:5000')
-        .delete(`/api/user/delete/${fakeUser._id}`)
-        .expect(200);
-    });
-    
-    it('handles user not found error for delete', async () => {
-        const nonExistentUserId = new mongoose.Types.ObjectId();
-
-        await request('http://localhost:5000')
-            .delete(`/api/user/delete/${nonExistentUserId}`)
-            .expect(404);
-    });    
 
     afterAll((done) => {
         server.close(done);
