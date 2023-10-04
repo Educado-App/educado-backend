@@ -36,7 +36,7 @@ describe('Login User route', () => {
     }
 
     // Send a Post request to the login endpoint
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(nonExistingUser)
       .expect(404);
@@ -52,7 +52,7 @@ describe('Login User route', () => {
       password: "incorrectPassword"
     }
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(incorrectPassword)
       .expect(401);  
@@ -68,7 +68,7 @@ describe('Login User route', () => {
       password: "ABC123456!"
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(correctCredentials)
       .expect(202);

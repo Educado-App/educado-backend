@@ -38,7 +38,7 @@ describe('Signup User route', () => {
       password: "ABC123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(201);
@@ -56,7 +56,7 @@ describe('Signup User route', () => {
       password: "ABC123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -69,7 +69,7 @@ describe('Signup User route', () => {
       email: fakeUser.email,
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -83,7 +83,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -97,7 +97,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -110,7 +110,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -124,7 +124,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
@@ -138,7 +138,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(201);
@@ -156,7 +156,7 @@ describe('Signup User route', () => {
       password: "abc123456!",
     };
 
-    const response = await request('http://localhost:5000')
+    const response = await request(`http://localhost:${PORT}`)
       .post('/api/signup/user')
       .send(input)
       .expect(400);
