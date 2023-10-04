@@ -1,11 +1,13 @@
+const { encrypt } = require('../../helpers/Password');
+
 module.exports = function makeFakeUser() {
 
-    return {
-        email: "fake@gmail.com",
-        password: "ABC123456!",
-        googleID: "1234567891011",
-        joinedAt: new Date(),
-        modifiedAt: new Date()
-    }
+  return {
+    email: "fake@gmail.com",
+    password: encrypt("ABC123456!"),
+    googleID: "1234567891011",
+    joinedAt: new Date(),
+    modifiedAt: new Date()
+  }
 
 }
