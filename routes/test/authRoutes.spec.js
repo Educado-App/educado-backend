@@ -11,7 +11,7 @@ app.use(express.json());
 app.use('/api', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
-const PORT = 5000; // Choose a port for testing
+const PORT = 5020; // Choose a port for testing
 const server = app.listen(PORT, () => {
   console.log(`Express server is running on port ${PORT}`);
 });
@@ -79,6 +79,7 @@ describe('Login User route', () => {
   });
 
   afterAll((done) => {
+    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
     server.close(done);
   });
 });

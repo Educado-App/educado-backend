@@ -11,7 +11,7 @@ app.use(express.json());
 app.use('/api/signup', router); // Mount the router under '/api/signup' path
 
 // Start the Express app on a specific port for testing
-const PORT = 5000; // Choose a port for testing
+const PORT = 5021; // Choose a port for testing
 const server = app.listen(PORT, () => {
   console.log(`Express server is running on port ${PORT}`);
 });
@@ -44,9 +44,9 @@ describe('Signup User route', () => {
       .expect(201);
 
     // Verify that the user was saved in the database
-    const user = await db.collection('users').findOne({ email: fakeUser.email });
+    const user = await db.collection('users').findOne({ email: input.email });
     expect(user).toBeDefined();
-    expect(user.email).toBe(fakeUser.email);
+    expect(user.email).toBe(input.email);
   });
 
 
@@ -144,8 +144,8 @@ describe('Signup User route', () => {
       .expect(201);
 
     // Verify that the password is not stored as plain text
-    const user = await db.collection('users').findOne({ email: "test user" });
-    expect(user).not.toBe("abc123456!");
+    const user = await db.collection('users').findOne({ email: input.email });
+    expect(user).not.toBe(input.password);
   });
 
 
@@ -164,6 +164,7 @@ describe('Signup User route', () => {
   });
 
   afterAll((done) => {
+    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
     server.close(done);
   });
 });
