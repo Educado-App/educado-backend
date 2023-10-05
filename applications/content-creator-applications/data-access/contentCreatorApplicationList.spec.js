@@ -2,6 +2,7 @@ const connectDb = require('../../../__tests__/fixtures/db')
 
 const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/fakeContentCreatorApplication')
 const { contentCreatorApplicationList } = require('.')
+const mongoose = require('mongoose');
 
 describe('Content Creator Application List', () => {
 
@@ -50,4 +51,8 @@ describe('Content Creator Application List', () => {
         expect(found).not.toBeNull()
         expect(found).toMatchObject(fakeApplication)
     })
+
+    afterAll(async () => {
+      await mongoose.connection.close();
+    });
 })

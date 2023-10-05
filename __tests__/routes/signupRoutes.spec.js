@@ -163,8 +163,9 @@ describe('Signup User route', () => {
 
   });
 
-  afterAll((done) => {
+  afterAll(async () => {
     db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    server.close(done);
+    server.close();
+    await mongoose.connection.close();
   });
 });

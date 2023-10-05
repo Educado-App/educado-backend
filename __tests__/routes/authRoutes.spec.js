@@ -62,7 +62,7 @@ describe('Login User route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(incorrectPassword)
-      .expect(401);  
+      .expect(401);
 
     // Verify the response body
     expect(response.body.message).toBe("Incorrect password");
@@ -85,8 +85,9 @@ describe('Login User route', () => {
     expect(response.body.accessToken).toBeDefined();
   });
 
-  afterAll((done) => {
+  afterAll(async () => {
     db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    server.close(done);
+    server.close();
+    await mongoose.connection.close();
   });
 });
