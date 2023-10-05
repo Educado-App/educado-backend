@@ -9,6 +9,7 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 
+/*
 //DON'T USE THIS ROUTE, USE /courses
 router.post("/course/", async (req, res) => {
   const { title, description, category } = req.body;
@@ -29,12 +30,10 @@ router.post("/course/", async (req, res) => {
   } catch (err) {
     res.status(422).send(err);
   }
-});
-
-// Course routes
+});*/
 
 //Create course route
-router.post("/courses", async (req, res) => {
+router.post("/course", async (req, res) => {
   const { title, category, level, description } = req.body;
 
   const course = new CourseModel({
@@ -209,10 +208,11 @@ router.post("/course/delete", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
-// Section routes
-router.post("/section/create/:section_id", /*requireLogin,*/ async (req, res) => {
+// Create section
+router.post("/section/create/:course_id", /*requireLogin,*/ async (req, res) => {
   const {title} = req.body; //Handles the data in "data" from the request
-  const course_id = req.params.section_id; //Handles the data in "params" from the request
+  const course_id = req.params.course_id; //Handles the data in "params" from the request
+  
   const section = new SectionModel({
     parentCourse: course_id,
     title: title,
