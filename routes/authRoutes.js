@@ -1,9 +1,5 @@
-const router = require('express').Router();
-const passport = require('passport'); // Import passport library module
-const { User } = require('../models/User'); // Import User model
-const bcrypt = require('bcrypt'); // Import bcrypt library module
-const jwt = require('jsonwebtoken'); // Import jsonwebtoken library module
-const keys = require('../config/keys'); // Import keys from config/keys.js
+const router = require('express').Router()
+const { User } = require("../models/User"); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
@@ -11,7 +7,7 @@ const { signAccessToken } = require('../helpers/token');
 const { compare } = require('../helpers/password');
 
 // Services
-require('../services/passport');
+//require("../services/passport");
 
 router.post('/auth', makeExpressCallback(authEndpointHandler));
 
