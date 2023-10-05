@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const { User } = require("../models/User"); // Import User model
 
-const { makeExpressCallback } = require('../helpers/express')
+const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
 const { compare } = require('../helpers/password');
@@ -9,7 +9,7 @@ const { compare } = require('../helpers/password');
 // Services
 //require("../services/passport");
 
-router.post('/auth', makeExpressCallback(authEndpointHandler))
+router.post('/auth', makeExpressCallback(authEndpointHandler));
 
 /* Commented out until google login is implemented correctly
 // Route handler for login simulation
@@ -31,7 +31,7 @@ router.get("/auth/google/callback",
 */
 
 // Login
-router.post("/auth/login", async (req, res) => {
+router.post('/auth/login', async (req, res) => {
   try {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
@@ -40,12 +40,12 @@ router.post("/auth/login", async (req, res) => {
       // If the email is not found, return an error message
       
       return res.status(404).json({
-        "message": "User not found"
+        'message': 'User not found'
       });
     } else {
       // If the email is found, compare the passwords
       
-      result = compare(req.body.password, user.password)
+      result = compare(req.body.password, user.password);
     }
     // If the passwords match, return a success message
     if (result) {
@@ -63,29 +63,29 @@ router.post("/auth/login", async (req, res) => {
     } else {
       // If the passwords do not match, return an error message
       return res.status(401).json({
-        "message": "Incorrect password" 
+        'message': 'Incorrect password' 
       });
     }
   } catch (err) { 
     // If the server could not be reached, return an error message
     return res.status(500).json({ 
-      "error": { "code": 500, "message": "Server could not be reached" }
+      'error': { 'code': 500, 'message': 'Server could not be reached' }
     });
   }
 });
 
 
 // Logout simulation
-router.get("/auth/logout", (req, res) => {
+router.get('/auth/logout', (req, res) => {
   req.logout();
-  res.redirect("/");
+  res.redirect('/');
 });
 
 // Show current user simulation
-router.get("/auth/current_user", (req, res) => {
+router.get('/auth/current_user', (req, res) => {
   setTimeout(() => {
     res.send(req.user);
   }, 1500);
 });
 
-module.exports = router
+module.exports = router;

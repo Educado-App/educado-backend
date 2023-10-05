@@ -1,11 +1,11 @@
-const router = require("express").Router();
-const { encrypt } = require("../helpers/password");
-const { patterns } = require("../helpers/patterns");
-const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
-const {User} = require("../models/User");
+const router = require('express').Router();
+const { encrypt } = require('../helpers/password');
+const { patterns } = require('../helpers/patterns');
+const { ContentCreatorApplication } = require('../models/ContentCreatorApplication');
+const {User} = require('../models/User');
 
 // Content Creator Application Route
-router.post("/content-creator", async (req, res) => {
+router.post('/content-creator', async (req, res) => {
   const form = req.body;
 
   // Validate form ...
@@ -21,7 +21,7 @@ router.post("/content-creator", async (req, res) => {
   }
 });
 
-router.post("/user", async (req, res) => {
+router.post('/user', async (req, res) => {
   const form = req.body;
   form.joinedAt = Date.now();
   form.modifiedAt = Date.now();
@@ -29,7 +29,7 @@ router.post("/user", async (req, res) => {
   // Validate form ...
   if(isMissing(form.password)){
     res.status(400);
-    res.send("Error 400: const { encrypt } = require('../../helpers/password'); is required");
+    res.send('Error 400: const { encrypt } = require(\'../../helpers/password\'); is required');
     return;
   }
 
@@ -49,16 +49,16 @@ router.post("/user", async (req, res) => {
     res.send(created);
   } catch (error) {
     switch(error) {
-      case "unique" | "user defined":
-        res.status(400);
-        res.send("Error 400: Email already exists");
-        return;
-      case "required":
-        res.status(400);
-        res.send("Error 400: Email is required");
-        return;
-      default:
-        break;
+    case 'unique' | 'user defined':
+      res.status(400);
+      res.send('Error 400: Email already exists');
+      return;
+    case 'required':
+      res.status(400);
+      res.send('Error 400: Email is required');
+      return;
+    default:
+      break;
     }
     res.status(400);
     res.send({ message: error.message });
@@ -70,13 +70,13 @@ module.exports = router;
 function validateEmail(input) {
   const emailPattern = patterns.email;
   if (isMissing(input)) {
-    throw new Error("Email is required");
+    throw new Error('Email is required');
   }
   if (input.length < 6) {
-    throw new Error("Email must be at least 6 characters");
+    throw new Error('Email must be at least 6 characters');
   }
-  if (!input.includes("@") || !input.includes(".")) {
-    throw new Error("Email must contain '@' and '.'");
+  if (!input.includes('@') || !input.includes('.')) {
+    throw new Error('Email must contain \'@\' and \'.\'');
   }
   /**
    * Email must contain a sequence of any letters, numbers or dots
@@ -85,7 +85,7 @@ function validateEmail(input) {
    * extension letters.
    */
   if (!(emailPattern.test(input))) {
-    throw new Error("Invalid email")
+    throw new Error('Invalid email');
   }
 
   return true;
@@ -93,10 +93,10 @@ function validateEmail(input) {
 
 function validateName(input) {
   if (isMissing(input)) {
-    throw new Error("Name is required");
+    throw new Error('Name is required');
   }
   if (input.length < 2 || input.length > 50) {
-    throw new Error("Name must be between 2 and 50 characters");
+    throw new Error('Name must be between 2 and 50 characters');
   }
   /**
    * Name can contain a sequence of any letters (including foreign 
@@ -105,7 +105,7 @@ function validateName(input) {
    * and ending with a sequence of any letters (at least one name). 
    */
   if(!(input.match(/^(\p{L}+[ -'])*\p{L}+$/u))){
-    throw new Error("Name must contain only letters (seperate names with spaces, - or ')");
+    throw new Error('Name must contain only letters (seperate names with spaces, - or \')');
   }
 
   return true;
