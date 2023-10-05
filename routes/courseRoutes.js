@@ -33,6 +33,7 @@ router.post("/course/", async (req, res) => {
 
 // Course routes
 
+//Create course route
 router.post("/courses", async (req, res) => {
   const { title, category, level, description } = req.body;
 
@@ -57,14 +58,15 @@ router.post("/courses", async (req, res) => {
 });
 
 // Update Course
-router.post("/course/update", /*requireLogin,*/ async (req, res) => {
-  const { course } = req.body;
+router.post("/course/update/:id", /*requireLogin,*/ async (req, res) => {
+  const course = req.body;
+  const { id } = req.params;
+
   const dbCourse = await CourseModel.findByIdAndUpdate(
-    course._id,
+    id,
     {
       title: course.title,
-      description: course.description,
-      sections: course.sections,
+      description: course.description
     },
     function (err, docs) {
       if (err) {
@@ -98,7 +100,10 @@ router.get("/course/:id", async (req, res) => {
 })
 
 // Update course title
+/* COMMENTED OUT FOR NOW NOT NECESSARY
 router.post("/course/update/title", async (req, res) => {
+
+  console.log("course title 1");
   const { text, course_id } = req.body;
 
   // find object in database and update title to new value
@@ -108,10 +113,13 @@ router.post("/course/update/title", async (req, res) => {
 
   // Send response
   res.send(course);
-});
+  console.log("course title 2");
+}); */
 
 // Update course description
+/* COMMENTED OUT FOR NOW NOT NECESSARY
 router.post("/course/update/description", async (req, res) => {
+  console.log("course des 1");
   const { text, course_id } = req.body;
 
   // find object in database and update title to new value
@@ -125,11 +133,15 @@ router.post("/course/update/description", async (req, res) => {
 
   // Send response
   res.send(course);
-});
+  console.log("course des 2");
+}); */
+
 
 // Update course category
 router.post("/course/update/category", async (req, res) => {
   const { text, course_id } = req.body;
+
+
 
   // find object in database and update title to new value
   (await CourseModel.findOneAndUpdate({ _id: course_id }, { category: text }))
@@ -242,6 +254,35 @@ router.get("/section/:id", async (req, res) => {
   const { id } = req.params; // destructure params
   const section = await SectionModel.findById(id);
   res.send(section);
+});
+
+/**
+ * Update section by id with the update button
+ * 
+ * @param {string} id - section id
+ * @param {object} section - section object
+ * @returns {string} - Just sends a message to confirm that the update is complete
+ */
+router.post("/section/update/:id", /*requireLogin,*/ async (req, res) => {
+  const section = req.body;
+  const { id } = req.params;
+
+  const dbSection = await SectionModel.findByIdAndUpdate(
+    id,
+    {
+      title: section.title,
+      description: section.description
+    },
+    function (err, docs) {
+      if (err) {
+        console.log("Error:", err);
+        res.send(err);
+      } else {
+        console.log("Updated section: ", docs);
+      }
+    }
+  );
+  res.send("section Update Complete");
 });
 
 // Update section title
