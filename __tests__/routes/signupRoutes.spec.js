@@ -119,8 +119,8 @@ describe('Signup User route', () => {
 
   it('Returns error if name is missing', async () => {
     const input = {
-      email: "test@test.dk",
-      password: "abc123456!",
+      email: 'test@test.dk',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -189,7 +189,7 @@ describe('Signup User route', () => {
       firstName: "test",
       lastName: "test",
       email: fakeUser.email,
-      password: "abc123456!",
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -201,8 +201,9 @@ describe('Signup User route', () => {
 
   });
 
-  afterAll((done) => {
+  afterAll(async () => {
     db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    server.close(done);
+    server.close();
+    await mongoose.connection.close();
   });
 });

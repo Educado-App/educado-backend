@@ -2,8 +2,8 @@ const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/testRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
-const jwt = require('jsonwebtoken');
-const { signAccessToken, verify } = require('../../helpers/token');
+const { signAccessToken } = require('../../helpers/token');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
@@ -16,28 +16,29 @@ const server = app.listen(PORT, () => {
 });
 
 // Mocked token secret
-const TOKEN_SECRET = "test";
+const TOKEN_SECRET = 'test';
 
 // Mock token secret
 jest.mock('../../config/keys', () => {
   return {
     TOKEN_SECRET
-  }
+  };
 });
 
 describe('JWT verify', () => {
   let db;
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+  beforeAll(done => {
+    done();
+    db = connectDb(); // Connect to the database
   });
 
   it('Return an error if no valid JWT is present on private route', async () => {
-    const token = "ImAnInvalidToken"
+    const token = 'ImAnInvalidToken';
     const response = await request(`http://localhost:${PORT}`)
       .get('/api/test/require-jwt')
       .set('token', token)
-      .expect(401)
+      .expect(401);
 
     expect(response.body.error).toBeDefined();
   });
@@ -49,18 +50,19 @@ describe('JWT verify', () => {
     const response = await request(`http://localhost:${PORT}`)
       .get('/api/test/require-jwt')
       .set('token', token)
-      .expect(200)
+      .expect(200);
   });
 
   it('Test for non-algorithm attack', async () => {
-    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0." + btoa(`{"id":1,"iat":${"" + Date.now()},"exp":999999999999}`) + ".";
+    const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.' + btoa(`{"id":1,"iat":${'' + Date.now()},"exp":999999999999}`) + '.';
     const response = await request(`http://localhost:${PORT}`)
       .get('/api/test/require-jwt')
       .set('token', token)
-      .expect(401)
+      .expect(401);
   });
 
-  afterAll((done) => {
-    server.close(done);
+  afterAll(async () => {
+    server.close();
+    await mongoose.connection.close();
   });
 });
