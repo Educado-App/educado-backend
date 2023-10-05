@@ -7,7 +7,7 @@ const { signAccessToken } = require('../helpers/token');
 const { compare } = require('../helpers/password');
 
 // Services
-require("../services/passport");
+//require("../services/passport");
 
 router.post('/auth', makeExpressCallback(authEndpointHandler))
 
