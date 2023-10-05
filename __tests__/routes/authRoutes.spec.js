@@ -13,7 +13,8 @@ app.use('/api', router); // Mount the router under '/api' path
 // Mock Google OAuth2 clientID
 jest.mock('../../config/keys', () => {
   return {
-    GOOGLE_CLIENT_ID: "test"
+    GOOGLE_CLIENT_ID: "test",
+    TOKEN_SECRET: "test",
   }
 });
 
