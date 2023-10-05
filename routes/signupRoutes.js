@@ -111,7 +111,6 @@ function validateName(input) {
   return true;
 }
 
-
 function isMissing(input) {
   return input === undefined || input === null || input === "";
 }
