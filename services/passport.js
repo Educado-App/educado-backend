@@ -1,12 +1,12 @@
 // Passport authentication imports
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 // Models
-const { UserModel } = require('../models/User')
+const { UserModel } = require('../models/User');
 
 // Import consts
-const keys = require("./../config/keys");
+const keys = require('./../config/keys');
 
 // ** SERIALIZATION & DESERIALIZATION ** //
 passport.serializeUser((user, done) => {
@@ -23,12 +23,12 @@ passport.deserializeUser((id, done) => {
 
 // Google OAuth Strategy 1: Login
 passport.use(
-  "google",
+  'google',
   new GoogleStrategy(
     {
       clientID: keys.googleClientID,
       clientSecret: keys.googleClientSecret,
-      callbackURL: "/auth/google/callback",
+      callbackURL: '/auth/google/callback',
       proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -49,12 +49,12 @@ passport.use(
 
 // Google OAuth Strategy 1: Login
 passport.use(
-  "google-restricted",
+  'google-restricted',
   new GoogleStrategy(
     {
       clientID: keys.googleClientID,
       clientSecret: keys.googleClientSecret,
-      callbackURL: "/auth/google/callback",
+      callbackURL: '/auth/google/callback',
       proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {

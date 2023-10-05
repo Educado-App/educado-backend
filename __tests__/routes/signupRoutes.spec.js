@@ -1,8 +1,8 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/signupRoutes'); // Import your router file here
-const connectDb = require('../fixtures/db')
-const makeFakeUser = require('../fixtures/fakeUser')
+const connectDb = require('../fixtures/db');
+const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');
 
 
@@ -33,9 +33,9 @@ describe('Signup User route', () => {
 
   it('Check that the endpoint saves the user in the database', async () => {
     const input = {
-      name: "test user",
-      email: "test@email.com",
-      password: "ABC123456!",
+      name: 'test user',
+      email: 'test@email.com',
+      password: 'ABC123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -52,8 +52,8 @@ describe('Signup User route', () => {
 
   it('Returns error if email is missing', async () => {
     const input = {
-      name: "test user",
-      password: "ABC123456!",
+      name: 'test user',
+      password: 'ABC123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -65,7 +65,7 @@ describe('Signup User route', () => {
 
   it('Returns error if password is missing', async () => {
     const input = {
-      name: "test user",
+      name: 'test user',
       email: fakeUser.email,
     };
 
@@ -78,9 +78,9 @@ describe('Signup User route', () => {
 
   it('Returns error if email does not contain @ and domain', async () => {
     const input = {
-      name: "test user",
-      email: "testcase",
-      password: "abc123456!",
+      name: 'test user',
+      email: 'testcase',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -92,9 +92,9 @@ describe('Signup User route', () => {
 
   it('Returns error if email is less than 6 characters', async () => {
     const input = {
-      name: "test user",
-      email: "testcase",
-      password: "abc123456!",
+      name: 'test user',
+      email: 'testcase',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -106,8 +106,8 @@ describe('Signup User route', () => {
 
   it('Returns error if name is missing', async () => {
     const input = {
-      email: "test@test.dk",
-      password: "abc123456!",
+      email: 'test@test.dk',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -119,9 +119,9 @@ describe('Signup User route', () => {
 
   it('Returns error if name contains illegal symbols', async () => {
     const input = {
-      name: "test 😭😭😭",
-      email: "test@test.dk",
-      password: "abc123456!",
+      name: 'test 😭😭😭',
+      email: 'test@test.dk',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -133,9 +133,9 @@ describe('Signup User route', () => {
 
   it('Test that the password is not stored as plain text', async () => {
     const input = {
-      name: "test user",
-      email: "test@test.dk",
-      password: "abc123456!",
+      name: 'test user',
+      email: 'test@test.dk',
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
@@ -151,9 +151,9 @@ describe('Signup User route', () => {
 
   it('Test that emails must be unique when registering', async () => {
     const input = {
-      name: "test",
+      name: 'test',
       email: fakeUser.email,
-      password: "abc123456!",
+      password: 'abc123456!',
     };
 
     const response = await request(`http://localhost:${PORT}`)
