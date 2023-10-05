@@ -1,19 +1,13 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
-let connection, db
+function connectToDb(uri, options = {}) {
 
-module.exports = async function connectDb() {
-    connection =
-        connection ||
-        await mongoose.connect(
-            global.__MONGO_URI__,
-            {
-                useNewUrlParser: true,
-                useFindAndModify: false
-            }
-        )
-    //db = db || connection.db(global.MONGO_DB_NAME)
-    db = db || connection.connection.db; // Assign the database object
+    mongoose.connect(uri, options)
 
-    return db; // Return the database object
+    const db = mongoose.connection
+    db.on("error", console.error.bind(console, "MongoDB connection error"))
+
+    _db = db
 }
+
+module.exports = { connectToDb }
