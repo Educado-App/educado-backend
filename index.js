@@ -20,6 +20,12 @@ connectToDb(keys.mongoURI, {
 
 const app = express(); // Configuration for listening, communicate to handlers
 
+// Simple logging middleware for testing
+app.use((req, res, next) => {
+  let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  console.log(fullUrl);
+  next();
+});
 app.use(
   cookieSession({
     maxAge: 30 * 24 * 60 * 60 * 1000, // Cookie should last for 30 days before automatic expiration
