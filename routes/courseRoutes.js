@@ -118,12 +118,6 @@ router.get("/courses/all/id", async (req, res) => {
   }
 });
 
-// FIXME: no error handling, just needed the endpoint - Mvh. Frederik
-router.get("/course/:id", async (req, res) => {
-  const { id } = req.params; // destructure params
-  const course = await CourseModel.findById(id);
-  res.send(course);
-})
 
 // Update course title
 router.post("/course/update/title", async (req, res) => {
@@ -480,9 +474,17 @@ router.post("/user/", async (req, res) => {
   }
 });
 
+// Get specific course
+router.get("/course/:id", async (req, res) => {
+  const { id } = req.params; // destructure params
+  const course = await CourseModel.findById(id);
+  res.send(course);
+})
+
+
 
 //Get all courses
-router.get("/course/all", async (req, res) => {
+router.get("/courses/all", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
 });
@@ -518,7 +520,7 @@ router.post("/course/unsubscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/user/subscriptions/all", async (req, res) => {
+router.get("/user/subscription/all", async (req, res) => {
   try {
     const { user_id } = req.query;
     
