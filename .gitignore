@@ -11,3 +11,4 @@ dev.js
 config/educado-*.json
 config/gcp_service.json
 config/keys.js
+__tests__/setup/globalConfigMongo.json

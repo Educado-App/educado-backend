@@ -1,15 +1,18 @@
-const router = require('express').Router()
-const passport = require("passport"); // Import passport library module
-const { User } = require("../models/User"); // Import User model
+const router = require('express').Router();
+const { User } = require('../models/User'); // Import User model
 
-const { makeExpressCallback } = require('../helpers/express')
-const { authEndpointHandler } = require('../auth')
+const { makeExpressCallback } = require('../helpers/express');
+const { authEndpointHandler } = require('../auth');
+const { signAccessToken } = require('../helpers/token');
+const { compare } = require('../helpers/password');
+const errorCodes = require('../helpers/errorCodes');
 
 // Services
-require("../services/passport");
+//require("../services/passport");
 
-router.post('/auth', makeExpressCallback(authEndpointHandler))
+router.post('/auth', makeExpressCallback(authEndpointHandler));
 
+/* Commented out until google login is implemented correctly
 // Route handler for login simulation
 router.get("/auth/google",
   passport.authenticate("google-restricted", {
@@ -26,38 +29,59 @@ router.get("/auth/google/callback",
   }
 );
 
+*/
+
 // Login
-router.get("/auth/login", async (req, res) => {
-  try {
-    // Searching for a single user in the database, with the email provided in the request body
-    const user = await User.findOne({ email: req.body.email });
-    // If email is found, compare the password provided in the request body with the password in the database
-    if (!user) {
-      return res.status(401).json({ "error": "Incorrect credentials" });
-    } else {
-      result = (req.body.password === user.password)
-    }
-    // If the passwords match, return a success message
-    if (result) {
-      return res.status(202).json({ "message": "Login successful" });
-    } else {
-      return res.status(401).json({ "error": "Incorrect credentials" });
-    }
-  } catch { return res.status(404).json({ "error": "Error" }) }
+router.post('/auth/login', async (req, res) => {
+	try {
+		console.log(req.body);
+		// Searching for a single user in the database, with the email provided in the request body
+		const user = await User.findOne({ email: req.body.email});
+		// If email is found, compare the password provided in the request body with the password in the database
+		if (!user) {
+			// Invalid email (email not found)
+			return res.status(401).json({ 'error': errorCodes['E0101']});
+		} else {
+			// If the email is found, compare the passwords
+      
+			result = compare(req.body.password, user.password);
+		}
+		// If the passwords match, return a success message
+		if (result) {
+			// Create a token for the user
+			const token = signAccessToken({ id: user.id });
+			// Return the token
+			return res.status(202).json({
+				status: 'login successful',
+				accessToken: token,
+				user: {
+					name: user.name,
+					email: user.email,
+				},
+			});
+		} else {
+			// If the passwords do not match, return an error message
+			return res.status(401).json({ 'error': errorCodes['E0105']});
+		}
+	} catch (err) { 
+		// If the server could not be reached, return an error message
+		console.log(err);
+		return res.status(500).json({ 'error': errorCodes['E0003']});
+	}
 });
 
 
 // Logout simulation
-router.get("/auth/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
+router.get('/auth/logout', (req, res) => {
+	req.logout();
+	res.redirect('/');
 });
 
 // Show current user simulation
-router.get("/auth/current_user", (req, res) => {
-  setTimeout(() => {
-    res.send(req.user);
-  }, 1500);
+router.get('/auth/current_user', (req, res) => {
+	setTimeout(() => {
+		res.send(req.user);
+	}, 1500);
 });
 
-module.exports = router
+module.exports = router;
