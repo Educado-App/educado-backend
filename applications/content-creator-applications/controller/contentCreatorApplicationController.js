@@ -1,13 +1,13 @@
-const { makeContentCreatorApplication } = require('../domain')
-const { makeHttpError } = require('../../../helpers/error')
+const { makeContentCreatorApplication } = require('../domain');
+const { makeHttpError } = require('../../../helpers/error');
 
 module.exports = function makeContentCreatorApplicationController({ contentCreatorApplicationList }) {
 
-    return async function handle(httpRequest) {
+	return async function handle(httpRequest) {
 
-        switch (httpRequest.method) {
-            case 'GET':
-                return await getContentCreatorApplication(httpRequest)
+		switch (httpRequest.method) {
+		case 'GET':
+			return await getContentCreatorApplication(httpRequest);
                 
             case 'POST':
                 if ('action' in httpRequest.queryParams) {
@@ -122,9 +122,9 @@ module.exports = function makeContentCreatorApplicationController({ contentCreat
                 data: updated
             }
 
-        } catch (error) {
-            return makeHttpError({ status: 400, message: error.message })
-        }
+		} catch (error) {
+			return makeHttpError({ status: 400, message: error.message });
+		}
 
-    }
-}
+	}
+};

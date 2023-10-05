@@ -1,5 +1,6 @@
 node_modules
 config/dev.js
+config/gcp_service.json
 *.DS_Store
 package-lock.json
 dev.js

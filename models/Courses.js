@@ -1,5 +1,5 @@
 // Mongoose model class for Courses
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // Routes are sorted into COURSE - SECTION - COMPONENT each with ASCII art, within each functions are in order of CRUD
@@ -20,6 +20,6 @@ const courseSchema = new Schema({
   sections: [{ type: Schema.Types.ObjectId, ref: "Component" }],
 });
 
-const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema
+const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
 
-module.exports = { CourseModel }
+module.exports = { CourseModel };

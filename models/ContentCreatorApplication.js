@@ -1,5 +1,5 @@
 // Mongoose model class for User
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Class description
@@ -14,8 +14,8 @@ const ContentCreatorSchema = new Schema({
 });
 
 const ContentCreatorApplication = mongoose.model(
-  "Content-Creator-Application",
-  ContentCreatorSchema
+	'Content-Creator-Application',
+	ContentCreatorSchema
 );
 
 module.exports = { ContentCreatorApplication };

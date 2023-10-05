@@ -1,6 +1,6 @@
 // Mongoose model class for User
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 // Class description
 const userSchema = new Schema({
@@ -10,6 +10,6 @@ const userSchema = new Schema({
   modifiedAt: Date
 });
 
-const UserModel = mongoose.model("users", userSchema);
+const UserModel = mongoose.model('users', userSchema);
 
-module.exports = { UserModel }
+module.exports.User = UserModel;
