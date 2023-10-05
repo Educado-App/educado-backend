@@ -63,7 +63,7 @@ router.post("/user", async (req, res) => {
 module.exports = router;
 
 // Might have to make this function async if nothing works
-function validateEmail(input) {
+async function validateEmail(input) {
   const emailPattern = patterns.email;
 
   if (isMissing(input)) {
@@ -84,13 +84,14 @@ function validateEmail(input) {
 
   if (await User.findOne({email: input}) != null) {
     throw errorCodes['E0201']; // User with the provided email already exists
-
+  }
   if (!(emailPattern.test(input))) {
     throw errorCodes['E0203']; // Invalid email format
   }
 
   return true;
 }
+
 
 function validateName(input) {
   if (isMissing(input)) {
