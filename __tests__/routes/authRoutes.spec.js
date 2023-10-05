@@ -1,8 +1,8 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../authRoutes'); // Import your router file here
-const connectDb = require('../../__tests__/fixtures/db')
-const makeFakeUser = require('../../__tests__/fixtures/fakeUser')
+const router = require('../../routes/authRoutes');
+const connectDb = require('../../__tests__/fixtures/db');
+const makeFakeUser = require('../../__tests__/fixtures/fakeUser');
 const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
 
