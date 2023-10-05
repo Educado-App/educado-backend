@@ -1,14 +1,14 @@
-const keys = require("../config/keys")
-const nodemailer = require("nodemailer")
+const keys = require('../config/keys');
+const nodemailer = require('nodemailer');
 
 module.exports = Object.freeze({
   isValid,
   send: sendMail
-})
+});
 
 function isValid(email) {
-  const regEx = new RegExp("^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}")
-  return regEx.test(email)
+  const regEx = new RegExp('^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}');
+  return regEx.test(email);
 }
 
 
@@ -21,9 +21,9 @@ async function sendMail({
 }) {
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: 'gmail',
     auth: {
-      type: "login",
+      type: 'login',
       user: keys.gmailUser,
       pass: keys.gmailAppPass,
 
@@ -31,7 +31,7 @@ async function sendMail({
     tls: {
       rejectUnauthorized: false,
     }
-  })
+  });
 
   const mailOptions = {
     subject: subject,
@@ -39,9 +39,9 @@ async function sendMail({
     to: to,
     text: text,
     html: html
-  }
+  };
 
-  await transporter.sendMail(mailOptions)
+  await transporter.sendMail(mailOptions);
 }
 
 

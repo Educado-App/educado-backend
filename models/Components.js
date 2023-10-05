@@ -1,5 +1,5 @@
 // Mongoose model class for Courses
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // Class description
@@ -11,6 +11,6 @@ const componentsSchema = new Schema({
   dateUpdated: Date, // If its a text component
 });
 
-const ComponentModel = mongoose.model("components", componentsSchema);
+const ComponentModel = mongoose.model('components', componentsSchema);
 
 module.exports = { ComponentModel }

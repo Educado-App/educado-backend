@@ -1,20 +1,16 @@
 const router = require('express').Router()
-const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
-const bcrypt = require("bcrypt"); // Import bcrypt library module
-const jwt = require("jsonwebtoken"); // Import jsonwebtoken library module
-const keys = require("../config/keys"); // Import keys from config/keys.js
 
-const { makeExpressCallback } = require('../helpers/express')
+const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
 const { compare } = require('../helpers/password');
 const errorCodes = require('../helpers/errorCodes');
 
 // Services
-require("../services/passport");
+//require("../services/passport");
 
-router.post('/auth', makeExpressCallback(authEndpointHandler))
+router.post('/auth', makeExpressCallback(authEndpointHandler));
 
 /* Commented out until google login is implemented correctly
 // Route handler for login simulation
@@ -36,7 +32,7 @@ router.get("/auth/google/callback",
 */
 
 // Login
-router.post("/auth/login", async (req, res) => {
+router.post('/auth/login', async (req, res) => {
   try {
     console.log(req.body);
     // Searching for a single user in the database, with the email provided in the request body
@@ -45,11 +41,10 @@ router.post("/auth/login", async (req, res) => {
     if (!user) {
       // Invalid email (email not found)
       return res.status(401).json({ 'error': errorCodes['E0101']});
-
     } else {
       // If the email is found, compare the passwords
       
-      result = compare(req.body.password, user.password)
+      result = compare(req.body.password, user.password);
     }
     // If the passwords match, return a success message
     if (result) {
@@ -77,16 +72,16 @@ router.post("/auth/login", async (req, res) => {
 
 
 // Logout simulation
-router.get("/auth/logout", (req, res) => {
+router.get('/auth/logout', (req, res) => {
   req.logout();
-  res.redirect("/");
+  res.redirect('/');
 });
 
 // Show current user simulation
-router.get("/auth/current_user", (req, res) => {
+router.get('/auth/current_user', (req, res) => {
   setTimeout(() => {
     res.send(req.user);
   }, 1500);
 });
 
-module.exports = router
+module.exports = router;

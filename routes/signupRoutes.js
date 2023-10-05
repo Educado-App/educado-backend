@@ -6,7 +6,7 @@ const {User} = require("../models/User");
 const errorCodes = require("../helpers/errorCodes");
 
 // Content Creator Application Route
-router.post("/content-creator", async (req, res) => {
+router.post('/content-creator', async (req, res) => {
   const form = req.body;
 
   // Validate form ...
@@ -22,7 +22,7 @@ router.post("/content-creator", async (req, res) => {
   }
 });
 
-router.post("/user", async (req, res) => {
+router.post('/user', async (req, res) => {
   const form = req.body;
   form.joinedAt = Date.now();
   form.modifiedAt = Date.now();
