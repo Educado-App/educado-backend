@@ -6,7 +6,6 @@ on:
       - main
       - staging
       - dev
-      - Cert
 
 #Run npm run test 
 jobs:

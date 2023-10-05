@@ -6,7 +6,6 @@ on:
       - main
       - staging
       - dev
-      - Cert
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
