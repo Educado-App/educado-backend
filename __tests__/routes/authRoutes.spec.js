@@ -4,7 +4,7 @@ const router = require('../../routes/authRoutes'); // Import your router file he
 const connectDb = require('../../__tests__/fixtures/db')
 const makeFakeUser = require('../../__tests__/fixtures/fakeUser')
 const mongoose = require('mongoose');
-const { encrypt } = require('../../helpers/Password');
+const { encrypt } = require('../../helpers/password');
 
 const app = express();
 app.use(express.json());
