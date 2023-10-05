@@ -1,7 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/testRoutes'); // Import your router file here
-const connectDb = require('../../__tests__/fixtures/db');
+const connectDb = require('../fixtures/db');
 const { signAccessToken } = require('../../helpers/token');
 
 const app = express();
