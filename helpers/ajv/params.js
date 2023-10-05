@@ -4,7 +4,7 @@ const ajv = new Ajv({ coerceTypes: true });
 require('ajv-formats')(ajv, { mode: 'fast', formats: ['date', 'time'], keywords: true });
 
 module.exports = Object.freeze({
-  validate
+	validate
 });
 
 /**
@@ -15,34 +15,34 @@ module.exports = Object.freeze({
  */
 function validate({ schema, data }) {
 
-  const _validate = ajv.compile(schema);
-  const valid = _validate(data);
-  if (!valid) {
-    throw new MultipleError(formatAjvErrors(_validate.errors));
-  }
+	const _validate = ajv.compile(schema);
+	const valid = _validate(data);
+	if (!valid) {
+		throw new MultipleError(formatAjvErrors(_validate.errors));
+	}
 
-  return data;
+	return data;
 }
 
 function formatAjvErrors(errors) {
-  const formatted = errors.map((error) => {
+	const formatted = errors.map((error) => {
 
-    const queryParameter = error.instancePath.replace('/', '');
-    const message = error.message;
+		const queryParameter = error.instancePath.replace('/', '');
+		const message = error.message;
 
-    const base = {
-      queryParameter,
-      message
-    };
+		const base = {
+			queryParameter,
+			message
+		};
 
-    const extras = {};
-    error.params.allowedValues ? extras['allowedValues'] = error.params.allowedValues : null;
+		const extras = {};
+		error.params.allowedValues ? extras['allowedValues'] = error.params.allowedValues : null;
 
-    return {
-      ...base,
-      ...extras
-    };
-  });
+		return {
+			...base,
+			...extras
+		};
+	});
 
-  return formatted;
+	return formatted;
 }

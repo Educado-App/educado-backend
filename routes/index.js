@@ -13,7 +13,7 @@ const TestRoutes = require('../routes/testRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
-  res.send(router.stack);
+	res.send(router.stack);
 });
 
 router.use('/api', CourseRoutes);

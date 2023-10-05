@@ -6,23 +6,23 @@
  */
 function extendFindAllSchema(overides = {}) {
 
-  const base = {
-    type: 'object',
-    properties: {
-      'sortBy': { enum: ['createdAt', '-createdAt'] },
-      'limit': { type: 'integer', minimum: 0 },
-      'offset': { type: 'integer', minimum: 0 }
-    }
-  };
+	const base = {
+		type: 'object',
+		properties: {
+			'sortBy': { enum: ['createdAt', '-createdAt'] },
+			'limit': { type: 'integer', minimum: 0 },
+			'offset': { type: 'integer', minimum: 0 }
+		}
+	};
 
-  return {
-    ...base,
-    ...overides,
-    properties: {
-      ...base.properties ,
-      ...overides.properties,
-    }
-  };
+	return {
+		...base,
+		...overides,
+		properties: {
+			...base.properties ,
+			...overides.properties,
+		}
+	};
 }
 
 module.exports = { extendFindAllSchema };
