@@ -10,6 +10,13 @@ const app = express();
 app.use(express.json());
 app.use('/api', router); // Mount the router under '/api' path
 
+// Mock Google OAuth2 clientID
+jest.mock('../../config/keys', () => {
+  return {
+    GOOGLE_CLIENT_ID: "test"
+  }
+});
+
 // Start the Express app on a specific port for testing
 const PORT = 5020; // Choose a port for testing
 const server = app.listen(PORT, () => {
