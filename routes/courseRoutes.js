@@ -57,7 +57,7 @@ router.post("/courses", async (req, res) => {
 });
 
 // Update Course
-router.post("/course/update", requireLogin, async (req, res) => {
+router.post("/course/update", /*requireLogin,*/ async (req, res) => {
   const { course } = req.body;
   const dbCourse = await CourseModel.findByIdAndUpdate(
     course._id,
@@ -258,7 +258,7 @@ router.post("/course/update/sectiontitle", async (req, res) => {
   res.send("Completed");
 });
 
-// Update course description
+// Update section title
 router.post("/section/update/title", async (req, res) => {
   const { text, section_id } = req.body;
 
