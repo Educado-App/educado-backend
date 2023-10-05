@@ -15,6 +15,7 @@ require("../services/passport");
 
 router.post('/auth', makeExpressCallback(authEndpointHandler))
 
+/* Commented out until google login is implemented correctly
 // Route handler for login simulation
 router.get("/auth/google",
   passport.authenticate("google-restricted", {
@@ -30,6 +31,8 @@ router.get("/auth/google/callback",
     res.redirect("/");
   }
 );
+
+*/
 
 // Login
 router.post("/auth/login", async (req, res) => {
