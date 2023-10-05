@@ -1,9 +1,10 @@
 const router = require('express').Router();
 
 // Models
-const { CourseModel } = require('../models/Courses');
-const { SectionModel } = require('../models/Sections');
-const { ComponentModel } = require('../models/Components');
+const { CourseModel } = require("../models/Courses");
+const { SectionModel } = require("../models/Sections");
+const { ComponentModel } = require("../models/Components");
+const { UserModel } = require("../models/User");
 const {
 	ContentCreatorApplication,
 } = require('../models/ContentCreatorApplication');
@@ -53,6 +54,21 @@ router.post('/courses', async (req, res) => {
 		res.status(422).send(err);
 	}
 });
+
+router.get("/course/getHome", async (req, res) => {
+
+  res.send("Hello course");
+});
+
+//Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user 
+router.get("/course/getSubscribedCourses", async (req, res) => {
+  const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById('650c26466fe6094f6214a4a4', 'subscriptions -_id'))).subscriptions;
+  //const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById(req.user.id, 'subscriptions -_id'))).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+  console.log(list)
+  res.send(list);
+});
+
 
 // Update Course
 router.post('/course/update', requireLogin, async (req, res) => {
@@ -436,5 +452,65 @@ router.get('/course/delete_all', requireLogin, async (req, res) => {
 	});
 	res.send('Completed');
 });
+
+// User route
+router.post("/user/", async (req, res) => {
+  const { googleID } = req.body;
+
+  const user = new UserModel({
+    googleID: googleID,
+    email: email,
+    password: password,
+    joinedAt: Date.now(),
+    modifiedAt: Date.now(),
+    subscriptions: []
+  });
+
+  try {
+    await user.save();
+    res.send(user);
+  } catch (err) {
+    res.status(422).send(err);
+  }
+});
+
+// Subscribe to course TODO: check for duplicates
+
+router.post("/course/:id/subscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $push: { subscriptions: course_id} }))
+    .save;
+
+  user = await UserModel.findById(user_id);
+  res.send(user)
+
+});
+
+router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
+  const { user_id, course_id} = req.body;
+
+  (await UserModel.findOneAndUpdate(
+    { _id: user_id }, 
+    { $pull: { subscriptions: course_id} }))
+    .save;
+
+  user = await UserModel.findById(user_id);
+  res.send(user)
+
+});
+
+// Get users subscriptions
+router.get("/user/subscriptions/getAll", async (req, res) => {
+  const {user_id} = req.body
+  const subscribedCourses = (await UserModel.findById(user_id, 'subscriptions -_id')).subscriptions;
+  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+
+  console.log(list)
+  res.send(list);
+});
+
 
 module.exports = router;
