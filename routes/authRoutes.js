@@ -5,6 +5,7 @@ const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
 const { compare } = require('../helpers/password');
+const errorCodes = require('../helpers/errorCodes');
 
 // Services
 //require("../services/passport");
@@ -33,15 +34,13 @@ router.get("/auth/google/callback",
 // Login
 router.post('/auth/login', async (req, res) => {
   try {
+    console.log(req.body);
     // Searching for a single user in the database, with the email provided in the request body
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email});
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
-      // If the email is not found, return an error message
-      
-      return res.status(404).json({
-        'message': 'User not found'
-      });
+      // Invalid email (email not found)
+      return res.status(401).json({ 'error': errorCodes['E0101']});
     } else {
       // If the email is found, compare the passwords
       
@@ -62,15 +61,12 @@ router.post('/auth/login', async (req, res) => {
       });
     } else {
       // If the passwords do not match, return an error message
-      return res.status(401).json({
-        'message': 'Incorrect password' 
-      });
+       return res.status(401).json({ 'error': errorCodes['E0105']});
     }
   } catch (err) { 
     // If the server could not be reached, return an error message
-    return res.status(500).json({ 
-      'error': { 'code': 500, 'message': 'Server could not be reached' }
-    });
+    console.log(err)
+    return res.status(500).json({ 'error': errorCodes['E0003']});
   }
 });
 

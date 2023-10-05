@@ -9,5 +9,4 @@ module.exports = function makeFakeUser() {
     joinedAt: new Date(),
     modifiedAt: new Date()
   };
-
 };

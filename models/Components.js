@@ -13,4 +13,4 @@ const componentsSchema = new Schema({
 
 const ComponentModel = mongoose.model('components', componentsSchema);
 
-module.exports = { ComponentModel };
+module.exports = { ComponentModel }

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 let connection, db;
 
 module.exports = async function connectDb() {
+  
   connection =
     connection ||
     await mongoose.connect(
