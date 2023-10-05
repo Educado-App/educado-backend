@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { encrypt } = require("../helpers/password");
+const { patterns } = require("../helpers/patterns");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
 const errorCodes = require("../helpers/errorCodes");
@@ -61,7 +62,10 @@ router.post("/user", async (req, res) => {
 
 module.exports = router;
 
-async function validateEmail(input) {
+// Might have to make this function async if nothing works
+function validateEmail(input) {
+  const emailPattern = patterns.email;
+
   if (isMissing(input)) {
     throw errorCodes['E0208']; // Email is required
   }
@@ -77,11 +81,12 @@ async function validateEmail(input) {
    * followed by a dot, followed by a sequence of two to four domain 
    * extension letters.
    */
-  if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input))) {
-    throw errorCodes['E0203']; // Invalid email format
-  }
+
   if (await User.findOne({email: input}) != null) {
     throw errorCodes['E0201']; // User with the provided email already exists
+
+  if (!(emailPattern.test(input))) {
+    throw errorCodes['E0203']; // Invalid email format
   }
 
   return true;

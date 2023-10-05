@@ -40,12 +40,13 @@ router.post("/auth/login", async (req, res) => {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email});
     // If email is found, compare the password provided in the request body with the password in the database
-    console.log("User: " + user)
     if (!user) {
-      // Invalid email 
+      // Invalid email (email not found)
       return res.status(401).json({ 'error': errorCodes['E0101']});
+
     } else {
       // If the email is found, compare the passwords
+      
       result = compare(req.body.password, user.password)
     }
     // If the passwords match, return a success message
@@ -66,6 +67,7 @@ router.post("/auth/login", async (req, res) => {
        return res.status(401).json({ 'error': errorCodes['E0105']});
     }
   } catch (err) { 
+    // If the server could not be reached, return an error message
     console.log(err)
     return res.status(500).json({ 'error': errorCodes['E0003']});
   }
