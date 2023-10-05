@@ -28,8 +28,6 @@ router.post("/user", async (req, res) => {
   form.modifiedAt = Date.now();
 
   // Validate form ...
-  
-
   try {
     // Validate user info
     if(isMissing(form.password)){
