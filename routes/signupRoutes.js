@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { encrypt } = require("../helpers/Password");
+const { encrypt } = require("../helpers/password");
 const { patterns } = require("../helpers/patterns");
 const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const {User} = require("../models/User");
@@ -29,7 +29,7 @@ router.post("/user", async (req, res) => {
   // Validate form ...
   if(isMissing(form.password)){
     res.status(400);
-    res.send("Error 400: Password is required");
+    res.send("Error 400: const { encrypt } = require('../../helpers/password'); is required");
     return;
   }
 

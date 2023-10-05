@@ -8,7 +8,7 @@ const keys = require("../config/keys"); // Import keys from config/keys.js
 const { makeExpressCallback } = require('../helpers/express')
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
-const { compare } = require('../helpers/Password');
+const { compare } = require('../helpers/password');
 
 // Services
 require("../services/passport");
