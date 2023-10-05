@@ -3,6 +3,7 @@ const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/f
 
 const { contentCreatorApplicationController: handle } = require('.')
 const { contentCreatorApplicationList } = require('../data-access')
+const mongoose = require('mongoose');
 
 describe('Content Creator Application Controller', () => {
 
@@ -72,5 +73,9 @@ describe('Content Creator Application Controller', () => {
 
     })
     xit('declines a single content creator application', async () => { })
+
+    afterAll(async () => {
+      await mongoose.connection.close();
+    });
 
 })

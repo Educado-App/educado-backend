@@ -4,6 +4,7 @@ const router = require('../../routes/testRoutes'); // Import your router file he
 const connectDb = require('../fixtures/db');
 const jwt = require('jsonwebtoken');
 const { signAccessToken, verify } = require('../../helpers/token');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
@@ -28,8 +29,9 @@ jest.mock('../../config/keys', () => {
 describe('JWT verify', () => {
   let db;
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+  beforeAll(done => {
+    done();
+    db = connectDb(); // Connect to the database
   });
 
   it('Return an error if no valid JWT is present on private route', async () => {
@@ -60,7 +62,8 @@ describe('JWT verify', () => {
       .expect(401)
   });
 
-  afterAll((done) => {
-    server.close(done);
+  afterAll(async () => {
+    server.close();
+    await mongoose.connection.close();
   });
 });
