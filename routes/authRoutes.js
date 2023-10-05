@@ -1,5 +1,4 @@
 const router = require('express').Router()
-const passport = require("passport"); // Import passport library module
 const { User } = require("../models/User"); // Import User model
 const bcrypt = require("bcrypt"); // Import bcrypt library module
 const jwt = require("jsonwebtoken"); // Import jsonwebtoken library module
