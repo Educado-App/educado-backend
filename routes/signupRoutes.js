@@ -48,7 +48,6 @@ router.post("/user", async (req, res) => {
     res.status(201);
     res.send(created);
   } catch (error) {
-    console.log(error)
     switch(error) {
       case "unique" | "user defined":
         res.status(400);
