@@ -6,7 +6,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 // Models
-
+/*
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
@@ -28,3 +28,4 @@ router.delete("/profile/delete/:id", async (req, res) => {
       res.status(500).json({ error: "An error occurred while deleting the content creator" });
     }
   });
+*/

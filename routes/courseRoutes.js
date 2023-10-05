@@ -17,6 +17,7 @@ const requireLogin = require("../middlewares/requireLogin");
 const { UserModel } = require("../models/User");
 const { IdentityStore } = require("aws-sdk");
 
+/*
 // Content Creator Application Route
 router.post("/course/", async (req, res) => {
   const { title, description } = req.body;
@@ -84,11 +85,7 @@ router.post("/course/update", requireLogin, async (req, res) => {
   res.send("Course Update Complete");
 });
 
-//Get all courses
-router.get("/courses", async (req, res) => {
-  const list = await CourseModel.find();
-  res.send(list);
-});
+
 
 
 // Get all courses id
@@ -460,6 +457,8 @@ router.get("/course/delete_all", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
+*/
+
 // User route
 router.post("/user/", async (req, res) => {
   const { googleID } = req.body;
@@ -482,7 +481,11 @@ router.post("/user/", async (req, res) => {
 });
 
 
-
+//Get all courses
+router.get("/course/all", async (req, res) => {
+  const list = await CourseModel.find();
+  res.send(list);
+});
 
 // Subscribe to course 
 
@@ -538,8 +541,8 @@ router.get("/user/subscriptions/all", async (req, res) => {
   }
 });
 
-/** New (Louise) */
 
+// get all sections from course
 router.get("/course/:id/sections/all", async (req, res) => {
   const { id } = req.params; // destructure params
   const sections = await SectionModel.find({ parentCourse: id} );
@@ -547,6 +550,7 @@ router.get("/course/:id/sections/all", async (req, res) => {
   res.send(sections);
 });
 
+// get specififc course
 router.get("/course/:courseId/section/:sectionId", async (req, res) => {
   const { courseId, sectionId } = req.params; // destructure params
 
@@ -555,6 +559,7 @@ router.get("/course/:courseId/section/:sectionId", async (req, res) => {
   res.send(section);
 });
 
+// get all excercies from a section
 router.get("/course/:courseId/section/:sectionId/exercises/all", async (req, res) => {
   const { courseId, sectionId } = req.params; // destructure params
 
@@ -563,6 +568,7 @@ router.get("/course/:courseId/section/:sectionId/exercises/all", async (req, res
   res.send(exercises);
 });
 
+// checks if user is subscribed to a specific course
 router.get('/user', async (req, res) => {
     
   try {
