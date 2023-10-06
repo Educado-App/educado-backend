@@ -1,0 +1,39 @@
+name: Linting
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+      - dev
+      - Cert
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+#Run npm run linting
+jobs:
+  lint:
+    name: 🧹 Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install, build
+        run: |
+          npm install
+          npm run build --if-present
+
+      - name: Linting
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          prettier: true
