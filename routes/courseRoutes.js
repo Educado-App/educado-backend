@@ -208,7 +208,14 @@ router.post("/course/delete", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
-// Create section
+/**
+ * Create section for course
+ *  
+ * @param {string} course_id - course id
+ * @param {string} title - section title
+ * @returns {object} course
+ * 
+ */
 router.post("/section/create/:course_id", /*requireLogin,*/ async (req, res) => {
   const {title} = req.body; //Handles the data in "data" from the request
   const course_id = req.params.course_id; //Handles the data in "params" from the request
