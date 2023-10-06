@@ -1,4 +1,4 @@
-/*const connectDb = require('../__tests__/fixtures/db')
+const connectDb = require('../__tests__/fixtures/db')
 const makeFakeUser = require('../__tests__/fixtures/fakeUser')
 const { userList, makeUser } = require('../users')
 const { authEndpointHandler: handle } = require('.')
@@ -39,4 +39,4 @@ describe('Authentication Endpoint Handler', () => {
         expect(response.success).toBe(false)
         expect(response).toHaveProperty('errors')
     })
-})*/
+})

@@ -2,17 +2,17 @@
  * Adds a context object to incomming request
  */
 
-const addUserContext = require('./user');
+const addUserContext = require('./user')
 
 module.exports = function context(req, res, next) {
     
-	const context = {};
+    const context = {}
 
-	/*   Append context adders here ...    */
-	context.user = addUserContext(req, context);
+    /*   Append context adders here ...    */
+    context.user = addUserContext(req, context)
 
-	req.context = context;
+    req.context = context
 
-	next();
+    next()
 
-};
+}

@@ -1,6 +1,6 @@
-const { contentCreatorApplicationList } = require('../data-access');
+const { contentCreatorApplicationList } = require('../data-access')
 
-const makeContentCreatorApplicationController = require('./contentCreatorApplicationController');
-const contentCreatorApplicationController = makeContentCreatorApplicationController({ contentCreatorApplicationList });
+const makeContentCreatorApplicationController = require('./contentCreatorApplicationController')
+const contentCreatorApplicationController = makeContentCreatorApplicationController({ contentCreatorApplicationList })
 
-module.exports = { contentCreatorApplicationController };
+module.exports = { contentCreatorApplicationController }

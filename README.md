@@ -40,31 +40,17 @@ The dev keys contain the following values:
 - Navigate into the client-web directory
 - Run `npm install` again
 
+### Setting up AWS CLI 
+- Use AWS install guide to install on your OS 
+    - [https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html]
+- Get AWS keys (access key ID and secret access key) from Daniel/Jacob 
+- Run `aws configure` and insert access key and secret key
+- Set two other potions to 'none'
+    - Default region name [None]: 
+    - Default output format [None]:
 
 ### Run app in development mode
 - Run `npm run dev` to start application 
 - By default the web-client runs on ://localhohst:3000
 - ...and rest api runs on ://localhost:8888
 - Local proxy (from client-web) handles communnication link between them
-
-## Docker Commands
-- `npm run docker`
-  - **Description:** Starts the Docker containers in the background.
-  - **Command:** `docker-compose up -d`
-
-- `npm run docker_down`
-  - **Description:** Stops and removes the Docker containers defined in the Docker Compose configuration.
-  - **Command:** `docker-compose down`
-
-- `npm run docker_build`
-  - **Description:** Builds and starts the Docker containers in the background. This command will rebuild the containers even if there are cached layers available.
-  - **Command:** `docker-compose up -d --build`
-
-- `npm run docker_clean_db`
-  - **Description:** Stops and removes the Docker containers and the volume associated with the MongoDB container, and then starts the MongoDB container with a fresh build. This command is useful for resetting the database to a clean state.
-  - **Command:** `docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb`
-
-## Notes
-- It’s important to use the appropriate command depending on whether you are in a development or production environment.
-- The Docker commands are intended to be run in an environment where Docker is installed and configured.
-- Ensure that no other services are running on the ports that are configured in `docker-compose.yml` to avoid port conflicts.
