@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"6e1c8444284a47d89c482a28e839ea60","collectionName":"content-creator-applications","type":"collection"}

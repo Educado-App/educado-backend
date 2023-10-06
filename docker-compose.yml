@@ -1,0 +1,37 @@
+version: '3'
+services:
+  nodejs-app:
+    container_name: educado_backend
+    build:
+      context: .
+      dockerfile: Dockerfile.nodejs
+    ports:
+      - "8888:8888"
+    environment:
+      - MONGO_URI=mongodb://root:examplepassword@mongodb:27017/?authMechanism=DEFAULT&authSource=admin
+    networks:
+      - educado_network
+
+  mongodb:
+    build:
+      context: .
+      dockerfile: Dockerfile.mongodb
+    container_name: educado_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: examplepassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - educado_network
+    depends_on:
+      - nodejs-app
+
+
+networks:
+  educado_network:
+
+volumes:
+  mongodb_data:
