@@ -371,7 +371,7 @@ router.post("/component/create", async (req, res) => {
 });
 
 //Get all components
-router.post("/components/all", async (req, res) => {
+router.post("/component/all", async (req, res) => {
   const { components } = req.body;
   let list = [];
   for (let i = 0; i < components.length; i++) {
