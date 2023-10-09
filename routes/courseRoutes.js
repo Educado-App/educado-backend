@@ -452,8 +452,6 @@ router.get("/course/delete_all", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
-*/
-
 // User route
 router.post("/user/", async (req, res) => {
   const { googleID } = req.body;
@@ -475,53 +473,148 @@ router.post("/user/", async (req, res) => {
   }
 });
 
-// Get specific course
-router.get("/course/:id", async (req, res) => {
-  const { id } = req.params; // destructure params
-  const course = await CourseModel.findById(id);
-  res.send(course);
-})
+*/
 
+/*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 
 //Get all courses
 router.get("/courses/all", async (req, res) => {
-  const list = await CourseModel.find();
-  res.send(list);
+
+  try {
+    // find all courses in the database
+    const list = await CourseModel.find();
+    res.send(list);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+  
 });
 
+
+// Get specific course
+router.get("/courses/:id", async (req, res) => {
+
+  try {
+    const { id } = req.params; 
+
+    // find a course based on it's id
+    const course = await CourseModel.findById(id);
+    res.send(course);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+})
+
+
+// Get all sections from course
+router.get("/courses/:id/sections/all", async (req, res) => {
+
+  try {
+    const { id } = req.params; 
+
+    // find all sections based on a course's id  
+    const sections = await SectionModel.find({ parentCourse: id} );
+
+    res.send(sections);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+});
+
+// Get a specififc section 
+router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
+
+  try{
+  const { courseId, sectionId } = req.params; 
+
+  // find a specific section within the given course by both IDs
+  const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
+  res.send(section);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+});
+
+// Get all excercies from a section
+router.get("/courses/:courseId/sections/:sectionId/exercises/all", async (req, res) => {
+
+  try {
+  const { courseId, sectionId } = req.params; 
+
+  // find a specific section within the given course by both IDs
+  const exercises = await ExerciseModel.find({ parentSection: sectionId });
+  res.send(exercises);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+});
+
+/*** SUBSCRIPTION ROUTES ***/
+
 // Subscribe to course 
+router.post("/courses/:id/subscribe",  async (req, res) => {
 
-router.post("/course/subscribe",  async (req, res) => {
-  const { user_id, course_id } = req.body;
+  try {
+    const { id } = req.params;
+    const { user_id} = req.body;
 
+    
+    // find user based on id, and add the course's id to the user's subscriptions field
+    (await User.findOneAndUpdate(
+      { _id: user_id }, 
+      { $push: { subscriptions: id} }))
+      .save;
 
-  (await User.findOneAndUpdate(
-    { _id: user_id }, 
-    { $push: { subscriptions: course_id} }))
-    .save;
+    let user = await User.findById(user_id);
+    res.send(user)
 
-  let user = await User.findById(user_id);
-  res.send(user)
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 
 });
 
 // Unsubscribe to course
-router.post("/course/unsubscribe",  async (req, res) => {
-  const { user_id, course_id} = req.body;
+router.post("/courses/:id/unsubscribe",  async (req, res) => {
+  
+  try {
+    const { id } = req.params;
+    const { user_id} = req.body;
 
-  (await User.findOneAndUpdate(
-    { _id: user_id }, 
-    { $pull: { subscriptions: course_id} }))
-    .save;
+    // find user based on id, and remove the course's id from the user's subscriptions field
+    (await User.findOneAndUpdate(
+      { _id: user_id }, 
+      { $pull: { subscriptions: id} }))
+      .save;
 
-  let user = await User.findById(user_id);
-  res.send(user)
+    let user = await User.findById(user_id);
+    res.send(user)
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 
 });
 
 // Get users subscriptions
-router.get("/user/subscription/all", async (req, res) => {
+router.get("/user/subscriptions/all", async (req, res) => {
   try {
     const { user_id } = req.query;
     
@@ -545,40 +638,18 @@ router.get("/user/subscription/all", async (req, res) => {
 });
 
 
-// get all sections from course
-router.get("/course/:id/sections/all", async (req, res) => {
-  const { id } = req.params; // destructure params
-  const sections = await SectionModel.find({ parentCourse: id} );
 
-  res.send(sections);
-});
-
-// get specififc course
-router.get("/course/:courseId/section/:sectionId", async (req, res) => {
-  const { courseId, sectionId } = req.params; // destructure params
-
-  // Find a specific section within the given course by both IDs
-  const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
-  res.send(section);
-});
-
-// get all excercies from a section
-router.get("/course/:courseId/section/:sectionId/exercises/all", async (req, res) => {
-  const { courseId, sectionId } = req.params; // destructure params
-
-  // Find a specific section within the given course by both IDs
-  const exercises = await ExerciseModel.find({ parentSection: sectionId });
-  res.send(exercises);
-});
-
-// checks if user is subscribed to a specific course
+// Checks if user is subscribed to a specific course
 router.get('/user', async (req, res) => {
     
   try {
 
     const { course_id, user_id } = req.query; 
+
+    // checks if the course id exist in the users subscriptions field
     const user = await User.findOne({ _id: user_id, subscriptions: course_id });
 
+    // return true if it exist and false if it does not
     if(user == null) {
       res.send("false");
     } else {
@@ -590,7 +661,5 @@ router.get('/user', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
 
 module.exports = router;
