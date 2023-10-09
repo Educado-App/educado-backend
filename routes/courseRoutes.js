@@ -485,7 +485,7 @@ router.get("/course/:id", async (req, res) => {
 
 
 //Get all courses
-router.get("/course/all", async (req, res) => {
+router.get("/courses/all", async (req, res) => {
   const list = await CourseModel.find();
   res.send(list);
 });
