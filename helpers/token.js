@@ -8,7 +8,7 @@ module.exports = Object.freeze({
 })
 
 function signAccessToken(payload = {}) {
-    return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: config.ACCESS_TOKEN_MAX_AGE })
+    return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: "2h"})
 }
 
 function signRefreshToken(payload = {}) {

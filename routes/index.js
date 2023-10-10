@@ -17,7 +17,7 @@ router.get('/api', (req, res) => {
 
 router.use('/api', CourseRoutes)
 router.use('', AWSRoutes)
-router.use('', bucketRoutesGCP)
+router.use('/api/content', bucketRoutesGCP)
 router.use('/api', AuthRoutes)
 router.use('/api/signup', SignupRoutes)
 router.use('/api/applications', ApplicationRoutes)
