@@ -1,6 +1,7 @@
 // Mongoose model class for User
 const mongoose = require('mongoose')
 const { Schema } = mongoose;
+const patterns = require('../helpers/patterns');
 
 // Class description
 const userSchema = new Schema({
@@ -17,7 +18,7 @@ const userSchema = new Schema({
          * a space, hyphen or apostrophe, repeated any number of times,
          * and ending with a sequence of any letters (at least one name). 
          */
-				return /^(\p{L}+[ -'])*\p{L}+$/u.test(firstName);
+				return patterns.name.test(firstName);
 			},
 			message: 'Invalid first name'
 		}
@@ -35,7 +36,7 @@ const userSchema = new Schema({
          * a space, hyphen or apostrophe, repeated any number of times,
          * and ending with a sequence of any letters (at least one name). 
          */
-				return /^(\p{L}+[ -'])*\p{L}+$/u.test(lastName);
+				return patterns.name.test(lastName);
 			},
 			message: 'Invalid last name'
 		}
@@ -53,7 +54,7 @@ const userSchema = new Schema({
          * followed by a dot, followed by a sequence of two to four domain 
          * extension letters.
          */
-        return /^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}/.test(email);
+        return patterns.email.test(email);
       },
       message: 'Invalid email'
     },
