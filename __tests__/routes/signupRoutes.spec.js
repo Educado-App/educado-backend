@@ -78,7 +78,7 @@ describe('Signup User route', () => {
 			.post('/api/signup/user')
 			.send(input)
 			.expect(400);
-
+		
 		expect(response.body.error.code).toBe('E0212');
 	});
 
@@ -198,7 +198,6 @@ describe('Signup User route', () => {
 			.expect(400);
 
 		expect(response.body.error.code).toBe('E0201');
-
 	});
 
 	afterAll(async () => {

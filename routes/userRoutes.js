@@ -1,9 +1,7 @@
 const router = require('express').Router();
-
-// Models
+const { validateEmail, validateName } = require('../helpers/validation');
+const errorCodes = require('../helpers/errorCodes');
 const { User } = require('../models/User');
-
-// Middlewares
 const requireLogin = require('../middlewares/requireLogin');
 
 router.delete('/delete/:id', requireLogin, async (req, res) => {
@@ -13,7 +11,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(204).json({ error: 'User not found' });
     }
 
 		// Send a success response
@@ -31,20 +29,35 @@ router.put('/update-email/:id', requireLogin, async (req, res) => {
     const { id } = req.params;
     const { newEmail } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { email: newEmail },
-      { new: true } // This ensures that the updated user document is returned
-    );
+    const emailValid = await validateEmail(newEmail);
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+    if (emailValid) {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        { email: newEmail },
+        { new: true } // This ensures that the updated user document is returned
+      );
+
+      if (!updatedUser) {
+        throw errorCodes['E0004'];
+      }
+
+      res.status(200);
+      res.send(updatedUser)
     }
 
-    res.status(200).json({ message: 'Email updated successfully', user: updatedUser });
   } catch (error) {
-    console.error('Error updating email:', error);
-    res.status(500).json({ error: 'An error occurred while updating the email' });
+    if (error === errorCodes['E0004']) {
+      // Handle "user not found" error response here
+      res.status(204);
+    } else {
+      res.status(400);
+    }
+    
+    console.log(error);
+    res.send({
+			error: error
+		});
   }
 });
 
@@ -54,20 +67,35 @@ router.put('/update-first-name/:id', requireLogin, async (req, res) => {
     const { id } = req.params;
     const { newFirstName } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { firstName: newFirstName },
-      { new: true } // This ensures that the updated user document is returned
-    );
+    const nameValid = await validateName(newFirstName);
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+    if (nameValid) {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        { firstName: newFirstName },
+        { new: true } // This ensures that the updated user document is returned
+      );
+
+      if (!updatedUser) {
+        throw errorCodes['E0004'];
+      }
+
+      res.status(200);
+      res.send(updatedUser)
     }
 
-    res.status(200).json({ message: 'First name updated successfully', user: updatedUser });
   } catch (error) {
-    console.error('Error updating first name:', error);
-    res.status(500).json({ error: 'An error occurred while updating the first name' });
+    if (error === errorCodes['E0004']) {
+      // Handle "user not found" error response here
+      res.status(204);
+    } else {
+      res.status(400);
+    }
+    
+    console.log(error);
+    res.send({
+			error: error
+		});
   }
 });
 
@@ -77,20 +105,35 @@ router.put('/update-last-name/:id', requireLogin, async (req, res) => {
     const { id } = req.params;
     const { newLastName } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { lastName: newLastName },
-      { new: true } // This ensures that the updated user document is returned
-    );
+    const nameValid = await validateName(newLastName);
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+    if (nameValid) {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        { firstName: newLastName },
+        { new: true } // This ensures that the updated user document is returned
+      );
+
+      if (!updatedUser) {
+        throw errorCodes['E0004'];
+      }
+
+      res.status(200);
+      res.send(updatedUser)
     }
 
-    res.status(200).json({ message: 'Last name updated successfully', user: updatedUser });
   } catch (error) {
-    console.error('Error updating last name:', error);
-    res.status(500).json({ error: 'An error occurred while updating the last name' });
+    if (error === errorCodes['E0004']) {
+      // Handle "user not found" error response here
+      res.status(204);
+    } else {
+      res.status(400);
+    }
+    
+    console.log(error);
+    res.send({
+			error: error
+		});
   }
 });
   
