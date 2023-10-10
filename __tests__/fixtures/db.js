@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-let connection, db;
+let connection, db
 
 module.exports = async function connectDb() {
     connection =

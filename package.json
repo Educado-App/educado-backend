@@ -10,16 +10,13 @@
   "scripts": {
     "start": "node index.js",
     "server": "nodemon index.js",
-    "test": "jest --runInBand",
-    "dev": "NODE_ENV=development npm run server",
-    "staging": "NODE_ENV=staging npm run server",
-    "prod": "NODE_ENV=production npm run server",
+    "test": "jest --runInBand --forceExit",
+    "dev": "npm run server",
+    "prod": "npm run server",
     "docker": "docker-compose up -d",
     "docker_down": "docker-compose down",
     "docker_build": "docker-compose up -d --build",
-    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb",
-    "linting": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "typechecking": "tsc --noEmit"
+    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb"
   },
   "author": "",
   "license": "ISC",
@@ -34,7 +31,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.5",
-    "eslint": "^8.50.0",
     "express": "^4.17.1",
     "http-proxy-middleware": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
@@ -46,8 +42,7 @@
     "nodemon": "^2.0.6",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
-    "supertest": "^6.3.3",
-    "prettier": "^3.0.3"
+    "supertest": "^6.3.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -55,9 +50,8 @@
     "@babel/node": "^7.2.2",
     "@babel/preset-env": "^7.3.4",
     "babel-jest": "^24.4.0",
-    "jest": "^29.1.2",
-    "mongodb-memory-server": "^8.9.3",
-    "supertest": "^6.3.3"
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^8.9.3"
   },
   "jest": {
     "verbose": true,
