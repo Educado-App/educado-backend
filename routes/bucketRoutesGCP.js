@@ -103,4 +103,25 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   res.send(`${fileName} uploaded to bucket ${bucketName}`);
 });
 
+router.delete('/delete', async (req, res) => {
+  try {
+    const fileName = req.body.fileName;
+    console.log("fileName:", fileName);
+    console.log("bucketName:", bucketName);
+
+    // Delete the file from the bucket
+    await storage
+      .bucket(bucketName)
+      .file(fileName)
+      .delete();
+
+    console.log(`${fileName} deleted from ${bucketName}.`);
+    res.status(200).send(`${fileName} deleted from bucket ${bucketName}`);
+
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(`Error: ${err.message}`);
+  }
+});
+
 module.exports = router;
