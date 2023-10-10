@@ -40,15 +40,6 @@ The dev keys contain the following values:
 - Navigate into the client-web directory
 - Run `npm install` again
 
-### Setting up AWS CLI 
-- Use AWS install guide to install on your OS 
-    - [https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html]
-- Get AWS keys (access key ID and secret access key) from Daniel/Jacob 
-- Run `aws configure` and insert access key and secret key
-- Set two other potions to 'none'
-    - Default region name [None]: 
-    - Default output format [None]:
-
 ### Run app in development mode
 - Run `npm run dev` to start application 
 - By default the web-client runs on ://localhohst:3000

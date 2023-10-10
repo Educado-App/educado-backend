@@ -11,12 +11,15 @@
     "start": "node index.js",
     "server": "nodemon index.js",
     "test": "jest --runInBand",
-    "dev": "npm run server",
-    "prod": "npm run server",
+    "dev": "NODE_ENV=development npm run server",
+    "staging": "NODE_ENV=staging npm run server",
+    "prod": "NODE_ENV=production npm run server",
     "docker": "docker-compose up -d",
     "docker_down": "docker-compose down",
     "docker_build": "docker-compose up -d --build",
-    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb"
+    "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb",
+    "linting": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "typechecking": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",

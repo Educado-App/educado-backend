@@ -1,32 +1,32 @@
-const router = require("express").Router();
+const router = require(`express`).Router();
 
 // Models
-const { User } = require("../models/User");
+const { User } = require(`../models/User`);
 
 // Middlewares
-const requireLogin = require("../middlewares/requireLogin");
+const requireLogin = require(`../middlewares/requireLogin`);
 
-router.delete("/delete/:id", requireLogin, async (req, res) => {
+router.delete(`/delete/:id`, requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
 
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: `User not found` });
     }
 
 		// Send a success response
-		res.status(200).json({ message: 'User deleted successfully' });
+		res.status(200).json({ message: `User deleted successfully` });
 	} catch (error) {
 		// Handle any errors and send an error response
-		console.error('Error deleting user:', error);
-		res.status(500).json({ error: 'An error occurred while deleting the user' });
+		console.error(`Error deleting user:`, error);
+		res.status(500).json({ error: `An error occurred while deleting the user` });
 	}
 });
 
 // Update User Email route
-router.put("/update-email/:id", requireLogin, async (req, res) => {
+router.put(`/update-email/:id`, requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newEmail } = req.body;
@@ -38,18 +38,18 @@ router.put("/update-email/:id", requireLogin, async (req, res) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: `User not found` });
     }
 
-    res.status(200).json({ message: "Email updated successfully", user: updatedUser });
+    res.status(200).json({ message: `Email updated successfully`, user: updatedUser });
   } catch (error) {
-    console.error("Error updating email:", error);
-    res.status(500).json({ error: "An error occurred while updating the email" });
+    console.error(`Error updating email:`, error);
+    res.status(500).json({ error: `An error occurred while updating the email` });
   }
 });
 
 // Update User first name route
-router.put("/update-first-name/:id", requireLogin, async (req, res) => {
+router.put(`/update-first-name/:id`, requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newFirstName } = req.body;
@@ -61,18 +61,18 @@ router.put("/update-first-name/:id", requireLogin, async (req, res) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: `User not found` });
     }
 
-    res.status(200).json({ message: "First name updated successfully", user: updatedUser });
+    res.status(200).json({ message: `First name updated successfully`, user: updatedUser });
   } catch (error) {
-    console.error("Error updating first name:", error);
-    res.status(500).json({ error: "An error occurred while updating the first name" });
+    console.error(`Error updating first name:`, error);
+    res.status(500).json({ error: `An error occurred while updating the first name` });
   }
 });
 
 // Update User last name route
-router.put("/update-last-name/:id", requireLogin, async (req, res) => {
+router.put(`/update-last-name/:id`, requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newLastName } = req.body;
@@ -84,13 +84,13 @@ router.put("/update-last-name/:id", requireLogin, async (req, res) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: `User not found` });
     }
 
-    res.status(200).json({ message: "Last name updated successfully", user: updatedUser });
+    res.status(200).json({ message: `Last name updated successfully`, user: updatedUser });
   } catch (error) {
-    console.error("Error updating last name:", error);
-    res.status(500).json({ error: "An error occurred while updating the last name" });
+    console.error(`Error updating last name:`, error);
+    res.status(500).json({ error: `An error occurred while updating the last name` });
   }
 });
   
