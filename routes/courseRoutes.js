@@ -614,12 +614,11 @@ router.post("/courses/:id/unsubscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/user/subscriptions/all", async (req, res) => {
+router.get("/users/:id/subscriptions/all", async (req, res) => {
   try {
-    const { user_id } = req.query;
-    
+    const userId = req.params.id;
     // Find the user by _id and select the 'subscriptions' field
-    const user = await User.findById(user_id).select('subscriptions');
+    const user = await User.findById(userId).select('subscriptions -_id');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

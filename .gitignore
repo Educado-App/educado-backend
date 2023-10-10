@@ -9,6 +9,7 @@ package-lock.json
 dev.js
 config/.env
 *.idea
+.idea
 
 # enviroment
 .env
