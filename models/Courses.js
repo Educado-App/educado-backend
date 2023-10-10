@@ -15,6 +15,8 @@ const courseSchema = new Schema({
   coverImg: component,
   category: String,
   published: Boolean,
+  difficulty: Number,
+  time: Number,
   sections: [{ type: Schema.Types.ObjectId, ref: "sections" }],
   creator: [{ type: Schema.Types.ObjectId, ref: "contentCreator" }]
 });
