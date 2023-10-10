@@ -2,7 +2,7 @@ const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/courseRoutes'); // Import your router file here
 
-const test_courseId =  
+const test_courseId =  ;
 
 const app = express();
 app.use(express.json());
