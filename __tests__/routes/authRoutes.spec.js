@@ -36,6 +36,7 @@ describe('Login User route', () => {
 		// Insert the fake user into the database
 		await db.collection('users').insertOne(fakeUser);
 	});
+	
 	it('Returns error if user is not found', async () => {
 		const nonExistingUser = {
 			email: 'iDontExist@test.dk',

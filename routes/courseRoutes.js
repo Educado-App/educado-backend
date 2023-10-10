@@ -4,35 +4,11 @@ const router = require('express').Router();
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
-const {
-	ContentCreatorApplication,
-} = require('../models/ContentCreatorApplication');
+const { ContentCreatorApplication } = require('../models/ContentCreatorApplication');
 const requireLogin = require('../middlewares/requireLogin');
+const adminOnly = require('../middlewares/adminOnly');
 
-// Content Creator Application Route
-router.post('/course/', async (req, res) => {
-	const { title, description } = req.body;
-
-	const course = new CourseModel({
-		title: title,
-		description: description,
-		category: '',
-		_user: req.user.id,
-		dateCreated: Date.now(),
-		dateUpdated: Date.now(),
-		sections: [],
-	});
-
-	try {
-		await course.save();
-		res.send(course);
-	} catch (err) {
-		res.status(422).send(err);
-	}
-});
-
-// Course routes
-
+// Create Content Creator Application Route
 router.post('/courses', async (req, res) => {
 	const { title, description } = req.body;
 
@@ -55,7 +31,7 @@ router.post('/courses', async (req, res) => {
 });
 
 // Update Course
-router.post('/course/update', requireLogin, async (req, res) => {
+router.post('/courses/update', requireLogin, async (req, res) => {
 	const { course } = req.body;
 	const dbCourse = await CourseModel.findByIdAndUpdate(
 		course._id,
@@ -76,27 +52,29 @@ router.post('/course/update', requireLogin, async (req, res) => {
 	res.send('Course Update Complete');
 });
 
-// Get all courses for user
-router.get('/course/getall', async (req, res) => {
-	const list = await CourseModel.find({ _user: req.user.id });
-	res.send(list);
-});
-
-// Get all courses for user
-router.get('/course/eml/getall', async (req, res) => {
-	const list = await CourseModel.find();
-	res.send(list);
+// Get all courses 
+router.get('/courses', adminOnly, async (req, res) => {
+	const result = await CourseModel.find({});
+	res.send(result);
 });
 
 // FIXME: no error handling, just needed the endpoint - Mvh. Frederik
-router.get('/course/:id', async (req, res) => {
+router.get('/courses/:id', async (req, res) => {
 	const { id } = req.params; // destructure params
 	const course = await CourseModel.findById(id);
 	res.send(course);
 });
 
+// Get all courses for one user
+router.get('/courses/creator/:id', requireLogin, async (req, res) => {
+  const id = req.params.id;
+  const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
+	
+  res.send(courses); // Send response
+});
+
 // Update course title
-router.post('/course/update/title', async (req, res) => {
+router.post('/courses/update/title', async (req, res) => {
 	const { text, course_id } = req.body;
 
 	// find object in database and update title to new value
@@ -109,7 +87,7 @@ router.post('/course/update/title', async (req, res) => {
 });
 
 // Update course description
-router.post('/course/update/description', async (req, res) => {
+router.post('/courses/update/description', async (req, res) => {
 	const { text, course_id } = req.body;
 
 	// find object in database and update title to new value
@@ -126,7 +104,7 @@ router.post('/course/update/description', async (req, res) => {
 });
 
 // Update course category
-router.post('/course/update/category', async (req, res) => {
+router.post('/courses/update/category', async (req, res) => {
 	const { text, course_id } = req.body;
 
 	// find object in database and update title to new value
@@ -139,7 +117,7 @@ router.post('/course/update/category', async (req, res) => {
 });
 
 // Update course published state
-router.post('/course/update/published', async (req, res) => {
+router.post('/courses/update/published', async (req, res) => {
 	const { published, course_id } = req.body;
 
 	// find object in database and update title to new value
@@ -156,7 +134,7 @@ router.post('/course/update/published', async (req, res) => {
 });
 
 // Delete all documents for user - the Nueclear option.
-router.post('/course/delete', requireLogin, async (req, res) => {
+router.post('/courses/delete', requireLogin, async (req, res) => {
 	const { course_id } = req.body;
 	let course;
 	try {
@@ -220,7 +198,7 @@ router.post('/section/create', requireLogin, async (req, res) => {
 });
 
 // Get all sections
-router.post('/course/getallsections', requireLogin, async (req, res) => {
+router.post('/courses/getallsections', requireLogin, async (req, res) => {
 	const { sections } = req.body;
 	let list = [];
 	for (let i = 0; i < sections.length; i++) {
@@ -231,7 +209,7 @@ router.post('/course/getallsections', requireLogin, async (req, res) => {
 });
 
 // Update section title
-router.post('/course/update/sectiontitle', async (req, res) => {
+router.post('/courses/update/sectiontitle', async (req, res) => {
 	// ...
 	// get new value & section ID
 	const { value, sectionId } = req.body;
@@ -275,7 +253,7 @@ router.post('/section/update/description', async (req, res) => {
 });
 
 // Update sections order
-router.post('/course/update/sectionsorder', async (req, res) => {
+router.post('/courses/update/sectionsorder', async (req, res) => {
 	// Get sections from request
 	const { sections, course_id } = req.body;
 	// REPORT NOTE: Måske lav performance test, for om det giver bedst mening at wipe array og overskrive, eller tjekke 1 efter 1 om updates
@@ -413,7 +391,7 @@ router.post('/component/delete', requireLogin, async (req, res) => {
 	res.send(componentIds);
 });
 
-router.post('/eml/course/getallsections', async (req, res) => {
+router.post('/eml/courses/getallsections', async (req, res) => {
 	const { sections } = req.body;
 	let list = [];
 	for (let i = 0; i < sections.length; i++) {
@@ -424,7 +402,7 @@ router.post('/eml/course/getallsections', async (req, res) => {
 });
 
 // Delete all documents for user
-router.get('/course/delete_all', requireLogin, async (req, res) => {
+router.get('/courses/delete_all', requireLogin, async (req, res) => {
 	await CourseModel.deleteMany({ _user: req.user.id }, (err) => {
 		console.log(err);
 	});

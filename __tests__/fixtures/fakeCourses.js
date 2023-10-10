@@ -1,0 +1,76 @@
+const courses = [
+  {
+    "title": 'fakeCourse1',
+    "description": 'fakeCourse1 description',
+    "dateCreated": new Date().toJSON(),
+    "dateUpdated": new Date().toJSON(),
+    "coverImg": 'fakeCourse1 coverImg',
+    "category": 'mathematics',
+    "published": false,
+    "sections": [],
+    "creator": [],
+    "difficulty": 1,
+    "time": 1,
+    "rating": 5,
+  },
+  {
+    "title": 'fakeCourse2',
+    "description": 'fakeCourse2 description',
+    "dateCreated": new Date().toJSON(),
+    "dateUpdated": new Date().toJSON(),
+    "coverImg": 'fakeCourse2 coverImg',
+    "category": 'language',
+    "published": false,
+    "sections": [],
+    "creator": ['1234567891011'],
+    "difficulty": 1,
+    "time": 1,
+    "rating": 5,
+  },
+  {
+    "title": 'fakeCourse3',
+    "description": 'fakeCourse3 description',
+    "dateCreated": new Date().toJSON(),
+    "dateUpdated": new Date().toJSON(),
+    "coverImg": 'fakeCourse3 coverImg',
+    "category": 'programming',
+    "published": true,
+    "sections": [],
+    "creator": [],
+    "difficulty": 2,
+    "time": 3,
+    "rating": 5,
+  },
+  {
+    "title": 'fakeCourse4',
+    "description": 'fakeCourse4 description',
+    "dateCreated": new Date().toJSON(),
+    "dateUpdated": new Date().toJSON(),
+    "coverImg": 'fakeCourse4 coverImg',
+    "category": 'music',
+    "published": true,
+    "sections": [],
+    "creator": ['1234567891011'],
+    "difficulty": 6,
+    "time": 2,
+    "rating": 3,
+  }
+];
+
+/**
+ * @returns {Array} Array of fake courses
+ */
+function getFakeCourses() {
+  return courses;
+}
+
+/**
+ * @param {Number} creatorId 
+ * @returns {Array} Array of fake courses created by the creator with the given id
+ */
+function getFakeCoursesByCreator(creatorId) {
+  const res = courses.filter(course => course.creator.includes(creatorId));
+  return res;
+}
+
+module.exports = { getFakeCourses, getFakeCoursesByCreator };

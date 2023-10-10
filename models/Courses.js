@@ -7,15 +7,50 @@ const { Schema } = mongoose;
 
 // Class description
 const courseSchema = new Schema({
-	title: String,
-	description: String,
-	_user: { type: Schema.Types.ObjectId, ref: 'User' },
+	title: {
+    type: String,
+    required: [true, 'Title is required'],
+  },
+	description: {
+    type: String,
+    required: [true, 'Description is required'],
+  },
 	dateCreated: Date,
 	dateUpdated: Date,
 	coverImg: String,
-	category: String,
+	category: {
+    type: String,
+    enum: ['Math', 'Science', 'Finance', 'Language', 'Sustainability', 'Other'],
+  },
 	published: Boolean,
-	sections: [{ type: Schema.Types.ObjectId, ref: 'Component' }],
+	sections: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: 'Component' 
+  }],
+  creator: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'User' 
+  },
+  difficulty: {
+    Number,
+    Range: [1, 5],
+    default: 3,
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published', 'hidden'],
+    default: 'draft',
+  },
+  estimatedHours: Number,
+  rating: {
+    Number,
+    Range: [0.0, 5.0],
+    default: 0.0,
+  },
+  numOfSubscriptions:{
+    type: Number,
+    default: 0,
+  },
 });
 
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
