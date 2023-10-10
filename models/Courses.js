@@ -1,5 +1,5 @@
 // Mongoose model class for Courses
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const { component } = require("./Components");
 

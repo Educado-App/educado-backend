@@ -14,4 +14,6 @@ config/.env
 # enviroment
 .env
 .env.*
-
+config/educado-*.json
+config/gcp_service.json
+__tests__/setup/globalConfigMongo.json
