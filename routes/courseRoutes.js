@@ -639,7 +639,7 @@ router.get("/users/:id/subscriptions/all", async (req, res) => {
 
 
 // Checks if user is subscribed to a specific course
-router.get('/user', async (req, res) => {
+router.get('/users', async (req, res) => {
     
   try {
 
