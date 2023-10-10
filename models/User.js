@@ -18,7 +18,7 @@ const userSchema = new Schema({
          * a space, hyphen or apostrophe, repeated any number of times,
          * and ending with a sequence of any letters (at least one name). 
          */
-				return patterns.name.test(firstName);
+				return /^(\p{L}+[ -'])*\p{L}+$/u.test(firstName);
 			},
 			message: 'Invalid first name'
 		}
@@ -36,7 +36,7 @@ const userSchema = new Schema({
          * a space, hyphen or apostrophe, repeated any number of times,
          * and ending with a sequence of any letters (at least one name). 
          */
-				return patterns.name.test(lastName);
+				return /^(\p{L}+[ -'])*\p{L}+$/u.test(lastName);
 			},
 			message: 'Invalid last name'
 		}
