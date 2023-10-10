@@ -8,4 +8,4 @@ const userList = makeUserList(UserModel);
 const buildMakeUser = require('../users/user');
 const makeUser = buildMakeUser({ Email, Password });
 
-module.exports = { makeUser, userList }
+module.exports = { makeUser, userList };

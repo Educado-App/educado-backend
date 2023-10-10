@@ -1,5 +1,5 @@
 // Mongoose model class for User
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 const { Schema } = mongoose;
 
 // Class description
@@ -55,7 +55,7 @@ const userSchema = new Schema({
          */
         return /^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}/.test(email);
       },
-      message: "Invalid email"
+      message: 'Invalid email'
     },
     validate: {
       validator: async function(input) {
@@ -75,6 +75,6 @@ const userSchema = new Schema({
   modifiedAt: Date
 });
 
-const UserModel = mongoose.model("users", userSchema);
+const UserModel = mongoose.model('users', userSchema);
 
 module.exports.User = UserModel
