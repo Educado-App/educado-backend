@@ -100,7 +100,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     console.log(`${fileName} uploaded to ${bucketName}.`);
   }
-  res.send(`${fileName} uploaded to bucket ${bucketName}`);
+  res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
 });
 
 router.delete('/delete', async (req, res) => {
