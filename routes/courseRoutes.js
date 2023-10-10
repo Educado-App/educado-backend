@@ -614,7 +614,7 @@ router.post("/courses/:id/unsubscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/user/subscriptions/all", async (req, res) => {
+router.get("/users/subscriptions/all", async (req, res) => {
   try {
     const { user_id } = req.query;
     
@@ -640,7 +640,7 @@ router.get("/user/subscriptions/all", async (req, res) => {
 
 
 // Checks if user is subscribed to a specific course
-router.get('/user', async (req, res) => {
+router.get('/users', async (req, res) => {
     
   try {
 
