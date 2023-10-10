@@ -479,7 +479,7 @@ router.post("/user/", async (req, res) => {
 
 
 //Get all courses
-router.get("/courses/all", async (req, res) => {
+router.get("/courses", async (req, res) => {
 
   try {
     // find all courses in the database
@@ -513,7 +513,7 @@ router.get("/courses/:id", async (req, res) => {
 
 
 // Get all sections from course
-router.get("/courses/:id/sections/all", async (req, res) => {
+router.get("/courses/:id/sections", async (req, res) => {
 
   try {
     const { id } = req.params; 
@@ -548,7 +548,7 @@ router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
 });
 
 // Get all excercies from a section
-router.get("/courses/:courseId/sections/:sectionId/exercises/all", async (req, res) => {
+router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) => {
 
   try {
   const { courseId, sectionId } = req.params; 
@@ -614,7 +614,7 @@ router.post("/courses/:id/unsubscribe",  async (req, res) => {
 });
 
 // Get users subscriptions
-router.get("/users/:id/subscriptions/all", async (req, res) => {
+router.get("/users/:id/subscriptions", async (req, res) => {
   try {
     const userId = req.params.id;
     // Find the user by _id and select the 'subscriptions' field
