@@ -49,7 +49,7 @@ router.put("/update-email/:id", requireLogin, async (req, res) => {
 });
 
 // Update User first name route
-router.put("/update-first_name/:id", requireLogin, async (req, res) => {
+router.put("/update-first-name/:id", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newFirstName } = req.body;
@@ -72,7 +72,7 @@ router.put("/update-first_name/:id", requireLogin, async (req, res) => {
 });
 
 // Update User last name route
-router.put("/update-last_name/:id", requireLogin, async (req, res) => {
+router.put("/update-last-name/:id", requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newLastName } = req.body;

@@ -58,7 +58,7 @@ describe('Update User Email Route', () => {
 
     it('updates user first name successfully', async () => {
         const response = await request('http://localhost:5000')
-            .put(`/api/user/update-first_name/${fakeUser._id}`)
+            .put(`/api/user/update-first-name/${fakeUser._id}`)
             .send({ newFirstName: 'NewFirstName' })
             .expect(200);
 
@@ -66,18 +66,18 @@ describe('Update User Email Route', () => {
         expect(response.body.user.firstName).toBe('NewFirstName');
     });
 
-    it('handles user not found error for update-first_name', async () => {
+    it('handles user not found error for update-first-name', async () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
     
         await request('http://localhost:5000')
-            .put(`/api/user/update-first_name/${nonExistentUserId}`)
+            .put(`/api/user/update-first-name/${nonExistentUserId}`)
             .send({ newFirstName: 'NewFirstName' })
             .expect(404);
         });
     
     it('updates user last name successfully', async () => {
         const response = await request('http://localhost:5000')
-            .put(`/api/user/update-last_name/${fakeUser._id}`)
+            .put(`/api/user/update-last-name/${fakeUser._id}`)
             .send({ newLastName: 'NewLastName' })
             .expect(200);
         
@@ -85,11 +85,11 @@ describe('Update User Email Route', () => {
         expect(response.body.user.lastName).toBe('NewLastName');
     });
 
-    it('handles user not found error for update-last_name', async () => {
+    it('handles user not found error for update-last-name', async () => {
     const nonExistentUserId = new mongoose.Types.ObjectId();
 
     await request('http://localhost:5000')
-        .put(`/api/user/update-last_name/${nonExistentUserId}`)
+        .put(`/api/user/update-last-name/${nonExistentUserId}`)
         .send({ newLastName: 'NewLastName' })
         .expect(404);
     });
