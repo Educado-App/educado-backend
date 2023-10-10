@@ -1,10 +1,10 @@
-const router = require('express').Router();
+const router = require("express").Router();
 
 // Models
-const { User } = require('../models/User');
+const { User } = require("../models/User");
 
 // Middlewares
-const requireLogin = require('../middlewares/requireLogin');
+const requireLogin = require("../middlewares/requireLogin");
 
 router.delete("/delete/:id", requireLogin, async (req, res) => {
   try {
@@ -92,4 +92,4 @@ router.put("/update-last_name/:id", requireLogin, async (req, res) => {
   }
 });
   
-module.exports = router;
+  module.exports = router;
