@@ -40,7 +40,6 @@ The dev keys contain the following values:
 - Navigate into the client-web directory
 - Run `npm install` again
 
-
 ### Run app in development mode
 - Run `npm run dev` to start application 
 - By default the web-client runs on ://localhohst:3000
