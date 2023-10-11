@@ -47,6 +47,7 @@ describe('Course Routes', () => {
       .get('/api/courses');
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Array);
+      
 
     });
   });
@@ -61,6 +62,7 @@ describe('Course Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
+      expect(response.body._id.toString()).toBe(courseId.toString());
 
     });
   });
@@ -110,9 +112,13 @@ describe('Course Routes', () => {
         .post('/api/courses/' + courseId + '/subscribe')
         .send({ user_id: userId});
 
+      console.log("course id: " + courseId)
+      console.log('response.body.subscriptions:', response.body.subscriptions)
+      console.log(response.body.subscriptions.find((element) => element == courseId))
+
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
-
+      expect(response.body.subscriptions.find((element) => element == courseId));
     });
   });
 
@@ -131,6 +137,7 @@ describe('Course Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
+      expect(response.body.subscriptions.find((element) => element !== courseId));
 
     });
   });
@@ -138,14 +145,28 @@ describe('Course Routes', () => {
   describe('GET /users/:id/subscriptions', () => {
     it('should get user subscriptions', async () => {
 
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com'});
+      const courseId = '651d3a15cda7d5bd2878dfc7';
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
       const userId = user._id;
+    
+      // Find the user and update their subscriptions
+      const result = await db.collection('users').findOneAndUpdate(
+        { _id: userId }, // Convert userId to ObjectId if needed
+        { $push: { subscriptions: courseId } },
+        { returnDocument: 'after' } // 'after' returns the updated document
+      );
+
+      const updatedUser = result.value;
+          
+      // Check if the subscription was successfully added
+      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
 
       const response = await request(`http://localhost:${PORT}`)
       .get('/api/users/' + userId + '/subscriptions');
 
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.find((element) => element == courseId));
 
     });
   });
@@ -154,22 +175,29 @@ describe('Course Routes', () => {
     
     it('should check if a user is subscribed to a specific course and return true', async () => {
       const courseId = '651d3a15cda7d5bd2878dfc7';
-  
       const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
       const userId = user._id;
-  
-      // Add the course to the user's subscriptions
-      await db.collection('users').findOneAndUpdate(
-        { _id: userId },
-        { $push: { subscriptions: courseId } }
+    
+      // Find the user and update their subscriptions
+      const result = await db.collection('users').findOneAndUpdate(
+        { _id: userId }, // Convert userId to ObjectId if needed
+        { $push: { subscriptions: courseId } },
+        { returnDocument: 'after' } // 'after' returns the updated document
       );
-  
+
+      const updatedUser = result.value;
+    
+      // Check if the subscription was successfully added
+      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
+
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
-  
+    
       expect(response.status).toBe(200);
       expect(response.text).toBe('true');
-    });
+    });    
+  
+    
 
     it('should return false if a user is not subscribed to a specific course', async () => {
 
