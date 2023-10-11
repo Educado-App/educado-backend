@@ -215,6 +215,7 @@ router.post("/course/delete", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
+//CREATED BY VIDEOSTREAMING TEAM
 //create lecture
 router.post("/lecture/create", async (req, res) => {
   //we need section id to create a lecture
@@ -248,6 +249,7 @@ router.post("/lecture/create", async (req, res) => {
   }
 });
 
+//CREATED BY VIDEOSTREAMING TEAM
 //add lecture component to lecture and update lecture
 router.post("/component/create", async (req, res) => {
   const { parentLecture, title, text } = req.body;
@@ -270,6 +272,64 @@ router.post("/component/create", async (req, res) => {
   } catch (err) {
     return res.send(err);
   }
+});
+
+//CREATED BY VIDEOSTREAMING TEAM
+//get lecture by id
+router.get("/lecture/get", async (req, res) => {
+  if (!req.query.lecture_id)
+    return res.send(
+      "Missing query parameters. use endpoint like this: /lecture/get?lecture_id=someLectureId"
+    );
+
+  const lectureId = req.query.lecture_id;
+
+  let lecture = await LectureModel.findById(lectureId).catch((err) => {
+    console.log(err);
+  });
+
+  if (lecture === null)
+    return res.send("No section found with id: " + lectureId);
+
+  //get LectureComponents
+  const components = await LectureContentModel.find({
+    parentLecture: lectureId,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  lecture.components = components;
+
+  return res.send(lecture);
+});
+
+//CREATED BY VIDEOSTREAMING TEAM
+//get section by id
+router.get("/section/get", async (req, res) => {
+  if (!req.query.section_id)
+    return res.send(
+      "Missing query parameters. use endpoint like this: /lectures/get?section_id=someSectionId"
+    );
+
+  const section_id = req.query.section_id;
+
+  let section = await SectionModel.findById(section_id).catch((err) => {
+    console.log(err);
+  });
+
+  if (section === null)
+    return res.send("No section found with id: " + section_id);
+
+  //get lectures
+
+  const lectures = await LectureModel.find({
+    parentSection: section_id,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  let _tempSection = JSON.parse(JSON.stringify(section));
+  _tempSection.components = lectures;
 });
 
 // Section routes
