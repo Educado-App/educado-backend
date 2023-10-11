@@ -8,7 +8,7 @@ const sectionSchema = new Schema({
   description: String,
   dateCreated: Date,
   dateUpdated: Date,
-  components: [{ type: Schema.Types.ObjectId, ref: "Component" }],
+  components: [{ type: Schema.Types.ObjectId, ref: "lectureComponent" }],
 });
 
 const SectionModel = mongoose.model("sections", sectionSchema);

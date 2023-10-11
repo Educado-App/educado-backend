@@ -5,6 +5,8 @@ const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
 const { UserModel } = require("../models/User");
+const { LectureModel } = require("../models/Lecture");
+const { LectureContentModel } = require("../models/LectureComponent");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
@@ -56,19 +58,21 @@ router.post("/courses", async (req, res) => {
 });
 
 router.get("/course/getHome", async (req, res) => {
-
   res.send("Hello course");
 });
 
-//Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user 
+//Route that fetched all subscribed courses of logged in user. It is using a fixed user now, but the out commented function is for the logged in user
 router.get("/course/getSubscribedCourses", async (req, res) => {
-  const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById('650c26466fe6094f6214a4a4', 'subscriptions -_id'))).subscriptions;
+  const subscribedCourses = JSON.parse(
+    JSON.stringify(
+      await UserModel.findById("650c26466fe6094f6214a4a4", "subscriptions -_id")
+    )
+  ).subscriptions;
   //const subscribedCourses = JSON.parse(JSON.stringify(await UserModel.findById(req.user.id, 'subscriptions -_id'))).subscriptions;
-  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
-  console.log(list)
+  const list = await CourseModel.find({ _id: { $in: subscribedCourses } });
+  console.log(list);
   res.send(list);
 });
-
 
 // Update Course
 router.post("/course/update", requireLogin, async (req, res) => {
@@ -109,7 +113,7 @@ router.get("/course/:id", async (req, res) => {
   const { id } = req.params; // destructure params
   const course = await CourseModel.findById(id);
   res.send(course);
-})
+});
 
 // Update course title
 router.post("/course/update/title", async (req, res) => {
@@ -211,8 +215,64 @@ router.post("/course/delete", requireLogin, async (req, res) => {
   res.send("Completed");
 });
 
-// Section routes
+//create lecture
+router.post("/lecture/create", async (req, res) => {
+  //we need section id to create a lecture
+  const { parentSection, title, description, image, video, components } =
+    req.body;
 
+  console.log("creating lecture with this data:");
+  console.log("body", req.body);
+
+  if (!parentSection || !title || !description)
+    return res.status(422).send("Missing title, parentSection or description");
+
+  const newLecture = new LectureModel({
+    title: title,
+    description: description,
+    parentSection: parentSection,
+    image: "",
+    video: "",
+    components: components || [],
+  });
+
+  try {
+    await newLecture.save();
+    section = await SectionModel.findById(parentSection);
+    await section.components.push(newLecture._id);
+    await section.save();
+    return res.send(section);
+  } catch (err) {
+    console.log(err);
+    return res.send(err);
+  }
+});
+
+//add lecture component to lecture and update lecture
+router.post("/component/create", async (req, res) => {
+  const { parentLecture, title, text } = req.body;
+
+  if (!parentLecture || !title || !text)
+    return res.status(422).send("Missing parentLecture , title or text");
+
+  const newComponent = new LectureContentModel({
+    title: title,
+    text: text,
+    parentLecture: parentLecture,
+  });
+
+  try {
+    await newComponent.save();
+    lecture = await LectureModel.findById(parentLecture);
+    await lecture.components.push(newComponent._id);
+    await lecture.save();
+    return res.send(lecture);
+  } catch (err) {
+    return res.send(err);
+  }
+});
+
+// Section routes
 router.post("/section/create", requireLogin, async (req, res) => {
   const { title, course_id } = req.body; // Or query?...
 
@@ -463,7 +523,7 @@ router.post("/user/", async (req, res) => {
     password: password,
     joinedAt: Date.now(),
     modifiedAt: Date.now(),
-    subscriptions: []
+    subscriptions: [],
   });
 
   try {
@@ -476,41 +536,44 @@ router.post("/user/", async (req, res) => {
 
 // Subscribe to course TODO: check for duplicates
 
-router.post("/course/:id/subscribe",  async (req, res) => {
-  const { user_id, course_id} = req.body;
+router.post("/course/:id/subscribe", async (req, res) => {
+  const { user_id, course_id } = req.body;
 
-  (await UserModel.findOneAndUpdate(
-    { _id: user_id }, 
-    { $push: { subscriptions: course_id} }))
-    .save;
+  (
+    await UserModel.findOneAndUpdate(
+      { _id: user_id },
+      { $push: { subscriptions: course_id } }
+    )
+  ).save;
 
   user = await UserModel.findById(user_id);
-  res.send(user)
-
+  res.send(user);
 });
 
-router.post("/user/subscriptions/unsubscribe",  async (req, res) => {
-  const { user_id, course_id} = req.body;
+router.post("/user/subscriptions/unsubscribe", async (req, res) => {
+  const { user_id, course_id } = req.body;
 
-  (await UserModel.findOneAndUpdate(
-    { _id: user_id }, 
-    { $pull: { subscriptions: course_id} }))
-    .save;
+  (
+    await UserModel.findOneAndUpdate(
+      { _id: user_id },
+      { $pull: { subscriptions: course_id } }
+    )
+  ).save;
 
   user = await UserModel.findById(user_id);
-  res.send(user)
-
+  res.send(user);
 });
 
 // Get users subscriptions
 router.get("/user/subscriptions/getAll", async (req, res) => {
-  const {user_id} = req.body
-  const subscribedCourses = (await UserModel.findById(user_id, 'subscriptions -_id')).subscriptions;
-  const list = await CourseModel.find({'_id': { $in: subscribedCourses }});
+  const { user_id } = req.body;
+  const subscribedCourses = (
+    await UserModel.findById(user_id, "subscriptions -_id")
+  ).subscriptions;
+  const list = await CourseModel.find({ _id: { $in: subscribedCourses } });
 
-  console.log(list)
+  console.log(list);
   res.send(list);
 });
-
 
 module.exports = router;
