@@ -121,7 +121,7 @@ router.put('/update-last-name/:id', requireLogin, async (req, res) => {
     if (nameValid) {
       const updatedUser = await User.findByIdAndUpdate(
         id,
-        { firstName: newLastName },
+        { lastName: newLastName },
         { new: true } // This ensures that the updated user document is returned
       );
 

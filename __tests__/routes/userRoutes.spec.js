@@ -147,9 +147,9 @@ describe('Update User Email Route', () => {
             .expect(200);
         
         // Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ firstName: newLastName });
+		const user = await db.collection('users').findOne({ lastName: newLastName });
 		expect(user).toBeDefined();
-		expect(user.firstName).toBe(newLastName);
+		expect(user.lastName).toBe(newLastName);
     });
 
     it('handles user not found error for update-last-name', async () => {
