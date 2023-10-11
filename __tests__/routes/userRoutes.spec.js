@@ -26,26 +26,21 @@ jest.mock('../../config/keys', () => {
 	};
 });
 
-function generateValidToken() {
-    const token = signAccessToken({ id: 1 }); // Generate a token with the user ID
-    return token;
-  }
-
-const fakeUser = makeFakeUser();
 
 describe('Update User Email Route', () => {
-    let db;
-    let token = generateValidToken();
+    let token, fakeUser, db;
 
     beforeAll(async () => {
 		db = await connectDb(); // Connect to the database
+
+        token = signAccessToken({ id: 1 });
+        fakeUser = makeFakeUser();
+
 	});
 
     beforeEach(async () => {
         // Insert the fake user into the database before each test
         await db.collection('users').insertOne(fakeUser);
-        // Generate a valid token for each test
-        token = signAccessToken({ id: 1 });
     });
 
     afterEach(async () => {
@@ -113,18 +108,9 @@ describe('Update User Email Route', () => {
     });
 
     it('updates user first name successfully', async () => {
-        const newFirstName = 'NewFirstName';
+        const newFirstName = 'newFirstName';
 
-        await request(`http://localhost:${PORT}`)
-            .put(`/api/user/update-first-name/${fakeUser._id}`)
-            .set('token', token) // Include the token in the request headers
-            .send({ newFirstName: newFirstName })
-            .expect(200);
-
-        // Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ firstName: newFirstName });
-		expect(user).toBeDefined();
-		expect(user.firstName).toBe(newFirstName);
+        await updateUserProperty('first-name', newFirstName, newFirstName, 'firstName');
     });
 
     it('handles user not found error for update-first-name', async () => {
@@ -138,18 +124,9 @@ describe('Update User Email Route', () => {
         });
     
     it('updates user last name successfully', async () => {
-        const newLastName = 'NewLastName';
+        const newLastName = 'newLastName';
 
-        await request(`http://localhost:${PORT}`)
-            .put(`/api/user/update-last-name/${fakeUser._id}`)
-            .set('token', token) // Include the token in the request headers
-            .send({ newLastName: newLastName })
-            .expect(200);
-        
-        // Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ lastName: newLastName });
-		expect(user).toBeDefined();
-		expect(user.lastName).toBe(newLastName);
+        await updateUserProperty('last-name', newLastName, newLastName, 'lastName');
     });
 
     it('handles user not found error for update-last-name', async () => {
@@ -167,4 +144,17 @@ describe('Update User Email Route', () => {
 		server.close();
 		await mongoose.connection.close();
 	});
+
+    const updateUserProperty = async (route, propertyName, propertyValue, dbField) => {
+        await request(`http://localhost:${PORT}`)
+            .put(`/api/user/update-${route}/${fakeUser._id}`)
+            .set('token', token) // Include the token in the request headers
+            .send({ [propertyName]: propertyValue })
+            .expect(200);
+    
+        // Verify that the user was saved in the database
+        const user = await db.collection('users').findOne({ [dbField]: propertyValue });
+        expect(user).toBeDefined();
+        expect(user[dbField]).toBe(propertyValue);
+    };
 });

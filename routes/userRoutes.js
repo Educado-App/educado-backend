@@ -10,8 +10,6 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 
     const deletedUser = await User.findByIdAndDelete(id);
 
-    console.log(deletedUser)
-
     if (!deletedUser) {
       throw errorCodes['E0004'];
     } else {
