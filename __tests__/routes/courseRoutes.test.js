@@ -6,6 +6,7 @@ const makeFakeUser = require('../../__tests__/fixtures/fakeUser');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../../__tests__/fixtures/fakeCourses');
 const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
+const { signAccessToken } = require('../../helpers/token');
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,7 @@ jest.mock('../../config/keys', () => {
 
 // Start the Express app on a specific port for testing
 const PORT = 5022; // Choose a port for testing
+const ADMIN_ID = 'srdfet784y2uioejqr';
 const server = app.listen(PORT, () => {
   console.log(`Express server is running on port ${PORT}`);
 });
@@ -44,7 +46,9 @@ describe('Get all courses for user route', () => {
     const courses = getFakeCoursesByCreator(fakeUser._id);
     // Send a get request to the courses endpoint
     const res = await request(`http://localhost:${PORT}`)
-      .get(`/api/courses/creator/${fakeUser._id}`);
+      .get(`/api/courses/creator/${fakeUser._id}`)
+      .set('token', signAccessToken({ id: fakeUser._id }));
+    expect(res.statusCode).toEqual(200);
     // Verify response body
     const result = res.body;
 
@@ -74,6 +78,19 @@ describe('Get all courses for user route', () => {
     }
   });
 
+  it('Returns error 401 if user is not authorized to access', async () => {
+
+    // Send a get request to the courses endpoint
+    const res = await request(`http://localhost:${PORT}`)
+      .get(`/api/courses/creator/${fakeUser._id}`)
+      .set('token', signAccessToken({ id: 'notAuthorized' }));
+    expect(res.statusCode).toEqual(401);
+    // Verify response body
+    const result = res.body;
+
+    expect(result.error).toBe('You are not allowed to access this content!');
+  });
+
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
     await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
@@ -97,7 +114,9 @@ describe('Get all courses route', () => {
     // Send a get request to the courses endpoint
 
     const res = await request(`http://localhost:${PORT}`)
-      .get('/api/courses');
+      .get('/api/courses')
+      .set('token', signAccessToken({ id: ADMIN_ID }));
+    expect(res.statusCode).toEqual(200);
     let i = 0;
     res.body.forEach(course => {
       expect(course).toMatchObject({
@@ -117,6 +136,18 @@ describe('Get all courses route', () => {
       });
       i++;
     });
+  });
+
+  it('Returns error 401 if user is not authorized to access', async () => {
+    // Send a get request to the courses endpoint
+    const res = await request(`http://localhost:${PORT}`)
+      .get(`/api/courses/creator/${fakeUser._id}`)
+      .set('token', signAccessToken({ id: 'notAuthorized' }));
+    expect(res.statusCode).toEqual(401);
+    // Verify response body
+    const result = res.body;
+
+    expect(result.error).toBe('You are not allowed to access this content!');
   });
 
   afterAll(async () => {

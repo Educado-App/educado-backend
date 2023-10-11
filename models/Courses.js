@@ -32,9 +32,7 @@ const courseSchema = new Schema({
     ref: 'User' 
   },
   difficulty: {
-    Number,
-    Range: [1, 5],
-    default: 3,
+    type: Number,
   },
   status: {
     type: String,
@@ -44,8 +42,6 @@ const courseSchema = new Schema({
   estimatedHours: Number,
   rating: {
     Number,
-    Range: [0.0, 5.0],
-    default: 0.0,
   },
   numOfSubscriptions:{
     type: Number,
