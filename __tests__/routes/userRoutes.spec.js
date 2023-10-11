@@ -53,10 +53,31 @@ describe('Update User Email Route', () => {
         await db.collection('users').deleteOne({ _id: fakeUser._id });
       });
 
+    it('deletes a user successfully', async () => {
+        // Delete the user using the API
+        await request(`http://localhost:${PORT}`)
+          .delete(`/api/user/delete/${fakeUser._id}`)
+          .set('token', token) // Include the token in the request headers
+          .expect(200);
+      
+        // Verify that the user was deleted from the database
+        const user = await db.collection('users').findOne({ _id: fakeUser._id });
+        expect(user).toBeNull();
+    });  
+
+    it('handles user not found error for delete', async () => {
+        const nonExistentUserId = new mongoose.Types.ObjectId();
+
+        await request(`http://localhost:${PORT}`)
+            .delete(`/api/user/delete/${nonExistentUserId}`)
+            .set('token', token) // Include the token in the request headers
+            .expect(204);
+    });
+
     it('updates user email successfully', async () => {
         const newEmail = 'newemail@example.com';
 
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put('/api/user/update-email/' + fakeUser._id)
             .set('token', token) // Include the token in the request headers
             .send({ newEmail })
@@ -84,7 +105,7 @@ describe('Update User Email Route', () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
         const newEmail = 'newemail@example.com';
 
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put('/api/user/update-email/' + nonExistentUserId)
             .set('token', token) // Include the token in the request headers
             .send({ newEmail })
@@ -94,7 +115,7 @@ describe('Update User Email Route', () => {
     it('updates user first name successfully', async () => {
         const newFirstName = 'NewFirstName';
 
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put(`/api/user/update-first-name/${fakeUser._id}`)
             .set('token', token) // Include the token in the request headers
             .send({ newFirstName: newFirstName })
@@ -109,7 +130,7 @@ describe('Update User Email Route', () => {
     it('handles user not found error for update-first-name', async () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
     
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put(`/api/user/update-first-name/${nonExistentUserId}`)
             .set('token', token) // Include the token in the request headers
             .send({ newFirstName: 'NewFirstName' })
@@ -119,7 +140,7 @@ describe('Update User Email Route', () => {
     it('updates user last name successfully', async () => {
         const newLastName = 'NewLastName';
 
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put(`/api/user/update-last-name/${fakeUser._id}`)
             .set('token', token) // Include the token in the request headers
             .send({ newLastName: newLastName })
@@ -134,7 +155,7 @@ describe('Update User Email Route', () => {
     it('handles user not found error for update-last-name', async () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
 
-        const response = await request(`http://localhost:${PORT}`)
+        await request(`http://localhost:${PORT}`)
             .put(`/api/user/update-last-name/${nonExistentUserId}`)
             .set('token', token) // Include the token in the request headers
             .send({ newLastName: 'NewLastName' })
