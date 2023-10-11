@@ -4,13 +4,16 @@ const { User } = require('../models/User'); // Import User model
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
-const { compare } = require('../helpers/password');
+const { compare, encrypt } = require('../helpers/password');
 const errorCodes = require('../helpers/errorCodes');
+const send = require('send');
+const { sendResetPasswordEmail } = require('../helpers/email');
+const { PasswordResetToken } = require('../models/PasswordResetToken');
 
 // Services
 //require("../services/passport");
 
-router.post('/auth', makeExpressCallback(authEndpointHandler));
+router.post('/', makeExpressCallback(authEndpointHandler));
 
 /* Commented out until google login is implemented correctly
 // Route handler for login simulation
@@ -32,7 +35,7 @@ router.get("/auth/google/callback",
 */
 
 // Login
-router.post('/auth/login', async (req, res) => {
+router.post('/login', async (req, res) => {
 	try {
 		console.log(req.body);
 		// Searching for a single user in the database, with the email provided in the request body
@@ -70,18 +73,83 @@ router.post('/auth/login', async (req, res) => {
 	}
 });
 
+router.post('/reset-password-request', async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!email || !user) {
+    return res.status(400).json({ error: errorCodes['E0401'] });
+  }
+
+  let token = await PasswordResetToken.findOne({ userId: user._id });
+  if (token) await token.deleteOne();
+  let resetToken = generatePasswordResetToken();
+  console.log(resetToken)
+  const hash = await encrypt(resetToken);
+
+  await new PasswordResetToken({
+    userId: user._id,
+    token: hash,
+    expiresAt: Date.now() + 1000 * 60 * 5 // 2 minutes
+  }).save();
+
+  const success = await sendResetPasswordEmail(user, resetToken);
+  if(success) {
+    return res.status(200).json({ status: 'success' });
+  } else {
+    return res.status(500).json({ error: errorCodes['E0004'] });
+  }
+});
+
+router.put('/reset-password', async (req, res) => {
+  const { email, token, newPassword } = req.body;
+  const user = await User.findOne({ email: email });
+
+  if (!email || !user) {
+    return res.status(400).json({ error: errorCodes['E0401'] });
+  }
+  const passwordResetToken = await PasswordResetToken.findOne({ userId: user._id});
+  if (!passwordResetToken || passwordResetToken.expiresAt < Date.now()) {
+    return res.status(400).json({ error: errorCodes['E0404'] });
+  }
+  const isValid = await compare(token, passwordResetToken.token);
+  if (!isValid) {
+    return res.status(400).json({ error: errorCodes['E0405'] });
+  }
+
+  user.password = await encrypt(newPassword);
+  await User.updateOne({ _id: user._id }, user);
+  await passwordResetToken.deleteOne();
+
+  return res.status(200).json({ status: 'success' });
+
+});
 
 // Logout simulation
-router.get('/auth/logout', (req, res) => {
+router.get('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
 
 // Show current user simulation
-router.get('/auth/current_user', (req, res) => {
+router.get('/current_user', (req, res) => {
 	setTimeout(() => {
 		res.send(req.user);
 	}, 1500);
 });
 
 module.exports = router;
+
+function generatePasswordResetToken() {
+  const length = 4;
+  let retVal = '';
+  for (let i = 0; i < length; i++) {
+    retVal += getRandomNumber(0, 9);
+  }
+  return retVal;
+}
+
+function getRandomNumber(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

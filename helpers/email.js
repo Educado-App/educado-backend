@@ -1,14 +1,14 @@
 const keys = require('../config/keys');
 const nodemailer = require('nodemailer');
+const regexPatterns = require('./patterns');
 
 module.exports = Object.freeze({
 	isValid,
-	send: sendMail
+	sendResetPasswordEmail,
 });
 
 function isValid(email) {
-	const regEx = new RegExp('^[0-9a-zA-Z.]+@[a-zA-Z]+.[a-zA-Z]{2,4}');
-	return regEx.test(email);
+	return regexPatterns.email.test(email);
 }
 
 
@@ -24,8 +24,8 @@ async function sendMail({
 		service: 'gmail',
 		auth: {
 			type: 'login',
-			user: keys.gmailUser,
-			pass: keys.gmailAppPass,
+			user: keys.GMAIL_USER,
+			pass: keys.GMAIL_APP_PASSWORD,
 
 		},
 		tls: {
@@ -44,6 +44,25 @@ async function sendMail({
 	await transporter.sendMail(mailOptions);
 }
 
+function sendResetPasswordEmail(user, token) {
+  const subject = 'Reset password request for Educado';
+  const to = user.email;
+  const text = `Hi ${user.firstName},
+  You have requested to reset your password. Please enter the following code in the app to reset your password:
 
+  ${token}
 
+  If you did not request this, please ignore this email and your password will remain unchanged. 
 
+  Best regards,
+  The Educado team
+  `;
+  const html = `
+  <p>Hi ${user.firstName},</p>
+  <p>You have requested to reset your password. Please enter the following code in the app to reset your password:</p>
+  <p><strong>${token}</strong></p>
+  <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+  `;
+  sendMail({ subject, to, text, html });
+  return true;
+}
