@@ -45,6 +45,7 @@ const userSchema = new Schema({
 		required: [true, 'Email is required'],
 		minLength: [6, 'Email must be at least 6 characters'],
 		unique: [true, 'Email must be unique'],
+		lowercase: true,
 		validate: {
 			validator: (email) => {
 				/**
