@@ -7,6 +7,9 @@ module.exports = function makeFakeUser() {
 		password: encrypt('ABC123456!'),
 		googleID: '1234567891011',
 		joinedAt: new Date(),
-		modifiedAt: new Date()
+		modifiedAt: new Date(),
+		subscriptions: [ 
+			{ _id: 'testSub123'}
+		]
 	};
 };

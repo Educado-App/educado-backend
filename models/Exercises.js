@@ -17,7 +17,7 @@ const exerciseSchema = new Schema ({
 })
 
 const ExerciseModel = mongoose.model(
-    "exercise", 
+    "exercises", 
     exerciseSchema
   ); 
   

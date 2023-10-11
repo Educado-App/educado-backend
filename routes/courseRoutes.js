@@ -547,7 +547,8 @@ router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
 
 });
 
-// Get all excercies from a section
+/*
+// Get all excercies from a section *** commented out since we do not use it per 10/10
 router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) => {
 
   try {
@@ -563,6 +564,7 @@ router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) 
   }
 
 });
+*/
 
 /*** SUBSCRIPTION ROUTES ***/
 

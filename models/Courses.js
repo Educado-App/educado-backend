@@ -18,11 +18,11 @@ const courseSchema = new Schema({
   difficulty: Number,
   time: Number,
   sections: [{ type: Schema.Types.ObjectId, ref: "sections" }],
-  creator: [{ type: Schema.Types.ObjectId, ref: "contentCreator" }]
+  creator: { type: Schema.Types.ObjectId, ref: "contentCreator" }
 });
 
 const CourseModel = mongoose.model(
-  "course", 
+  "courses", 
   courseSchema
 ); 
 

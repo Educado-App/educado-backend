@@ -15,7 +15,7 @@ const contentCreatorSchema = new Schema({
 });
 
 const ContentCreator = mongoose.model(
-  "contentCreator",
+  "contentCreators",
   contentCreatorSchema
 );
 
