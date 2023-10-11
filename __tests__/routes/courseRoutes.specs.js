@@ -152,26 +152,29 @@ describe('Course Routes', () => {
 
   describe('GET /users', () => {
     
-    it('should check if a user is subscribed to a specific course', async () => {
-
-      const courseId = 'testSub123';
-
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com'});
-      const userId = user._id; 
-
+    it('should check if a user is subscribed to a specific course and return true', async () => {
+      const courseId = '651d3a15cda7d5bd2878dfc7';
+  
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+  
+      // Add the course to the user's subscriptions
+      await db.collection('users').findOneAndUpdate(
+        { _id: userId },
+        { $push: { subscriptions: courseId } }
+      );
+  
       const response = await request(`http://localhost:${PORT}`)
-      .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
-
+        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+  
       expect(response.status).toBe(200);
       expect(response.text).toBe('true');
-
     });
 
     it('should return false if a user is not subscribed to a specific course', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course'});
       const courseId = course._id;
-
 
       const user = await db.collection('users').findOne({ email: 'fake@gmail.com'});
       const userId = user._id; 

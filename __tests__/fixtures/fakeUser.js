@@ -9,7 +9,7 @@ module.exports = function makeFakeUser() {
 		joinedAt: new Date(),
 		modifiedAt: new Date(),
 		subscriptions: [ 
-			{ _id: 'testSub123'}
+
 		]
 	};
 };
