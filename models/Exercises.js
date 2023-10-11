@@ -10,9 +10,9 @@ const exerciseSchema = new Schema ({
     answers: {
         text: String,
         correct: Boolean,
-        modifiedAt: Date
+        modifiedAt: Date, 
+        feedBack: String
     },
-    onWrongFeedback: component,
     modifiedAt: Date,  
 })
 

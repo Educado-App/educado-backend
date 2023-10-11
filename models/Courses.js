@@ -16,7 +16,10 @@ const courseSchema = new Schema({
   category: String,
   published: Boolean,
   difficulty: Number,
-  time: Number,
+  status: String,
+  rating: Number,
+  numOfSubscriptions: Number,
+  estimatedHours: Number,
   sections: [{ type: Schema.Types.ObjectId, ref: "sections" }],
   creator: { type: Schema.Types.ObjectId, ref: "contentCreator" }
 });
