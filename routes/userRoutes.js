@@ -18,19 +18,19 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
       res.send(deletedUser)
     }
 
-	} catch (error) {
-		if (error === errorCodes['E0004']) {
+  } catch (error) {
+    if (error === errorCodes['E0004']) {
       // Handle "user not found" error response here
       res.status(204);
     } else {
       res.status(400);
     }
-    
+
     console.log(error);
     res.send({
-			error: error
-		});
-	}
+      error: error
+    });
+  }
 });
 
 // Update User with dynamic fields
@@ -62,11 +62,11 @@ router.patch('/:id', requireLogin, async (req, res) => {
     } else {
       res.status(400);
     }
-    
+
     console.log(error);
     res.send({
-			error: error
-		});
+      error: error
+    });
   }
 });
 
@@ -99,20 +99,23 @@ router.get('/:id/subscriptions', async (req, res) => {
     // Find the user by _id and select the 'subscriptions' field
     const user = await User.findById(userId).select('subscriptions');
 
+    //checks if user exist
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // Handle "user not found" error response here
+      return res.status(404).json({ 'error': errorCodes['E0004'] });
     }
-
+    
     const subscribedCourses = user.subscriptions;
 
     // Find courses based on the subscribed course IDs
-    const list = await CourseModel.find({ '_id': { $in: subscribedCourses } });
+    const courseList = await CourseModel.find({ '_id': { $in: subscribedCourses } });
 
-    res.send(list);
+    res.send(courseList);
 
   } catch (error) {
-    console.error(("Error getting users subscribed courses, message: " + error));
-    res.status(500).json({ message: 'Server error' });
+    // If the server could not be reached, return an error message
+    console.log(error);
+    return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
 
@@ -120,25 +123,41 @@ router.get('/:id/subscriptions', async (req, res) => {
 
 // Checks if user is subscribed to a specific course
 router.get('', async (req, res) => {
-	try {
-	  const { user_id, course_id } = req.query;
-  
-	  // Check if the course_id exists in the user's subscriptions array
-	  const userTest = await User.findById(user_id);
-  
-	  if (userTest.subscriptions.includes(course_id)) {
-		// User is subscribed to the course
-		res.send("true");
-	  } else {
-		// User is not subscribed to the course
-		res.send("false");
-	  }
-	} catch (error) {
-	  console.error(("Error checking if user is subscribed to course, message: " + error));
-	  res.status(500).json({ message: 'Server error' });
-	}
-  });
+  try {
+    const { user_id, course_id } = req.query;
+
+    // Check if the course_id exists in the user's subscriptions array
+    const user = await User.findById(user_id);
+
+    //checks if user exist
+    if (!user) {
+      // Handle "user not found" error response here
+      return res.status(404).json({ 'error': errorCodes['E0004'] });
+    }
+
+    const course = await CourseModel.findById(course_id);
+
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ 'error': errorCodes['E0006'] });
+    }
+
+    if (user.subscriptions.includes(course_id)) {
+      // User is subscribed to the course
+      res.send("true");
+    } else {
+      // User is not subscribed to the course
+      res.send("false");
+    }
+
+  } catch (error) {
+    // If the server could not be reached, return an error message
+    console.log(error);
+    return res.status(500).json({ 'error': errorCodes['E0003'] });
+  }
+});
 
 
-  
-  module.exports = router;
+
+module.exports = router;

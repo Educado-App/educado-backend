@@ -9,6 +9,6 @@ module.exports = function makeFakeSection() {
         modifiedAt: Date,
         totalPoints: 100,
         components: [],
-        parentCourse: '1abc',
+        parentCourse: '',
     };
 };

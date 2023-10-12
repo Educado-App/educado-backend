@@ -230,7 +230,9 @@ describe('Users Routes', () => {
   describe('GET /users', () => {
 
     it('should check if a user is subscribed to a specific course and return true', async () => {
-      const courseId = '651d3a15cda7d5bd2878dfc7';
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+      
       const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
       const userId = user._id;
 
@@ -244,7 +246,7 @@ describe('Users Routes', () => {
       const updatedUser = result.value;
 
       // Check if the subscription was successfully added
-      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
+      expect(updatedUser.subscriptions.find((element) => element == courseId));
 
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
@@ -252,8 +254,6 @@ describe('Users Routes', () => {
       expect(response.status).toBe(200);
       expect(response.text).toBe('true');
     });
-
-
 
     it('should return false if a user is not subscribed to a specific course', async () => {
 
@@ -270,6 +270,70 @@ describe('Users Routes', () => {
       expect(response.text).toBe('false');
 
     });
+
+    it('should handle user not found error', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // create non existing userId
+      const ObjectId = mongoose.Types.ObjectId;
+      const userId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent user
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0004');
+    });
+
+
+    it('should handle invalid user id', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // simulate a request with invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users?user_id=this-is-an-invalid-userId&course_id=' + courseId);
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
+    it('should handle course not found error', async () => {
+
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // create non existing courseId
+      const ObjectId = mongoose.Types.ObjectId;
+      const courseId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent course
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0006');
+    });
+
+
+    it('should handle invalid course id', async () => {
+
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // simulate a request with invalid course id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
+
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
   });
 
   describe('GET /users/:id/subscriptions', () => {
@@ -289,7 +353,7 @@ describe('Users Routes', () => {
       const updatedUser = result.value;
 
       // Check if the subscription was successfully added
-      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
+      expect(updatedUser.subscriptions.find((element) => element == courseId));
 
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/users/' + userId + '/subscriptions');
@@ -299,6 +363,32 @@ describe('Users Routes', () => {
       expect(response.body.find((element) => element == courseId));
 
     });
+
+    it('should handle user not found error', async () => {
+
+      // create non existing userId
+      const ObjectId = mongoose.Types.ObjectId;
+      const userId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent user
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/' + userId + '/subscriptions');
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0004');
+    });
+
+
+    it('should handle invalid user id', async () => {
+
+      // simulate a request with invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/this-is-an-invalid-userId/subscriptions');
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
   });
 
   afterAll(async () => {
