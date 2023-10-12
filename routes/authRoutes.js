@@ -33,21 +33,19 @@ router.get("/auth/google/callback",
 
 // Login
 router.post("/auth/login", async (req, res) => {
-  console.log("/api/auth/login received request")
-  console.log(req.body)
   try {
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database
-    console.log("User: " + user)
     if (!user) {
       // If the email is not found, return an error message
-      console.log("User not found")
+      
       return res.status(404).json({
         "message": "User not found"
       });
     } else {
       // If the email is found, compare the passwords
+      
       result = compare(req.body.password, user.password)
     }
     // If the passwords match, return a success message
@@ -71,7 +69,7 @@ router.post("/auth/login", async (req, res) => {
       });
     }
   } catch (err) { 
-    console.log(err)
+    // If the server could not be reached, return an error message
     return res.status(500).json({ 
       "error": { "code": 500, "message": "Server could not be reached" }
     });

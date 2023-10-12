@@ -9,12 +9,10 @@ const sectionSchema = new Schema({
   title: String,
   description: String,
   sectionNumber: Number,
-  createdAt: Date,
-  modifiedAt: Date,
   totalPoints: Number,
-  components: [{ type: Schema.Types.ObjectId, ref: "component" }],
   parentCourse: { type: Schema.Types.ObjectId, ref: "Course" },
-});
+  components: [{ type: Schema.Types.ObjectId, ref: "lectureComponent" }],
+}, { timestamps: true });
 
 const SectionModel = mongoose.model("sections", sectionSchema);
 
