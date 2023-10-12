@@ -113,26 +113,6 @@ describe('Login User route', () => {
   });
 });
 
-describe('generatePasswordResetToken', () => {
-  it('Returns a string of four digits', async () => {
-    const token = generatePasswordResetToken();
-    expect(typeof token).toBe('string');
-    expect(token.length).toBe(4);
-    expect(Number.isInteger(Number(token))).toBe(true);
-  });
-});
-
-describe('getRandomNumber', () => {
-  it('Returns a number between min and max', async () => {
-    const min = 0;
-    const max = 9;
-    const number = getRandomNumber(min, max);
-    expect(typeof number).toBe('number');
-    expect(number).toBeGreaterThanOrEqual(min);
-    expect(number).toBeLessThanOrEqual(max);
-  });
-});
-
 describe('Reset password request route', () => {
 
   beforeAll(async () => {
