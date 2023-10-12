@@ -104,7 +104,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   const fileName = req.body.fileName;
 
   if (!multerFile) {
-    console.error("No file uploaded.");
     res.status(400).send("No file uploaded.");
     return;
   }
@@ -115,25 +114,18 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   console.log("multerFile:", multerFile);
 
   //upload to bucket
-  try {
-    await uploadFile();
-    res.send(`${fileName} uploaded to bucket ${bucketName}`);
-  } catch (error) {
-    console.error('Error in file upload:', error);
-    res.status(500).send('Internal server error');
-  }
+  uploadFile().catch(console.error);
 
   async function uploadFile() {
-    try {
-      // Uploads a local file to the bucket
-      await storage
-        .bucket(bucketName)
-        .file(fileName)
-        .save(buffer, {
-          metadata: {
-            contentType: multerFile.mimetype,
-          },
-        });
+    // Uploads a local file to the bucket
+    await storage
+      .bucket(bucketName)
+      .file(fileName)
+      .save(buffer, {
+        metadata: {
+          contentType: multerFile.mimetype,
+        },
+      });
 
     // console.log(`${fileName} uploaded to ${bucketName}.`);
   }
