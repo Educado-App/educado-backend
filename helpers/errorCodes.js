@@ -17,6 +17,10 @@ module.exports = {
 		code: 'E0003',
 		message: 'Server could not be reached'
 	},
+	E0004: {
+		code: 'E0004',
+		message: 'User not found'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -33,7 +37,7 @@ module.exports = {
 	},
 	E0104: {
 		code: 'E0104',
-		message: 'Account is suspended or blocked by and administrator.'
+		message: 'Account is suspended or blocked by an administrator.'
 	},
 	E0105: {
 		code: 'E0105',
