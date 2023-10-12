@@ -23,9 +23,7 @@ jest.mock('../../config/keys', () => {
 // Start the Express app on a specific port for testing
 const PORT = 5022; // Choose a port for testing
 const ADMIN_ID = 'srdfet784y2uioejqr';
-const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 const fakeUser = makeFakeUser();
 const fakeCourses = getFakeCourses();
