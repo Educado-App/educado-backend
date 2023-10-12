@@ -1,5 +1,6 @@
 // Mongoose model class for Courses
 const mongoose = require('mongoose');
+const { component } = require('./Components');
 const { Schema } = mongoose;
 
 // Class description 
@@ -12,7 +13,7 @@ const sectionSchema = new Schema({
   createdAt: Date,
   modifiedAt: Date,
   totalPoints: Number,
-  components: [{ type: Schema.Types.ObjectId, ref: "components" }],
+  components: component,
   parentCourse: { type: Schema.Types.ObjectId, ref: "courses" },
 });
 
