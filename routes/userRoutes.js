@@ -100,7 +100,7 @@ router.get('/:id/subscriptions', async (req, res) => {
     const user = await User.findById(userId).select('subscriptions');
 
     if (!user) {
-      return res.status(204);
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const subscribedCourses = user.subscriptions;

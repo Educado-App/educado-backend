@@ -584,7 +584,6 @@ router.post('/:id/subscribe',  async (req, res) => {
 
     let user = await User.findById(user_id);
 
-	console.log(user);
     res.send(user);
 
   } catch (error) {
@@ -609,7 +608,6 @@ router.post('/:id/unsubscribe',  async (req, res) => {
 
     let user = await User.findById(user_id);
 
-	console.log(id)
     res.send(user)
 
   } catch (error) {
