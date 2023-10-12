@@ -505,7 +505,7 @@ router.get('/:id', async (req, res) => {
     res.send(course);
 
   } catch (error) {
-    console.error(error);
+    console.error("Error getting course based on course id, message: " + error);
     res.status(500).json({ message: 'Server error' });
   }
 
@@ -524,7 +524,7 @@ router.get('/:id/sections', async (req, res) => {
     res.send(sections);
 
   } catch (error) {
-    console.error(error);
+    console.error("Error getting sections for course based on course id, message: " + error);
     res.status(500).json({ message: 'Server error' });
   }
 
@@ -541,7 +541,7 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
   res.send(section);
 
   } catch (error) {
-    console.error(error);
+    console.error("Error getting specific section based on section id, message: " + error);
     res.status(500).json({ message: 'Server error' });
   }
 
@@ -588,7 +588,7 @@ router.post('/:id/subscribe',  async (req, res) => {
     res.send(user);
 
   } catch (error) {
-    console.error(error);
+    console.error("Error getting user to subscribe to course, message: " + error);
     res.status(500).json({ message: 'Server error' });
   }
 
@@ -613,7 +613,7 @@ router.post('/:id/unsubscribe',  async (req, res) => {
     res.send(user)
 
   } catch (error) {
-    console.error(error);
+    console.error(("Error getting user to unsubscribe, message: " + error));
     res.status(500).json({ message: 'Server error' });
   }
 

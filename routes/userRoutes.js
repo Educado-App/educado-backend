@@ -89,6 +89,8 @@ async function validateFields(fields) {
   return true;
 }
 
+/** SUBSCRIPTIONS **/
+
 // Get users subscriptions
 router.get('/:id/subscriptions', async (req, res) => {
   try {
@@ -111,7 +113,7 @@ router.get('/:id/subscriptions', async (req, res) => {
     res.send(list);
 
   } catch (error) {
-    console.error(error);
+    console.error(("Error getting users subscribed courses, message: " + error));
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -134,7 +136,7 @@ router.get('', async (req, res) => {
 		res.send("false");
 	  }
 	} catch (error) {
-	  console.error(error);
+	  console.error(("Error checking if user is subscribed to course, message: " + error));
 	  res.status(500).json({ message: 'Server error' });
 	}
   });
