@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateEmail, validateName } = require('../helpers/validation');
+const { validateEmail, validateName, validatePoints } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { User } = require('../models/User');
 const requireLogin = require('../middlewares/requireLogin');
@@ -33,7 +33,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 });
 
 // Update User with dynamic fields
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body; // Fields to be updated dynamically
@@ -41,26 +41,30 @@ router.patch('/:id', async (req, res) => {
     const validFields = await validateFields(updateFields);
 
     if (validFields) {
+      // Extracts the points and level fields from updateFields
+      const { points, level, ...otherFields } = updateFields;
+
       const updatedUser = await User.findByIdAndUpdate(
         id,
-        { $set: updateFields },
+        { $set: otherFields },
         { new: true } // This ensures that the updated user document is returned
       );
-
-      // Update user points and level based on earned points
-      updateUserLevel(updatedUser, updateFields.points);
 
       if (!updatedUser) {
         throw errorCodes['E0004'];
       }
 
+      if (!isNaN(points)) {
+        updateUserLevel(updatedUser, updateFields.points)
+      }
+    
       res.status(200).send(updatedUser);
     }
 
   } catch (error) {
     if (error === errorCodes['E0004']) {
       // Handle "user not found" error response here
-      res.status(204);
+      res.status(404);
     } else {
       res.status(400);
     }
@@ -90,6 +94,12 @@ async function validateFields(fields) {
           return false;
         }
         break;
+      case 'points':
+        const pointsValid = await validatePoints(fieldValue);
+        if (!pointsValid) {
+          return false;
+        }
+        break;
       // Add more cases if needed for other fields
       default:
         // Handle default case if necessary
@@ -100,28 +110,20 @@ async function validateFields(fields) {
 }
 
 // Update user points and level based on earned points
-function updateUserLevel(user, earnedPoints) {
+async function updateUserLevel(user, earnedPoints) {
   // Add earned points to user's total points
   user.points += earnedPoints;
 
   // Check if user has enough points to level up
   const pointsToNextLevel = user.level * 100; // For example, 100 points * level to reach the next level
   if (user.points >= pointsToNextLevel) {
-      // User has enough points to level up
-      user.points -= pointsToNextLevel; // Deduct points needed for the level up
-      user.level++;
+    // User has enough points to level up
+    user.points -= pointsToNextLevel; // Deduct points needed for the level up
+    user.level++;
   }
 
-  // Save updated user data to the database
-  user.save((err) => {
-      if (error) {
-          console.log(error);
-      } else {
-          console.log('User points and level updated successfully.');
-      }
-  });
+  // Update user points and level in the database
+  await User.updateOne({ _id: user._id }, { points: user.points, level: user.level });
 }
-
-
   
   module.exports = router;

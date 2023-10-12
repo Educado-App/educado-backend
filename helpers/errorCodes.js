@@ -134,5 +134,19 @@ module.exports = {
 	E0503: {
 		code: 'E0503',
 		message: 'Verification link is invalid or has already been used.'
+	},
+
+	// E06 - Point system errors
+	E0601: {
+		code: 'E0601',
+		message: 'Points added is less than or equal to 0.'
+	},
+	E0602: {
+		code: 'E0602',
+		message: 'Points must be of type integer'
+	},
+	E0603: {
+		code: 'E0603',
+		message: 'Points are required'
 	}
 };
