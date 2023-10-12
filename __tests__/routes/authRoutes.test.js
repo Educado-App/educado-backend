@@ -6,8 +6,6 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
 const { sendResetPasswordEmail } = require('../../helpers/email');
-const exp = require('constants');
-const { User } = require('../../models/User');
 
 
 const app = express();
@@ -160,14 +158,10 @@ describe('Reset password request route', () => {
   });
 
   it('Returns error if reset password attempts > 3', async () => {
-    const newFakeUser = makeFakeUser();
-    // Set reset password attempts to have 3 attempts
-    newFakeUser.resetAttempts = [new Date(), new Date(), new Date()]; 
-    newFakeUser.email = 'mail@test.com'; // Change email to avoid duplicate key error
+    const newFakeUser = makeFakeUser('test@user.com', [new Date(), new Date(), new Date()]); // Create a new fake user with 3 reset password attempts
     await db.collection('users').insertOne(newFakeUser);
     sendResetPasswordEmail.mockImplementation(() => true);
     const user = { email: newFakeUser.email }
-    console.log(await db.collection('users').findOne({ email: newFakeUser.email }));
     const res = await request(`http://localhost:${PORT}`)
       .post('/api/auth/reset-password-request')
       .send(user)
@@ -176,7 +170,26 @@ describe('Reset password request route', () => {
     expect(res.body.error.code).toBe('E0406');
   });
 
-  // TODO: Test if reset password attempts are deleted after 1 hour
+  it('clears reset password attempts after expiration', async () => {
+    const newFakeUser = makeFakeUser('user@test.com', [new Date() - 1000 * 60 * 5, new Date(), new Date()]);
+    // Set reset password attempts to have 3 attempts with one being 5 minutes ago
+    await db.collection('users').insertOne(newFakeUser);
+    sendResetPasswordEmail.mockImplementation(() => true);
+
+    const user = { email: newFakeUser.email }
+
+    await request(`http://localhost:${PORT}`)
+      .post('/api/auth/reset-password-request')
+      .send(user)
+      .expect(200);
+
+    const result = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/reset-password-request')
+      .send(user)
+      .expect(400);
+
+    expect(result.body.error.code).toBe('E0406');
+  });
 
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
