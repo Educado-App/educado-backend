@@ -93,7 +93,7 @@ router.get("/download", async (req, res) => {
     const base64 = fileContents.toString("base64");
     res.status(200).send(base64);
   } catch (err) {
-    console.log("An error occurred:", err);
+    // console.log("An error occurred:", err);
     res.status(400).send(`Error: ${err.message}`);
   }
 });
@@ -102,51 +102,40 @@ router.get("/download", async (req, res) => {
 router.post("/upload", upload.single("file"), async (req, res) => {
   const multerFile = req.file;
   const fileName = req.body.fileName;
-  const buffer = req.file.buffer;
-
-  console.log("buffer:", buffer);
-  console.log("fileName:", fileName);
-  console.log("multerFile:", multerFile);
 
   if (!multerFile) {
-    console.error("No file uploaded.");
     res.status(400).send("No file uploaded.");
     return;
   }
 
+  const buffer = req.file.buffer;
+  console.log("buffer:", buffer);
+  console.log("fileName:", fileName);
+  console.log("multerFile:", multerFile);
+
   //upload to bucket
-  try {
-    await uploadFile();
-    res.send(`${fileName} uploaded to bucket ${bucketName}`);
-  } catch (error) {
-    console.error('Error in file upload:', error);
-    res.status(500).send('Internal server error');
-  }
+  uploadFile().catch(console.error);
 
   async function uploadFile() {
-    try {
-      // Uploads a local file to the bucket
-      await storage
-        .bucket(bucketName)
-        .file(fileName)
-        .save(buffer, {
-          metadata: {
-            contentType: multerFile.mimetype,
-          },
-        });
+    // Uploads a local file to the bucket
+    await storage
+      .bucket(bucketName)
+      .file(fileName)
+      .save(buffer, {
+        metadata: {
+          contentType: multerFile.mimetype,
+        },
+      });
 
-      console.log(`${fileName} uploaded to ${bucketName}.`);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      throw error; // Rethrow the error to be caught in the catch block above
-    }
+    // console.log(`${fileName} uploaded to ${bucketName}.`);
   }
   res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
 });
 
+
 router.delete('/delete', async (req, res) => {
   try {
-    const fileName = req.body.fileName;
+    const fileName = req.query.fileName;
     console.log("fileName:", fileName);
     console.log("bucketName:", bucketName);
 
