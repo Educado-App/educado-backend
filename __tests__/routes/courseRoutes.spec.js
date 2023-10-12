@@ -13,7 +13,7 @@ const User = require('../../models/User');
 
 const app = express();
 app.use(express.json());
-app.use('/api', router); // Mount the router under '/api' path
+app.use('/api/courses', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
@@ -138,80 +138,6 @@ describe('Course Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
       expect(response.body.subscriptions.find((element) => element !== courseId));
-
-    });
-  });
-
-  describe('GET /users/:id/subscriptions', () => {
-    it('should get user subscriptions', async () => {
-
-      const courseId = '651d3a15cda7d5bd2878dfc7';
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-      const userId = user._id;
-    
-      // Find the user and update their subscriptions
-      const result = await db.collection('users').findOneAndUpdate(
-        { _id: userId }, // Convert userId to ObjectId if needed
-        { $push: { subscriptions: courseId } },
-        { returnDocument: 'after' } // 'after' returns the updated document
-      );
-
-      const updatedUser = result.value;
-          
-      // Check if the subscription was successfully added
-      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
-
-      const response = await request(`http://localhost:${PORT}`)
-      .get('/api/users/' + userId + '/subscriptions');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.find((element) => element == courseId));
-
-    });
-  });
-
-  describe('GET /users', () => {
-    
-    it('should check if a user is subscribed to a specific course and return true', async () => {
-      const courseId = '651d3a15cda7d5bd2878dfc7';
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-      const userId = user._id;
-    
-      // Find the user and update their subscriptions
-      const result = await db.collection('users').findOneAndUpdate(
-        { _id: userId }, // Convert userId to ObjectId if needed
-        { $push: { subscriptions: courseId } },
-        { returnDocument: 'after' } // 'after' returns the updated document
-      );
-
-      const updatedUser = result.value;
-    
-      // Check if the subscription was successfully added
-      expect(updatedUser.subscriptions.includes(courseId)).toBe(true);
-
-      const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
-    
-      expect(response.status).toBe(200);
-      expect(response.text).toBe('true');
-    });    
-  
-    
-
-    it('should return false if a user is not subscribed to a specific course', async () => {
-
-      const course = await db.collection('courses').findOne({ title: 'test course'});
-      const courseId = course._id;
-
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com'});
-      const userId = user._id; 
-      
-      const response = await request(`http://localhost:${PORT}`)
-      .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
-
-      expect(response.status).toBe(200);
-      expect(response.text).toBe('false');
 
     });
   });

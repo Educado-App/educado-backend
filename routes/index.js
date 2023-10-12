@@ -16,7 +16,7 @@ router.get('/api', (req, res) => {
 	res.send(router.stack);
 });
 
-router.use('/api', CourseRoutes);
+router.use('/api/courses', CourseRoutes);
 router.use('', AWSRoutes);
 router.use('/api', AuthRoutes);
 router.use('/api/signup', SignupRoutes);

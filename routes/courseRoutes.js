@@ -479,7 +479,7 @@ router.post("/user/", async (req, res) => {
 
 
 //Get all courses
-router.get("/courses", async (req, res) => {
+router.get('', async (req, res) => {
 
   try {
     // find all courses in the database
@@ -495,7 +495,7 @@ router.get("/courses", async (req, res) => {
 
 
 // Get specific course
-router.get("/courses/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
 
   try {
     const { id } = req.params; 
@@ -513,7 +513,7 @@ router.get("/courses/:id", async (req, res) => {
 
 
 // Get all sections from course
-router.get("/courses/:id/sections", async (req, res) => {
+router.get('/:id/sections', async (req, res) => {
 
   try {
     const { id } = req.params; 
@@ -531,7 +531,7 @@ router.get("/courses/:id/sections", async (req, res) => {
 });
 
 // Get a specififc section 
-router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
+router.get('/:courseId/sections/:sectionId', async (req, res) => {
 
   try {
   const { courseId, sectionId } = req.params; 
@@ -549,7 +549,7 @@ router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
 
 /*
 // Get all excercies from a section *** commented out since we do not use it per 10/10
-router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) => {
+router.get("/:courseId/sections/:sectionId/exercises", async (req, res) => {
 
   try {
   const { courseId, sectionId } = req.params; 
@@ -569,7 +569,7 @@ router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) 
 /*** SUBSCRIPTION ROUTES ***/
 
 // Subscribe to course 
-router.post("/courses/:id/subscribe",  async (req, res) => {
+router.post('/:id/subscribe',  async (req, res) => {
 
   try {
     const { id } = req.params;
@@ -595,7 +595,7 @@ router.post("/courses/:id/subscribe",  async (req, res) => {
 });
 
 // Unsubscribe to course
-router.post("/courses/:id/unsubscribe",  async (req, res) => {
+router.post('/:id/unsubscribe',  async (req, res) => {
   
   try {
     const { id } = req.params;
@@ -618,56 +618,6 @@ router.post("/courses/:id/unsubscribe",  async (req, res) => {
   }
 
 });
-
-// Get users subscriptions
-router.get("/users/:id/subscriptions", async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    // Find the user by _id and select the 'subscriptions' field
-    const user = await User.findById(userId).select('subscriptions');
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const subscribedCourses = user.subscriptions;
-
-    // Find courses based on the subscribed course IDs
-    const list = await CourseModel.find({ '_id': { $in: subscribedCourses } });
-
-	console.log(userId);
-	console.log(list);
-    res.send(list);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-
-
-// Checks if user is subscribed to a specific course
-router.get('/users', async (req, res) => {
-	try {
-	  const { user_id, course_id } = req.query;
-  
-	  // Check if the course_id exists in the user's subscriptions array
-	  const userTest = await User.findById(user_id);
-  
-	  if (userTest.subscriptions.includes(course_id)) {
-		// User is subscribed to the course
-		res.send("true");
-	  } else {
-		// User is not subscribed to the course
-		res.send("false");
-	  }
-	} catch (error) {
-	  console.error(error);
-	  res.status(500).json({ message: 'Server error' });
-	}
-  });
   
 
 module.exports = router;
