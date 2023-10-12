@@ -33,7 +33,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 });
 
 // Update User Email route
-router.put('/update-email/:id', requireLogin, async (req, res) => {
+router.patch('/update-email/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newEmail } = req.body;
@@ -52,7 +52,7 @@ router.put('/update-email/:id', requireLogin, async (req, res) => {
       }
 
       res.status(200);
-      res.send(updatedUser)
+      res.send(updatedUser);
     }
 
   } catch (error) {
@@ -65,13 +65,13 @@ router.put('/update-email/:id', requireLogin, async (req, res) => {
     
     console.log(error);
     res.send({
-			error: error
-		});
+      error: error
+    });
   }
 });
 
 // Update User first name route
-router.put('/update-first-name/:id', requireLogin, async (req, res) => {
+router.patch('/update-first-name/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newFirstName } = req.body;
@@ -109,7 +109,7 @@ router.put('/update-first-name/:id', requireLogin, async (req, res) => {
 });
 
 // Update User last name route
-router.put('/update-last-name/:id', requireLogin, async (req, res) => {
+router.patch('/update-last-name/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { newLastName } = req.body;

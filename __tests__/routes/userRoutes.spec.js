@@ -71,40 +71,40 @@ describe('Update User Email Route', () => {
 
     it('updates user email successfully', async () => {
         const newEmail = 'newemail@example.com';
-
+    
         await request(`http://localhost:${PORT}`)
-            .put('/api/user/update-email/' + fakeUser._id)
+            .patch('/api/user/update-email/' + fakeUser._id)
             .set('token', token) // Include the token in the request headers
             .send({ newEmail })
-            .expect(200);
-
+            .expect(200); // Expecting a 200 OK response
+    
         // Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ email: newEmail });
-		expect(user).toBeDefined();
-		expect(user.email).toBe(newEmail);
+        const user = await db.collection('users').findOne({ email: newEmail });
+        expect(user).toBeDefined();
+        expect(user.email).toBe(newEmail);
     });
-
+    
     it('Test that emails must be unique when updating', async () => {
         const newEmail = fakeUser.email;
-
+    
         const response = await request(`http://localhost:${PORT}`)
-            .put('/api/user/update-email/' + fakeUser._id)
+            .patch('/api/user/update-email/' + fakeUser._id)
             .set('token', token) // Include the token in the request headers
             .send({ newEmail })
-            .expect(400);
-
-            expect(response.body.error.code).toBe('E0201');
+            .expect(400); // Expecting a 400 Bad Request response
+    
+        expect(response.body.error.code).toBe('E0201');
     });
-
+    
     it('handles user not found error for update-email', async () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
         const newEmail = 'newemail@example.com';
-
+    
         await request(`http://localhost:${PORT}`)
-            .put('/api/user/update-email/' + nonExistentUserId)
+            .patch('/api/user/update-email/' + nonExistentUserId)
             .set('token', token) // Include the token in the request headers
             .send({ newEmail })
-            .expect(204);
+            .expect(204); // Expecting a 204 No Content response for user not found
     });
 
     it('updates user first name successfully', async () => {
@@ -117,7 +117,7 @@ describe('Update User Email Route', () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
     
         await request(`http://localhost:${PORT}`)
-            .put(`/api/user/update-first-name/${nonExistentUserId}`)
+            .patch(`/api/user/update-first-name/${nonExistentUserId}`)
             .set('token', token) // Include the token in the request headers
             .send({ newFirstName: 'NewFirstName' })
             .expect(204);
@@ -133,7 +133,7 @@ describe('Update User Email Route', () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
 
         await request(`http://localhost:${PORT}`)
-            .put(`/api/user/update-last-name/${nonExistentUserId}`)
+            .patch(`/api/user/update-last-name/${nonExistentUserId}`)
             .set('token', token) // Include the token in the request headers
             .send({ newLastName: 'NewLastName' })
             .expect(204);
@@ -147,7 +147,7 @@ describe('Update User Email Route', () => {
 
     const updateUserProperty = async (route, propertyName, propertyValue, dbField) => {
         await request(`http://localhost:${PORT}`)
-            .put(`/api/user/update-${route}/${fakeUser._id}`)
+            .patch(`/api/user/update-${route}/${fakeUser._id}`)
             .set('token', token) // Include the token in the request headers
             .send({ [propertyName]: propertyValue })
             .expect(200);
