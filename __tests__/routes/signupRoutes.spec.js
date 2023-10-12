@@ -12,9 +12,7 @@ app.use('/api/signup', router); // Mount the router under '/api/signup' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
-const server = app.listen(PORT, () => {
-	console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Create a fake user
 let fakeUser = makeFakeUser();

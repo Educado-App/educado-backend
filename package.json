@@ -63,8 +63,8 @@
     "verbose": true,
     "modulePathIgnorePatterns": [
       "<rootDir>/__tests__/fixtures",
-      "<rootDir>/__tests__/helpers",
-      "<rootDir>/__tests__/setup"
+      "<rootDir>/__tests__/setup",
+      "<rootDir>/__tests__/helpers/timeout.js"
     ],
     "globalSetup": "<rootDir>/__tests__/setup/jest-setup.js",
     "globalTeardown": "<rootDir>/__tests__/setup/jest-teardown.js",
