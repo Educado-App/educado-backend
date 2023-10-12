@@ -13,20 +13,50 @@ dotenv.config({ path: "./config/.env" });
 
 const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 // Creates a client
+
+
+// New GCP Bucket Instance
 const storage = new Storage({
   projectId: credentials.project_id,
   keyFilename: credentials,
 });
 
+// Constant variables
 const bucketName = "educado-bucket";
 const dir = "./_temp_bucketFiles";
 
+// New Multer Instance - for handling file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // no larger than 5mb
   },
 });
+
+// Get all content from bucket - filename, type, etc.
+router.get("/list", async (req, res) => {
+  console.log("GETTING LIST OF FILES FROM BUCKET");
+
+  try {
+    const [files] = await storage.bucket(bucketName).getFiles();
+
+    const fileNames = files.map((file) => file.name);
+    const fileTypes = files.map((file) => file.metadata.contentType);
+    const fileSizes = files.map((file) => file.metadata.size);
+
+    const fileData = {
+      fileNames: fileNames,
+      fileTypes: fileTypes,
+      fileSizes: fileSizes,
+    };
+
+    res.status(200).send(fileData);
+  } catch (err) {
+    console.log("An error occurred:", err);
+    res.status(400).send(`Error: ${err.message}`);
+  }
+});
+
 
 // Get image from GCP bucket
 router.get("/download", async (req, res) => {
@@ -74,6 +104,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   const fileName = req.body.fileName;
 
   if (!multerFile) {
+    console.error("No file uploaded.");
     res.status(400).send("No file uploaded.");
     return;
   }
@@ -84,18 +115,25 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   console.log("multerFile:", multerFile);
 
   //upload to bucket
-  uploadFile().catch(console.error);
+  try {
+    await uploadFile();
+    res.send(`${fileName} uploaded to bucket ${bucketName}`);
+  } catch (error) {
+    console.error('Error in file upload:', error);
+    res.status(500).send('Internal server error');
+  }
 
   async function uploadFile() {
-    // Uploads a local file to the bucket
-    await storage
-      .bucket(bucketName)
-      .file(fileName)
-      .save(buffer, {
-        metadata: {
-          contentType: multerFile.mimetype,
-        },
-      });
+    try {
+      // Uploads a local file to the bucket
+      await storage
+        .bucket(bucketName)
+        .file(fileName)
+        .save(buffer, {
+          metadata: {
+            contentType: multerFile.mimetype,
+          },
+        });
 
     // console.log(`${fileName} uploaded to ${bucketName}.`);
   }

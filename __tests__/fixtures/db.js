@@ -12,5 +12,8 @@ module.exports = async function connectDb() {
                 useFindAndModify: false
             }
         )
-    //db = db || connection.db(global.__MONGO_DB_NAME__)
+    //db = db || connection.db(global.MONGO_DB_NAME)
+    db = db || connection.connection.db; // Assign the database object
+
+    return db; // Return the database object
 }
