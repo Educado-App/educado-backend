@@ -32,18 +32,18 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 	}
 });
 
-// Update User Email route
-router.patch('/update-email/:id', requireLogin, async (req, res) => {
+// Update User with dynamic fields
+router.patch('/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { newEmail } = req.body;
+    const updateFields = req.body; // Fields to be updated dynamically
 
-    const emailValid = await validateEmail(newEmail);
+    const validFields = await validateFields(updateFields);
 
-    if (emailValid) {
+    if (validFields) {
       const updatedUser = await User.findByIdAndUpdate(
         id,
-        { email: newEmail },
+        { $set: updateFields },
         { new: true } // This ensures that the updated user document is returned
       );
 
@@ -51,46 +51,7 @@ router.patch('/update-email/:id', requireLogin, async (req, res) => {
         throw errorCodes['E0004'];
       }
 
-      res.status(200);
-      res.send(updatedUser);
-    }
-
-  } catch (error) {
-    if (error === errorCodes['E0004']) {
-      // Handle "user not found" error response here
-      res.status(204);
-    } else {
-      res.status(400);
-    }
-    
-    console.log(error);
-    res.send({
-      error: error
-    });
-  }
-});
-
-// Update User first name route
-router.patch('/update-first-name/:id', requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newFirstName } = req.body;
-
-    const nameValid = await validateName(newFirstName);
-
-    if (nameValid) {
-      const updatedUser = await User.findByIdAndUpdate(
-        id,
-        { firstName: newFirstName },
-        { new: true } // This ensures that the updated user document is returned
-      );
-
-      if (!updatedUser) {
-        throw errorCodes['E0004'];
-      }
-
-      res.status(200);
-      res.send(updatedUser)
+      res.status(200).send(updatedUser);
     }
 
   } catch (error) {
@@ -108,42 +69,25 @@ router.patch('/update-first-name/:id', requireLogin, async (req, res) => {
   }
 });
 
-// Update User last name route
-router.patch('/update-last-name/:id', requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newLastName } = req.body;
+async function validateFields(fields) {
+  const fieldEntries = Object.entries(fields);
 
-    const nameValid = await validateName(newLastName);
-
-    if (nameValid) {
-      const updatedUser = await User.findByIdAndUpdate(
-        id,
-        { lastName: newLastName },
-        { new: true } // This ensures that the updated user document is returned
-      );
-
-      if (!updatedUser) {
-        throw errorCodes['E0004'];
+  for (const [fieldName, fieldValue] of fieldEntries) {
+    if (fieldName === 'email') {
+      const emailValid = await validateEmail(fieldValue);
+      if (!emailValid) {
+        return false;
       }
-
-      res.status(200);
-      res.send(updatedUser)
+    } else if (fieldName === 'firstName' || fieldName === 'lastName') {
+      const nameValid = await validateName(fieldValue);
+      if (!nameValid) {
+        return false;
+      }
     }
-
-  } catch (error) {
-    if (error === errorCodes['E0004']) {
-      // Handle "user not found" error response here
-      res.status(204);
-    } else {
-      res.status(400);
-    }
-    
-    console.log(error);
-    res.send({
-			error: error
-		});
   }
-});
+  return true;
+}
+
+
   
   module.exports = router;
