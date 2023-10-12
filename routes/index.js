@@ -22,7 +22,7 @@ router.use('/api', AuthRoutes);
 router.use('/api/signup', SignupRoutes);
 router.use('/api/applications', ApplicationRoutes);
 router.use('/api/mail', MailRoutes);
-router.use('/api/user', UserRoutes);
+router.use('/api/users', UserRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

@@ -14,7 +14,7 @@ describe('Authentication Handler', () => {
         
         const user = makeUser(fakeUser)
         await userList.add(user)
-        
+
         const result = await authHandler.authenticate(fakeUser)
 
         expect(result.accessToken).toMatch('ey')
