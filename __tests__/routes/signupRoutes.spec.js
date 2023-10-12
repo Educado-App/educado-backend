@@ -22,6 +22,13 @@ describe('Signup User route', () => {
 
 	let db; // Store the database connection
 
+  const userInput = {
+    firstName: 'test user',
+    lastName: 'test user',
+    email: 'test@email.com',
+    password: 'ABC123456!',
+  };
+
 	beforeAll(async () => {
 		db = await connectDb(); // Connect to the database
 
@@ -29,17 +36,12 @@ describe('Signup User route', () => {
 		await db.collection('users').insertOne(fakeUser);
 	});
 
-	it('Check that the endpoint saves the user in the database', async () => {
-		const input = {
-			firstName: 'test user',
-			lastName: 'test user',
-			email: 'test@email.com',
-			password: 'ABC123456!',
-		};
+	it('Saves the user in the database', async () => {
+		
 
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/signup/user')
-			.send(input)
+			.send(userInput)
 			.expect(201);
 
 		// Verify that the user was saved in the database
@@ -50,15 +52,9 @@ describe('Signup User route', () => {
 
 
 	it('Returns error if email is missing', async () => {
-		const input = {
-			firstName: 'test user',
-			lastName: 'test user',
-			password: 'ABC123456!',
-		};
-
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/signup/user')
-			.send(input)
+			.send(userInput)
 			.expect(400);
 
 		expect(response.body.error.code).toBe('E0208');
