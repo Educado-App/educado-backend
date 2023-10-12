@@ -39,7 +39,7 @@
     "http-proxy-middleware": "^2.0.3",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^6.1.0",
-    "mongoose": "^5.10.9",
+    "mongoose": "^5.13.20",
     "multer": "^1.4.2",
     "multer-s3": "^2.10.0",
     "nodemailer": "^6.8.0",
