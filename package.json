@@ -11,7 +11,7 @@
     "start": "node index.js",
     "server": "nodemon index.js",
     "test": "jest --runInBand",
-    "dev": "NODE_ENV=development npm run server",
+    "dev": "set NODE_ENV=development && npm run server",
     "staging": "NODE_ENV=staging npm run server",
     "prod": "NODE_ENV=production npm run server",
     "docker": "docker-compose up -d",

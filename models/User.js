@@ -73,7 +73,19 @@ const userSchema = new Schema({
   },
   password: String,
   joinedAt: Date,
-  modifiedAt: Date
+  modifiedAt: Date,
+  points: {
+    type: Number,
+    default: 0
+  },
+  level: {
+      type: Number,
+      default: 1
+  },
+  subscriptions: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Courses'
+  }],
 });
 
 const UserModel = mongoose.model('users', userSchema);
