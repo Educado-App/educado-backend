@@ -5,8 +5,10 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { compare, encrypt } = require("../helpers/password");
 
-// Content Creator Application Route
+// Content Creator Signup Route
 router.post("/signup", async (req, res) => {
+
+  //Password is first and foremost hashed, and subsequently redifined in the form below
   const hashpassword = encrypt(req.body.password)
     
   const form = req.body;
@@ -29,21 +31,26 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  //Find the specific content creator by their email for subsequent use
   const contentCreator = await ContentCreatorApplication.findOne({ email: email })
   
   try {
      
+    //If the email isn't found, an error will be thrown, which can be displayed in the frontend
     if(!contentCreator){
       console.log("Wrong User")
-      res.status(404).json({ msg: "An Account with this email does not exist"  });
+      res.status(404).json({ msg: "Não existe uma conta com este e-mail"  });
     }
     
+    //If the passwords don't match, an error will be thrwn, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
-      res.status(404).json({ msg: "Wrong Password" });
+      res.status(404).json({ msg: "Senha incorreta" });
 
     }
     
+    //If both email and passwords match, a 200 response will be generated, and used in the frontend to validate the login
     if (compare(password, contentCreator.password) && email == contentCreator.email){
       const token = jwt.sign({email: contentCreator.email, password: contentCreator.password},'secretfortoken',{ expiresIn: '3h' });
 
