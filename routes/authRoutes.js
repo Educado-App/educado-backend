@@ -34,6 +34,7 @@ router.get("/auth/google/callback",
 // Login
 router.post("/auth/login", async (req, res) => {
   try {
+    console.log("login")
     // Searching for a single user in the database, with the email provided in the request body
     const user = await User.findOne({ email: req.body.email });
     // If email is found, compare the password provided in the request body with the password in the database

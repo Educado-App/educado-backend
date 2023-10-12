@@ -9,7 +9,8 @@ const lectureSchema = new Schema({
     parentSection: { type: Schema.Types.ObjectId, ref: "sections" },
     image: String,
     video: String,
-    components: [{ type: Schema.Types.ObjectId, ref: "lectureComponents" }]
+    completed: Boolean,
+    // components: [{ type: Schema.Types.ObjectId, ref: "lectureComponents" }]
   }, { timestamps: true });
   
   const LectureModel = mongoose.model("lectures", lectureSchema);

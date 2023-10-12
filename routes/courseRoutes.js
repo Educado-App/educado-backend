@@ -12,7 +12,7 @@ const { ComponentModel } = require("../models/Components");
 const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 const { LectureModel } = require("../models/Lecture");
-const { LectureContentModel } = require("../models/LectureComponent");
+//const { LectureContentModel } = require("../models/LectureComponent");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
@@ -228,7 +228,7 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 //create lecture
 router.post("/lecture/create", async (req, res) => {
   //we need section id to create a lecture
-  const { parentSection, title, description, image, video, components } =
+  const { parentSection, title, description, image, video } =
     req.body;
 
   console.log("creating lecture with this data:");
@@ -243,7 +243,7 @@ router.post("/lecture/create", async (req, res) => {
     parentSection: parentSection,
     image: "",
     video: "",
-    components: components || [],
+    completed: false,
   });
 
   try {
@@ -260,38 +260,38 @@ router.post("/lecture/create", async (req, res) => {
 
 //CREATED BY VIDEOSTREAMING TEAM
 //add lecture component to lecture and update lecture
-router.post("/component/create", async (req, res) => {
-  const { parentLecture, title, text } = req.body;
+// router.post("/component/create", async (req, res) => {
+//   const { parentLecture, title, text } = req.body;
 
-  if (!parentLecture || !title || !text)
-    return res.status(422).send("Missing parentLecture , title or text");
+//   if (!parentLecture || !title || !text)
+//     return res.status(422).send("Missing parentLecture , title or text");
 
-  const newComponent = new LectureContentModel({
-    title: title,
-    text: text,
-    parentLecture: parentLecture,
-  });
+//   const newComponent = new LectureContentModel({
+//     title: title,
+//     text: text,
+//     parentLecture: parentLecture,
+//   });
 
-  try {
-    await newComponent.save();
-    lecture = await LectureModel.findById(parentLecture);
-    await lecture.components.push(newComponent._id);
-    await lecture.save();
-    return res.send(lecture);
-  } catch (err) {
-    return res.send(err);
-  }
-});
+//   try {
+//     await newComponent.save();
+//     lecture = await LectureModel.findById(parentLecture);
+//     await lecture.components.push(newComponent._id);
+//     await lecture.save();
+//     return res.send(lecture);
+//   } catch (err) {
+//     return res.send(err);
+//   }
+// });
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
-router.get("/lecture/get", async (req, res) => {
-  if (!req.query.lecture_id)
+router.get("/lecture/:lectureId", async (req, res) => {
+  if (!req.params.lectureId)
     return res.send(
-      "Missing query parameters. use endpoint like this: /lecture/get?lecture_id=someLectureId"
+      "Missing query parameters"
     );
 
-  const lectureId = req.query.lecture_id;
+  const lectureId = req.params.lectureId;
 
   let lecture = await LectureModel.findById(lectureId).catch((err) => {
     console.log(err);
@@ -300,27 +300,27 @@ router.get("/lecture/get", async (req, res) => {
   if (lecture === null)
     return res.send("No section found with id: " + lectureId);
 
-  //get LectureComponents
-  const components = await LectureContentModel.find({
-    parentLecture: lectureId,
-  }).catch((err) => {
-    console.log(err);
-  });
+  // //get LectureComponents
+  // const components = await LectureContentModel.find({
+  //   parentLecture: lectureId,
+  // }).catch((err) => {
+  //   console.log(err);
+  // });
 
-  lecture.components = components;
+  // lecture.components = components;
 
   return res.send(lecture);
 });
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get section by id
-router.get("/section/get", async (req, res) => {
-  if (!req.query.section_id)
+router.get("/section/:sectionId", async (req, res) => {
+  if (!req.params.sectionId)
     return res.send(
-      "Missing query parameters. use endpoint like this: /lectures/get?section_id=someSectionId"
+      "Missing query parameters. use endpoint like this: /section/section_id"
     );
 
-  const section_id = req.query.section_id;
+  const section_id = req.params.sectionId;
 
   let section = await SectionModel.findById(section_id).catch((err) => {
     console.log(err);
