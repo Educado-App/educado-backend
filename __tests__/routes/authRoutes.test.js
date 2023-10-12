@@ -1,6 +1,6 @@
 const request = require('supertest');
 const express = require('express');
-const { router, generatePasswordResetToken, getRandomNumber } = require('../../routes/authRoutes'); // Import your router file here
+const router = require('../../routes/authRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');

@@ -152,8 +152,6 @@ router.get('/current_user', (req, res) => {
 	}, 1500);
 });
 
-module.exports = router;
-
 /**
  * Generates a random 4 digit code for password reset
  * @returns {String} - 4 digit code as a string
