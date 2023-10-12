@@ -108,8 +108,6 @@ router.get('/:id/subscriptions', async (req, res) => {
     // Find courses based on the subscribed course IDs
     const list = await CourseModel.find({ '_id': { $in: subscribedCourses } });
 
-	console.log(userId);
-	console.log(list);
     res.send(list);
 
   } catch (error) {
