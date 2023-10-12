@@ -12,9 +12,7 @@ app.use('/api/users', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5023; // Choose a port for testing
-const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Mocked token secret
 const TOKEN_SECRET = 'test';
