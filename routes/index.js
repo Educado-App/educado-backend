@@ -25,3 +25,6 @@ router.use("/api/mail", MailRoutes);
 router.use("/api/user", UserRoutes);
 
 module.exports = router;
+
+
+/* {"mongoDBName":"jest","mongoUri":"mongodb://127.0.0.1:51631/"} */

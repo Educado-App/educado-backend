@@ -17,7 +17,6 @@ const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
-const { UserModel } = require("../models/User");
 const { IdentityStore } = require("aws-sdk");
 
 //Why is all this out commented? Have it been replaced whit something else?
@@ -340,6 +339,8 @@ router.get("/section/get", async (req, res) => {
 
   let _tempSection = JSON.parse(JSON.stringify(section));
   _tempSection.components = lectures;
+
+  return res.send(_tempSection);
 });
 
 // Section routes
