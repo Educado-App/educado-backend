@@ -10,7 +10,8 @@ const send = require('send');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
 
-const EXPIRATION_TIME = 1000 * 60 * 5;
+const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
+const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5; //1000 * 60 * 60;
 
 // Services
 //require("../services/passport");
@@ -83,6 +84,27 @@ router.post('/reset-password-request', async (req, res) => {
     return res.status(400).json({ error: errorCodes['E0401'] });
   }
 
+  // Delete any attempts older than 1 hour
+  if(user.resetAttempts != null) {
+    user.resetAttempts.forEach(async (attempt) => {
+      if(attempt === null || attempt < (Date.now() - ATTEMPT_EXPIRATION_TIME) ) {
+        user.resetAttempts.remove(attempt);
+        await User.updateOne({ _id: user._id }, user);
+      }
+    });
+  } else {
+    user.resetAttempts = [];
+    await User.updateOne({ _id: user._id }, user);
+  }
+  // If there are more than 2 attempts in the last hour, return error E0406
+  if(user.resetAttempts.length > 2) {
+    return res.status(400).json({ error: errorCodes['E0406'] });
+  }
+
+  user.resetAttempts.push(Date.now());
+  
+  await User.updateOne({ _id: user._id }, user);
+
   // Delete any existing token
   let token = await PasswordResetToken.findOne({ userId: user._id });
   if (token) await token.deleteOne();
@@ -95,7 +117,7 @@ router.post('/reset-password-request', async (req, res) => {
   await new PasswordResetToken({
     userId: user._id,
     token: hash,
-    expiresAt: Date.now() + EXPIRATION_TIME // 5 minutes
+    expiresAt: Date.now() + TOKEN_EXPIRATION_TIME // 5 minutes
   }).save();
 
   // Send email with reset token

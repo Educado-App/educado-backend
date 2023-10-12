@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
 const { sendResetPasswordEmail } = require('../../helpers/email');
 const exp = require('constants');
+const { User } = require('../../models/User');
 
 
 const app = express();
@@ -157,6 +158,25 @@ describe('Reset password request route', () => {
       .expect(500);
     expect(res.body.error.code).toBe('E0004');
   });
+
+  it('Returns error if reset password attempts > 3', async () => {
+    const newFakeUser = makeFakeUser();
+    // Set reset password attempts to have 3 attempts
+    newFakeUser.resetAttempts = [new Date(), new Date(), new Date()]; 
+    newFakeUser.email = 'mail@test.com'; // Change email to avoid duplicate key error
+    await db.collection('users').insertOne(newFakeUser);
+    sendResetPasswordEmail.mockImplementation(() => true);
+    const user = { email: newFakeUser.email }
+    console.log(await db.collection('users').findOne({ email: newFakeUser.email }));
+    const res = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/reset-password-request')
+      .send(user)
+      .expect(400);
+
+    expect(res.body.error.code).toBe('E0406');
+  });
+
+  // TODO: Test if reset password attempts are deleted after 1 hour
 
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
