@@ -258,6 +258,8 @@ router.post("/lecture/create", async (req, res) => {
   }
 });
 
+
+
 //CREATED BY VIDEOSTREAMING TEAM
 //add lecture component to lecture and update lecture
 // router.post("/component/create", async (req, res) => {
@@ -344,23 +346,33 @@ router.get("/section/:sectionId", async (req, res) => {
 });
 
 // Section routes
-router.post("/section/create", requireLogin, async (req, res) => {
-  const { title, course_id } = req.body; // Or query?...
+router.post("/section/create", async (req, res) => {
+  const { title, course_id, description } = req.body; // Or query?...
+
+  console.log("body", req.body);
+  console.log("creating section with this data:");
+  
+
 
   const section = new SectionModel({
     title: title,
-    description: "",
+    exercises: [],
+    parentCourse: course_id,
+    description: description,
+    totalPoints: 100,
+    sectionNumber: 1,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     components: [],
   });
+  console.log("section", section);
 
   try {
     await section.save();
     course = await CourseModel.findById(course_id);
     await course.sections.push(section._id);
     await course.save();
-    res.send(course);
+    res.send({course : course, section : section});
   } catch (err) {
     res.status(422).send(err);
   }
@@ -632,6 +644,24 @@ router.get("/courses/:id", async (req, res) => {
   }
 
 })
+
+
+// delete section by id - USE WITH CAUTION SO YOU DONT MESS UP DATABASE RELATIONS
+router.delete("/sections/:id", async (req, res) => {
+  
+    try {
+      const { id } = req.params; 
+  
+      // find a section based on it's id and delete it
+      const section = await SectionModel.findByIdAndDelete(id);
+      res.send(section);
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  
+});
 
 
 // Get all sections from course
