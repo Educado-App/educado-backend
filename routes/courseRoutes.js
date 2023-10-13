@@ -1,14 +1,10 @@
 const router = require('express').Router();
-const errorCodes = require('../helpers/errorCodes');
-const express = require('express');
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Models
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
+const { ContentCreatorApplication } = require('../models/ContentCreatorApplication');
 const requireLogin = require('../middlewares/requireLogin');
 const adminOnly = require('../middlewares/adminOnly');
 
@@ -87,6 +83,13 @@ router.post('/courses/update', requireLogin, async (req, res) => {
 router.get('/courses', adminOnly, async (req, res) => {
 	const result = await CourseModel.find({});
 	res.send(result);
+});
+
+// FIXME: no error handling, just needed the endpoint - Mvh. Frederik
+router.get('/courses/:id', async (req, res) => {
+	const { id } = req.params; // destructure params
+	const course = await CourseModel.findById(id);
+	res.send(course);
 });
 
 // Get all courses for one user
@@ -222,12 +225,12 @@ router.post('/section/create', requireLogin, async (req, res) => {
 });
 
 // Get all sections
-router.post("/course/sections", requireLogin, async (req, res) => {
+router.post('/courses/getallsections', requireLogin, async (req, res) => {
 	const { sections } = req.body;
 	let list = [];
 	for (let i = 0; i < sections.length; i++) {
-	const temp = await SectionModel.findOne({ _id: sections[i] });
-	list.push(temp);
+		const temp = await SectionModel.findOne({ _id: sections[i] });
+		list.push(temp);
 	}
 	res.send(list);
 });
@@ -324,8 +327,8 @@ router.post('/section/delete', requireLogin, async (req, res) => {
 	res.send(sectionIds);
 });
 
-// Create Component
-router.post("/component/create", async (req, res) => {
+//Create Component
+router.post('/component/create', async (req, res) => {
 	const { type, section_id } = req.body; // Or query?...
 
 	const component = new ComponentModel({
@@ -348,12 +351,12 @@ router.post("/component/create", async (req, res) => {
 });
 
 //Get all components
-router.post("/component/all", async (req, res) => {
+router.post('/component/getallcomponents', async (req, res) => {
 	const { components } = req.body;
 	let list = [];
 	for (let i = 0; i < components.length; i++) {
-	const temp = await ComponentModel.findOne({ _id: components[i] });
-	list.push(temp);
+		const temp = await ComponentModel.findOne({ _id: components[i] });
+		list.push(temp);
 	}
 	res.send(list);
 });
@@ -413,6 +416,16 @@ router.post('/component/delete', requireLogin, async (req, res) => {
 	});
 
 	res.send(componentIds);
+});
+
+router.post('/eml/courses/getallsections', async (req, res) => {
+	const { sections } = req.body;
+	let list = [];
+	for (let i = 0; i < sections.length; i++) {
+		const temp = await SectionModel.findOne({ _id: sections[i] });
+		list.push(temp);
+	}
+	res.send(list);
 });
 
 // Delete all documents for user
