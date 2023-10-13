@@ -75,6 +75,7 @@ const userSchema = new Schema({
   joinedAt: Date,
 	resetAttempts: [Date],
   modifiedAt: Date
+  subscriptions: [{ type: Schema.Types.ObjectId, ref: "courses" }]
 });
 
 const UserModel = mongoose.model('users', userSchema);

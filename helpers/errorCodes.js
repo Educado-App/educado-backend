@@ -1,24 +1,49 @@
 module.exports = {
 
-  // E00 - General errors
-  E0000: {
-    code: 'E0000',
-    message: 'Unknown error'
-  },
-  E0001: {
-    code: 'E0001',
-    message: 'Authentication token is invalid or expired.'
-  },
-  E0002: {
-    code: 'E0002',
-    message: 'Users role does not have the necessary permissions for this action'
-  },
-  E0003: {
-    code: 'E0003',
-    message: 'Server could not be reached'
-  },
-  E0004: {
-    code: 'E0004',
+  
+	// E00 - General errors
+	E0000: {
+		code: 'E0000',
+		message: 'Unknown error'
+	},
+	E0001: {
+		code: 'E0001',
+		message: 'Authentication token is invalid or expired.'
+	},
+	E0002: {
+		code: 'E0002',
+		message: 'Users role does not have the necessary permissions for this action'
+	},
+	E0003: {
+		code: 'E0003',
+		message: 'Server could not be reached'
+	},
+	E0004: {
+		code: 'E0004',
+		message: 'User not found'
+	},
+	E0005: {
+		code: 'E0005',
+		message: 'No courses found'
+	},
+	E0006: {
+		code: 'E0006',
+		message: 'Course not found'
+	},
+	E0007: {
+		code: 'E0007',
+		message: 'No sections found'
+	},
+	E0008: {
+		code: 'E0008',
+		message: 'Section not found'
+	},
+	E0009:{
+		code: 'E0009',
+		message:'Course does not contain sections'
+	},
+  E0010: {
+    code: 'E0010',
     message: 'Email could not be sent'
   },
 
@@ -125,18 +150,37 @@ module.exports = {
     code: 'E0406',
     message: 'Too many requests. Please try again later.'
   },
+  
+	// E05 - Verification errors
+	E0501: {
+		code: 'E0501',
+		message: 'Account is already verified.'
+	},
+	E0502: {
+		code: 'E0502',
+		message: 'Verification link has expired.'
+	},
+	E0503: {
+		code: 'E0503',
+		message: 'Verification link is invalid or has already been used.'
+	},
 
-// E05 - Verification errors
-E0501: {
-  code: 'E0501',
-    message: 'Account is already verified.'
-},
-E0502: {
-  code: 'E0502',
-    message: 'Verification link has expired.'
-},
-E0503: {
-  code: 'E0503',
-    message: 'Verification link is invalid or has already been used.'
-}
+	// E06 - Subscription errors
+
+	E0601: {
+		code: 'E0601',
+		message: 'Could not subscribe to course'
+	},
+	E0602: {
+		code: 'E0602',
+		message: 'Could not unsubscribe to course'
+	},
+	E0603: {
+		code: 'E0603',
+		message: 'Could not get users subscriptions'
+	},
+	E0604: {
+		code: 'E0604',
+		message: 'Could not check users subscriptions'
+	}
 };
