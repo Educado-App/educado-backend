@@ -76,6 +76,41 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
   }
 });
 
+// Mark courses, sections, and exercises as completed for a user
+router.post('/:id/completed', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { courseId, sectionId, exerciseId } = req.body;
+
+    // Retrieve the user by ID
+    const user = await User.findById(id);
+
+    if (!user) {
+      throw errorCodes['E0004'];
+    }
+
+    markAsCompleted(user, courseId, sectionId, exerciseId);
+
+    // Save the updated user object
+    await user.save();
+
+    res.status(200).send(user);
+  } catch (error) {
+    if (error === errorCodes['E0004']) {
+      // Handle "user not found" error response here
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+    
+    console.log(error);
+    res.send({
+			error: error
+		});
+  }
+});
+
+
 async function validateFields(fields) {
   const fieldEntries = Object.entries(fields);
 
@@ -125,5 +160,40 @@ async function updateUserLevel(user, earnedPoints) {
   // Update user points and level in the database
   await User.updateOne({ _id: user._id }, { points: user.points, level: user.level });
 }
+
+
+function markAsCompleted(user, courseId, sectionId, exerciseId) {
+  // Check if the user has already completed the exercise
+  const exerciseCompleted = user.completedExercises.includes(exerciseId);
+  if (!exerciseCompleted) {
+    // Add the exercise to the user's completed exercises
+    user.completedExercises.push(exerciseId);
+  }
+
+  // Check if all exercises in the section are completed
+  const section = user.completedSections.find((section) => section.sectionId.equals(sectionId));
+  if (section) {
+    const allExercisesCompleted = section.completedExercises.every((exercise) =>
+      user.completedExercises.includes(exercise)
+    );
+    if (allExercisesCompleted && !user.completedSections.includes(sectionId)) {
+      // Add the section to the user's completedSections
+      user.completedSections.push(sectionId);
+    }
+  }
+
+  // Check if all sections in the course are completed
+  const course = user.completedCourses.find((course) => course.courseId.equals(courseId));
+  if (course) {
+    const allSectionsCompleted = course.completedSections.every((section) =>
+      user.completedSections.includes(section)
+    );
+    if (allSectionsCompleted && !user.completedCourses.includes(courseId)) {
+      // Add the course to the user's completedCourses
+      user.completedCourses.push(courseId);
+    }
+  }
+}
+
   
   module.exports = router;

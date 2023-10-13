@@ -74,6 +74,10 @@ const userSchema = new Schema({
   password: String,
   joinedAt: Date,
   modifiedAt: Date,
+  subscriptions: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Courses'
+  }],
   points: {
     type: Number,
     default: 0
@@ -82,10 +86,28 @@ const userSchema = new Schema({
       type: Number,
       default: 1
   },
-  subscriptions: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Courses'
-  }],
+  completedCourses: [
+    {
+        courseId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Courses' // Reference to Courses model
+        },
+        completedSections: [
+            {
+                sectionId: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Sections' // Reference to Sections model
+                },
+                completedExercises: [
+                    {
+                        type: Schema.Types.ObjectId,
+                        ref: 'Exercises' // Reference to Exercises model
+                    }
+                ]
+            }
+        ]
+    }
+]
 });
 
 const UserModel = mongoose.model('users', userSchema);
