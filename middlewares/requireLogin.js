@@ -1,4 +1,5 @@
 const { verify } = require('../helpers/token');
+const errorCodes = require('../helpers/errorCodes');
 
 module.exports = (req, res, next) => {
 	try {
@@ -10,7 +11,6 @@ module.exports = (req, res, next) => {
     }
 		next();
 	} catch {
-		// TODO: add updated error messages
-		return res.status(401).send({ error: 'You must be logged in!' });
+		return res.status(401).send({ 'error': errorCodes['E0001'] });
 	}
 };

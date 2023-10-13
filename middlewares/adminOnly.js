@@ -1,4 +1,5 @@
 const { verify } = require('../helpers/token');
+const errorCodes = require('../helpers/errorCodes');
 
 const ADMIN_ID = 'srdfet784y2uioejqr'
 
@@ -11,6 +12,6 @@ module.exports = (req, res, next) => {
 		next();
 	} catch {
 		// TODO: add updated error messages
-		return res.status(401).send({ error: 'You must be logged in to acces this content!' });
+		return res.status(401).send({ 'error': errorCodes['E0002'] });
 	}
 };

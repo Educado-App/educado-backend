@@ -20,7 +20,7 @@ const courseSchema = new Schema({
 	coverImg: String,
 	category: {
     type: String,
-    enum: ['Math', 'Science', 'Finance', 'Language', 'Sustainability', 'Other'],
+    enum: ['personal finance', 'health and workplace safety', 'sewing', 'flectronics', 'other'],
   },
 	published: Boolean,
 	sections: [{ 
