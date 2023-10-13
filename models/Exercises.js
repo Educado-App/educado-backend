@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const exerciseSchema = new Schema({
-    parentSection: [{ type: Schema.Types.ObjectId, ref: 'Section' }],
+    parentSection: [{ type: Schema.Types.ObjectId, ref: 'Sections' }],
     description: {
         type: String,
         required: true

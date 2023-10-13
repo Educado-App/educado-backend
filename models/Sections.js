@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const sectionSchema = new Schema({
     title: String,
     description: String,
-    exercises: [{ type: Schema.Types.ObjectId, ref: 'Exercise' }],
+    exercises: [{ type: Schema.Types.ObjectId, ref: 'Exercises' }],
     sectionNumber: Number,
     totalPoints: {
         type: Number,
@@ -21,7 +21,7 @@ const sectionSchema = new Schema({
         default: Date.now
     },
     components: [{ type: Schema.Types.ObjectId, ref: 'Component' }],
-    parentCourse: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
+    parentCourse: [{ type: Schema.Types.ObjectId, ref: 'Courses' }]
 });
 
 const SectionModel = mongoose.model('sections', sectionSchema);

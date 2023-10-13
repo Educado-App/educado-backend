@@ -1,5 +1,5 @@
 const { patterns } = require('../helpers/patterns');
-const { User } = require('../models/User');
+const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
 
 async function validateEmail(input) {
@@ -21,7 +21,7 @@ async function validateEmail(input) {
    * extension letters.
    */
 
-	if (await User.findOne({email: input}) != null) {
+	if (await UserModel.findOne({email: input}) != null) {
 		throw errorCodes['E0201']; // User with the provided email already exists
 	}
 	if (!(emailPattern.test(input))) {

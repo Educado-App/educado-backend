@@ -1,14 +1,17 @@
 const router = require('express').Router();
 const { validateEmail, validateName, validatePoints } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
-const { User } = require('../models/User');
+const { UserModel } = require('../models/Users');
+const { CourseModel } = require('../models/Courses');
+const { SectionModel } = require('../models/Sections');
+const { ExerciseModel } = require('../models/Exercises');
 const requireLogin = require('../middlewares/requireLogin');
 
 router.delete('/delete/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedUser = await UserModel.findByIdAndDelete(id);
 
     if (!deletedUser) {
       throw errorCodes['E0004'];
@@ -44,7 +47,7 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
       // Extracts the points and level fields from updateFields
       const { points, level, ...otherFields } = updateFields;
 
-      const updatedUser = await User.findByIdAndUpdate(
+      const updatedUser = await UserModel.findByIdAndUpdate(
         id,
         { $set: otherFields },
         { new: true } // This ensures that the updated user document is returned
@@ -77,22 +80,19 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 });
 
 // Mark courses, sections, and exercises as completed for a user
-router.post('/:id/completed', requireLogin, async (req, res) => {
+router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
   try {
     const { id } = req.params;
-    const { courseId, sectionId, exerciseId } = req.body;
+    const { exerciseId } = req.body;
 
     // Retrieve the user by ID
-    const user = await User.findById(id);
+    const user = await UserModel.findById(id);
 
     if (!user) {
       throw errorCodes['E0004'];
     }
 
-    markAsCompleted(user, courseId, sectionId, exerciseId);
-
-    // Save the updated user object
-    await user.save();
+    markAsCompleted(user, exerciseId);
 
     res.status(200).send(user);
   } catch (error) {
@@ -158,42 +158,72 @@ async function updateUserLevel(user, earnedPoints) {
   }
 
   // Update user points and level in the database
-  await User.updateOne({ _id: user._id }, { points: user.points, level: user.level });
+  await UserModel.updateOne({ _id: user._id }, { points: user.points, level: user.level });
 }
 
 
-function markAsCompleted(user, courseId, sectionId, exerciseId) {
+async function markAsCompleted(user, exerciseId) {
+  // Retrieve the exercise by ID to find sectionId
+  const exercise = await ExerciseModel.findById(exerciseId);
+  const sectionId = exercise.parentSection;
+  const section = await SectionModel.findById(sectionId);
+  const courseId = section.parentCourse;
+  const course = await CourseModel.findById(courseId);
+
+  // Ensure user.completedExercises is initialized as an empty array if it's null or undefined
+  if (!user.completedExercises) {
+    user.completedExercises = [];
+  }
+
+  if (!user.completedSections) {
+    user.completedSections = [];
+  }
+
+  if (!user.completedCourses) {
+    user.completedCourses = [];
+  }
+
   // Check if the user has already completed the exercise
-  const exerciseCompleted = user.completedExercises.includes(exerciseId);
-  if (!exerciseCompleted) {
+  if (!user.completedExercises.includes(exerciseId)) {
     // Add the exercise to the user's completed exercises
     user.completedExercises.push(exerciseId);
   }
 
   // Check if all exercises in the section are completed
-  const section = user.completedSections.find((section) => section.sectionId.equals(sectionId));
   if (section) {
-    const allExercisesCompleted = section.completedExercises.every((exercise) =>
-      user.completedExercises.includes(exercise)
-    );
-    if (allExercisesCompleted && !user.completedSections.includes(sectionId)) {
+    const allExercisesCompleted = await Promise.all(section.exercises.map(async (exercise) => {
+      return user.completedExercises.includes(exercise.toString());
+    }));
+    if (allExercisesCompleted.every((completed) => completed) && !user.completedSections.includes(sectionId.toString())) {
       // Add the section to the user's completedSections
-      user.completedSections.push(sectionId);
+      user.completedSections.push(sectionId.toString());
     }
   }
 
   // Check if all sections in the course are completed
-  const course = user.completedCourses.find((course) => course.courseId.equals(courseId));
   if (course) {
-    const allSectionsCompleted = course.completedSections.every((section) =>
-      user.completedSections.includes(section)
-    );
-    if (allSectionsCompleted && !user.completedCourses.includes(courseId)) {
+    const allSectionsCompleted = await Promise.all(course.sections.map(async (section) => {
+      return user.completedSections.includes(section.toString());
+    }));
+    if (allSectionsCompleted.every((completed) => completed) && !user.completedCourses.includes(courseId.toString())) {
       // Add the course to the user's completedCourses
-      user.completedCourses.push(courseId);
+      user.completedCourses.push(courseId.toString());
     }
   }
+
+  // Update the user object in the database
+  await UserModel.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        completedExercises: user.completedExercises,
+        completedSections: user.completedSections,
+        completedCourses: user.completedCourses,
+      },
+    }
+  );
 }
+
 
   
   module.exports = router;

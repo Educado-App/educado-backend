@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { encrypt } = require('../helpers/password');
 const { validateEmail, validateName } = require('../helpers/validation');
 const { ContentCreatorApplication } = require('../models/ContentCreatorApplication');
-const {User} = require('../models/User');
+const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
 
 // Content Creator Application Route
@@ -43,7 +43,7 @@ router.post('/user', async (req, res) => {
 			const hashedPassword = encrypt(form.password);
 			//Overwriting the plain text password with the hashed password 
 			form.password = hashedPassword;
-			const doc = User(form);
+			const doc = UserModel(form);
 			const created = await doc.save();  // Save user
 			res.status(201);
 			res.send(created);

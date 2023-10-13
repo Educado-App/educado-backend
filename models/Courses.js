@@ -9,13 +9,13 @@ const { Schema } = mongoose;
 const courseSchema = new Schema({
 	title: String,
 	description: String,
-	_user: { type: Schema.Types.ObjectId, ref: 'User' },
+	_user: { type: Schema.Types.ObjectId, ref: 'Users' },
 	dateCreated: Date,
 	dateUpdated: Date,
 	coverImg: String,
 	category: String,
 	published: Boolean,
-	sections: [{ type: Schema.Types.ObjectId, ref: 'Component' }],
+	sections: [{ type: Schema.Types.ObjectId, ref: 'Sections' }],
 });
 
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema

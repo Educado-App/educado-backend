@@ -1,4 +1,4 @@
-const { UserModel } = require('../models/User');
+const { UserModel } = require('../models/Users');
 const Email = require('../helpers/email');
 const Password = require('../helpers/password');
 

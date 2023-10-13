@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../models/User'); // Import User model
+const { UserModel } = require('../models/Users'); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
