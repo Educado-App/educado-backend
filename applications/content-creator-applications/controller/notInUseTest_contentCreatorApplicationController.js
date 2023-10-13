@@ -1,3 +1,4 @@
+
 const connectDb = require('../../../__tests__/fixtures/db');
 const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/fakeContentCreatorApplication');
 
@@ -27,6 +28,8 @@ describe('Content Creator Application Controller', () => {
 		expect(response.status).toBe(201);
 		expect(response.success).toBe(true);
 	});
+
+	
 
 	it('gets a specific content creator application', async () => {
 		const fakeApplication = makeFakeContentCreatorApplication();

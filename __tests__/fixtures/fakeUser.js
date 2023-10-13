@@ -9,6 +9,9 @@ module.exports = function makeFakeUser() {
         joinedAt: new Date(),
         modifiedAt: new Date(),
         firstName: 'Fake first name',
-        lastName: 'Fake last name'
+        lastName: 'Fake last name',
+        subscriptions: [ 
+
+		]
     }
 }

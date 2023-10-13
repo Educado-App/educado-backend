@@ -55,8 +55,9 @@ router.post('/auth/login', async (req, res) => {
 				status: 'login successful',
 				accessToken: token,
 				user: {
-					name: user.name,
-					email: user.email,
+          name: user.name,
+          email: user.email,
+          id: user.id,
 				},
 			});
 		} else {

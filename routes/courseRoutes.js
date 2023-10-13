@@ -1,14 +1,24 @@
 const router = require('express').Router();
+const errorCodes = require('../helpers/errorCodes');
+const express = require('express');
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Models
-const { CourseModel } = require('../models/Courses');
-const { SectionModel } = require('../models/Sections');
-const { ComponentModel } = require('../models/Components');
+const { CourseModel } = require("../models/Courses");
+const { SectionModel } = require("../models/Sections");
+const { ComponentModel } = require("../models/Components");
+const { User } = require("../models/User");
 const {
 	ContentCreatorApplication,
-} = require('../models/ContentCreatorApplication');
-const requireLogin = require('../middlewares/requireLogin');
+} = require("../models/ContentCreatorApplication");
+const requireLogin = require("../middlewares/requireLogin");
+const { UserModel } = require("../models/User");
+const { IdentityStore } = require("aws-sdk");
 
+//Why is all this out commented? Have it been replaced whit something else?
+/*
 // Content Creator Application Route
 router.post('/course/', async (req, res) => {
 	const { title, description } = req.body;
@@ -76,24 +86,39 @@ router.post('/course/update', requireLogin, async (req, res) => {
 	res.send('Course Update Complete');
 });
 
-// Get all courses for user
-router.get('/course/getall', async (req, res) => {
-	const list = await CourseModel.find({ _user: req.user.id });
-	res.send(list);
+
+
+
+// Get all courses id
+router.get("/courses/all/id", async (req, res) => {
+
+	try {
+	// Searching for all courses in database
+	const course = await CourseModel.find();
+	console.log("ID: " + course._id);
+	if (!course) {
+		// If no course is found, return an error message
+		console.log("No courses found")
+		return res.status(404).json({
+		"message": "No courses found"
+		});
+	} else {
+		console.log("ID: " + course.id);
+		return res.status(202).json({
+		status: 'course fetched successful',
+		course: {
+			id: course.id,
+		},
+		});
+	}
+	} catch (err) { 
+	console.log(err)
+	return res.status(500).json({ 
+		"error": { "code": 500, "message": "Server could not be reached" }
+	});
+	}
 });
 
-// Get all courses for user
-router.get('/course/eml/getall', async (req, res) => {
-	const list = await CourseModel.find();
-	res.send(list);
-});
-
-// FIXME: no error handling, just needed the endpoint - Mvh. Frederik
-router.get('/course/:id', async (req, res) => {
-	const { id } = req.params; // destructure params
-	const course = await CourseModel.findById(id);
-	res.send(course);
-});
 
 // Update course title
 router.post('/course/update/title', async (req, res) => {
@@ -220,12 +245,12 @@ router.post('/section/create', requireLogin, async (req, res) => {
 });
 
 // Get all sections
-router.post('/course/getallsections', requireLogin, async (req, res) => {
+router.post("/course/sections", requireLogin, async (req, res) => {
 	const { sections } = req.body;
 	let list = [];
 	for (let i = 0; i < sections.length; i++) {
-		const temp = await SectionModel.findOne({ _id: sections[i] });
-		list.push(temp);
+	const temp = await SectionModel.findOne({ _id: sections[i] });
+	list.push(temp);
 	}
 	res.send(list);
 });
@@ -322,8 +347,8 @@ router.post('/section/delete', requireLogin, async (req, res) => {
 	res.send(sectionIds);
 });
 
-//Create Component
-router.post('/component/create', async (req, res) => {
+// Create Component
+router.post("/component/create", async (req, res) => {
 	const { type, section_id } = req.body; // Or query?...
 
 	const component = new ComponentModel({
@@ -346,12 +371,12 @@ router.post('/component/create', async (req, res) => {
 });
 
 //Get all components
-router.post('/component/getallcomponents', async (req, res) => {
+router.post("/component/all", async (req, res) => {
 	const { components } = req.body;
 	let list = [];
 	for (let i = 0; i < components.length; i++) {
-		const temp = await ComponentModel.findOne({ _id: components[i] });
-		list.push(temp);
+	const temp = await ComponentModel.findOne({ _id: components[i] });
+	list.push(temp);
 	}
 	res.send(list);
 });
@@ -413,16 +438,6 @@ router.post('/component/delete', requireLogin, async (req, res) => {
 	res.send(componentIds);
 });
 
-router.post('/eml/course/getallsections', async (req, res) => {
-	const { sections } = req.body;
-	let list = [];
-	for (let i = 0; i < sections.length; i++) {
-		const temp = await SectionModel.findOne({ _id: sections[i] });
-		list.push(temp);
-	}
-	res.send(list);
-});
-
 // Delete all documents for user
 router.get('/course/delete_all', requireLogin, async (req, res) => {
 	await CourseModel.deleteMany({ _user: req.user.id }, (err) => {
@@ -436,5 +451,246 @@ router.get('/course/delete_all', requireLogin, async (req, res) => {
 	});
 	res.send('Completed');
 });
+
+// User route
+router.post("/user/", async (req, res) => {
+	const { googleID } = req.body;
+
+	const user = new UserModel({
+	googleID: googleID,
+	email: email,
+	password: password,
+	joinedAt: Date.now(),
+	modifiedAt: Date.now(),
+	subscriptions: []
+	});
+
+	try {
+	await user.save();
+	res.send(user);
+	} catch (err) {
+	res.status(422).send(err);
+	}
+});
+
+*/
+
+/*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
+
+
+//Get all courses
+router.get('', async (req, res) => {
+
+	try {
+		// find all courses in the database
+		const courses = await CourseModel.find();
+
+		// check if sections exist
+		if (courses.length === 0) {
+			// Handle "courses not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0005'] });
+		}
+
+		res.send(courses);
+
+
+	} catch (error) {
+		// If the server could not be reached, return an error message
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+
+// Get specific course
+router.get('/:id', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+
+		// find a course based on it's id
+		const course = await CourseModel.findById(id);
+
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		res.send(course);
+
+	} catch (error) {
+
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+})
+
+
+// Get all sections from course
+router.get('/:id/sections', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+
+		// find a course based on it's id
+		const course = await CourseModel.findById(id);
+
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		const sectionsInCourse = course.sections;
+
+		// check if course contains sections
+		if (sectionsInCourse.length === 0) {
+			// Handle "course does not contain sections" error response here
+			return res.status(404).json({ 'error': errorCodes['E0009'] });
+		}
+
+		// check if the sections exists
+		const sectionsList = await SectionModel.find({ '_id': { $in: sectionsInCourse } });
+		if (sectionsList.length === 0) {
+			// Handle "course does not contain sections" error response here
+			return res.status(404).json({ 'error': errorCodes['E0007'] });
+		}
+
+		res.send(sectionsList);
+
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+// Get a specififc section 
+router.get('/:courseId/sections/:sectionId', async (req, res) => {
+
+	try {
+		const { courseId, sectionId } = req.params;
+
+		const course = await CourseModel.findById(courseId);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+		// find a specific section within the given course by both IDs
+		const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
+
+		// check if section exist
+		if (!section) {
+			// Handle "section not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0008'] });
+		}
+
+		res.send(section);
+
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+/*
+// Get all excercies from a section *** commented out since we do not use it per 10/10
+router.get("/:courseId/sections/:sectionId/exercises", async (req, res) => {
+
+	try {
+	const { courseId, sectionId } = req.params; 
+
+	// find a specific section within the given course by both IDs
+	const exercises = await ExerciseModel.find({ parentSection: sectionId });
+	res.send(exercises);
+
+	} catch (error) {
+	console.error(error);
+	res.status(500).json({ message: 'Server error' });
+	}
+
+});
+*/
+
+/*** SUBSCRIPTION ROUTES ***/
+
+// Subscribe to course 
+router.post('/:id/subscribe', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+		const { user_id } = req.body;
+
+		const user = await User.findById(user_id);
+
+		//checks if user exist
+		if (!user) {
+			// Handle "user not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0004'] });
+		}
+
+		const course = await CourseModel.findById(id);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		// find user based on id, and add the course's id to the user's subscriptions field
+		(await User.findOneAndUpdate(
+			{ _id: user_id },
+			{ $push: { subscriptions: id } }))
+			.save;
+
+		res.send(user);
+
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+// Unsubscribe to course
+router.post('/:id/unsubscribe', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+		const { user_id } = req.body;
+
+		const user = await User.findById(user_id);
+		//checks if user exist
+		if (!user) {
+			// Handle "user not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0004'] });
+		}
+
+		const course = await CourseModel.findById(id);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		// find user based on id, and remove the course's id from the user's subscriptions field
+		(await User.findOneAndUpdate(
+			{ _id: user_id },
+			{ $pull: { subscriptions: id } }))
+			.save;
+
+		res.send(user)
+
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
 
 module.exports = router;

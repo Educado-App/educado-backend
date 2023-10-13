@@ -21,6 +21,26 @@ module.exports = {
 		code: 'E0004',
 		message: 'User not found'
 	},
+	E0005: {
+		code: 'E0005',
+		message: 'No courses found'
+	},
+	E0006: {
+		code: 'E0006',
+		message: 'Course not found'
+	},
+	E0007: {
+		code: 'E0007',
+		message: 'No sections found'
+	},
+	E0008: {
+		code: 'E0008',
+		message: 'Section not found'
+	},
+	E0009:{
+		code: 'E0009',
+		message:'Course does not contain sections'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -134,5 +154,25 @@ module.exports = {
 	E0503: {
 		code: 'E0503',
 		message: 'Verification link is invalid or has already been used.'
+	},
+
+	// E06 - Subscription errors
+
+	E0601: {
+		code: 'E0601',
+		message: 'Could not subscribe to course'
+	},
+	E0602: {
+		code: 'E0602',
+		message: 'Could not unsubscribe to course'
+	},
+	E0603: {
+		code: 'E0603',
+		message: 'Could not get users subscriptions'
+	},
+	E0604: {
+		code: 'E0604',
+		message: 'Could not check users subscriptions'
 	}
+
 };
