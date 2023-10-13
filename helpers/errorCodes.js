@@ -31,7 +31,7 @@ module.exports = {
 	},
 	E0007: {
 		code: 'E0007',
-		message: 'No sections not found'
+		message: 'No sections found'
 	},
 	E0008: {
 		code: 'E0008',
