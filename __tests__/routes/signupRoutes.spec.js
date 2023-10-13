@@ -45,13 +45,14 @@ describe('Signup User route', () => {
 			.expect(201);
 
 		// Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ email: input.email });
+		const user = await db.collection('users').findOne({ email: userInput.email });
 		expect(user).toBeDefined();
-		expect(user.email).toBe(input.email);
+		expect(user.email).toBe(userInput.email);
 	});
 
 
 	it('Returns error if email is missing', async () => {
+    userInput.email = '';
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/signup/user')
 			.send(userInput)
