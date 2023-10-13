@@ -9,7 +9,9 @@ module.exports = async function connectDb() {
             global.__MONGO_URI__,
             {
                 useNewUrlParser: true,
-                useFindAndModify: false
+                useUnifiedTopology: true,
+                useFindAndModify: false,
+                useCreateIndex: true,
             }
         )
     //db = db || connection.db(global.__MONGO_DB_NAME__)

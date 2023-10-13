@@ -500,10 +500,10 @@ describe('Course Routes', () => {
 
 
   afterAll(async () => {
-    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
-    db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    server.close();
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+    await server.close();
     await mongoose.connection.close();
   });
 

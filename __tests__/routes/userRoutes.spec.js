@@ -13,9 +13,7 @@ app.use('/api/users', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5023; // Choose a port for testing
-const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Mocked token secret
 const TOKEN_SECRET = 'test';
@@ -392,10 +390,9 @@ describe('Users Routes', () => {
   });
 
   afterAll(async () => {
-    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
-    server.close();
-    await mongoose.connection.close();
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+    await server.close();
+    mongoose.connection.close();
   });
-
 });

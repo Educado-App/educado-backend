@@ -25,8 +25,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
     } else {
       res.status(400);
     }
-
-    console.log(error);
+    
     res.send({
       error: error
     });
@@ -62,8 +61,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
     } else {
       res.status(400);
     }
-
-    console.log(error);
+    
     res.send({
       error: error
     });
