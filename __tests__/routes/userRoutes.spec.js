@@ -390,9 +390,9 @@ describe('Users Routes', () => {
   });
 
   afterAll(async () => {
-    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
-    server.close();
-    await mongoose.connection.close();
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+    await server.close();
+    mongoose.connection.close();
   });
 });
