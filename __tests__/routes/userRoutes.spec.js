@@ -327,7 +327,7 @@ describe('Users Routes', () => {
 
       // simulate a request with invalid course id
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
+        .get('/api/users/subscriptions/?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
 
 
       expect(response.status).toBe(500);
