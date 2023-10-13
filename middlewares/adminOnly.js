@@ -3,7 +3,6 @@ const { verify } = require('../helpers/token');
 const ADMIN_ID = 'srdfet784y2uioejqr'
 
 module.exports = (req, res, next) => {
-  console.log("Params: ", req.params);
 	try {
 		const claims = verify(req.headers.token ?? '');
     if(claims.id !== ADMIN_ID) {

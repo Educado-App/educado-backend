@@ -1,7 +1,6 @@
 const { verify } = require('../helpers/token');
 
 module.exports = (req, res, next) => {
-  console.log("Params: ", req.params);
 	try {
 		const claims = verify(req.headers.token ?? '');
     if(req.params.id != null) {
