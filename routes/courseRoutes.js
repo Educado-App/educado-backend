@@ -16,8 +16,6 @@ const adminOnly = require('../middlewares/adminOnly');
 const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 
-//Why is all this out commented? Have it been replaced whit something else?
-
 // Content Creator Application Route
 router.post('/course/', async (req, res) => {
 	const { title, description } = req.body;
@@ -574,25 +572,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	}
 
 });
-
-/*
-// Get all excercies from a section *** commented out since we do not use it per 10/10
-router.get("/:courseId/sections/:sectionId/exercises", async (req, res) => {
-
-	try {
-	const { courseId, sectionId } = req.params; 
-
-	// find a specific section within the given course by both IDs
-	const exercises = await ExerciseModel.find({ parentSection: sectionId });
-	res.send(exercises);
-
-	} catch (error) {
-	console.error(error);
-	res.status(500).json({ message: 'Server error' });
-	}
-
-});
-*/
 
 /*** SUBSCRIPTION ROUTES ***/
 
