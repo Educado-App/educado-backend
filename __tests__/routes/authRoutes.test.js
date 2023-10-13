@@ -3,10 +3,12 @@ const express = require('express');
 const router = require('../../routes/authRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
+const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
+
 const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
 const { sendResetPasswordEmail } = require('../../helpers/email');
-
+const token = require('../../helpers/token');
 
 const app = express();
 app.use(express.json());
@@ -154,6 +156,7 @@ describe('Reset password request route', () => {
       .post('/api/auth/reset-password-request')
       .send(existingEmail)
       .expect(500);
+
     expect(res.body.error.code).toBe('E0004');
   });
 
@@ -191,12 +194,22 @@ describe('Reset password request route', () => {
     expect(result.body.error.code).toBe('E0406');
   });
 
+  it('Returns error if token is wrong', async () => {
+    const fakeToken = makeFakeResetPasswordToken('6859');
+    await db.collection('passwordResetTokenSchema').insertOne(fakeToken);
+    const fakeCredentials = {token: fakeToken.token, email: fakeUser.email};
+    sendResetPasswordEmail.mockImplementation(() => false);
+    const res = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/reset-password-code')
+      .send(fakeCredentials)
+      .expect(400);
+
+    expect(res.body.error.code).toBe('E0405');
+  });
+
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
   });
-});
-
-describe('Reset password route', () => {
 });
 
 afterAll(async () => {

@@ -131,11 +131,32 @@ router.post('/reset-password-request', async (req, res) => {
   }
 });
 
+router.post('/reset-password-code', async (req, res) => {
+  const { email, token } = req.body;
+  const user = await User.findOne({ email: email });
+
+  // If email is not provided or user is not found, return error E0401
+  if (!user) {
+    return res.status(400).json({ error: errorCodes['E0401'] });
+  }
+
+  const passwordResetToken = await PasswordResetToken.findOne({ userId: user._id});
+  const isValid = compare(token, passwordResetToken.token);
+
+  // If token is invalid, return error E0405
+  if (!isValid) {
+    return res.status(400).json({ error: errorCodes['E0405'] });
+  }
+  // return success
+   return res.status(200).json({ status: 'success' });
+
+});
+
 router.put('/reset-password', async (req, res) => {
   const { email, token, newPassword } = req.body;
   const user = await User.findOne({ email: email });
 
-  if (!email || !user) { // If email is not provided or user is not found, return error E0401
+  if (!user) { // If email is not provided or user is not found, return error E0401
     return res.status(400).json({ error: errorCodes['E0401'] });
   }
   const passwordResetToken = await PasswordResetToken.findOne({ userId: user._id});
@@ -144,7 +165,7 @@ router.put('/reset-password', async (req, res) => {
   if (!passwordResetToken || passwordResetToken.expiresAt < Date.now()) {
     return res.status(400).json({ error: errorCodes['E0404'] });
   }
-  const isValid = await compare(token, passwordResetToken.token);
+  const isValid = compare(token, passwordResetToken.token);
 
   // If token is invalid, return error E0405
   if (!isValid) {
@@ -158,7 +179,6 @@ router.put('/reset-password', async (req, res) => {
 
   // Return success
   return res.status(200).json({ status: 'success' });
-
 });
 
 // Logout simulation
