@@ -249,7 +249,7 @@ describe('Users Routes', () => {
       expect(updatedUser.subscriptions.find((element) => element == courseId));
 
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
 
       expect(response.status).toBe(200);
       expect(response.text).toBe('true');
@@ -264,7 +264,7 @@ describe('Users Routes', () => {
       const userId = user._id;
 
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
 
       expect(response.status).toBe(200);
       expect(response.text).toBe('false');
@@ -282,7 +282,7 @@ describe('Users Routes', () => {
 
       // simulate a request for a non-existent user
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
 
       expect(response.status).toBe(404);
       expect(response.body.error.code).toBe('E0004');
@@ -296,7 +296,7 @@ describe('Users Routes', () => {
 
       // simulate a request with invalid user id
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=this-is-an-invalid-userId&course_id=' + courseId);
+        .get('/api/users/subscriptions?user_id=this-is-an-invalid-userId&course_id=' + courseId);
 
       expect(response.status).toBe(500);
       expect(response.body.error.code).toBe('E0003');
@@ -313,7 +313,7 @@ describe('Users Routes', () => {
 
       // simulate a request for a non-existent course
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users?user_id=' + userId + '&course_id=' + courseId);
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
 
       expect(response.status).toBe(404);
       expect(response.body.error.code).toBe('E0006');
@@ -327,7 +327,7 @@ describe('Users Routes', () => {
 
       // simulate a request with invalid course id
       const response = await request(`http://localhost:${PORT}`)
-        .get('/api/users/subscriptions/?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
 
 
       expect(response.status).toBe(500);

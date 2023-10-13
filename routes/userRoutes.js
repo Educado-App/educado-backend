@@ -122,7 +122,7 @@ router.get('/:id/subscriptions', async (req, res) => {
 
 
 // Checks if user is subscribed to a specific course
-router.get('/subscriptions/', async (req, res) => {
+router.get('/subscriptions', async (req, res) => {
   try {
     const { user_id, course_id } = req.query;
 
