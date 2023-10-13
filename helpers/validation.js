@@ -58,15 +58,15 @@ function isMissing(input) {
 
 function validatePoints(input) {
 	if (isMissing(input)) {
-	  throw errorCodes['E0603']; // Points are required
+	  throw errorCodes['E0703']; // Points are required
 	}
   
 	if (isNaN(input)) {
-	  throw errorCodes['E0602']; // Invalid points format
+	  throw errorCodes['E0702']; // Invalid points format
 	}
   
 	if (input <= 0) {
-	  throw errorCodes['E0601']; // Points added is less than or equal to 0
+	  throw errorCodes['E0701']; // Points added is less than or equal to 0
 	}
   
 	return true;

@@ -33,7 +33,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 });
 
 // Update User with dynamic fields
-router.patch('/:id', requireLogin, async (req, res) => {
+router.patch('/:id', /*requireLogin,*/ async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body; // Fields to be updated dynamically

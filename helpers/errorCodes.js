@@ -136,17 +136,21 @@ module.exports = {
 		message: 'Verification link is invalid or has already been used.'
 	},
 
-	// E06 - Point system errors
-	E0601: {
-		code: 'E0601',
+	// E07 - Point system errors
+	E0701: {
+		code: 'E0701',
 		message: 'Points added is less than or equal to 0.'
 	},
-	E0602: {
-		code: 'E0602',
+	E0702: {
+		code: 'E0702',
 		message: 'Points must be of type integer'
 	},
-	E0603: {
-		code: 'E0603',
-		message: 'Points are required'
+	E0703: {
+		code: 'E0703',
+		message: 'Points are required.'
+	},
+	E0704: {
+		code: 'E0704',
+		message: 'Max level reached.'
 	}
 };

@@ -279,7 +279,7 @@ describe('Update points and level', () => {
       })
       .expect(400); // Expecting a 400 Bad Request response
 
-    expect(response.body.error.code).toBe('E0602');
+    expect(response.body.error.code).toBe('E0702');
   });
 
   it('Handles negative value for points', async () => {
@@ -293,7 +293,7 @@ describe('Update points and level', () => {
       })
       .expect(400); // Expecting a 400 Bad Request response
 
-    expect(response.body.error.code).toBe('E0601');
+    expect(response.body.error.code).toBe('E0701');
   });
 
   it('Handles 0 value for points', async () => {
@@ -307,6 +307,6 @@ describe('Update points and level', () => {
       })
       .expect(400); // Expecting a 400 Bad Request response
 
-    expect(response.body.error.code).toBe('E0601');
+    expect(response.body.error.code).toBe('E0701');
   });
 });
