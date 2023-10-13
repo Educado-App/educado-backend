@@ -43,11 +43,16 @@ describe('Get all courses for user route', () => {
 
   it('Returns courses made by a given user', async () => {
 
-    const courses = getFakeCoursesByCreator(fakeUser._id);
+    await db.collection('users').insertOne(fakeUser);
+
+    const actualUser = await db.collection('users').findOne({ email: fakeUser.email });
+
+    const courses = getFakeCoursesByCreator(actualUser._id);
+
     // Send a get request to the courses endpoint
     const res = await request(`http://localhost:${PORT}`)
-      .get(`/api/courses/creator/${fakeUser._id}`)
-      .set('token', signAccessToken({ id: fakeUser._id }));
+      .get(`/api/courses/creator/${actualUser._id}`)
+      .set('token', signAccessToken({ id: actualUser._id }));
     expect(res.statusCode).toEqual(200);
     // Verify response body
     const result = res.body;
