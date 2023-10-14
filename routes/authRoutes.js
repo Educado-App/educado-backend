@@ -7,7 +7,7 @@ const { authEndpointHandler } = require('../auth')
 // Services
 require("../services/passport");
 
-router.post('/login', makeExpressCallback(authEndpointHandler))
+router.post('/auth', makeExpressCallback(authEndpointHandler))
 
 // Route handler for login simulation
 router.get("/auth/google",

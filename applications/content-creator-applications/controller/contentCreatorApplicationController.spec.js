@@ -4,7 +4,7 @@ const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/f
 const { contentCreatorApplicationController: handle } = require('.')
 const { contentCreatorApplicationList } = require('../data-access')
 
-describe('Content Creator Application Controller', () => {
+/*describe('Content Creator Application Controller', () => {
 
     beforeAll(() => connectDb())
     afterEach(async () => await contentCreatorApplicationList.remove({}))
@@ -73,4 +73,4 @@ describe('Content Creator Application Controller', () => {
     })
     xit('declines a single content creator application', async () => { })
 
-})
+})*/

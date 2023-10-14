@@ -40,13 +40,13 @@ router.post("/login", async (req, res) => {
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
     if(!contentCreator){
       console.log("Wrong User")
-      res.status(404).json({ msg: "Não existe uma conta com este e-mail"  });
+      res.status(404).json({ msg: "Não existe uma conta com este e-mail"  }); //A user with this email does not exist
     }
     
     //If the passwords don't match, an error will be thrwn, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
-      res.status(404).json({ msg: "Senha incorreta" });
+      res.status(404).json({ msg: "Senha incorreta" }); //Wrong password
 
     }
     
