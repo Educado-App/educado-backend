@@ -8,3 +8,4 @@ dev.js
 .env
 .env.*
 config/*.json
+config/keys.js
