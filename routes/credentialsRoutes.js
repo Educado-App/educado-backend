@@ -5,18 +5,26 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { compare, encrypt } = require("../helpers/password");
 
-// Content Creator Signup Route
+
+/**
+* Signup Route.
+* Creates a new Content Creator Application.
+*
+* @param {JSON} Form Which includes the following fields:
+* @param {String} name Name of the Content Creator
+* @param {String} email Email of the Content Creator (Will be used for login)
+* @param {String} password Password of the Content Creator (Will be encrypted)
+* @returns {JSON} Returns response status code
+*/
 router.post("/signup", async (req, res) => {
 
   //Password is first and foremost hashed, and subsequently redifined in the form below
-  const hashpassword = encrypt(req.body.password)
-    
   const form = req.body;
+  const hashpassword = encrypt(req.body.password)
   form.password = hashpassword;
 
   const doc = ContentCreatorApplication(form);
   const created = doc.save();
-
 
   try {
     res.status(201);
@@ -28,6 +36,15 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+/**
+* Login Route.
+* Validates Content Creator credentials on attempted logins.
+*
+* @param {JSON} Form Which includes the following fields:
+* @param {String} email Name of the Content Creator
+* @param {String} password Password of the Content Creator (Will be encrypted)
+* @returns {JSON} Returns response status code and validation token
+*/
 router.post("/login", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
