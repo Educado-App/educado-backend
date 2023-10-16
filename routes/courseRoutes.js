@@ -234,12 +234,6 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 
 */
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // no larger than 5mb
-  },
-});
 
 // New GCP Bucket Instance
 const storage = new Storage({
@@ -249,13 +243,28 @@ const storage = new Storage({
 
 //CREATED BY VIDEOSTREAMING TEAM
 //create lecture
+// Update Multer configuration
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // increased to 50mb to accommodate video
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'), false);
+    }
+  },
+});
+
 router.post("/lecture/create", upload.single("file"), async (req, res) => {
   const { parentSection, title, description } = req.body;
-  const image = req.file;
+  const uploadedFile = req.file;
   const buffer = req.file.buffer;
 
-  // Check if the request contains an image
-  if (!image) return res.status(400).send("Missing image");
+  // Check if the request contains a file
+  if (!uploadedFile) return res.status(400).send("Missing file");
 
   console.log("creating lecture with this data:");
   console.log("body", req.body);
@@ -275,7 +284,7 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
   try {
     await newLecture.save();
 
-    if (!newLecture._id || !image || !buffer) {
+    if (!newLecture._id || !uploadedFile || !buffer) {
       return res.status(422).send("Error within the upload function");
     }
 
@@ -283,14 +292,18 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
       // Upload to GCP bucket
       await storage
         .bucket(bucketName)
-        .file(newLecture._id.toString()) // Assuming _id is the filename
+        .file(newLecture._id.toString()) 
         .save(buffer, {
           metadata: {
-            contentType: image.mimetype,
+            contentType: uploadedFile.mimetype,
           },
         });
       
-      newLecture.image = newLecture._id.toString();
+      if (uploadedFile.mimetype.startsWith('image/')) {
+        newLecture.image = newLecture._id.toString();
+      } else if (uploadedFile.mimetype.startsWith('video/')) {
+        newLecture.video = newLecture._id.toString();
+      }
       await newLecture.save();
 
       const section = await SectionModel.findById(parentSection);
@@ -309,6 +322,7 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
     return res.send(err);
   }
 });
+
 
 
 
