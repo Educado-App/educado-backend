@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const express = require('express');
 const app = express();
+const axios = require("axios");
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
@@ -12,12 +13,23 @@ const { ComponentModel } = require("../models/Components");
 const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 const { LectureModel } = require("../models/Lecture");
+
+
+const { Storage } = require("@google-cloud/storage");
+const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+// Constant variables
+const bucketName = "educado-bucket";
+const dir = "./_temp_bucketFiles";
+const Blob = require('blob');
+
+
 //const { LectureContentModel } = require("../models/LectureComponent");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
+const multer = require("multer");
 
 //Why is all this out commented? Have it been replaced whit something else?
 /*
@@ -224,12 +236,28 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 
 */
 
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // no larger than 5mb
+  },
+});
+
+// New GCP Bucket Instance
+const storage = new Storage({
+  projectId: credentials.project_id,
+  keyFilename: credentials,
+});
+
 //CREATED BY VIDEOSTREAMING TEAM
 //create lecture
-router.post("/lecture/create", async (req, res) => {
-  //we need section id to create a lecture
-  const { parentSection, title, description, image, video } =
-    req.body;
+router.post("/lecture/create", upload.single("file"), async (req, res) => {
+  const { parentSection, title, description } = req.body;
+  const image = req.file;
+  const buffer = req.file.buffer;
+
+  // Check if the request contains an image
+  if (!image) return res.status(400).send("Missing image");
 
   console.log("creating lecture with this data:");
   console.log("body", req.body);
@@ -241,22 +269,49 @@ router.post("/lecture/create", async (req, res) => {
     title: title,
     description: description,
     parentSection: parentSection,
-    image: "",
+    image: "", 
     video: "",
     completed: false,
   });
 
   try {
     await newLecture.save();
-    section = await SectionModel.findById(parentSection);
-    await section.components.push(newLecture._id);
-    await section.save();
-    return res.send(section);
+
+    if (!newLecture._id || !image || !buffer) {
+      return res.status(422).send("Error within the upload function");
+    }
+
+    try {
+      // Upload to GCP bucket
+      await storage
+        .bucket(bucketName)
+        .file(newLecture._id.toString()) // Assuming _id is the filename
+        .save(buffer, {
+          metadata: {
+            contentType: image.mimetype,
+          },
+        });
+      
+      newLecture.image = newLecture._id.toString();
+      await newLecture.save();
+
+      const section = await SectionModel.findById(parentSection);
+      section.components.push(newLecture._id);
+      await section.save();
+
+      return res.send(section);
+
+    } catch (err) {
+      console.error("Error in GCP upload:", err.message);
+      return res.status(422).send("Error within the upload function");
+    }
+
   } catch (err) {
     console.log(err);
     return res.send(err);
   }
 });
+
 
 
 

@@ -93,7 +93,8 @@ router.get("/download", async (req, res) => {
     const base64 = fileContents.toString("base64");
     res.status(200).send(base64);
   } catch (err) {
-    // console.log("An error occurred:", err);
+    console.log("ERROR GETTING BUCKETIMAGE", err);
+
     res.status(400).send(`Error: ${err.message}`);
   }
 });
