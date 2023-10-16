@@ -197,7 +197,7 @@ async function markAsCompleted(user, exerciseId) {
   );
 
   user = await UserModel.findById(user._id);
-
+  
   // Check if all sections in the course are completed
   const allSectionsCompleted = user.completedCourses[completedCourseIndex].completedSections.every(completedSection => completedSection.isComplete);
 
@@ -210,6 +210,8 @@ async function markAsCompleted(user, exerciseId) {
           }
       }
   );
+
+  return await UserModel.findById(user._id);
 }
 
 async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
