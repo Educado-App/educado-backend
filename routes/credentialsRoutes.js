@@ -17,22 +17,27 @@ const { compare, encrypt } = require("../helpers/password");
 * @returns {JSON} Returns response status code
 */
 router.post("/signup", async (req, res) => {
-
-  //Password is first and foremost hashed, and subsequently redifined in the form below
   const form = req.body;
+  const email = req.body.email;
   const hashpassword = encrypt(req.body.password)
   form.password = hashpassword;
+
+try {
+  if(await ContentCreatorApplication.findOne({ email: email })){
+    console.log("Wrong Email") 
+    res.status(400).json({ msg: "Já existe uma conta com o e-mail dele" }); //An account with his email already exists
+}
 
   const doc = ContentCreatorApplication(form);
   const created = doc.save();
 
-  try {
     res.status(201);
     res.send(created);
     
-  } catch (error) {
-    res.status(400);
-    res.send(error.message);
+  } catch (err) {
+    if(!err.statusCode) {
+      err.statusCode = 500;
+    }
   }
 });
 
@@ -60,7 +65,7 @@ router.post("/login", async (req, res) => {
       res.status(404).json({ msg: "Não existe uma conta com este e-mail"  }); //A user with this email does not exist
     }
     
-    //If the passwords don't match, an error will be thrwn, which can also be displayed in the frontend
+    //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
       res.status(404).json({ msg: "Senha incorreta" }); //Wrong password
