@@ -89,13 +89,14 @@ router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
     // Retrieve the user by ID
     let user = await UserModel.findById(id);
 
+    
     if (!user) {
       throw errorCodes['E0004'];
     }
 
-    markAsCompleted(user, exerciseId);
+    const updatedUser = await markAsCompleted(user, exerciseId);
 
-    res.status(200).send(user);
+    res.status(200).send(updatedUser);
   } catch (error) {
     if (error === errorCodes['E0004']) {
       // Handle "user not found" error response here
@@ -164,64 +165,60 @@ async function updateUserLevel(user, earnedPoints) {
 
 
 async function markAsCompleted(user, exerciseId) {
-    // Retrieve the exercise by ID to find sectionId
-    const exercise = await ExerciseModel.findById(exerciseId);
-    const sectionIdString = exercise.parentSection;
-    const sectionId = mongoose.Types.ObjectId(sectionIdString.toString());
-    const section = await SectionModel.findById(sectionId);
-    const courseIdString = section.parentCourse;
-    const courseId = mongoose.Types.ObjectId(courseIdString.toString());
+  // Retrieve the exercise by ID to find sectionId
+  const exercise = await ExerciseModel.findById(exerciseId);
+  const sectionIdString = exercise.parentSection;
+  const sectionId = mongoose.Types.ObjectId(sectionIdString.toString());
+  const section = await SectionModel.findById(sectionId);
+  const courseIdString = section.parentCourse;
+  const courseId = mongoose.Types.ObjectId(courseIdString.toString());
 
-    await markExerciseAsCompleted(user, courseId, sectionId, exerciseId);
-    
-    // Check if all exercises in the section are completed
-    user = await UserModel.findById(user._id);
-    // Redfine the completedCourseIndex with the updated user
-    completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
-    const completedSection = user.completedCourses[completedCourseIndex].completedSections.find(completedSection => completedSection.sectionId.equals(sectionId));
-    const allExercisesCompleted = completedSection.completedExercises.length === section.exercises.length;
+  await markExerciseAsCompleted(user, courseId, sectionId, exerciseId);
+  
+  // Check if all exercises in the section are completed
+  user = await UserModel.findById(user._id);
+  
+  // Redefine the completedCourseIndex with the updated user
+  const completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
+  const completedSection = user.completedCourses[completedCourseIndex].completedSections.find(completedSection => completedSection.sectionId.equals(sectionId));
+  const allExercisesCompleted = completedSection.completedExercises.length === section.exercises.length;
 
-    // Update section's isComplete status
-    await UserModel.updateOne(
-        {
-            _id: user._id,
-            'completedCourses.courseId': courseId,
-            'completedCourses.completedSections.sectionId': sectionId
-        },
-        {
-            $set: {
-                'completedCourses.$.completedSections.$[section].isComplete': allExercisesCompleted
-            }
-        },
-        {
-            arrayFilters: [{ 'section.sectionId': sectionId }]
-        }
-    );
+  // Update section's isComplete status
+  await UserModel.findByIdAndUpdate(
+      user._id,
+      {
+          $set: {
+              [`completedCourses.${completedCourseIndex}.completedSections.$[section].isComplete`]: allExercisesCompleted
+          }
+      },
+      {
+          arrayFilters: [{ 'section.sectionId': sectionId }]
+      }
+  );
 
-    user = await UserModel.findById(user._id);
+  user = await UserModel.findById(user._id);
 
-    // Check if all sections in the course are completed
-    const allSectionsCompleted = user.completedCourses[completedCourseIndex].completedSections.every(completedSection => completedSection.isComplete);
+  // Check if all sections in the course are completed
+  const allSectionsCompleted = user.completedCourses[completedCourseIndex].completedSections.every(completedSection => completedSection.isComplete);
 
-    // Update course's isComplete status
-    await UserModel.updateOne(
-        { _id: user._id, 'completedCourses.courseId': courseId },
-        {
-            $set: {
-                'completedCourses.$.isComplete': allSectionsCompleted
-            }
-        }
-    );
+  // Update course's isComplete status
+  await UserModel.findByIdAndUpdate(
+      user._id,
+      {
+          $set: {
+              [`completedCourses.${completedCourseIndex}.isComplete`]: allSectionsCompleted
+          }
+      }
+  );
 }
 
 async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
   const completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
-  
+
   if (completedCourseIndex === -1) {
-    console.log(JSON.stringify(user, null, 2));
       // Course not found, add it along with completedSections and completedExercises
-      await UserModel.updateOne(
-          { _id: user._id },
+      await UserModel.findByIdAndUpdate(
+          user._id,
           {
               $push: {
                   completedCourses: {
@@ -232,18 +229,16 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
               }
           }
       );
-      user = await UserModel.findById(user._id);
-      console.log(JSON.stringify(user, null, 2));
   } else {
       const completedSectionIndex = user.completedCourses[completedCourseIndex].completedSections.findIndex(completedSection => completedSection.sectionId.equals(sectionId));
 
       if (completedSectionIndex === -1) {
           // Section not found, add it along with completedExercises
-          await UserModel.updateOne(
-              { _id: user._id, 'completedCourses.courseId': courseId },
+          await UserModel.findByIdAndUpdate(
+              user._id,
               {
                   $push: {
-                      'completedCourses.$.completedSections': {
+                      [`completedCourses.${completedCourseIndex}.completedSections`]: {
                           sectionId,
                           completedExercises: [{ exerciseId }],
                           isComplete: false
@@ -258,20 +253,16 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
           );
 
           // Returns if the exercise is already completed
-          if(isExerciseAlreadyCompleted) {
+          if (isExerciseAlreadyCompleted) {
               throw errorCodes['E0801'];
           }
 
           // Adds the exercise to the user's completedExercises array
-          await UserModel.updateOne(
-              {
-                  _id: user._id,
-                  'completedCourses.courseId': courseId,
-                  'completedCourses.completedSections.sectionId': sectionId
-              },
+          await UserModel.findByIdAndUpdate(
+              user._id,
               {
                   $addToSet: {
-                      'completedCourses.$.completedSections.$[section].completedExercises': { exerciseId }
+                      [`completedCourses.${completedCourseIndex}.completedSections.$[section].completedExercises`]: { exerciseId }
                   }
               },
               {
@@ -281,5 +272,6 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
       }
   }
 }
+
 
 module.exports = router;
