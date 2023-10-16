@@ -11,7 +11,6 @@ const TestRoutes = require('../routes/testRoutes');
 
 const CredentialsRoutes = require('./credentialsRoutes.js');
 const ApplicationRoutes = require('./applicationRoutes');
-const MailRoutes = require('./mailRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
