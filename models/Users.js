@@ -90,22 +90,36 @@ const userSchema = new Schema({
     {
         courseId: {
             type: Schema.Types.ObjectId,
-            ref: 'Courses' // Reference to Courses model
+            ref: 'Courses'
         },
         completedSections: [
             {
                 sectionId: {
                     type: Schema.Types.ObjectId,
-                    ref: 'Sections' // Reference to Sections model
+                    ref: 'Sections'
                 },
                 completedExercises: [
                     {
-                        type: Schema.Types.ObjectId,
-                        ref: 'Exercises' // Reference to Exercises model
+                        exerciseId: {
+                            type: Schema.Types.ObjectId,
+                            ref: 'Exercises'
+                        },
+                        isComplete: {
+                          type: Boolean,
+                          default: true
+                        }
                     }
-                ]
+                ],
+                isComplete: {
+                    type: Boolean,
+                    default: false
+                }
             }
-        ]
+        ],
+        isComplete: {
+            type: Boolean,
+            default: false
+        }
     }
 ]
 });
