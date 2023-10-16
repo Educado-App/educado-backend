@@ -1,7 +1,7 @@
 const { makeContentCreatorApplication } = require('.')
 const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/fakeContentCreatorApplication')
 
-/*describe('Content Creator Application', () => {
+describe('Content Creator Application', () => {
 
     it('can get approved', async () => {
 
@@ -26,4 +26,4 @@ const makeFakeContentCreatorApplication = require('../../../__tests__/fixtures/f
 
     })
 
-})*/
+})
