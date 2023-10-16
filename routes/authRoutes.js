@@ -43,9 +43,10 @@ router.post('/login', async (req, res) => {
 		// Searching for a single user in the database, with the email provided in the request body
 		const user = await User.findOne({ email: req.body.email});
 		// If email is found, compare the password provided in the request body with the password in the database
+    console.log(req.body)
 		if (!user) {
 			// Invalid email (email not found)
-			return res.status(401).json({ 'error': errorCodes['E0101']});
+			return res.status(401).json({ 'error': errorCodes['E0004']});
 		} else {
 			// If the email is found, compare the passwords
       
@@ -99,7 +100,7 @@ router.post('/reset-password-request', async (req, res) => {
   }
   // If there are more than 2 attempts in the last hour, return error E0406
   if(user.resetAttempts.length > 2) {
-    return res.status(400).json({ error: errorCodes['E0406'] });
+    return res.status(400).json({ error: errorCodes['E0406'] }); // 
   }
 
   user.resetAttempts.push(Date.now());

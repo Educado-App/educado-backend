@@ -92,7 +92,7 @@ module.exports = {
   },
   E0206: {
     code: 'E0206',
-    message: 'Email must contain "@" and ".".'
+    message: "Email must contain '@' and '.'"
   },
   E0207: {
     code: 'E0207',
@@ -117,6 +117,14 @@ module.exports = {
   E0212: {
     code: 'E0212',
     message: 'Password is required.'
+  },
+  E0213: {
+    code: 'E0213',
+    message: 'Password must be at least 8 characters.'
+  },
+  E0214: {
+    code: 'E0214',
+    message: 'Password must contain at least one letter.'
   },
 
   // E03 - Logout errors
@@ -182,5 +190,15 @@ module.exports = {
 	E0604: {
 		code: 'E0604',
 		message: 'Could not check users subscriptions'
-	}
+	},
+
+  // Model update errors:
+	E0701: {
+		code: 'E0701',
+		message: 'Attempted to update illegal field name'
+	},
+  E0702: {
+		code: 'E0702',
+		message: 'Field value is identical to the current value.'
+	},
 };
