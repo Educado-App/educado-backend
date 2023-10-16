@@ -19,7 +19,6 @@ const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 // Constant variables
 const bucketName = "educado-bucket";
 const dir = "./_temp_bucketFiles";
-const Blob = require('blob');
 
 
 //const { LectureContentModel } = require("../models/LectureComponent");
