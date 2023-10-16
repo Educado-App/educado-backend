@@ -22,7 +22,7 @@ const courseSchema = new Schema({
 	coverImg: component,
 	category: {
     type: String,
-    enum: ['Math', 'Science', 'Finance', 'Language', 'Sustainability', 'Other'],
+    enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics', 'other'],
   },
 	published: Boolean,
   creator: { 
