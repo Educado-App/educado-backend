@@ -52,7 +52,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
     }
 
     if (validFields) {
-      const updatedUser = await User.findByIdAndUpdate( id, { $set: updateFields }, { new: true })
+      const updatedUser = await User.findByIdAndUpdate( id, { $set: updateFields, modifiedAt: Date.now() }, { new: true })
 
       if (!updatedUser) {
         throw errorCodes['E0004']; // User not found
@@ -66,7 +66,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
       // Handle "user not found" error response here
       res.status(204).send({ error: errorCodes['E0004'] }); // User not found
     } else {
-      res.status(400).send({ error: error.message });
+      res.status(400).send({ error: error });
     }
   }
 });
@@ -84,7 +84,8 @@ async function validateFields(fields) {
           return false;
         }
         break;
-      case 'firstName' || 'lastName':
+      case 'firstName':
+      case 'lastName':
         if (!validateName(fieldValue)) {
           return false;
         }
