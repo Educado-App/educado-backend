@@ -4,7 +4,6 @@ const router = require('express').Router();
 const CourseRoutes = require('./courseRoutes');
 const AWSRoutes = require('./bucketRoutes');
 const AuthRoutes = require('./authRoutes');
-const ApplicationRoutes = require('./applicationRoutes');
 const MailRoutes = require('./mailRoutes');
 const UserRoutes = require('./userRoutes');
 const requireLogin = require('../middlewares/requireLogin');
