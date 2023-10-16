@@ -25,10 +25,6 @@ const courseSchema = new Schema({
     enum: ['Math', 'Science', 'Finance', 'Language', 'Sustainability', 'Other'],
   },
 	published: Boolean,
-	sections: [{ 
-    type: Schema.Types.ObjectId, 
-    ref: 'Component' 
-  }],
   creator: { 
     type: Schema.Types.ObjectId, 
     ref: 'User' 
