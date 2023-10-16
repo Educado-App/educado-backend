@@ -7,6 +7,8 @@ const { Schema } = mongoose;
 // Class description
 const courseSchema = new Schema({
   title: String,
+  category: String,
+  level: String,
   description: String,
   dateCreated: Date,
   dateUpdated: Date,
