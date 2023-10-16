@@ -152,5 +152,11 @@ module.exports = {
 	E0704: {
 		code: 'E0704',
 		message: 'Max level reached.'
+	},
+
+	// E08 - Answer Exercises Errors
+	E0801: {
+		code: 'E0801',
+		message: 'This exercise is already in completedExercises.'
 	}
 };
