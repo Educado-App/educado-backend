@@ -44,7 +44,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
     const user = await User.findById(id);
 
     if (!ensureNewValues(updateFields, user)) {
-      return res.status(400).send({ error: errorCodes['E0702'] })
+      return res.status(400).send({ error: errorCodes['E0802'] })
     }
 
     if(updateFields.password) {
@@ -58,7 +58,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
         throw errorCodes['E0004']; // User not found
       }
 
-      res.status(200).send(updatedUser);
+      res.status(200).send({ message: 'success' });
     }
 
   } catch (error) {
@@ -96,7 +96,7 @@ async function validateFields(fields) {
         break;
       // Add more cases for other fields if needed
       default:
-        throw new Error('Illegal field name');
+        throw errorCodes['E0801'];
     }
   }
   return true;

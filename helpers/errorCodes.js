@@ -193,12 +193,13 @@ module.exports = {
 	},
 
   // Model update errors:
-	E0701: {
-		code: 'E0701',
+	E0801: {
+		code: 'E0801',
 		message: 'Attempted to update illegal field name'
 	},
-  E0702: {
-		code: 'E0702',
+  E0802: {
+		code: 'E0802',
 		message: 'Field value is identical to the current value.'
 	},
+  
 };

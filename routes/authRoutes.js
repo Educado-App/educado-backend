@@ -100,7 +100,7 @@ router.post('/reset-password-request', async (req, res) => {
   }
   // If there are more than 2 attempts in the last hour, return error E0406
   if(user.resetAttempts.length > 2) {
-    return res.status(400).json({ error: errorCodes['E0406'] }); // 
+    return res.status(400).json({ error: errorCodes['E0406'] });
   }
 
   user.resetAttempts.push(Date.now());
