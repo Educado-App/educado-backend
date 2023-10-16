@@ -52,6 +52,22 @@ function validateName(input) {
 	return true;
 }
 
+function validatePassword (input) {
+	const passwordPattern = patterns.password;
+
+	if (isMissing(input)) {
+		throw errorCodes['E0212']; // Password is required
+	}
+	if (input.length < 8) {
+		throw errorCodes['E0213']; // Password must be at least 8 characters
+	}
+	if (!(passwordPattern.test(input))) {
+		throw errorCodes['E0214']; // Password must contain at least one letter
+	}
+
+	return true;
+}
+
 function isMissing(input) {
 	return input === undefined || input === null || input === '';
 }
@@ -59,5 +75,6 @@ function isMissing(input) {
 module.exports = {
 	validateEmail,
 	validateName,
+	validatePassword,
 	isMissing
 };
