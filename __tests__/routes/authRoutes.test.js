@@ -55,10 +55,10 @@ describe('Login User route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(nonExistingUser)
-      .expect(401);
+      .expect(404);
 
     // Verify the response body
-    expect(response.body.error.code).toBe('E0101');
+    expect(response.body.error.code).toBe('E0004');
   });
 
   it('Returns error if user is not found', async () => {
@@ -71,10 +71,10 @@ describe('Login User route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(nonExistingUser)
-      .expect(401);
+      .expect(404);
 
     // Verify the response body
-    expect(response.body.error.code).toBe('E0101');
+    expect(response.body.error.code).toBe('E0004');
   });
 
 

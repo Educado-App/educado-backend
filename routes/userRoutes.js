@@ -44,7 +44,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
     const validFields = await validateFields(updateFields);
 
-    const user = await User.findById(id);
+    const user = await UserModel.findById(id);
 
     if (!ensureNewValues(updateFields, user)) {
       return res.status(400).send({ error: errorCodes['E0802'] })
@@ -217,6 +217,7 @@ async function validateFields(fields) {
         throw errorCodes['E0801'];
     }
   }
+  return true;
 }
 
 function ensureNewValues(newValues, oldValues) {
