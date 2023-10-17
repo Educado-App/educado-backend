@@ -53,5 +53,3 @@ const courseSchema = new Schema({
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
 
 module.exports = { CourseModel };
-
-

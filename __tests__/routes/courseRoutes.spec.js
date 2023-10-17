@@ -9,7 +9,7 @@ const makeFakeSection = require('../fixtures/fakeSection');
 const CourseModel = require('../../models/Courses');
 const SectionModel = require('../../models/Sections');
 const ExerciseModel = require('../../models/Exercises');
-const User = require('../../models/User');
+const UserModel = require('../../models/Users');
 const { ObjectID } = require('mongodb');
 
 const app = express();

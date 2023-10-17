@@ -38,14 +38,22 @@ module.exports = {
 		code: 'E0008',
 		message: 'Section not found'
 	},
-	E0009:{
+	E0009: {
 		code: 'E0009',
-		message:'Course does not contain sections'
+		message: 'Course does not contain sections'
 	},
-  E0010: {
-    code: 'E0010',
-    message: 'Email could not be sent'
-  },
+	E0010: {
+		code: 'E0010',
+		message: 'Email could not be sent'
+	},
+	E0011: {
+		code: 'E0011',
+		message: 'No exercises found'
+	},
+	E0012: {
+		code: 'E0012',
+		message: 'Exercise not found'
+	},
 
   // E01 - Login errors
   E0101: {
@@ -166,7 +174,6 @@ module.exports = {
 	},
 
 	// E06 - Subscription errors
-
 	E0601: {
 		code: 'E0601',
 		message: 'Could not subscribe to course'
@@ -182,5 +189,29 @@ module.exports = {
 	E0604: {
 		code: 'E0604',
 		message: 'Could not check users subscriptions'
-	}
+	},
+
+	// E07 - Point system errors
+	E0701: {
+		code: 'E0701',
+		message: 'Points added is less than or equal to 0.'
+	},
+	E0702: {
+		code: 'E0702',
+		message: 'Points must be of type integer'
+	},
+	E0703: {
+		code: 'E0703',
+		message: 'Points are required.'
+	},
+	E0704: {
+		code: 'E0704',
+		message: 'Max level reached.'
+	},
+
+	// E09 - Answer Exercises Errors
+	E0901: {
+		code: 'E0901',
+		message: 'This exercise is already in completedExercises.'
+	},
 };

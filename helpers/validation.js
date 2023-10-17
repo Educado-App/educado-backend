@@ -1,5 +1,5 @@
 const { patterns } = require('../helpers/patterns');
-const { User } = require('../models/User');
+const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
 
 async function validateEmail(input) {
@@ -21,7 +21,7 @@ async function validateEmail(input) {
    * extension letters.
    */
 
-	if (await User.findOne({email: input}) != null) {
+	if (await UserModel.findOne({email: input}) != null) {
 		throw errorCodes['E0201']; // User with the provided email already exists
 	}
 	if (!(emailPattern.test(input))) {
@@ -56,8 +56,25 @@ function isMissing(input) {
 	return input === undefined || input === null || input === '';
 }
 
+function validatePoints(input) {
+	if (isMissing(input)) {
+	  throw errorCodes['E0703']; // Points are required
+	}
+  
+	if (isNaN(input)) {
+	  throw errorCodes['E0702']; // Invalid points format
+	}
+  
+	if (input <= 0) {
+	  throw errorCodes['E0701']; // Points added is less than or equal to 0
+	}
+  
+	return true;
+}
+
 module.exports = {
 	validateEmail,
 	validateName,
+	validatePoints,
 	isMissing
 };
