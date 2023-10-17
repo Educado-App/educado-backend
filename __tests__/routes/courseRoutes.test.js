@@ -10,7 +10,7 @@ const errorCodes = require('../../helpers/errorCodes')
 
 const app = express();
 app.use(express.json());
-app.use('/api', router); // Add your router to the Express app
+app.use('/api/courses', router); // Add your router to the Express app
 
 // Mock Google OAuth2 clientID
 jest.mock('../../config/keys', () => {
@@ -155,6 +155,19 @@ describe('Get all courses route', () => {
     const result = res.body;
 
     expect(result.error).toStrictEqual(errorCodes['E0002']);
+  });
+
+  it('returns error 404 if no courses are found', async () => {
+
+    // delete all courses
+    await db.collection('courses').deleteMany({});
+
+    // send request with no courses in db
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/courses')
+      .set('token', signAccessToken({ id: ADMIN_ID }))
+      .expect(404)
+    expect(response.body.error.code).toBe('E0005');
   });
 
   afterAll(async () => {
