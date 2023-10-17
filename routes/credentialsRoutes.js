@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
+const { ContentCreator } = require("../models/ContentCreatorApplication");
 const bcrypt = require('bcrypt');
 
 const jwt = require("jsonwebtoken");
@@ -23,9 +23,9 @@ router.post("/signup", async (req, res) => {
   form.password = hashpassword;
 
 try {
-  if(await ContentCreatorApplication.findOne({ email: email })){
+  if(await ContentCreator.findOne({ email: email })){
     console.log("Wrong Email") 
-    res.status(400).json({ msg: "Já existe uma conta com o e-mail dele" }); //An account with his email already exists
+    res.status(400).json({error: errorCodes['E0201']}); //An account with his email already exists
 }
 
   const doc = ContentCreatorApplication(form);
@@ -55,20 +55,20 @@ router.post("/login", async (req, res) => {
   const password = req.body.password;
 
   //Find the specific content creator by their email for subsequent use
-  const contentCreator = await ContentCreatorApplication.findOne({ email: email })
+  const contentCreator = await ContentCreator.findOne({ email: email })
   
   try {
      
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
     if(!contentCreator){
       console.log("Wrong User")
-      res.status(404).json({ msg: "Não existe uma conta com este e-mail"  }); //A user with this email does not exist
+      res.status(404).json({error: errorCodes['E0101']}); //A user with this email does not exist
     }
     
     //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
-      res.status(404).json({ msg: "Senha incorreta" }); //Wrong password
+      res.status(404).json({error: errorCodes['E0101'] }); //Wrong password
 
     }
     
