@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { component } = require('./Components');
 const { Schema } = mongoose;
 
 const sectionSchema = new Schema({

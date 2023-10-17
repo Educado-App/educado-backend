@@ -78,6 +78,7 @@ const userSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref: 'Courses'
   }],
+  resetAttempts: [Date],
   points: {
     type: Number,
     default: 0

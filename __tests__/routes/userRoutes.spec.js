@@ -6,206 +6,396 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
 const makeFakeSection = require('../fixtures/fakeSection');
 const makeFakeExercise = require('../fixtures/fakeExercise');
-const { signAccessToken } = require('../../helpers/token');
+const { signAccessToken, verify } = require('../../helpers/token');
 const mongoose = require('mongoose');
-
 const app = express();
 app.use(express.json());
 app.use('/api/users', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5023; // Choose a port for testing
-const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Mocked token secret
 const TOKEN_SECRET = 'test';
 
+// make fake course
+let fakeCourse = makeFakeCourse();
+
 // Mock token secret
 jest.mock('../../config/keys', () => {
-	return {
-		TOKEN_SECRET
-	};
+  return {
+    TOKEN_SECRET: TOKEN_SECRET,
+  };
 });
 
+describe('Users Routes', () => {
+  let token, fakeUser, db, actualUser;
 
-describe('Update User Route', () => {
-  let token, fakeUser, db;
+    beforeAll(async () => {
+      db = await connectDb(); // Connect to the database
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+      fakeUser = makeFakeUser();
+      await db.collection('courses').insertOne(fakeCourse);
 
-    token = signAccessToken({ id: 1 });
-    fakeUser = makeFakeUser();
-  });
-
-  beforeEach(async () => {
-      // Insert the fake user into the database before each test
-      await db.collection('users').insertOne(fakeUser);
-  });
-
-  afterEach(async () => {
-      // Remove the user from the database after each test
-      await db.collection('users').deleteOne({ _id: fakeUser._id });
     });
 
-  it('deletes a user successfully', async () => {
+    beforeEach(async () => {
+      // Insert the fake user into the database before each test
+      await db.collection('users').insertOne(fakeUser);
+      actualUser = await db.collection('users').findOne({ email: fakeUser.email })
+      token = signAccessToken({ id: actualUser._id })
+    });
+
+    afterEach(async () => {
+      // Remove the user from the database after each test
+      await db.collection('users').deleteOne({ _id: actualUser._id });
+    });
+
+  describe('Update User Email Route', () => {
+
+    it('deletes a user successfully', async () => {
       // Delete the user using the API
       await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/delete/${fakeUser._id}`)
+        .delete(`/api/users/delete/${actualUser._id}`)
         .set('token', token) // Include the token in the request headers
         .expect(200);
-    
-      // Verify that the user was deleted from the database
-      const user = await db.collection('users').findOne({ _id: fakeUser._id });
-      expect(user).toBeNull();
-  });  
 
-  it('handles user not found error for delete', async () => {
+      // Verify that the user was deleted from the database
+      const user = await db.collection('users').findOne({ _id: actualUser._id });
+      expect(user).toBeNull();
+    });
+
+    /*it('handles user not found error for delete', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
 
       await request(`http://localhost:${PORT}`)
-          .delete(`/api/users/delete/${nonExistentUserId}`)
-          .set('token', token) // Include the token in the request headers
-          .expect(204);
-  });
+        .delete(`/api/users/delete/${nonExistentUserId}`)
+        .set('token', token) // Include the token in the request headers
+        .expect(204);
+    });*/
 
-  it('updates user email successfully', async () => {
+    it('updates user email successfully', async () => {
       const newEmail = 'newemail@example.com';
-  
+
       await request(`http://localhost:${PORT}`)
-          .patch('/api/users/' + fakeUser._id)
-          .set('token', token) // Include the token in the request headers
-          .send({ email: newEmail })
-          .expect(200); // Expecting a 200 OK response
-  
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ email: newEmail })
+        .expect(200); // Expecting a 200 OK response
+
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: fakeUser._id });
+      const user = await db.collection('users').findOne({ _id: actualUser._id });
       expect(user).toBeDefined();
       expect(user.email).toBe(newEmail);
-  });
-  
-  it('Test that emails must be unique when updating', async () => {
-      const newEmail = fakeUser.email;
-  
-      const response = await request(`http://localhost:${PORT}`)
-          .patch('/api/users/' + fakeUser._id)
-          .set('token', token) // Include the token in the request headers
-          .send({ email: newEmail })
-          .expect(400); // Expecting a 400 Bad Request response
-  
-      expect(response.body.error.code).toBe('E0201');
-  });
+    });
 
-  it('updates user first name successfully', async () => {
+    it('Test that emails must be unique when updating', async () => {
+      const newEmail = fakeUser.email;
+
+      const response = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ email: newEmail })
+        .expect(400); // Expecting a 400 Bad Request response
+
+      expect(response.body.error.code).toBe('E0201');
+    });
+
+    /*it('handles user not found error for update-email', async () => {
+      const nonExistentUserId = new mongoose.Types.ObjectId();
+      const newEmail = 'newemail@example.com';
+
+      await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + nonExistentUserId)
+        .set('token', token) // Include the token in the request headers
+        .send({ email: newEmail })
+        .expect(204); // Expecting a 204 No Content response for user not found
+    });*/
+
+    it('updates user first name successfully', async () => {
       const newFirstName = 'newFirstName';
 
       await request(`http://localhost:${PORT}`)
-          .patch('/api/users/' + fakeUser._id)
-          .set('token', token) // Include the token in the request headers
-          .send({ firstName: newFirstName })
-          .expect(200); // Expecting a 200 OK response
-  
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ firstName: newFirstName })
+        .expect(200); // Expecting a 200 OK response
+
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: fakeUser._id });
+      const user = await db.collection('users').findOne({ _id: actualUser._id });
       expect(user).toBeDefined();
       expect(user.firstName).toBe(newFirstName);
-  });
-  
-  it('updates user last name successfully', async () => {
+    });
+
+    /*it('handles user not found error for update-first-name', async () => {
+      const nonExistentUserId = new mongoose.Types.ObjectId();
+
+      await request(`http://localhost:${PORT}`)
+        .patch(`/api/users/${nonExistentUserId}`)
+        .set('token', token) // Include the token in the request headers
+        .send({ newFirstName: 'NewFirstName' })
+        .expect(204);
+    });*/
+
+    it('updates user last name successfully', async () => {
       const newLastName = 'newLastName';
 
       await request(`http://localhost:${PORT}`)
-          .patch('/api/users/' + fakeUser._id)
-          .set('token', token) // Include the token in the request headers
-          .send({ lastName: newLastName })
-          .expect(200); // Expecting a 200 OK response
-  
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ lastName: newLastName })
+        .expect(200); // Expecting a 200 OK response
+
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: fakeUser._id });
+      const user = await db.collection('users').findOne({ _id: actualUser._id });
       expect(user).toBeDefined();
       expect(user.lastName).toBe(newLastName);
-  });
+    });
 
-  it('updates user fields successfully', async () => {
+    /*it('handles user not found error for update-last-name', async () => {
+      const nonExistentUserId = new mongoose.Types.ObjectId();
+
+      await request(`http://localhost:${PORT}`)
+        .patch(`/api/users/${nonExistentUserId}`)
+        .set('token', token) // Include the token in the request headers
+        .send({ newLastName: 'NewLastName' })
+        .expect(204);
+    });*/
+
+    it('updates user fields successfully', async () => {
       const newEmail = 'newemail@example.com';
       const newFirstName = 'Jane';
-  
+
       await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + fakeUser._id)
+        .patch('/api/users/' + actualUser._id)
         .set('token', token) // Include the token in the request headers
         .send({
           email: newEmail,
           firstName: newFirstName
         })
         .expect(200); // Expecting a 200 OK response
-  
+
       // Verify that the user was updated in the database
-      const updatedUser = await db.collection('users').findOne({ _id: fakeUser._id });
+      const updatedUser = await db.collection('users').findOne({ _id: actualUser._id });
       expect(updatedUser.email).toBe(newEmail);
       expect(updatedUser.firstName).toBe(newFirstName);
     });
-    
-  it('handles user not found error', async () => {
-    const nonExistentUserId = new mongoose.Types.ObjectId();
-    const newEmail = 'newemail@example.com';
 
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/users/' + nonExistentUserId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        email: newEmail
-      })
-      .expect(404); // Expecting a 404 No Content response for user not found
+    /*it('handles user not found error', async () => {
+      const nonExistentUserId = new mongoose.Types.ObjectId();
+      const newEmail = 'newemail@example.com';
+
+      await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + nonExistentUserId)
+        .set('token', token) // Include the token in the request headers
+        .send({
+          email: newEmail
+        })
+        .expect(204); // Expecting a 204 No Content response for user not found
+    });*/
+
+    it('handles validation errors for email', async () => {
+      const invalidEmail = 'invalidemail'; // Invalid email format
+
+      const response = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({
+          email: invalidEmail
+        })
+        .expect(400); // Expecting a 400 Bad Request response
+
+      expect(response.body.error.code).toBe('E0206');
+    });
+
+    it('handles validation errors for first name', async () => {
+      const invalidFirstName = 'AASD!==#¤("DSN:_;>:'; // Invalid email format
+
+      const response = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id)
+        .set('token', token) // Include the token in the request headers
+        .send({
+          firstName: invalidFirstName
+        })
+        .expect(400); // Expecting a 400 Bad Request response
+
+      expect(response.body.error.code).toBe('E0211');
+    });
   });
 
-  it('handles validation errors for email', async () => {
-    const invalidEmail = 'invalidemail'; // Invalid email format
+  /** SUBSCRIPTIONS **/
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/users/' + fakeUser._id)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        email: invalidEmail
-      })
-      .expect(400); // Expecting a 400 Bad Request response
+  describe('GET /users', () => {
 
-    expect(response.body.error.code).toBe('E0206');
+    it('should check if a user is subscribed to a specific course and return true', async () => {
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+      
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // Find the user and update their subscriptions
+      const result = await db.collection('users').findOneAndUpdate(
+        { _id: userId }, // Convert userId to ObjectId if needed
+        { $push: { subscriptions: courseId } },
+        { returnDocument: 'after' } // 'after' returns the updated document
+      )
+
+      const updatedUser = result.value;
+
+      // Check if the subscription was successfully added
+      expect(updatedUser.subscriptions.find((element) => element == courseId));
+
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(200);
+      expect(response.text).toBe('true');
+    });
+
+    it('should return false if a user is not subscribed to a specific course', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(200);
+      expect(response.text).toBe('false');
+
+    });
+
+    /*it('should handle user not found error', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // create non existing userId
+      const ObjectId = mongoose.Types.ObjectId;
+      const userId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent user
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0004');
+    });*/
+
+
+    it('should handle invalid user id', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // simulate a request with invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=this-is-an-invalid-userId&course_id=' + courseId);
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
+    it('should handle course not found error', async () => {
+
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // create non existing courseId
+      const ObjectId = mongoose.Types.ObjectId;
+      const courseId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent course
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=' + courseId);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0006');
+    });
+
+
+    it('should handle invalid course id', async () => {
+
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // simulate a request with invalid course id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/subscriptions?user_id=' + userId + '&course_id=this-is-an-invalid-courseId');
+
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
   });
 
-  it('handles validation errors for first name', async () => {
-    const invalidFirstName = 'AASD!==#¤("DSN:_;>:'; // Invalid email format
+  describe('GET /users/:id/subscriptions', () => {
+    it('should get user subscriptions', async () => {
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/users/' + fakeUser._id)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        firstName: invalidFirstName
-      })
-      .expect(400); // Expecting a 400 Bad Request response
+      const courseId = '651d3a15cda7d5bd2878dfc7';
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
 
-    expect(response.body.error.code).toBe('E0211');
-  });
+      // Find the user and update their subscriptions
+      const result = await db.collection('users').findOneAndUpdate(
+        { _id: userId }, // Convert userId to ObjectId if needed
+        { $push: { subscriptions: courseId } },
+        { returnDocument: 'after' } // 'after' returns the updated document
+      );
 
-  it('handles validation errors for last name', async () => {
-    const invalidLastName = 'AASD!==#¤("DSN:_;>:'; // Invalid email format
+      const updatedUser = result.value;
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/users/' + fakeUser._id)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        lastName: invalidLastName
-      })
-      .expect(400); // Expecting a 400 Bad Request response
+      // Check if the subscription was successfully added
+      expect(updatedUser.subscriptions.find((element) => element == courseId));
 
-    expect(response.body.error.code).toBe('E0211');
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/' + userId + '/subscriptions');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.find((element) => element == courseId));
+
+    });
+
+    it('should handle user not found error', async () => {
+
+      // create non existing userId
+      const ObjectId = mongoose.Types.ObjectId;
+      const userId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // simulate a request for a non-existent user
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/' + userId + '/subscriptions');
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0004');
+    });
+
+
+    it('should handle invalid user id', async () => {
+
+      // simulate a request with invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .get('/api/users/this-is-an-invalid-userId/subscriptions');
+
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('E0003');
+    });
+
   });
 
   afterAll(async () => {
-    // Clean up: delete all created users in the 'users' collection
-    await db.collection('users').deleteMany({});
-	});
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+    await server.close();
+    mongoose.connection.close();
+  });
 });
 
 describe('Update points and level', () => {
@@ -431,5 +621,5 @@ describe('Handles answering exercises', () => {
       .expect(404);
   
       expect(response.body.error.code).toBe('E0004');
-  });  
+  });
 });

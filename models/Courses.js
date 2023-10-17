@@ -1,3 +1,5 @@
+const component = require('../models/Components')
+
 // Mongoose model class for Courses
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
@@ -7,15 +9,45 @@ const { Schema } = mongoose;
 
 // Class description
 const courseSchema = new Schema({
-	title: String,
-	description: String,
-	_user: { type: Schema.Types.ObjectId, ref: 'Users' },
+	title: {
+    type: String,
+    required: [true, 'Title is required'],
+  },
+	description: {
+    type: String,
+    required: [true, 'Description is required'],
+  },
 	dateCreated: Date,
 	dateUpdated: Date,
-	coverImg: String,
-	category: String,
+	coverImg: component,
+	category: {
+    type: String,
+    enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics', 'other'],
+  },
 	published: Boolean,
-	sections: [{ type: Schema.Types.ObjectId, ref: 'Sections' }],
+  creator: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'contentCreator' 
+  },
+  difficulty: {
+    type: Number,
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published', 'hidden'],
+    default: 'draft',
+  },
+  estimatedHours: Number,
+  rating: {
+    Number,
+  },
+  numOfSubscriptions:{
+    type: Number,
+    default: 0,
+  },
+  sections: [{ 
+    type: Schema.Types.ObjectId, ref: "sections"
+  }],
 });
 
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema

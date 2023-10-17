@@ -14,9 +14,10 @@ const ContentCreatorSchema = new Schema({
   modifiedAt: { type: Date },
 });
 
-const ContentCreatorApplication = mongoose.model(
-  'Content-Creator-Application',
+const ContentCreator = mongoose.model(
+  'contentCreator',
   ContentCreatorSchema
 );
 
-module.exports = { ContentCreatorApplication };
+
+module.exports = { ContentCreator };
