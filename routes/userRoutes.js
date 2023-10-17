@@ -118,7 +118,7 @@ router.get('/:id/subscriptions', async (req, res) => {
     const userId = req.params.id;
 
     // Find the user by _id and select the 'subscriptions' field
-    const user = await User.findById(userId).select('subscriptions');
+    const user = await UserModel.findById(userId).select('subscriptions');
 
     //checks if user exist
     if (!user) {
@@ -147,7 +147,7 @@ router.get('/subscriptions', async (req, res) => {
     const { user_id, course_id } = req.query;
 
     // Check if the course_id exists in the user's subscriptions array
-    const user = await User.findById(user_id);
+    const user = await UserModel.findById(user_id);
 
     //checks if user exist
     if (!user) {

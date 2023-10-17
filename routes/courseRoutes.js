@@ -16,7 +16,6 @@ const {
 	ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
-const { UserModel } = require("../models/User");
 const { IdentityStore } = require("aws-sdk");
 
 
@@ -259,7 +258,7 @@ router.post('/:id/subscribe', async (req, res) => {
 		const { id } = req.params;
 		const { user_id } = req.body;
 
-		const user = await User.findById(user_id);
+		const user = await UserModel.findById(user_id);
 
 		//checks if user exist
 		if (!user) {
@@ -275,7 +274,7 @@ router.post('/:id/subscribe', async (req, res) => {
 		}
 
 		// find user based on id, and add the course's id to the user's subscriptions field
-		(await User.findOneAndUpdate(
+		(await UserModel.findOneAndUpdate(
 			{ _id: user_id },
 			{ $push: { subscriptions: id } }))
 			.save;
@@ -295,7 +294,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
 		const { id } = req.params;
 		const { user_id } = req.body;
 
-		const user = await User.findById(user_id);
+		const user = await UserModel.findById(user_id);
 		//checks if user exist
 		if (!user) {
 			// Handle "user not found" error response here
@@ -310,7 +309,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
 		}
 
 		// find user based on id, and remove the course's id from the user's subscriptions field
-		(await User.findOneAndUpdate(
+		(await UserModel.findOneAndUpdate(
 			{ _id: user_id },
 			{ $pull: { subscriptions: id } }))
 			.save;
