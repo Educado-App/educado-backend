@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+const fs = require('fs');
+const path = require('path');
+
 
 // Models
 const { CourseModel } = require("../models/Courses");
@@ -18,7 +21,8 @@ const { Storage } = require("@google-cloud/storage");
 const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 // Constant variables
 const bucketName = "educado-bucket";
-const dir = "./_temp_bucketFiles";
+const dir = "./_vids";
+const transcoder = require("../services/transcoderHub");
 
 
 //const { LectureContentModel } = require("../models/LectureComponent");
@@ -287,25 +291,68 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
     if (!newLecture._id || !uploadedFile || !buffer) {
       return res.status(422).send("Error within the upload function");
     }
-
     try {
-      // Upload to GCP bucket
-      await storage
-        .bucket(bucketName)
-        .file(newLecture._id.toString()) 
-        .save(buffer, {
-          metadata: {
-            contentType: uploadedFile.mimetype,
-          },
-        });
-      
       if (uploadedFile.mimetype.startsWith('image/')) {
+        // Upload to GCP bucket
+        await storage
+          .bucket(bucketName)
+          .file(newLecture._id.toString()) 
+          .save(buffer, {
+            metadata: {
+              contentType: uploadedFile.mimetype,
+            },
+          });
         newLecture.image = newLecture._id.toString();
-      } else if (uploadedFile.mimetype.startsWith('video/')) {
-        newLecture.video = newLecture._id.toString();
-      }
-      await newLecture.save();
 
+      } 
+      else if (uploadedFile.mimetype.startsWith('video/')) {
+        if (!fs.existsSync('./_vids')) fs.mkdirSync('./_vids');
+    
+        const localPath = `./_vids/${newLecture._id.toString()}.mp4`; // Assuming the video is in mp4 format. Adjust the extension if necessary.
+    
+        // Write buffer to the file
+        fs.writeFileSync(localPath, buffer);
+    
+        // Transcode the video to different sizes
+        const sizes = [
+            { width: 1080, height: 1920 },
+            { width: 720, height: 1280 },
+            { width: 360, height: 640 },
+            { width: 180, height: 320 },
+        ];
+        const baseOutputPath = localPath;
+        const format = 'mp4';
+        console.log("Transcoding video...");
+        await transcoder.transcode(localPath, baseOutputPath, sizes, format);
+        console.log("Transcoding complete");
+      
+        // Upload the transcoded files to GCP
+        for (let size of sizes) {
+            const ext = path.extname(baseOutputPath);
+            const nameWithoutExt = path.basename(baseOutputPath, ext);
+            const dir = path.dirname(baseOutputPath);
+            const outputFilename = `${nameWithoutExt}_transcoded${size.width}x${size.height}${ext}`;
+            const outputPath = path.join(dir, outputFilename);
+    
+            await storage
+                .bucket(bucketName)
+                .file(outputFilename)
+                .save(fs.readFileSync(outputPath), {
+                    metadata: {
+                        contentType: uploadedFile.mimetype,
+                    },
+                });
+            //Delete the transcoded file from the _vids dir
+            fs.unlinkSync(outputPath);
+        }
+        //Delete the original file from the _vids dir
+        fs.unlinkSync(localPath);
+      }
+      
+      
+      newLecture.video = newLecture._id.toString();
+
+      await newLecture.save();
       const section = await SectionModel.findById(parentSection);
       section.components.push(newLecture._id);
       await section.save();
