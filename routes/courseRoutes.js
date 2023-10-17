@@ -345,6 +345,57 @@ router.get("/section/:sectionId", async (req, res) => {
   return res.send(_tempSection);
 });
 
+//CREATED BY VIDEOSTREAMING TEAM
+//post pass to next lecture
+
+router.post("/lecture/:lectureId/passlecture", async (req, res) => {
+  const lectureId = req.params.lectureId;
+
+  if (!lectureId) {
+    return res.status(400).send("Missing lectureId in the request.");
+  }
+
+  try {
+    // Find the current lecture based on lectureId
+    const currentLecture = await LectureModel.findById(lectureId);
+
+    if (!currentLecture) {
+
+    // Mark the current lecture as completed
+    currentLecture.completed = true;
+    await currentLecture.save();
+
+    // Find the section of the current lecture
+    const section = await SectionModel.findById(currentLecture.parentSection);
+
+    if (!section) {
+      return res.status(404).send("Section not found.");
+    }
+
+    // Find the index of the current lecture in the section's components
+    const currentIndex = section.components.indexOf(lectureId);
+
+    // Check if there is a next lecture in the same section
+    if (currentIndex < section.components.length - 1) {
+      const nextLectureId = section.components[currentIndex + 1];
+      const nextLecture = await LectureModel.findById(nextLectureId);
+
+      if (!nextLecture) {
+        return res.status(404).send("Next lecture not found.");
+      }
+
+      // Respond with the details of the next lecture
+      return res.json(nextLecture);
+    }
+
+    // If there is no next lecture in the same section
+    return res.status(404).send("No next lecture in the same section.");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("An error occurred while processing your request.");
+  }
+});
+
 // Section routes
 router.post("/section/create", async (req, res) => {
   const { title, course_id, description } = req.body; // Or query?...
