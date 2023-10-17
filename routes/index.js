@@ -10,6 +10,7 @@ const MailRoutes = require('./mailRoutes');
 const UserRoutes = require('./userRoutes');
 const requireLogin = require('../middlewares/requireLogin');
 const TestRoutes = require('../routes/testRoutes');
+const ContentCreatorRoutes = require('../routes/contentCreatorRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -23,6 +24,7 @@ router.use('/api/signup', SignupRoutes);
 router.use('/api/applications', ApplicationRoutes);
 router.use('/api/mail', MailRoutes);
 router.use('/api/users', UserRoutes);
+router.use('/api/creators', ContentCreatorRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

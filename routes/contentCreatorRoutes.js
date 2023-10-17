@@ -1,31 +1,33 @@
-const router = require("express").Router();
-
+const router = require('express').Router();
+const errorCodes = require('../helpers/errorCodes');
 const express = require('express');
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
-// Models
-/*
 const {
-  ContentCreatorApplication,
+  ContentCreator,
 } = require("../models/ContentCreatorApplication");
 
 router.delete("/profile/delete/:id", async (req, res) => {
-    try {
-      // Get the authenticated creator's ID from req.creator.id
-      const { id } = req.params;
-  
-      // Use Mongoose to find and delete the user by ID
-      console.log("Deleting creator with ID:", id)
-      await User.findByIdAndDelete(id);
-  
-      // Send a success response
-      res.status(200).json({ message: "Content creator deleted successfully" });
-    } catch (error) {
-      // Handle any errors and send an error response
-      console.error("Error deleting content creator:", error);
-      res.status(500).json({ error: "An error occurred while deleting the content creator" });
+  try {
+    const { id } = req.params;
+    console.log("Deleting creator with ID:", id);
+
+    const deletedCreator = await ContentCreator.findByIdAndDelete(id);
+
+    if (!deletedCreator) {
+      console.log("Content creator not found.");
+      return res.status(204).json({ 'error': errorCodes['E0011'] });
+    } else {
+      console.log("Content creator deleted successfully.");
+      return res.status(200).json({ message: "Content creator deleted successfully" });
     }
-  });
-*/
+  } catch (error) {
+    return res.status(500).json({ 'error': errorCodes['E0003'] });
+  }
+});
+
+
+
+module.exports = router;
