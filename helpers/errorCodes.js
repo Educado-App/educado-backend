@@ -41,8 +41,6 @@ module.exports = {
 		code: 'E0009',
 		message:'Course does not contain sections'
 	},
-<<<<<<< Updated upstream
-=======
   E0010: {
     code: 'E0010',
     message: 'Email could not be sent'
@@ -51,7 +49,6 @@ module.exports = {
     code: 'E0011',
     message: 'Content creator not found'
   },
->>>>>>> Stashed changes
 
 	// E01 - Login errors
 	E0101: {
