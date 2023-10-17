@@ -1,9 +1,10 @@
 const router = require('express').Router();
-const { validateEmail, validateName } = require('../helpers/validation');
+const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { User } = require('../models/User');
 const { CourseModel } = require('../models/Courses');
 const requireLogin = require('../middlewares/requireLogin');
+const { encrypt, compare } = require('../helpers/password');
 
 router.delete('/delete/:id', requireLogin, async (req, res) => {
   try {
@@ -12,20 +13,20 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      throw errorCodes['E0004'];
+      throw errorCodes['E0004']; // User not found
     } else {
       res.status(200);
       res.send(deletedUser)
     }
 
   } catch (error) {
-    if (error === errorCodes['E0004']) {
+    if (error === errorCodes['E0004']) { // User not found
       // Handle "user not found" error response here
       res.status(204);
     } else {
       res.status(400);
     }
-    
+
     res.send({
       error: error
     });
@@ -40,50 +41,79 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
     const validFields = await validateFields(updateFields);
 
+    const user = await User.findById(id);
+
+    if (!ensureNewValues(updateFields, user)) {
+      return res.status(400).send({ error: errorCodes['E0802'] })
+    }
+
+    if(updateFields.password) {
+      updateFields.password = encrypt(updateFields.password);
+    }
+
     if (validFields) {
-      const updatedUser = await User.findByIdAndUpdate(
-        id,
-        { $set: updateFields },
-        { new: true } // This ensures that the updated user document is returned
-      );
+      const updatedUser = await User.findByIdAndUpdate( id, { $set: updateFields, modifiedAt: Date.now() }, { new: true })
 
       if (!updatedUser) {
-        throw errorCodes['E0004'];
+        throw errorCodes['E0004']; // User not found
       }
 
-      res.status(200).send(updatedUser);
+      res.status(200).send({ message: 'success' });
     }
 
   } catch (error) {
-    if (error === errorCodes['E0004']) {
+    if (error === errorCodes['E0004']) { // User not found
       // Handle "user not found" error response here
-      res.status(204);
+      res.status(204).send({ error: errorCodes['E0004'] }); // User not found
     } else {
-      res.status(400);
+      res.status(400).send({ error: error });
     }
-    
-    res.send({
-      error: error
-    });
   }
 });
 
+/**
+ * Validates the fields to be updated dynamically
+ */
 async function validateFields(fields) {
   const fieldEntries = Object.entries(fields);
 
   for (const [fieldName, fieldValue] of fieldEntries) {
-    if (fieldName === 'email') {
-      const emailValid = await validateEmail(fieldValue);
-      if (!emailValid) {
-        return false;
-      }
-    } else if (fieldName === 'firstName' || fieldName === 'lastName') {
-      const nameValid = await validateName(fieldValue);
-      if (!nameValid) {
-        return false;
-      }
+    switch (fieldName) {
+      case 'email':
+        if (!(await validateEmail(fieldValue))) {
+          return false;
+        }
+        break;
+      case 'firstName':
+      case 'lastName':
+        if (!validateName(fieldValue)) {
+          return false;
+        }
+        break;
+      case 'password':
+        if (!validatePassword(fieldValue)) {
+          return false;
+        }
+        break;
+      // Add more cases for other fields if needed
+      default:
+        throw errorCodes['E0801'];
     }
   }
+  return true;
+}
+
+function ensureNewValues(newValues, oldValues) {
+  const newEntries = Object.entries(newValues);
+
+  for (const [fieldName, fieldValue] of newEntries) {
+    if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
+      return false;
+    } else if (fieldValue === oldValues[fieldName]) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -102,7 +132,7 @@ router.get('/:id/subscriptions', async (req, res) => {
       // Handle "user not found" error response here
       return res.status(404).json({ 'error': errorCodes['E0004'] });
     }
-    
+
     const subscribedCourses = user.subscriptions;
 
     // Find courses based on the subscribed course IDs

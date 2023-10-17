@@ -1,8 +1,8 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/signupRoutes');
-const connectDb = require('../../__tests__/fixtures/db');
-const makeFakeUser = require('../../__tests__/fixtures/fakeUser');
+const connectDb = require('../fixtures/db');
+const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');
 
 
