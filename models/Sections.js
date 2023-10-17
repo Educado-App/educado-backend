@@ -1,20 +1,28 @@
-// Mongoose model class for Courses
 const mongoose = require('mongoose');
 const { component } = require('./Components');
 const { Schema } = mongoose;
 
-// Class description 
-
 const sectionSchema = new Schema({
-  exercises: [{ type: Schema.Types.ObjectId, ref: "exercises" }],
-  title: String,
-  description: String,
-  sectionNumber: Number,
-  createdAt: Date,
-  modifiedAt: Date,
-  totalPoints: Number,
-  components: component,
-  parentCourse: { type: Schema.Types.ObjectId, ref: "courses" },
+    title: String,
+    description: String,
+    exercises: [{ type: Schema.Types.ObjectId, ref: 'Exercises' }],
+    sectionNumber: Number,
+    totalPoints: {
+        type: Number,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        required: true,
+        default: Date.now
+    },
+    modifiedAt: {
+        type: Date,
+        required: true,
+        default: Date.now
+    },
+    components: [{ type: Schema.Types.ObjectId, ref: 'Component' }],
+    parentCourse: [{ type: Schema.Types.ObjectId, ref: 'Courses' }]
 });
 
 const SectionModel = mongoose.model('sections', sectionSchema);
