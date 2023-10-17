@@ -360,6 +360,8 @@ router.post("/lecture/:lectureId/passlecture", async (req, res) => {
     const currentLecture = await LectureModel.findById(lectureId);
 
     if (!currentLecture) {
+      return res.status(404).send("Lecture not found.");
+    }
 
     // Mark the current lecture as completed
     currentLecture.completed = true;
