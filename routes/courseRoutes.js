@@ -4,6 +4,7 @@ const router = require('express').Router();
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
+const { ExerciseModel } = require('../models/Exercises');
 const {
 	ContentCreatorApplication,
 } = require('../models/ContentCreatorApplication');
@@ -230,6 +231,14 @@ router.post('/course/getallsections', requireLogin, async (req, res) => {
 	res.send(list);
 });
 
+// Get all sections for course
+router.get('/section/getall/:course_id', async (req, res) => {
+	const { course_id } = req.params;
+	const course = await CourseModel.findById(course_id);
+	const list = await SectionModel.find({ _id: course.sections });
+	res.send(list);
+});
+
 // Update section title
 router.post('/course/update/sectiontitle', async (req, res) => {
 	// ...
@@ -435,6 +444,20 @@ router.get('/course/delete_all', requireLogin, async (req, res) => {
 		console.log(err);
 	});
 	res.send('Completed');
+});
+
+// Get all exercises
+router.get('/exercise/getall', async (req, res) => {
+	const list = await ExerciseModel.find();
+	res.send(list);
+});
+
+// Get all exercises for section
+router.get('/exercise/getall/:section_id', async (req, res) => {
+	const { section_id } = req.params;
+	const section = await SectionModel.findById(section_id);
+	const list = await ExerciseModel.find({ _id: section.exercises });
+	res.send(list);
 });
 
 module.exports = router;
