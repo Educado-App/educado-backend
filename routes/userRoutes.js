@@ -112,7 +112,6 @@ router.get('/:id/subscriptions', async (req, res) => {
 
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
@@ -151,7 +150,6 @@ router.get('/subscriptions', async (req, res) => {
 
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });

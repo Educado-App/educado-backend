@@ -1,6 +1,7 @@
 node_modules
 config/dev.js
 config/educado-*.json
+config/gcp_service.json
 
 *.DS_Store
 dev.js
@@ -11,5 +12,6 @@ config/.env
 # enviroment
 .env
 .env.*
+config/educado-*.json
 config/gcp_service.json
 __tests__/setup/globalConfigMongo.json
