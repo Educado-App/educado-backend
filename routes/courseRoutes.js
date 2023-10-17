@@ -1,12 +1,11 @@
 const router = require("express").Router();
 
-const express = require('express');
+const express = require("express");
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-const fs = require('fs');
-const path = require('path');
-
+app.use(express.urlencoded({ extended: true }));
+const fs = require("fs");
+const path = require("path");
 
 // Models
 const { CourseModel } = require("../models/Courses");
@@ -16,14 +15,12 @@ const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 const { LectureModel } = require("../models/Lecture");
 
-
 const { Storage } = require("@google-cloud/storage");
 const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 // Constant variables
 const bucketName = "educado-bucket";
 const dir = "./_vids";
 const transcoder = require("../services/transcoderHub");
-
 
 //const { LectureContentModel } = require("../models/LectureComponent");
 const {
@@ -238,7 +235,6 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 
 */
 
-
 // New GCP Bucket Instance
 const storage = new Storage({
   projectId: credentials.project_id,
@@ -254,10 +250,13 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // increased to 50mb to accommodate video
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype.startsWith("video/")
+    ) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type'), false);
+      cb(new Error("Invalid file type"), false);
     }
   },
 });
@@ -280,7 +279,7 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
     title: title,
     description: description,
     parentSection: parentSection,
-    image: "", 
+    image: "",
     video: "",
     completed: false,
   });
@@ -292,64 +291,61 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
       return res.status(422).send("Error within the upload function");
     }
     try {
-      if (uploadedFile.mimetype.startsWith('image/')) {
+      if (uploadedFile.mimetype.startsWith("image/")) {
         // Upload to GCP bucket
         await storage
           .bucket(bucketName)
-          .file(newLecture._id.toString()) 
+          .file(newLecture._id.toString())
           .save(buffer, {
             metadata: {
               contentType: uploadedFile.mimetype,
             },
           });
         newLecture.image = newLecture._id.toString();
+      } else if (uploadedFile.mimetype.startsWith("video/")) {
+        if (!fs.existsSync("./_vids")) fs.mkdirSync("./_vids");
 
-      } 
-      else if (uploadedFile.mimetype.startsWith('video/')) {
-        if (!fs.existsSync('./_vids')) fs.mkdirSync('./_vids');
-    
         const localPath = `./_vids/${newLecture._id.toString()}.mp4`; // Assuming the video is in mp4 format. Adjust the extension if necessary.
-    
+
         // Write buffer to the file
         fs.writeFileSync(localPath, buffer);
-    
+
         // Transcode the video to different sizes
         const sizes = [
-            { width: 1080, height: 1920 },
-            { width: 720, height: 1280 },
-            { width: 360, height: 640 },
-            { width: 180, height: 320 },
+          { width: 1080, height: 1920 },
+          { width: 720, height: 1280 },
+          { width: 360, height: 640 },
+          { width: 180, height: 320 },
         ];
         const baseOutputPath = localPath;
-        const format = 'mp4';
+        const format = "mp4";
         console.log("Transcoding video...");
         await transcoder.transcode(localPath, baseOutputPath, sizes, format);
         console.log("Transcoding complete");
-      
+
         // Upload the transcoded files to GCP
         for (let size of sizes) {
-            const ext = path.extname(baseOutputPath);
-            const nameWithoutExt = path.basename(baseOutputPath, ext);
-            const dir = path.dirname(baseOutputPath);
-            const outputFilename = `${nameWithoutExt}_transcoded${size.width}x${size.height}${ext}`;
-            const outputPath = path.join(dir, outputFilename);
-    
-            await storage
-                .bucket(bucketName)
-                .file(outputFilename)
-                .save(fs.readFileSync(outputPath), {
-                    metadata: {
-                        contentType: uploadedFile.mimetype,
-                    },
-                });
-            //Delete the transcoded file from the _vids dir
-            fs.unlinkSync(outputPath);
+          const ext = path.extname(baseOutputPath);
+          const nameWithoutExt = path.basename(baseOutputPath, ext);
+          const dir = path.dirname(baseOutputPath);
+          const outputFilename = `${nameWithoutExt}_transcoded${size.width}x${size.height}${ext}`;
+          const outputPath = path.join(dir, outputFilename);
+
+          await storage
+            .bucket(bucketName)
+            .file(outputFilename)
+            .save(fs.readFileSync(outputPath), {
+              metadata: {
+                contentType: uploadedFile.mimetype,
+              },
+            });
+          //Delete the transcoded file from the _vids dir
+          fs.unlinkSync(outputPath);
         }
         //Delete the original file from the _vids dir
         fs.unlinkSync(localPath);
       }
-      
-      
+
       newLecture.video = newLecture._id.toString();
 
       await newLecture.save();
@@ -358,21 +354,15 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
       await section.save();
 
       return res.send(section);
-
     } catch (err) {
       console.error("Error in GCP upload:", err.message);
       return res.status(422).send("Error within the upload function");
     }
-
   } catch (err) {
     console.log(err);
     return res.send(err);
   }
 });
-
-
-
-
 
 //CREATED BY VIDEOSTREAMING TEAM
 //add lecture component to lecture and update lecture
@@ -402,10 +392,7 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
 router.get("/lecture/:lectureId", async (req, res) => {
-  if (!req.params.lectureId)
-    return res.send(
-      "Missing query parameters"
-    );
+  if (!req.params.lectureId) return res.send("Missing query parameters");
 
   const lectureId = req.params.lectureId;
 
@@ -508,7 +495,9 @@ router.post("/lecture/:lectureId/passlecture", async (req, res) => {
     return res.status(404).send("No next lecture in the same section.");
   } catch (err) {
     console.error(err);
-    return res.status(500).send("An error occurred while processing your request.");
+    return res
+      .status(500)
+      .send("An error occurred while processing your request.");
   }
 });
 
@@ -518,8 +507,6 @@ router.post("/section/create", async (req, res) => {
 
   console.log("body", req.body);
   console.log("creating section with this data:");
-  
-
 
   const section = new SectionModel({
     title: title,
@@ -539,7 +526,7 @@ router.post("/section/create", async (req, res) => {
     course = await CourseModel.findById(course_id);
     await course.sections.push(section._id);
     await course.save();
-    res.send({course : course, section : section});
+    res.send({ course: course, section: section });
   } catch (err) {
     res.status(422).send(err);
   }
@@ -774,162 +761,153 @@ router.post("/user/", async (req, res) => {
   }
 });
 
-
-
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
-
 
 //Get all courses
 router.get("/courses", async (req, res) => {
-
   try {
     // find all courses in the database
     const list = await CourseModel.find();
     res.send(list);
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-  
 });
-
 
 // Get specific course
 router.get("/courses/:id", async (req, res) => {
-
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
 
     // find a course based on it's id
     const course = await CourseModel.findById(id);
     res.send(course);
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-
-})
-
+});
 
 // delete section by id - USE WITH CAUTION SO YOU DONT MESS UP DATABASE RELATIONS
 router.delete("/sections/:id", async (req, res) => {
-  
-    try {
-      const { id } = req.params; 
-  
-      // find a section based on it's id and delete it
-      const section = await SectionModel.findByIdAndDelete(id);
-      res.send(section);
-  
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  
-});
+  try {
+    const { id } = req.params;
 
+    // find a section based on it's id and delete it
+    const section = await SectionModel.findByIdAndDelete(id);
+    res.send(section);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.delete("/lectures/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // find a section based on it's id and delete it
+    const lecture = await LectureModel.findByIdAndDelete(id);
+    res.send(lecture);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Get all sections from course
 router.get("/courses/:id/sections", async (req, res) => {
-
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
 
-    // find all sections based on a course's id  
-    const sections = await SectionModel.find({ parentCourse: id} );
+    // find all sections based on a course's id
+    const sections = await SectionModel.find({ parentCourse: id });
 
     res.send(sections);
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-
 });
 
-// Get a specififc section 
+// Get a specififc section
 router.get("/courses/:courseId/sections/:sectionId", async (req, res) => {
+  try {
+    const { courseId, sectionId } = req.params;
 
-  try{
-  const { courseId, sectionId } = req.params; 
-
-  // find a specific section within the given course by both IDs
-  const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
-  res.send(section);
-
+    // find a specific section within the given course by both IDs
+    const section = await SectionModel.findOne({
+      parentCourse: courseId,
+      _id: sectionId,
+    });
+    res.send(section);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-
 });
 
 // Get all excercies from a section
-router.get("/courses/:courseId/sections/:sectionId/exercises", async (req, res) => {
+router.get(
+  "/courses/:courseId/sections/:sectionId/exercises",
+  async (req, res) => {
+    try {
+      const { courseId, sectionId } = req.params;
 
-  try {
-  const { courseId, sectionId } = req.params; 
-
-  // find a specific section within the given course by both IDs
-  const exercises = await ExerciseModel.find({ parentSection: sectionId });
-  res.send(exercises);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+      // find a specific section within the given course by both IDs
+      const exercises = await ExerciseModel.find({ parentSection: sectionId });
+      res.send(exercises);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
   }
-
-});
+);
 
 /*** SUBSCRIPTION ROUTES ***/
 
-// Subscribe to course 
-router.post("/courses/:id/subscribe",  async (req, res) => {
-
+// Subscribe to course
+router.post("/courses/:id/subscribe", async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id} = req.body;
+    const { user_id } = req.body;
 
-    
     // find user based on id, and add the course's id to the user's subscriptions field
-    (await User.findOneAndUpdate(
-      { _id: user_id }, 
-      { $push: { subscriptions: id} }))
-      .save;
+    (
+      await User.findOneAndUpdate(
+        { _id: user_id },
+        { $push: { subscriptions: id } }
+      )
+    ).save;
 
     let user = await User.findById(user_id);
-    res.send(user)
-
+    res.send(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-
 });
 
 // Unsubscribe to course
-router.post("/courses/:id/unsubscribe",  async (req, res) => {
-  
+router.post("/courses/:id/unsubscribe", async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id} = req.body;
+    const { user_id } = req.body;
 
     // find user based on id, and remove the course's id from the user's subscriptions field
-    (await User.findOneAndUpdate(
-      { _id: user_id }, 
-      { $pull: { subscriptions: id} }))
-      .save;
+    (
+      await User.findOneAndUpdate(
+        { _id: user_id },
+        { $pull: { subscriptions: id } }
+      )
+    ).save;
 
     let user = await User.findById(user_id);
-    res.send(user)
-
+    res.send(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
-
 });
 
 // Get users subscriptions
@@ -937,46 +915,41 @@ router.get("/users/:id/subscriptions", async (req, res) => {
   try {
     const userId = req.params.id;
     // Find the user by _id and select the 'subscriptions' field
-    const user = await User.findById(userId).select('subscriptions -_id');
+    const user = await User.findById(userId).select("subscriptions -_id");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const subscribedCourses = user.subscriptions;
 
     // Find courses based on the subscribed course IDs
-    const list = await CourseModel.find({ '_id': { $in: subscribedCourses } });
+    const list = await CourseModel.find({ _id: { $in: subscribedCourses } });
 
     res.send(list);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-
-
 // Checks if user is subscribed to a specific course
-router.get('/users', async (req, res) => {
-    
+router.get("/users", async (req, res) => {
   try {
-
-    const { course_id, user_id } = req.query; 
+    const { course_id, user_id } = req.query;
 
     // checks if the course id exist in the users subscriptions field
     const user = await User.findOne({ _id: user_id, subscriptions: course_id });
 
     // return true if it exist and false if it does not
-    if(user == null) {
+    if (user == null) {
       res.send("false");
     } else {
       res.send("true");
     }
-    
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
