@@ -22,13 +22,13 @@ const { IdentityStore } = require("aws-sdk");
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 // Get all courses 
-router.get('/courses', adminOnly, async (req, res) => {
+router.get('', adminOnly, async (req, res) => {
 	const result = await CourseModel.find({});
 	res.send(result);
 });
 
 // Get all courses for one user
-router.get('/courses/creator/:id', requireLogin, async (req, res) => {
+router.get('/creator/:id', requireLogin, async (req, res) => {
   const id = req.params.id; // Get user id from request
   const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
 	
@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Get all sections
-router.post('/course/getallsections', requireLogin, async (req, res) => {
+router.post('/getallsections', requireLogin, async (req, res) => {
 	const { sections } = req.body;
 	let list = [];
 	for (let i = 0; i < sections.length; i++) {
@@ -102,7 +102,7 @@ router.get('/section/getall/:course_id', async (req, res) => {
 });
 
 // Update section title
-router.post('/course/update/sectiontitle', async (req, res) => {
+router.post('/update/sectiontitle', async (req, res) => {
 	// ...
 	// get new value & section ID
 	const { value, sectionId } = req.body;
@@ -146,7 +146,7 @@ router.post('/section/update/description', async (req, res) => {
 });
 
 // Update sections order
-router.post('/course/update/sectionsorder', async (req, res) => {
+router.post('/update/sectionsorder', async (req, res) => {
 	// Get sections from request
 	const { sections, course_id } = req.body;
 	// REPORT NOTE: Måske lav performance test, for om det giver bedst mening at wipe array og overskrive, eller tjekke 1 efter 1 om updates
