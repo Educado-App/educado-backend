@@ -55,7 +55,7 @@ describe('Login User route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(nonExistingUser)
-      .expect(404);
+      .expect(401);
 
     // Verify the response body
     expect(response.body.error.code).toBe('E0004');
@@ -71,7 +71,7 @@ describe('Login User route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .post('/api/auth/login')
       .send(nonExistingUser)
-      .expect(404);
+      .expect(401);
 
     // Verify the response body
     expect(response.body.error.code).toBe('E0004');

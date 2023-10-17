@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 // Routes
 const CourseRoutes = require('./courseRoutes');
+const ExerciseRoutes = require('./exerciseRoutes');
 const AWSRoutes = require('./bucketRoutes');
 const AuthRoutes = require('./authRoutes');
 const SignupRoutes = require('./signupRoutes');
@@ -17,6 +18,7 @@ router.get('/api', (req, res) => {
 });
 
 router.use('/api/courses', CourseRoutes);
+router.use('/api/exercises', ExerciseRoutes);
 router.use('', AWSRoutes);
 router.use('/api/auth', AuthRoutes);
 router.use('/api/signup', SignupRoutes);

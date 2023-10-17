@@ -45,20 +45,16 @@ router.get('/', adminOnly, async (req, res) => {
 		}
 
 		res.send(courses);
-
-
 	} catch (error) {
 		// If the server could not be reached, return an error message
 		console.log(error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
-
 });
 
 
 // Get specific course
 router.get('/:id', async (req, res) => {
-
 	try {
 		const { id } = req.params;
 
@@ -70,113 +66,11 @@ router.get('/:id', async (req, res) => {
 			// Handle "course not found" error response here
 			return res.status(404).json({ 'error': errorCodes['E0006'] });
 		}
-
 		res.send(course);
-
 	} catch (error) {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
-
-// Get all sections
-router.post('/course/getallsections', requireLogin, async (req, res) => {
-	const { sections } = req.body;
-	let list = [];
-	for (let i = 0; i < sections.length; i++) {
-		const temp = await SectionModel.findOne({ _id: sections[i] });
-		list.push(temp);
-	}
-	res.send(list);
-});
-
-// Get all sections for course
-router.get('/section/getall/:course_id', async (req, res) => {
-	const { course_id } = req.params;
-	const course = await CourseModel.findById(course_id);
-	const list = await SectionModel.find({ _id: course.sections });
-	res.send(list);
-});
-
-// Update section title
-router.post('/course/update/sectiontitle', async (req, res) => {
-	// ...
-	// get new value & section ID
-	const { value, sectionId } = req.body;
-
-	// find object in database and update title to new value
-	(await SectionModel.findOneAndUpdate({ _id: sectionId }, { title: value }))
-		.save;
-
-	// Send response
-	res.send('Completed');
-});
-
-// Update course description
-router.post('/section/update/title', async (req, res) => {
-	const { text, section_id } = req.body;
-
-	// find object in database and update title to new value
-	(await SectionModel.findOneAndUpdate({ _id: section_id }, { title: text }))
-		.save;
-	section = await SectionModel.findById(section_id);
-
-	// Send response
-	res.send(section);
-});
-
-// Update section description
-router.post('/section/update/description', async (req, res) => {
-	const { text, section_id } = req.body;
-
-	// find object in database and update title to new value
-	(
-		await SectionModel.findOneAndUpdate(
-			{ _id: section_id },
-			{ description: text }
-		)
-	).save;
-	section = await SectionModel.findById(section_id);
-
-	// Send response
-	res.send(section);
-});
-
-// Update sections order
-router.post('/course/update/sectionsorder', async (req, res) => {
-	// Get sections from request
-	const { sections, course_id } = req.body;
-	// REPORT NOTE: Måske lav performance test, for om det giver bedst mening at wipe array og overskrive, eller tjekke 1 efter 1 om updates
-	// Overwrite existing array
-	(
-		await CourseModel.findOneAndUpdate(
-			{ _id: course_id },
-			{ sections: sections }
-		)
-	).save;
-
-	course = await CourseModel.findById(course_id);
-
-	// Send response
-	res.send(course);
-});
-
-// Delete component for user
-router.post('/section/delete', requireLogin, async (req, res) => {
-	const { section_id, course_id } = req.body;
-
-	const course = await CourseModel.findById(course_id).catch((err) => {
-		console.log(err);
-	});
-
-	let sectionIds = course.sections;
-
-	let index = sectionIds.indexOf(section_id);
-	if (index !== -1) {
-		sectionIds.splice(index, 1);
-	}
-
-})
-
 
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
@@ -242,7 +136,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
-
 });
 
 /*** SUBSCRIPTION ROUTES ***/
@@ -318,14 +211,8 @@ router.post('/:id/unsubscribe', async (req, res) => {
 
 });
 
-// Get all exercises
-router.get('/exercise/getall', async (req, res) => {
-	const list = await ExerciseModel.find();
-	res.send(list);
-});
-
 // Get all exercises for section
-router.get('/exercise/getall/:section_id', async (req, res) => {
+router.get('/:section_id/exercises', async (req, res) => {
 	const { section_id } = req.params;
 	const section = await SectionModel.findById(section_id);
 	const list = await ExerciseModel.find({ _id: section.exercises });

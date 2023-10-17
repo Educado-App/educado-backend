@@ -44,7 +44,7 @@ router.post('/login', async (req, res) => {
 		// If email is found, compare the password provided in the request body with the password in the database
 		if (!user) {
 			// Invalid email (email not found)
-			return res.status(404).json({ 'error': errorCodes['E0004']});
+			return res.status(401).json({ 'error': errorCodes['E0004']});
 		} else {
 			// If the email is found, compare the passwords
       
