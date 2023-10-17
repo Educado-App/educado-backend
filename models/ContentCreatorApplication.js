@@ -19,4 +19,4 @@ const ContentCreator = mongoose.model(
 );
 
 
-module.exports = { ContentCreator }
+module.exports = { ContentCreator };

@@ -4,8 +4,9 @@ const router = require('../../routes/userRoutes');
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
-const { signAccessToken, verify } = require('../../helpers/token');
+const { signAccessToken } = require('../../helpers/token');
 const mongoose = require('mongoose');
+
 const app = express();
 app.use(express.json());
 app.use('/api/users', router); // Mount the router under '/api' path
@@ -23,17 +24,18 @@ let fakeCourse = makeFakeCourse();
 // Mock token secret
 jest.mock('../../config/keys', () => {
   return {
-    TOKEN_SECRET: TOKEN_SECRET,
+    TOKEN_SECRET
   };
 });
 
 describe('Users Routes', () => {
 
-  let token, fakeUser, db, actualUser;
+  let token, fakeUser, db;
 
     beforeAll(async () => {
       db = await connectDb(); // Connect to the database
 
+      token = signAccessToken({ id: 1 });
       fakeUser = makeFakeUser();
       await db.collection('courses').insertOne(fakeCourse);
 
@@ -42,13 +44,11 @@ describe('Users Routes', () => {
     beforeEach(async () => {
       // Insert the fake user into the database before each test
       await db.collection('users').insertOne(fakeUser);
-      actualUser = await db.collection('users').findOne({ email: fakeUser.email })
-      token = signAccessToken({ id: actualUser._id })
     });
 
     afterEach(async () => {
       // Remove the user from the database after each test
-      await db.collection('users').deleteOne({ _id: actualUser._id });
+      await db.collection('users').deleteOne({ _id: fakeUser._id });
     });
 
   describe('Update User Email Route', () => {
@@ -56,35 +56,35 @@ describe('Users Routes', () => {
     it('deletes a user successfully', async () => {
       // Delete the user using the API
       await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/delete/${actualUser._id}`)
+        .delete(`/api/users/delete/${fakeUser._id}`)
         .set('token', token) // Include the token in the request headers
         .expect(200);
 
       // Verify that the user was deleted from the database
-      const user = await db.collection('users').findOne({ _id: actualUser._id });
+      const user = await db.collection('users').findOne({ _id: fakeUser._id });
       expect(user).toBeNull();
     });
 
-    /*it('handles user not found error for delete', async () => {
+    it('handles user not found error for delete', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
 
       await request(`http://localhost:${PORT}`)
         .delete(`/api/users/delete/${nonExistentUserId}`)
         .set('token', token) // Include the token in the request headers
         .expect(204);
-    });*/
+    });
 
     it('updates user email successfully', async () => {
       const newEmail = 'newemail@example.com';
 
       await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({ email: newEmail })
         .expect(200); // Expecting a 200 OK response
 
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: actualUser._id });
+      const user = await db.collection('users').findOne({ _id: fakeUser._id });
       expect(user).toBeDefined();
       expect(user.email).toBe(newEmail);
     });
@@ -93,7 +93,7 @@ describe('Users Routes', () => {
       const newEmail = fakeUser.email;
 
       const response = await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({ email: newEmail })
         .expect(400); // Expecting a 400 Bad Request response
@@ -101,7 +101,7 @@ describe('Users Routes', () => {
       expect(response.body.error.code).toBe('E0201');
     });
 
-    /*it('handles user not found error for update-email', async () => {
+    it('handles user not found error for update-email', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
       const newEmail = 'newemail@example.com';
 
@@ -110,24 +110,24 @@ describe('Users Routes', () => {
         .set('token', token) // Include the token in the request headers
         .send({ email: newEmail })
         .expect(204); // Expecting a 204 No Content response for user not found
-    });*/
+    });
 
     it('updates user first name successfully', async () => {
       const newFirstName = 'newFirstName';
 
       await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({ firstName: newFirstName })
         .expect(200); // Expecting a 200 OK response
 
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: actualUser._id });
+      const user = await db.collection('users').findOne({ _id: fakeUser._id });
       expect(user).toBeDefined();
       expect(user.firstName).toBe(newFirstName);
     });
 
-    /*it('handles user not found error for update-first-name', async () => {
+    it('handles user not found error for update-first-name', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
 
       await request(`http://localhost:${PORT}`)
@@ -135,24 +135,24 @@ describe('Users Routes', () => {
         .set('token', token) // Include the token in the request headers
         .send({ newFirstName: 'NewFirstName' })
         .expect(204);
-    });*/
+    });
 
     it('updates user last name successfully', async () => {
       const newLastName = 'newLastName';
 
       await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({ lastName: newLastName })
         .expect(200); // Expecting a 200 OK response
 
       // Verify that the user was saved in the database
-      const user = await db.collection('users').findOne({ _id: actualUser._id });
+      const user = await db.collection('users').findOne({ _id: fakeUser._id });
       expect(user).toBeDefined();
       expect(user.lastName).toBe(newLastName);
     });
 
-    /*it('handles user not found error for update-last-name', async () => {
+    it('handles user not found error for update-last-name', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
 
       await request(`http://localhost:${PORT}`)
@@ -160,14 +160,14 @@ describe('Users Routes', () => {
         .set('token', token) // Include the token in the request headers
         .send({ newLastName: 'NewLastName' })
         .expect(204);
-    });*/
+    });
 
     it('updates user fields successfully', async () => {
       const newEmail = 'newemail@example.com';
       const newFirstName = 'Jane';
 
       await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({
           email: newEmail,
@@ -176,12 +176,12 @@ describe('Users Routes', () => {
         .expect(200); // Expecting a 200 OK response
 
       // Verify that the user was updated in the database
-      const updatedUser = await db.collection('users').findOne({ _id: actualUser._id });
+      const updatedUser = await db.collection('users').findOne({ _id: fakeUser._id });
       expect(updatedUser.email).toBe(newEmail);
       expect(updatedUser.firstName).toBe(newFirstName);
     });
 
-    /*it('handles user not found error', async () => {
+    it('handles user not found error', async () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
       const newEmail = 'newemail@example.com';
 
@@ -192,13 +192,13 @@ describe('Users Routes', () => {
           email: newEmail
         })
         .expect(204); // Expecting a 204 No Content response for user not found
-    });*/
+    });
 
     it('handles validation errors for email', async () => {
       const invalidEmail = 'invalidemail'; // Invalid email format
 
       const response = await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({
           email: invalidEmail
@@ -212,7 +212,7 @@ describe('Users Routes', () => {
       const invalidFirstName = 'AASD!==#¤("DSN:_;>:'; // Invalid email format
 
       const response = await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + actualUser._id)
+        .patch('/api/users/' + fakeUser._id)
         .set('token', token) // Include the token in the request headers
         .send({
           firstName: invalidFirstName
@@ -239,7 +239,7 @@ describe('Users Routes', () => {
         { _id: userId }, // Convert userId to ObjectId if needed
         { $push: { subscriptions: courseId } },
         { returnDocument: 'after' } // 'after' returns the updated document
-      )
+      );
 
       const updatedUser = result.value;
 
@@ -269,7 +269,7 @@ describe('Users Routes', () => {
 
     });
 
-    /*it('should handle user not found error', async () => {
+    it('should handle user not found error', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -284,7 +284,7 @@ describe('Users Routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.body.error.code).toBe('E0004');
-    });*/
+    });
 
 
     it('should handle invalid user id', async () => {

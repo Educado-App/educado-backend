@@ -18,7 +18,9 @@ app.use('/api/courses', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
-const server = app.listen(PORT);
+const server = app.listen(PORT, () => {
+  console.log(`Express server is running on port ${PORT}`);
+});
 
 // Create a fake user, course and section
 let fakeUser = makeFakeUser();
@@ -263,6 +265,8 @@ describe('Course Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .post('/api/courses/' + courseId + '/subscribe')
         .send({ user_id: userId });
+
+      console.log(response.body.subscriptions.find((element) => element == courseId))
 
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);

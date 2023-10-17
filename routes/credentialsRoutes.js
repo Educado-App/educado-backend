@@ -1,8 +1,7 @@
 const router = require("express").Router();
-const { ContentCreator } = require("../models/ContentCreatorApplication");
+const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const bcrypt = require('bcrypt');
 
-const errorCodes = require('../helpers/errorCodes');
 const jwt = require("jsonwebtoken");
 const { compare, encrypt } = require("../helpers/password");
 
@@ -24,13 +23,12 @@ router.post("/signup", async (req, res) => {
   form.password = hashpassword;
 
 try {
-  if(await ContentCreator.findOne({ email: email })){
+  if(await ContentCreatorApplication.findOne({ email: email })){
     console.log("Wrong Email") 
-    console.log(ContentCreator.findOne({ email: email }), email)
-    res.status(400).json({error: errorCodes['E0201']});  //An account with his email already exists
+    res.status(400).json({ msg: "Já existe uma conta com o e-mail dele" }); //An account with his email already exists
 }
 
-  const doc = ContentCreator(form);
+  const doc = ContentCreatorApplication(form);
   const created = doc.save();
 
     res.status(201);
@@ -55,22 +53,22 @@ try {
 router.post("/login", async (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  
+
   //Find the specific content creator by their email for subsequent use
-  const contentCreator = await ContentCreator.findOne({ email: email })
+  const contentCreator = await ContentCreatorApplication.findOne({ email: email })
   
   try {
      
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
     if(!contentCreator){
       console.log("Wrong User")
-      res.status(404).json({error: errorCodes['E0101']}); //A user with this email does not exist
+      res.status(404).json({ msg: "Não existe uma conta com este e-mail"  }); //A user with this email does not exist
     }
     
     //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
       console.log("Wrong Password")
-      res.status(404).json({error: errorCodes['E0101'] }); //Wrong password
+      res.status(404).json({ msg: "Senha incorreta" }); //Wrong password
 
     }
     

@@ -60,7 +60,7 @@ describe('JWT verify', () => {
 	});
 
 	afterAll(async () => {
-		await server.close();
+		server.close();
 		await mongoose.connection.close();
 	});
 });
