@@ -12,7 +12,7 @@ Educado Creator studio + backend, a learning creation application based on the f
 - google Oauth
 
 ## Step-by-step guide to run Educado development setup
-Below is a short guide explaining how to set up and run Educado in development mode. 
+Below is a short guide explaining how to set up and run Educado in development mode.
 
 ### Setting up Node environment
 - Ensure that local version of Node.js is latest stable version (v16.14.2)
@@ -54,3 +54,42 @@ The dev keys contain the following values:
 - By default the web-client runs on ://localhohst:3000
 - ...and rest api runs on ://localhost:8888
 - Local proxy (from client-web) handles communnication link between them
+
+## Setting up and running local repository (simplified)
+- Download [MongoDB Compass (GUI)](https://www.mongodb.com/try/download/compass)
+- Download [Docker](https://www.docker.com/)
+- Clone backend from GitHub
+- Add .env and gcp_service.json to config (of backend)
+    - **Immediately add these to .gitignore**
+    - **Do not under any circumstances share these files**
+- Note for Mac users: You may have to write `sudo` before your commands
+- Run in terminal:
+`npm install`
+- Run in terminal:
+`run docker`
+
+### Common errors and corresponding fixes
+
+#### NODE:16 ERROR GETTING CREDENTIALS
+
+Run in terminal:
+`docker login`
+
+Try to run Docker again by running this in the terminal:
+`npm run docker`
+
+#### ERROR LOADING METADATA FOR NODE:16
+
+Run in terminal:
+`docker pull node:16`
+
+Try to run Docker again by running this in the terminal:
+`npm run docker`
+
+#### ERROR LOADING METADATA FOR MONGODB
+
+Run in terminal:
+`docker pull mongo:latest`
+
+Try to run Docker again by running this in the terminal:
+`npm run docker`
