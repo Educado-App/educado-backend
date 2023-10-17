@@ -10,12 +10,8 @@ const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
 const { User } = require("../models/User");
-const {
-	ContentCreatorApplication,
-} = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
-const { UserModel } = require("../models/User");
-const { IdentityStore } = require("aws-sdk");
+
 
 
 
