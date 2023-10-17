@@ -1,9 +1,5 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const express = require('express');
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 const adminOnly = require("../middlewares/adminOnly");
 
 // Models
@@ -22,13 +18,13 @@ const { IdentityStore } = require("aws-sdk");
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 // Get all courses 
-router.get('/courses', adminOnly, async (req, res) => {
+/*router.get('/', adminOnly, async (req, res) => {
 	const result = await CourseModel.find({});
 	res.send(result);
-});
+});*/
 
 // Get all courses for one user
-router.get('/courses/creator/:id', requireLogin, async (req, res) => {
+router.get('/creator/:id', requireLogin, async (req, res) => {
   const id = req.params.id; // Get user id from request
   const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
 	
@@ -36,7 +32,7 @@ router.get('/courses/creator/:id', requireLogin, async (req, res) => {
 });
 
 //Get all courses
-router.get('', async (req, res) => {
+router.get('/', adminOnly, async (req, res) => {
 
 	try {
 		// find all courses in the database

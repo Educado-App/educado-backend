@@ -6,7 +6,6 @@ const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
 const { compare, encrypt } = require('../helpers/password');
 const errorCodes = require('../helpers/errorCodes');
-const send = require('send');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
 

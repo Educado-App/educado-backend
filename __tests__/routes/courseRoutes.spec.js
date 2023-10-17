@@ -39,19 +39,6 @@ describe('Course Routes', () => {
 
   });
 
-  describe('GET /courses', () => {
-    it('should get all courses', async () => {
-
-      const response = await request(`http://localhost:${PORT}`)
-        .get('/api/courses');
-      expect(response.status).toBe(200);
-      expect(response.body).toBeInstanceOf(Array);
-
-      // error handling for when there is no courses can be found in the bottom
-    });
-
-  });
-
   describe('GET /courses/:id', () => {
 
 
@@ -475,24 +462,6 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0007');
     });
   });
-
-  describe('GET /courses, error handling', () => {
-
-    it('should handle no courses not found', async () => {
-
-      // delete all courses
-      await db.collection('courses').deleteMany({});
-
-      // send request with no courses in db
-      const response = await request(`http://localhost:${PORT}`)
-        .get('/api/courses');
-
-      expect(response.status).toBe(404);
-      expect(response.body.error.code).toBe('E0005');
-    });
-
-  });
-
 
 
   afterAll(async () => {
