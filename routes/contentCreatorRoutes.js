@@ -18,7 +18,7 @@ router.delete("/profile/delete/:id", async (req, res) => {
   
       // Use Mongoose to find and delete the user by ID
       console.log("Deleting creator with ID:", id)
-      await User.findByIdAndDelete(id);
+      await UserModel.findByIdAndDelete(id);
   
       // Send a success response
       res.status(200).json({ message: "Content creator deleted successfully" });
