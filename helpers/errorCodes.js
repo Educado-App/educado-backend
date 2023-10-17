@@ -21,6 +21,38 @@ module.exports = {
 		code: 'E0004',
 		message: 'User not found'
 	},
+	E0005: {
+		code: 'E0005',
+		message: 'No courses found'
+	},
+	E0006: {
+		code: 'E0006',
+		message: 'Course not found'
+	},
+	E0007: {
+		code: 'E0007',
+		message: 'No sections found'
+	},
+	E0008: {
+		code: 'E0008',
+		message: 'Section not found'
+	},
+	E0009: {
+		code: 'E0009',
+		message: 'Course does not contain sections'
+	},
+	E0010: {
+		code: 'E0010',
+		message: 'Email could not be sent'
+	},
+	E0011: {
+		code: 'E0011',
+		message: 'No exercises found'
+	},
+	E0012: {
+		code: 'E0012',
+		message: 'Exercise not found'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -154,9 +186,9 @@ module.exports = {
 		message: 'Max level reached.'
 	},
 
-	// E08 - Answer Exercises Errors
-	E0801: {
-		code: 'E0801',
+	// E09 - Answer Exercises Errors
+	E0901: {
+		code: 'E0901',
 		message: 'This exercise is already in completedExercises.'
 	}
 };

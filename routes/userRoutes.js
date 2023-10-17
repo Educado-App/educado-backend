@@ -37,7 +37,7 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
 });
 
 // Update User with dynamic fields
-router.patch('/:id', /*requireLogin,*/ async (req, res) => {
+router.patch('/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const updateFields = req.body; // Fields to be updated dynamically
@@ -81,7 +81,7 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 });
 
 // Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
+router.patch('/:id/completed', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     const { exerciseId } = req.body;
@@ -98,7 +98,7 @@ router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
 
     res.status(200).send(updatedUser);
   } catch (error) {
-    if (error === errorCodes['E0004']) {
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
       // Handle "user not found" error response here
       res.status(404);
     } else {
@@ -167,12 +167,22 @@ async function updateUserLevel(user, earnedPoints) {
 async function markAsCompleted(user, exerciseId) {
   // Retrieve the exercise by ID to find sectionId
   const exercise = await ExerciseModel.findById(exerciseId);
+
+  if (!exercise) {
+    throw errorCodes['E0012'];
+  }
+
   const sectionIdString = exercise.parentSection;
   const sectionId = mongoose.Types.ObjectId(sectionIdString.toString());
   const section = await SectionModel.findById(sectionId);
+
+  if (!section) {
+    throw errorCodes['E0008'];
+  }
+
   const courseIdString = section.parentCourse;
   const courseId = mongoose.Types.ObjectId(courseIdString.toString());
-
+  
   await markExerciseAsCompleted(user, courseId, sectionId, exerciseId);
   
   // Check if all exercises in the section are completed

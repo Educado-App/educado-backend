@@ -395,5 +395,41 @@ describe('Handles answering exercises', () => {
         
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
+  }); 
+  
+  it('Fails to add exerciseId to completed exercises without authentication', async () => {
+    const exerciseId = fakeExercise._id;
+  
+    const response = await request(`http://localhost:${PORT}`)
+      .patch('/api/users/' + fakeUser._id + '/completed')
+      .send({ exerciseId: exerciseId })
+      .expect(401);
+  
+    expect(response.body.error).toEqual('You must be logged in!');
+  });
+  
+  it('Fails to add non-existing exerciseId to completed exercises', async () => {
+    const nonExistingExerciseId = new mongoose.Types.ObjectId();
+  
+    const response = await request(`http://localhost:${PORT}`)
+      .patch('/api/users/' + fakeUser._id + '/completed')
+      .set('token', token)
+      .send({ exerciseId: nonExistingExerciseId })
+      .expect(404);
+  
+      expect(response.body.error.code).toBe('E0012');
+  });
+  
+  it('Fails to add exerciseId to completed exercises for non-existing user', async () => {
+    const exerciseId = fakeExercise._id;
+    const nonExistingUserId = new mongoose.Types.ObjectId();
+  
+    const response = await request(`http://localhost:${PORT}`)
+      .patch('/api/users/' + nonExistingUserId + '/completed')
+      .set('token', token)
+      .send({ exerciseId: exerciseId })
+      .expect(404);
+  
+      expect(response.body.error.code).toBe('E0004');
   });  
 });
