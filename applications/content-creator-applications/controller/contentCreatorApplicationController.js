@@ -53,17 +53,16 @@ module.exports = function makeContentCreatorApplicationController({ contentCreat
 
 			const validCCApplication = makeContentCreatorApplication(applicationInfo);
 
-			const created = await contentCreatorApplicationList.add({
-				id: validCCApplication.getId(),
-				firstName: validCCApplication.getFirstName(),
-				lastName: validCCApplication.getLastName(),
-				email: validCCApplication.getEmail(),
-				motivation: validCCApplication.getMotivation(),
-				approved: validCCApplication.isApproved(),
-				rejectionReason: validCCApplication.getRejectReason(),
-				createdAt: validCCApplication.getCreatedAt(),
-				modifiedAt: validCCApplication.getModifiedAt(),
-			});
+            const created = await contentCreatorApplicationList.add({
+                id: validCCApplication.getId(),
+                name: validCCApplication.getName(),
+                email: validCCApplication.getEmail(),
+                password: validCCApplication.getPassword(),
+                approved: validCCApplication.isApproved(),
+                rejectionReason: validCCApplication.getRejectReason(),
+                createdAt: validCCApplication.getCreatedAt(),
+                modifiedAt: validCCApplication.getModifiedAt(),
+            })
 
 			return {
 				success: true,
