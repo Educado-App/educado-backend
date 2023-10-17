@@ -9,7 +9,7 @@ const {
   ContentCreator,
 } = require("../models/ContentCreatorApplication");
 
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/profile/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
     console.log("Deleting creator with ID:", id);
