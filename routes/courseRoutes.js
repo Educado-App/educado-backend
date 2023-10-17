@@ -12,12 +12,22 @@ const { ComponentModel } = require("../models/Components");
 const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 const { LectureModel } = require("../models/Lecture");
+
+
+const { Storage } = require("@google-cloud/storage");
+const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+// Constant variables
+const bucketName = "educado-bucket";
+const dir = "./_temp_bucketFiles";
+
+
 //const { LectureContentModel } = require("../models/LectureComponent");
 const {
   ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
+const multer = require("multer");
 
 //Why is all this out commented? Have it been replaced whit something else?
 /*
@@ -224,12 +234,37 @@ router.post("/course/delete", requireLogin, async (req, res) => {
 
 */
 
+
+// New GCP Bucket Instance
+const storage = new Storage({
+  projectId: credentials.project_id,
+  keyFilename: credentials,
+});
+
 //CREATED BY VIDEOSTREAMING TEAM
 //create lecture
-router.post("/lecture/create", async (req, res) => {
-  //we need section id to create a lecture
-  const { parentSection, title, description, image, video } =
-    req.body;
+// Update Multer configuration
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // increased to 50mb to accommodate video
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'), false);
+    }
+  },
+});
+
+router.post("/lecture/create", upload.single("file"), async (req, res) => {
+  const { parentSection, title, description } = req.body;
+  const uploadedFile = req.file;
+  const buffer = req.file.buffer;
+
+  // Check if the request contains a file
+  if (!uploadedFile) return res.status(400).send("Missing file");
 
   console.log("creating lecture with this data:");
   console.log("body", req.body);
@@ -241,22 +276,54 @@ router.post("/lecture/create", async (req, res) => {
     title: title,
     description: description,
     parentSection: parentSection,
-    image: "",
+    image: "", 
     video: "",
     completed: false,
   });
 
   try {
     await newLecture.save();
-    section = await SectionModel.findById(parentSection);
-    await section.components.push(newLecture._id);
-    await section.save();
-    return res.send(section);
+
+    if (!newLecture._id || !uploadedFile || !buffer) {
+      return res.status(422).send("Error within the upload function");
+    }
+
+    try {
+      // Upload to GCP bucket
+      await storage
+        .bucket(bucketName)
+        .file(newLecture._id.toString()) 
+        .save(buffer, {
+          metadata: {
+            contentType: uploadedFile.mimetype,
+          },
+        });
+      
+      if (uploadedFile.mimetype.startsWith('image/')) {
+        newLecture.image = newLecture._id.toString();
+      } else if (uploadedFile.mimetype.startsWith('video/')) {
+        newLecture.video = newLecture._id.toString();
+      }
+      await newLecture.save();
+
+      const section = await SectionModel.findById(parentSection);
+      section.components.push(newLecture._id);
+      await section.save();
+
+      return res.send(section);
+
+    } catch (err) {
+      console.error("Error in GCP upload:", err.message);
+      return res.status(422).send("Error within the upload function");
+    }
+
   } catch (err) {
     console.log(err);
     return res.send(err);
   }
 });
+
+
 
 
 
