@@ -100,7 +100,7 @@ module.exports = {
   },
   E0206: {
     code: 'E0206',
-    message: 'Email must contain "@" and ".".'
+    message: "Email must contain '@' and '.'"
   },
   E0207: {
     code: 'E0207',
@@ -125,6 +125,14 @@ module.exports = {
   E0212: {
     code: 'E0212',
     message: 'Password is required.'
+  },
+  E0213: {
+    code: 'E0213',
+    message: 'Password must be at least 8 characters.'
+  },
+  E0214: {
+    code: 'E0214',
+    message: 'Password must contain at least one letter.'
   },
 
   // E03 - Logout errors
@@ -207,6 +215,16 @@ module.exports = {
 	E0704: {
 		code: 'E0704',
 		message: 'Max level reached.'
+	},
+
+	// Model update errors:
+	E0801: {
+		code: 'E0801',
+		message: 'Attempted to update illegal field name'
+	},
+  	E0802: {
+		code: 'E0802',
+		message: 'Field value is identical to the current value.'
 	},
 
 	// E09 - Answer Exercises Errors

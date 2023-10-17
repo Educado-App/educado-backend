@@ -140,7 +140,7 @@ describe('Users Routes', () => {
     it('updates user last name successfully', async () => {
       const newLastName = 'newLastName';
 
-      await request(`http://localhost:${PORT}`)
+      const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + actualUser._id)
         .set('token', token) // Include the token in the request headers
         .send({ lastName: newLastName })
@@ -386,7 +386,6 @@ describe('Users Routes', () => {
       expect(response.status).toBe(500);
       expect(response.body.error.code).toBe('E0003');
     });
-
   });
 
   describe('Update points and level', () => {  
@@ -565,6 +564,112 @@ describe('Users Routes', () => {
         .expect(401);
     
         expect(response.body.error.code).toBe('E0002');
+    });
+  });
+
+  describe('User PATCH route', () => {
+
+    it('should change user credentials', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ 
+          password: 'newPassword',
+          email: 'newEmail@email.com',
+          firstName: 'newFirstName',
+          lastName: 'newLastName',
+        })
+        .expect(200); // Expecting a 200 OK response
+
+      const updatedUser = await db.collection('users').findOne({ _id: user._id });
+
+      expect(updatedUser).toMatchObject({
+        firstName: 'newFirstName',
+        lastName: 'newLastName',
+        email: 'newEmail@email.com',
+        password: expect.any(String),
+        joinedAt: user.joinedAt,
+        resetAttempts: user.resetAttempts,
+        modifiedAt: expect.any(Date),
+        subscriptions: user.subscriptions,
+      });
+    });
+    
+    it('return error if password is not atleast 8 characters long', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ password: 'newpass'})
+        .expect(400); // Expecting a 400 response
+
+        expect(res.body.error.code).toBe('E0213');
+    });
+
+    it('return error if password does not contain atleast one letter', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ password: '12345678'})
+        .expect(400); // Expecting a 400 response
+
+        expect(res.body.error.code).toBe('E0214');
+    });
+
+    it('return error if there is an attempt to update an illegal field name', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ createdAt: Date.now() })
+        .expect(400); // Expecting a 400 response
+
+        expect(res.body.error.code).toBe('E0801');
+    });
+
+    it('return succesful updated object with new modifiedAt value ', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({ email: 'hej@hej.dk'
+        })
+        .expect(200); // Expecting a 200 OK response
+
+      const updatedUser = await db.collection('users').findOne({ _id: user._id });
+
+      expect(updatedUser.modifiedAt).not.toBe(user.modifiedAt);
+    });
+
+    it('return error if email you try to PATCH is identical', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({email: fakeUser.email})
+        .expect(400); // Expecting a 400 response
+
+      expect(res.body.error.code).toBe('E0201');
+    });
+
+    it('return error if firstName you try to PATCH is identical', async () => {
+      const user = await db.collection('users').findOne({ email: fakeUser.email });
+
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + user._id)
+        .set('token', token) // Include the token in the request headers
+        .send({firstName: fakeUser.firstName})
+        .expect(400); // Expecting a 400 response
+
+      expect(res.body.error.code).toBe('E0802');
     });
   });
 

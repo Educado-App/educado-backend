@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateEmail, validateName, validatePoints } = require('../helpers/validation');
+const { validateEmail, validateName, validatePoints, validatePassword } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { CourseModel } = require('../models/Courses');
@@ -7,6 +7,7 @@ const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
+const { encrypt, compare } = require('../helpers/password');
 
 router.delete('/delete/:id', requireLogin, async (req, res) => {
   try {
@@ -15,20 +16,20 @@ router.delete('/delete/:id', requireLogin, async (req, res) => {
     const deletedUser = await UserModel.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      throw errorCodes['E0004'];
+      throw errorCodes['E0004']; // User not found
     } else {
       res.status(200);
       res.send(deletedUser)
     }
 
   } catch (error) {
-    if (error === errorCodes['E0004']) {
+    if (error === errorCodes['E0004']) { // User not found
       // Handle "user not found" error response here
       res.status(204);
     } else {
       res.status(400);
     }
-    
+
     res.send({
       error: error
     });
@@ -43,6 +44,16 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
     const validFields = await validateFields(updateFields);
 
+    const user = await User.findById(id);
+
+    if (!ensureNewValues(updateFields, user)) {
+      return res.status(400).send({ error: errorCodes['E0802'] })
+    }
+
+    if(updateFields.password) {
+      updateFields.password = encrypt(updateFields.password);
+    }
+
     if (validFields) {
       // Extracts the points and level fields from updateFields
       const { points, level, ...otherFields } = updateFields;
@@ -54,7 +65,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
       );
 
       if (!updatedUser) {
-        throw errorCodes['E0004'];
+        throw errorCodes['E0004']; // User not found
       }
 
       if (!isNaN(points)) {
@@ -65,16 +76,12 @@ router.patch('/:id', requireLogin, async (req, res) => {
     }
 
   } catch (error) {
-    if (error === errorCodes['E0004']) {
+    if (error === errorCodes['E0004']) { // User not found
       // Handle "user not found" error response here
-      res.status(404);
+      res.status(404).send({ error: errorCodes['E0004'] });
     } else {
-      res.status(400);
+      res.status(400).send({ error: error });
     }
-    
-    res.send({
-      error: error
-    });
   }
 });
 
@@ -105,8 +112,8 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     
     console.log(error);
     res.send({
-			error: error
-		});
+      error: error
+    });
   }
 });
 
@@ -125,7 +132,7 @@ router.get('/:id/subscriptions', async (req, res) => {
       // Handle "user not found" error response here
       return res.status(404).json({ 'error': errorCodes['E0004'] });
     }
-    
+
     const subscribedCourses = user.subscriptions;
 
     // Find courses based on the subscribed course IDs
@@ -138,8 +145,6 @@ router.get('/:id/subscriptions', async (req, res) => {
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
-
-
 
 // Checks if user is subscribed to a specific course
 router.get('/subscriptions', async (req, res) => {
@@ -177,36 +182,54 @@ router.get('/subscriptions', async (req, res) => {
   }
 });
 
+
+/**
+ * Validates the fields to be updated dynamically
+ */
 async function validateFields(fields) {
   const fieldEntries = Object.entries(fields);
 
   for (const [fieldName, fieldValue] of fieldEntries) {
     switch (fieldName) {
       case 'email':
-        const emailValid = await validateEmail(fieldValue);
-        if (!emailValid) {
+        if (!(await validateEmail(fieldValue))) {
           return false;
         }
         break;
       case 'firstName':
       case 'lastName':
-        const nameValid = await validateName(fieldValue);
-        if (!nameValid) {
+        if (!validateName(fieldValue)) {
+          return false;
+        }
+        break;
+      case 'password':
+        if (!validatePassword(fieldValue)) {
           return false;
         }
         break;
       case 'points':
-        const pointsValid = await validatePoints(fieldValue);
-        if (!pointsValid) {
+        if (!validatePoints(fieldValue)) {
           return false;
         }
         break;
-      // Add more cases if needed for other fields
+      // Add more cases for other fields if needed
       default:
-        // Handle default case if necessary
-        break;
+        throw errorCodes['E0801'];
     }
   }
+}
+
+function ensureNewValues(newValues, oldValues) {
+  const newEntries = Object.entries(newValues);
+
+  for (const [fieldName, fieldValue] of newEntries) {
+    if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
+      return false;
+    } else if (fieldValue === oldValues[fieldName]) {
+      return false;
+    }
+  }
+
   return true;
 }
 
