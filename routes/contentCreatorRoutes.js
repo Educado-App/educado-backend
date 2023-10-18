@@ -16,7 +16,7 @@ router.delete("/:id", async (req, res) => {
     const deletedCreator = await ContentCreator.findByIdAndDelete(id);
 
     if (!deletedCreator) {
-      return res.status(204).json({ 'error': errorCodes['E0011'] });
+      return res.status(204).json({ 'error': errorCodes['E0013'] });
     } else {
       return res.status(200).json({ message: "Content creator deleted successfully" });
     }
