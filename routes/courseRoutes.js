@@ -3,15 +3,15 @@ const errorCodes = require('../helpers/errorCodes');
 const adminOnly = require("../middlewares/adminOnly");
 
 // Models
-const { CourseModel } = require("../models/Courses");
-const { SectionModel } = require("../models/Sections");
-const { ComponentModel } = require("../models/Components");
-const { User } = require("../models/User");
+const { CourseModel } = require('../models/Courses');
+const { SectionModel } = require('../models/Sections');
+const { ComponentModel } = require('../models/Components');
+const { ExerciseModel } = require('../models/Exercises');
+const { UserModel } = require('../models/Users');
 const {
 	ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
-const { UserModel } = require("../models/User");
 const { IdentityStore } = require("aws-sdk");
 
 
@@ -45,20 +45,16 @@ router.get('/', adminOnly, async (req, res) => {
 		}
 
 		res.send(courses);
-
-
 	} catch (error) {
 		// If the server could not be reached, return an error message
 		console.log(error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
-
 });
 
 
 // Get specific course
 router.get('/:id', async (req, res) => {
-
 	try {
 		const { id } = req.params;
 
@@ -70,15 +66,11 @@ router.get('/:id', async (req, res) => {
 			// Handle "course not found" error response here
 			return res.status(404).json({ 'error': errorCodes['E0006'] });
 		}
-
 		res.send(course);
-
 	} catch (error) {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
-
-})
-
+});
 
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
@@ -144,7 +136,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
-
 });
 
 /*** SUBSCRIPTION ROUTES ***/
@@ -156,7 +147,7 @@ router.post('/:id/subscribe', async (req, res) => {
 		const { id } = req.params;
 		const { user_id } = req.body;
 
-		const user = await User.findById(user_id);
+		const user = await UserModel.findById(user_id);
 
 		//checks if user exist
 		if (!user) {
@@ -172,7 +163,7 @@ router.post('/:id/subscribe', async (req, res) => {
 		}
 
 		// find user based on id, and add the course's id to the user's subscriptions field
-		(await User.findOneAndUpdate(
+		(await UserModel.findOneAndUpdate(
 			{ _id: user_id },
 			{ $push: { subscriptions: id } }))
 			.save;
@@ -192,7 +183,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
 		const { id } = req.params;
 		const { user_id } = req.body;
 
-		const user = await User.findById(user_id);
+		const user = await UserModel.findById(user_id);
 		//checks if user exist
 		if (!user) {
 			// Handle "user not found" error response here
@@ -207,7 +198,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
 		}
 
 		// find user based on id, and remove the course's id from the user's subscriptions field
-		(await User.findOneAndUpdate(
+		(await UserModel.findOneAndUpdate(
 			{ _id: user_id },
 			{ $pull: { subscriptions: id } }))
 			.save;
@@ -220,5 +211,12 @@ router.post('/:id/unsubscribe', async (req, res) => {
 
 });
 
+// Get all exercises for section
+router.get('/:section_id/exercises', async (req, res) => {
+	const { section_id } = req.params;
+	const section = await SectionModel.findById(section_id);
+	const list = await ExerciseModel.find({ _id: section.exercises });
+	res.send(list);
+});
 
 module.exports = router;
