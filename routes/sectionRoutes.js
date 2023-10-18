@@ -23,8 +23,7 @@ router.get("/", async (req, res) => {
 // Get specific section
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const sectionObjectId = mongoose.Types.ObjectId(id);
-  const section = await SectionModel.findById(sectionObjectId);
+  const section = await SectionModel.findById(id);
   res.send(section);
 });
 

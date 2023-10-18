@@ -24,8 +24,7 @@ router.get("/", async (req, res) => {
 // Get specific exercise
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const exerciseObjectId = mongoose.Types.ObjectId(id);
-  const exercise = await ExerciseModel.findById(exerciseObjectId);
+  const exercise = await ExerciseModel.findById(id);
   res.send(exercise);
 });
 
