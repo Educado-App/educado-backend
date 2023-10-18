@@ -1,141 +1,144 @@
-const request = require("supertest");
-const express = require("express");
-const mongoose = require('mongoose');
-
-const schema = require('../../routes/credentialsRoutes'); // Import your router file here
+const request = require('supertest');
+const express = require('express');
+const router = require('../../routes/credentialsRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
-const { ContentCreatorApplication } = require("../../models/ContentCreatorApplication");
-const bcrypt = require('bcrypt');
-const jwt = require("jsonwebtoken");
-const { compare, encrypt } = require("../../helpers/password");
 
-const Model = mongoose.model('Test', schema);
+const mongoose = require('mongoose');
+const { encrypt } = require('../../helpers/password');
+const token = require('../../helpers/token');
+const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
 
 const app = express();
 app.use(express.json());
-app.use('/api/auth', schema); // Mount the router under '/api' path
+app.use('/api/credentials', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
-const PORT = 5020; // Choose a port for testing
+const PORT = 5069; // Choose a port for testing
 const server = app.listen(PORT);
+const { signAccessToken, verify } = require('../../helpers/token');
 
-let db; // Store the database connection
-beforeAll(async () => {
-  db = await connectDb(); // Connect to the database
+const fakeContentCreator = makeFakeContentCreator();
+
+const TOKEN_SECRET = 'test';
+
+// Mock token secret
+jest.mock('../../config/keys', () => {
+    return {
+      TOKEN_SECRET: TOKEN_SECRET,
+    };
+  });
+
+// Login route for Content Creators
+describe('Login Content Creator route', () => {
+  let db; // Store the database connection
+
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database  
+    // Insert the fake user into the database
+    await db.collection('content-creators').insertOne(fakeContentCreator);
+  });
+
+  it('Returns error if user is not found', async () => {
+    const nonExistingContentCreator = {
+      email: 'iDontExist@test.dk',
+      password: '12345678'
+    };
+
+    // Send a Post request to the login endpoint
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/credentials/login')
+      .send(nonExistingContentCreator)
+      .expect(401);
+    // Verify the response body
+    expect(response.body.error.code).toBe('E0105');
+  });
+
+  it('Returns error if password is incorrect', async () => {
+    const incorrectPassword = {
+      email: fakeContentCreator.email,
+      password: 'incorrectPassword'
+    };
+
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/credentials/login')
+      .send(incorrectPassword)
+      .expect(401);
+    // Verify the response body
+    expect(response.body.error.code).toBe('E0105');
+  });
+
+  it('Returns token if user is found and password is correct', async () => {
+    const correctCredentials = {
+      email: fakeContentCreator.email,
+      password: 'ABC123456!'
+    };
+
+    // Verify the response body
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/credentials/login')
+      .send(correctCredentials)
+      .expect(202);
+
+    // Verify the response body
+    expect(response.body.status).toBe('login successful');
+    expect(response.body.accessToken).toBeDefined();
+  });
+
+  afterAll(async () => {
+    await db.collection('content-creators').deleteMany({}); // Delete all documents in the 'credentials' collection
+  });
 });
 
-describe("Credentials Routes", () => {
-    describe("POST /signup", () => {
-        it("should create a new content creator application", async () => {
-            const response = await request(app)
-                .post("/signup")
-                .send({
-                    email: "test@example.com",
-                    password: "password",
-                    name: "John Doe",
-                    /* this should be addded in a future sprint, so im gonna leave it commented out for now
-                    firstName: "John",
-                    lastName: "Doe",
-                    motivation: "I am a content creator",
-                    */
-                })
-                .expect(201);
+// Signup route for Content Creators
+describe('Signup Content Creator route', () => {
 
-            const contentCreatorApplication = await ContentCreatorApplication.findOne({
-                email: "test@example.com",
-            });
-            expect(contentCreatorApplication).not.toBeNull();
+  let db; // Store the database connection
+  
+  const contentCreatorInput = {
+    name: 'test content creator',
+    email: 'testnew@emailer.com',
+    password: 'ABCDEFG123456!',
+  };
 
-            // Check if password is encrypted
-            expect(contentCreatorApplication.password).not.toBe("password");
-            const isPasswordMatch = await bcrypt.compare("password",
-                contentCreatorApplication.password
-            );
-            expect(isPasswordMatch).toBe(true);
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-            // Check if JWT token is returned
-            const decoded = jwt.verify(response.body.token, process.env.JWT_SECRET);
-            expect(decoded.email).toBe("test@example.com");
-        });
-    });
+		// Insert the fake user into the database
+		await db.collection('content-creators').insertOne(fakeContentCreator);
+	});
 
-    describe("POST /login", () => {
-        it("should log in a content creator", async () => {
-            const password = "password";
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const contentCreatorApplication = Mode1.ContentCreatorApplication({
-                email: "test@example.com",
-                password: hashedPassword,
-                name: "John Doe",
-                /* this should be addded in a future sprint, so im gonna leave it commented out for now
-                firstName: "John",
-                lastName: "Doe",
-                */
-            });
-            await contentCreatorApplication.save();
+	it('Saves the user in the database', async () => {
+		const response = await request(`http://localhost:${PORT}`)
+			.post('/api/credentials/signup')
+			.send(contentCreatorInput)
+			.expect(201);
+      
+		// Verify that the user was saved in the database
+		const contentCreator = await db.collection('content-creators').findOne({ email: contentCreatorInput.email });
+		expect(contentCreator.email).toBe(contentCreatorInput.email);
+	});
 
-            const response = await request(app)
-                .post("/login")
-                .send({
-                    email: "test@example.com",
-                    password: "password",
-                })
-                .expect(200);
+	it('Test that emails must be unique when registering', async () => {
+		const contentCreatorInput = {
+			name: 'test',
+			email: fakeContentCreator.email,
+			password: 'abc123456!',
+		};
 
-            // Check if JWT token is returned
-            const decoded = jwt.verify(response.body.token, process.env.JWT_SECRET);
-            expect(decoded.email).toBe("test@example.com");
-        });
+		const response = await request(`http://localhost:${PORT}`)
+			.post('/api/credentials/signup')
+			.send(contentCreatorInput)
+			.expect(400);
 
-        it("should not log in a content creator with incorrect password", async () => {
-            const password = "password";
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const contentCreatorApplication = Mode1.ContentCreatorApplication({
-                email: "test@example.com",
-                password: hashedPassword,
-                name: "John Doe",
-                /* this should be addded in a future sprint, so im gonna leave it commented out for now
-                firstName: "John",
-                lastName: "Doe",
-                */
-            });
-            await contentCreatorApplication.save();
+		expect(response.body.error.code).toBe('E0201');
+	});
 
-            await request(app)
-                .post("/login")
-                .send({
-                    email: "test@example.com",
-                    password: "wrongpassword",
-                })
-                .expect(400);
-        });
-
-        it("should not log in a content creator with incorrect email", async () => {
-            const password = "password";
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const contentCreatorApplication = Mode1.ContentCreatorApplication({
-                email: "test@example.com",
-                password: hashedPassword,
-                name: "John Doe",
-                /* this should be addded in a future sprint, so im gonna leave it commented out for now
-                firstName: "John",
-                lastName: "Doe",
-                */
-            });
-            await contentCreatorApplication.save();
-
-            await request(app)
-                .post("/login")
-                .send({
-                    email: "wrongemail@example.com",
-                    password: "password",
-                })
-                .expect(400);
-        });
-    });
+  afterAll(async () => {
+    await db.collection('content-creators').deleteMany({}); // Delete all documents in the 'credentials' collection
+  });
 });
 
 afterAll(async () => {
-    await mongoose.connection.close();
-    server.close();
+  await mongoose.connection.close();
+  server.close();
 });

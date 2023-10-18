@@ -1,11 +1,16 @@
 const router = require("express").Router();
 const { ContentCreator } = require("../models/ContentCreatorApplication");
 const bcrypt = require('bcrypt');
+const errorCodes = require('../helpers/errorCodes');
 
 const jwt = require("jsonwebtoken");
 const { compare, encrypt } = require("../helpers/password");
+const { signAccessToken } = require("../helpers/token");
+const user = require("../users/user");
+const { makeExpressCallback } = require("../helpers/express");
+const { authEndpointHandler } = require("../auth");
 
-
+router.post('/', makeExpressCallback(authEndpointHandler))
 /**
 * Signup Route.
 * Creates a new Content Creator Application.
@@ -18,26 +23,23 @@ const { compare, encrypt } = require("../helpers/password");
 */
 router.post("/signup", async (req, res) => {
   const form = req.body;
+  
   const email = req.body.email;
   const hashpassword = encrypt(req.body.password)
   form.password = hashpassword;
 
 try {
   if(await ContentCreator.findOne({ email: email })){
-    console.log("Wrong Email") 
-    res.status(400).json({error: errorCodes['E0201']}); //An account with his email already exists
+    return res.status(400).send({error: errorCodes['E0201']}); //An account with his email already exists
 }
 
-  const doc = ContentCreatorApplication(form);
+  const doc = ContentCreator(form);
   const created = doc.save();
 
-    res.status(201);
-    res.send(created);
+    return res.status(201).send(created);
     
   } catch (err) {
-    if(!err.statusCode) {
-      err.statusCode = 500;
-    }
+    return res.status(500).send({error: errorCodes['E0101']}); //Something went wrong
   }
 });
 
@@ -51,39 +53,38 @@ try {
 * @returns {JSON} Returns response status code and validation token
 */
 router.post("/login", async (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-
-  //Find the specific content creator by their email for subsequent use
-  const contentCreator = await ContentCreator.findOne({ email: email })
-  
   try {
-     
+    const password = req.body.password;
+    const email = req.body.email;
+    //Find the specific content creator by their email for subsequent use
+    const contentCreator = await ContentCreator.findOne({ email: email })
+    
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
     if(!contentCreator){
-      console.log("Wrong User")
-      res.status(404).json({error: errorCodes['E0101']}); //A user with this email does not exist
+      return res.status(401).json({error: errorCodes['E0105']}); //A user with this email does not exist
     }
     
     //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
     if (!compare(password, contentCreator.password)){
-      console.log("Wrong Password")
-      res.status(404).json({error: errorCodes['E0101'] }); //Wrong password
-
+      return res.status(401).json({error: errorCodes['E0105'] }); //Wrong password
     }
     
-    //If both email and passwords match, a 200 response will be generated, and used in the frontend to validate the login
+    //If both email and passwords match, a 202 response will be generated, and used in the frontend to validate the login
     if (compare(password, contentCreator.password) && email == contentCreator.email){
       const token = jwt.sign({email: contentCreator.email, password: contentCreator.password},'secretfortoken',{ expiresIn: '3h' });
-
-      res.status(200).json({ token: token, email: contentCreator.email, password: contentCreator.password, name: contentCreator.name});
-      console.log("Successful Login")
+      return res.status(202).json({ 
+        status: 'login successful',
+        accessToken: token, 
+        user: {
+          name: contentCreator.name,
+          email: contentCreator.email,
+          id: contentCreator._id,
+        },
+      });
     }
 
   } catch (err) {
-    if(!err.statusCode) {
-      err.statusCode = 500;
-    }
+    return res.status(500).json({error: errorCodes['E0101']}); //Something went wrong
   }
 });
 
