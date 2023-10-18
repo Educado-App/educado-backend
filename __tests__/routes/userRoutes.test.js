@@ -34,13 +34,12 @@ describe('Users Routes', () => {
 
     beforeAll(async () => {
       db = await connectDb(); // Connect to the database
-
-      fakeUser = makeFakeUser();
       await db.collection('courses').insertOne(fakeCourse);
     });
 
     beforeEach(async () => {
       // Insert the fake user into the database before each test
+      fakeUser = makeFakeUser();
       await db.collection('users').insertOne(fakeUser);
       actualUser = await db.collection('users').findOne({ email: fakeUser.email })
       token = signAccessToken({ id: actualUser._id })
@@ -398,7 +397,7 @@ describe('Users Routes', () => {
         .send({
           points: points
         })
-        .expect(200); // Expecting a 400 Bad Request response
+        .expect(200); // Expecting a 200 OK Request response
   
         // Verify that the user was updated in the database
         const updatedUser = await db.collection('users').findOne({ _id: fakeUser._id });
@@ -415,7 +414,7 @@ describe('Users Routes', () => {
         .send({
           points: points
         })
-        .expect(200); // Expecting a 400 Bad Request response
+        .expect(200); // Expecting a 200 OK Request response
   
         // Verify that the user was updated in the database
         const updatedUser = await db.collection('users').findOne({ _id: fakeUser._id });
@@ -634,18 +633,18 @@ describe('Users Routes', () => {
     });
 
     it('return succesful updated object with new modifiedAt value ', async () => {
+      // wait 1 second to make sure modifiedAt is not the same
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const user = await db.collection('users').findOne({ email: fakeUser.email });
-
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + user._id)
         .set('token', token) // Include the token in the request headers
         .send({ email: 'hej@hej.dk'
         })
         .expect(200); // Expecting a 200 OK response
-
+      
       const updatedUser = await db.collection('users').findOne({ _id: user._id });
-
-      expect(updatedUser.modifiedAt).not.toBe(user.modifiedAt);
+      expect(updatedUser.modifiedAt-0).not.toBe(user.modifiedAt-0);
     });
 
     it('return error if email you try to PATCH is identical', async () => {
