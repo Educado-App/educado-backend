@@ -44,7 +44,6 @@ describe('DELETE /api/profile/delete/:id', () => {
     const creator = await db.collection('contentcreators').findOne({
       email: 'test1@mail.dk'
     });
-    console.log(creator)
     const creatorId = creator._id
 
     // Perform the DELETE request

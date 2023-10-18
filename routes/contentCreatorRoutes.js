@@ -9,7 +9,7 @@ const {
   ContentCreator,
 } = require("../models/ContentCreatorApplication");
 
-router.delete("/profile/delete/:id", async (req, res) => {
+router.delete("/profiles/:id", async (req, res) => {
   try {
     const { id } = req.params;
     console.log("Deleting creator with ID:", id);
@@ -17,10 +17,8 @@ router.delete("/profile/delete/:id", async (req, res) => {
     const deletedCreator = await ContentCreator.findByIdAndDelete(id);
 
     if (!deletedCreator) {
-      console.log("Content creator not found.");
       return res.status(204).json({ 'error': errorCodes['E0011'] });
     } else {
-      console.log("Content creator deleted successfully.");
       return res.status(200).json({ message: "Content creator deleted successfully" });
     }
   } catch (error) {
