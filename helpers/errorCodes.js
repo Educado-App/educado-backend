@@ -58,8 +58,8 @@ module.exports = {
     code: 'E0010',
     message: 'Email could not be sent'
   },
-  E0011: {
-    code: 'E0011',
+  E0013: {
+    code: 'E0013',
     message: 'Content creator not found'
   },
 
