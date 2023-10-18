@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const errorCodes = require("../helpers/errorCodes");
 const adminOnly = require("../middlewares/adminOnly");
+const mongoose = require("mongoose");
 
 // Models
 const { CourseModel } = require("../models/Courses");
@@ -21,9 +22,9 @@ router.get("/", async (req, res) => {
 });
 
 // Get specific exercise
-router.get("/:exercise_id", async (req, res) => {
-  const { exercise_id } = req.params;
-  const exerciseObjectId = mongoose.Types.ObjectId(exercise_id);
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const exerciseObjectId = mongoose.Types.ObjectId(id);
   const exercise = await ExerciseModel.findById(exerciseObjectId);
   res.send(exercise);
 });
