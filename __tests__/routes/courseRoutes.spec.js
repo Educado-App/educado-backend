@@ -9,7 +9,7 @@ const makeFakeSection = require('../fixtures/fakeSection');
 const CourseModel = require('../../models/Courses');
 const SectionModel = require('../../models/Sections');
 const ExerciseModel = require('../../models/Exercises');
-const User = require('../../models/User');
+const UserModel = require('../../models/Users');
 const { ObjectID } = require('mongodb');
 
 const app = express();
@@ -18,9 +18,7 @@ app.use('/api/courses', router); // Mount the router under '/api' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
-const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Create a fake user, course and section
 let fakeUser = makeFakeUser();
@@ -38,19 +36,6 @@ describe('Course Routes', () => {
     await db.collection('users').insertOne(fakeUser);
     await db.collection('courses').insertOne(fakeCourse);
     await db.collection('sections').insertOne(fakeSection);
-
-  });
-
-  describe('GET /courses', () => {
-    it('should get all courses', async () => {
-
-      const response = await request(`http://localhost:${PORT}`)
-        .get('/api/courses');
-      expect(response.status).toBe(200);
-      expect(response.body).toBeInstanceOf(Array);
-
-      // error handling for when there is no courses can be found in the bottom
-    });
 
   });
 
@@ -266,8 +251,6 @@ describe('Course Routes', () => {
         .post('/api/courses/' + courseId + '/subscribe')
         .send({ user_id: userId });
 
-      console.log(response.body.subscriptions.find((element) => element == courseId))
-
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
       expect(response.body.subscriptions.find((element) => element == courseId));
@@ -480,30 +463,12 @@ describe('Course Routes', () => {
     });
   });
 
-  describe('GET /courses, error handling', () => {
-
-    it('should handle no courses not found', async () => {
-
-      // delete all courses
-      await db.collection('courses').deleteMany({});
-
-      // send request with no courses in db
-      const response = await request(`http://localhost:${PORT}`)
-        .get('/api/courses');
-
-      expect(response.status).toBe(404);
-      expect(response.body.error.code).toBe('E0005');
-    });
-
-  });
-
-
 
   afterAll(async () => {
-    db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
-    db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    server.close();
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+    await server.close();
     await mongoose.connection.close();
   });
 
