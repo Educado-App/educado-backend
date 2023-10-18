@@ -19,3 +19,5 @@ router.get('/', async (req, res) => {
 	const list = await ExerciseModel.find();
 	res.send(list);
 });
+
+module.exports = router;
