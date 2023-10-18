@@ -12,7 +12,6 @@ const {
 router.delete("/profiles/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("Deleting creator with ID:", id);
 
     const deletedCreator = await ContentCreator.findByIdAndDelete(id);
 
