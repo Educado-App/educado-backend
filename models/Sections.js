@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const sectionSchema = new Schema({
     title: String,
     description: String,
-    exercises: { type: Schema.Types.ObjectId, ref: 'Exercises' },
+    exercises: [{ type: Schema.Types.ObjectId, ref: 'Exercises' }],
     sectionNumber: Number,
     totalPoints: {
         type: Number,
