@@ -1,11 +1,22 @@
 const { verify } = require('../helpers/token');
+const { User } = require('../models/User');
+const errorCodes = require('../helpers/errorCodes');
+const isValidId = require('../helpers/Id');
 
-module.exports = (req, res, next) => {
-	try {
-		const claims = verify(req.headers.token ?? '');
-		next();
-	} catch {
-		// TODO: add updated error messages
-		return res.status(401).send({ error: 'You must be logged in!' });
-	}
-};
+module.exports = async (req, res, next) => {
+
+  let claims;
+  try {
+    claims = verify(req.headers.token);
+  } catch {
+    return res.status(401).send({ error: errorCodes['E0001'] });
+  }
+
+  if (req.params.id) {
+    if (claims.id !== req.params.id || !claims.id) {
+      return res.status(401).send({ error: errorCodes['E0002'] });
+    }
+  }
+
+  next();
+}

@@ -1,8 +1,8 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/signupRoutes');
-const connectDb = require('../../__tests__/fixtures/db');
-const makeFakeUser = require('../../__tests__/fixtures/fakeUser');
+const connectDb = require('../fixtures/db');
+const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');
 
 
@@ -12,17 +12,23 @@ app.use('/api/signup', router); // Mount the router under '/api/signup' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
-const server = app.listen(PORT, () => {
-	console.log(`Express server is running on port ${PORT}`);
-});
+const server = app.listen(PORT);
 
 // Create a fake user
 let fakeUser = makeFakeUser();
 
 
+
 describe('Signup User route', () => {
 
 	let db; // Store the database connection
+
+  const userInput = {
+    firstName: 'test user',
+    lastName: 'test user',
+    email: 'test@email.com',
+    password: 'ABC123456!',
+  };
 
 	beforeAll(async () => {
 		db = await connectDb(); // Connect to the database
@@ -31,36 +37,24 @@ describe('Signup User route', () => {
 		await db.collection('users').insertOne(fakeUser);
 	});
 
-	it('Check that the endpoint saves the user in the database', async () => {
-		const input = {
-			firstName: 'test user',
-			lastName: 'test user',
-			email: 'test@email.com',
-			password: 'ABC123456!',
-		};
-
+	it('Saves the user in the database', async () => {
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/signup/user')
-			.send(input)
+			.send(userInput)
 			.expect(201);
 
 		// Verify that the user was saved in the database
-		const user = await db.collection('users').findOne({ email: input.email });
+		const user = await db.collection('users').findOne({ email: userInput.email });
 		expect(user).toBeDefined();
-		expect(user.email).toBe(input.email);
+		expect(user.email).toBe(userInput.email);
 	});
 
 
 	it('Returns error if email is missing', async () => {
-		const input = {
-			firstName: 'test user',
-			lastName: 'test user',
-			password: 'ABC123456!',
-		};
-
+    userInput.email = '';
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/signup/user')
-			.send(input)
+			.send(userInput)
 			.expect(400);
 
 		expect(response.body.error.code).toBe('E0208');
@@ -78,7 +72,7 @@ describe('Signup User route', () => {
 			.post('/api/signup/user')
 			.send(input)
 			.expect(400);
-
+		
 		expect(response.body.error.code).toBe('E0212');
 	});
 
@@ -198,11 +192,10 @@ describe('Signup User route', () => {
 			.expect(400);
 
 		expect(response.body.error.code).toBe('E0201');
-
 	});
 
 	afterAll(async () => {
-		db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
 		server.close();
 		await mongoose.connection.close();
 	});
