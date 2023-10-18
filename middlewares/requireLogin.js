@@ -1,5 +1,5 @@
 const { verify } = require('../helpers/token');
-const { User } = require('../models/User');
+const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
 const isValidId = require('../helpers/Id');
 
