@@ -54,6 +54,14 @@ module.exports = {
 		code: 'E0012',
 		message: 'Exercise not found'
 	},
+  E0010: {
+    code: 'E0010',
+    message: 'Email could not be sent'
+  },
+  E0011: {
+    code: 'E0011',
+    message: 'Content creator not found'
+  },
 
   // E01 - Login errors
   E0101: {

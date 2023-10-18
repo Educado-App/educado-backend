@@ -32,7 +32,7 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 });
 
 //Get all courses
-router.get('/', adminOnly, async (req, res) => {
+router.get('/', async (req, res) => {
 
 	try {
 		// find all courses in the database
