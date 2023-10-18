@@ -16,7 +16,7 @@ const server = app.listen(PORT, () => {
 });
 
 
-describe('DELETE /api/profiles/:id', () => {
+describe('DELETE /api/creators/profiles/:id', () => {
 
   let fakeCreator, db;
 
