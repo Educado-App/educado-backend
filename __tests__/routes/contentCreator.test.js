@@ -16,7 +16,7 @@ const server = app.listen(PORT, () => {
 });
 
 
-describe('DELETE /api/creators/profiles/:id', () => {
+describe('DELETE /api/creators/:id', () => {
 
   let fakeCreator, db;
 
@@ -48,7 +48,7 @@ describe('DELETE /api/creators/profiles/:id', () => {
 
     // Perform the DELETE request
     const response = await request(`http://localhost:${PORT}`)
-      .delete(`/api/creators/profiles/${creatorId}`);
+      .delete(`/api/creators/${creatorId}`);
 
     // Assert the response
     expect(response.status).toBe(200);
@@ -65,7 +65,7 @@ describe('DELETE /api/creators/profiles/:id', () => {
   it('should handle an invalid ID', async () => {
     // Perform a DELETE request with an invalid ID
     const response = await request(`http://localhost:${PORT}`)
-      .delete('/api/creators/profiles/this-is-an-invalid-creatorId');
+      .delete('/api/creators/this-is-an-invalid-creatorId');
 
     // Assert the response
     expect(response.status).toBe(500);
@@ -78,7 +78,7 @@ describe('DELETE /api/creators/profiles/:id', () => {
 
     // Perform the DELETE request
     const response = await request(`http://localhost:${PORT}`)
-      .delete('/api/creators/profiles/' + non_existing_id);
+      .delete('/api/creators/' + non_existing_id);
 
     // Assert the response
     expect(response.status).toBe(204);
