@@ -23,9 +23,7 @@ router.get("/", async (req, res) => {
 // Get specific section
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  console.log(id)
   const section = await SectionModel.findById(id);
-  console.log("Section: " + section)
   res.send(section);
 });
 
