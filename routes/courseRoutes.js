@@ -11,8 +11,7 @@ const path = require("path");
 const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
-const { User } = require("../models/User");
-const { UserModel } = require("../models/User");
+const { UserModel } = require("../models/Users");
 const { LectureModel } = require("../models/Lecture");
 const { ExerciseModel } = require('../models/Exercises');
 
@@ -686,13 +685,13 @@ router.post("/courses/:id/subscribe", async (req, res) => {
 
     // find user based on id, and add the course's id to the user's subscriptions field
     (
-      await User.findOneAndUpdate(
+      await UserModel.findOneAndUpdate(
         { _id: user_id },
         { $push: { subscriptions: id } }
       )
     ).save;
 
-    let user = await User.findById(user_id);
+    let user = await UserModel.findById(user_id);
     res.send(user);
   } catch (error) {
     console.error(error);
@@ -708,13 +707,13 @@ router.post("/courses/:id/unsubscribe", async (req, res) => {
 
     // find user based on id, and remove the course's id from the user's subscriptions field
     (
-      await User.findOneAndUpdate(
+      await UserModel.findOneAndUpdate(
         { _id: user_id },
         { $pull: { subscriptions: id } }
       )
     ).save;
 
-    let user = await User.findById(user_id);
+    let user = await UserModel.findById(user_id);
     res.send(user);
   } catch (error) {
     console.error(error);
@@ -727,7 +726,7 @@ router.get("/users/:id/subscriptions", async (req, res) => {
   try {
     const userId = req.params.id;
     // Find the user by _id and select the 'subscriptions' field
-    const user = await User.findById(userId).select("subscriptions -_id");
+    const user = await UserModel.findById(userId).select("subscriptions -_id");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
