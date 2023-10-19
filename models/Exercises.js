@@ -1,18 +1,43 @@
-// Mongoose model class for Courses
-const mongoose = require("mongoose");
-const { component } = require("./Components");
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// Class description
 const exerciseSchema = new Schema({
-  parentSection: { type: Schema.Types.ObjectId, ref: "sections" },
-  title: String,
-  description: String,
-  content: component,
-  answers: [{}],
-  modifiedAt: Date,
+    parentSection: { type: Schema.Types.ObjectId, ref: 'Sections' },
+    description: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: Schema.Types.ObjectId,
+        ref: 'Component',
+        required: true
+    },
+    answers: [{
+        text: {
+            type: String,
+            required: true
+        },
+        correct: {
+            type: Boolean,
+            required: true
+        },
+        modifiedAt: {
+            type: Date,
+            default: Date.now,
+            required: true
+        }
+    }],
+    onWrongFeedback: {
+        type: Schema.Types.ObjectId,
+        ref: 'Component'
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now,
+        required: true
+    }
 });
 
-const ExerciseModel = mongoose.model("exercises", exerciseSchema); // Create new collection called courses, using the courseScema
+const ExerciseModel = mongoose.model('exercises', exerciseSchema);
 
-module.exports = { ExerciseModel }
+module.exports = { ExerciseModel };

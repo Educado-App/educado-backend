@@ -61,7 +61,6 @@ describe('Login User route', () => {
     expect(response.body.error.code).toBe('E0004');
   });
 
-
   it('Returns error if password is incorrect', async () => {
     const incorrectPassword = {
       email: fakeUser.email,

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../models/User'); // Import User model
+const { UserModel } = require('../models/Users'); // Import User model
 
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
@@ -40,9 +40,8 @@ router.get("/auth/google/callback",
 router.post('/login', async (req, res) => {
 	try {
 		// Searching for a single user in the database, with the email provided in the request body
-		const user = await User.findOne({ email: req.body.email});
+		const user = await UserModel.findOne({ email: req.body.email});
 		// If email is found, compare the password provided in the request body with the password in the database
-    console.log(req.body)
 		if (!user) {
 			// Invalid email (email not found)
 			return res.status(401).json({ 'error': errorCodes['E0004']});
@@ -78,7 +77,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/reset-password-request', async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email: email });
+  const user = await UserModel.findOne({ email: email });
 
   // If email is not provided or user is not found, return error E0401
   if (!email || !user) {
@@ -90,12 +89,12 @@ router.post('/reset-password-request', async (req, res) => {
     user.resetAttempts.forEach(async (attempt) => {
       if(attempt === null || attempt < (Date.now() - ATTEMPT_EXPIRATION_TIME) ) {
         user.resetAttempts.remove(attempt);
-        await User.updateOne({ _id: user._id }, user);
+        await UserModel.updateOne({ _id: user._id }, user);
       }
     });
   } else {
     user.resetAttempts = [];
-    await User.updateOne({ _id: user._id }, user);
+    await UserModel.updateOne({ _id: user._id }, user);
   }
   // If there are more than 2 attempts in the last hour, return error E0406
   if(user.resetAttempts.length > 2) {
@@ -104,7 +103,7 @@ router.post('/reset-password-request', async (req, res) => {
 
   user.resetAttempts.push(Date.now());
   
-  await User.updateOne({ _id: user._id }, user);
+  await UserModel.updateOne({ _id: user._id }, user);
 
   // Delete any existing token
   let token = await PasswordResetToken.findOne({ userId: user._id });
@@ -134,7 +133,7 @@ router.post('/reset-password-request', async (req, res) => {
 
 router.post('/reset-password-code', async (req, res) => {
   const { email, token } = req.body;
-  const user = await User.findOne({ email: email });
+  const user = await UserModel.findOne({ email: email });
 
   // If email is not provided or user is not found, return error E0401
   if (!user) {
@@ -155,7 +154,7 @@ router.post('/reset-password-code', async (req, res) => {
 
 router.patch('/reset-password', async (req, res) => {
   const { email, token, newPassword } = req.body;
-  const user = await User.findOne({ email: email });
+  const user = await UserModel.findOne({ email: email });
 
   if (!user) { // If email is not provided or user is not found, return error E0401
     return res.status(400).json({ error: errorCodes['E0401'] });
@@ -175,7 +174,7 @@ router.patch('/reset-password', async (req, res) => {
 
   // Update password and delete token
   user.password = await encrypt(newPassword);
-  await User.updateOne({ _id: user._id }, user);
+  await UserModel.updateOne({ _id: user._id }, user);
   await passwordResetToken.deleteOne();
 
   // Return success
