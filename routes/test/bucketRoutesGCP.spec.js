@@ -95,3 +95,60 @@ describe('GCP Routes', () => {
 
 });
 
+// Test GET/Stream
+describe('GET /stream/:fileName', () => {
+
+  const testVideoFileName = 'twins.mp4';
+
+  beforeAll(async () => {
+    // Check if the test video file exists in the bucket
+    const fileExists = await storage.bucket(bucketName).file(testVideoFileName).exists();
+
+    if (!fileExists[0]) {
+      // If the file doesn't exist, upload it to the bucket for testing
+      const filePath = path.join(__dirname, testVideoFileName);
+      await storage.bucket(bucketName).upload(filePath, {
+        destination: testVideoFileName,
+      });
+    }
+  });
+
+  afterAll(async () => {
+    // You can optionally remove the test video file after the tests if you want
+    // await storage.bucket(bucketName).file(testVideoFileName).delete();
+  });
+
+  it('should stream video from GCP bucket', async () => {
+    const response = await request(app)
+      .get(`/stream/${testVideoFileName}`);
+    
+    expect(response.status).to.equal(200);
+    // Optionally check the content-type header, ensuring it's serving as a video.
+    expect(response.headers['content-type']).to.equal('video/mp4');
+  });
+
+  it('should return 400 if no file name provided in the URL', async () => {
+    const response = await request(app).get('/stream/');
+    
+    expect(response.status).to.equal(400);
+    expect(response.text).to.equal('No file name provided. Use this format: /stream/fileName');
+  });
+
+  it('should handle range requests', async () => {
+    const response = await request(app)
+      .get(`/stream/${testVideoFileName}`)
+      .set('Range', 'bytes=0-499'); // Request the first 500 bytes
+
+    expect(response.status).to.equal(206); // 206 Partial Content
+    expect(response.headers['content-range']).to.be.a('string'); // Ensure a content-range header is set
+  });
+
+  it('should return 400 if video file doesn’t exist', async () => {
+    const response = await request(app)
+      .get('/stream/nonExistentVideo.mp4');
+
+    expect(response.status).to.equal(400);
+    expect(response.text).to.include('Error getting bucketvideo. It probably doesn\'t exist.');
+  });
+
+});

@@ -36,8 +36,6 @@ const upload = multer({
 
 // Get all content from bucket - filename, type, etc.
 router.get("/list", async (req, res) => {
-  console.log("GETTING LIST OF FILES FROM BUCKET");
-
   try {
     const [files] = await storage.bucket(bucketName).getFiles();
 
@@ -60,8 +58,6 @@ router.get("/list", async (req, res) => {
 
 // Get image from GCP bucket
 router.get("/download", async (req, res) => {
-  console.log("GETTING IMAGE FROM BUCKET");
-
   if (!req.query.fileName) {
     res
       .status(400)
