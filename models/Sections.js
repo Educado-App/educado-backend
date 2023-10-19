@@ -1,8 +1,6 @@
-// Mongoose model class for Courses
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const { component } = require('./Components');
 const { Schema } = mongoose;
-
-// Class description 
 
 const sectionSchema = new Schema({
   exercises: [{ type: Schema.Types.ObjectId, ref: "exercise" }],
@@ -14,6 +12,6 @@ const sectionSchema = new Schema({
   components: [{ type: Schema.Types.ObjectId, ref: "lectures" }],
 }, { timestamps: true });
 
-const SectionModel = mongoose.model("sections", sectionSchema);
+const SectionModel = mongoose.model('sections', sectionSchema);
 
-module.exports = { SectionModel }
+module.exports = { SectionModel };

@@ -14,6 +14,7 @@ const { ComponentModel } = require("../models/Components");
 const { User } = require("../models/User");
 const { UserModel } = require("../models/User");
 const { LectureModel } = require("../models/Lecture");
+const { ExerciseModel } = require('../models/Exercises');
 
 const { Storage } = require("@google-cloud/storage");
 const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -23,217 +24,16 @@ const dir = "./_vids";
 const transcoder = require("../services/transcoderHub");
 
 //const { LectureContentModel } = require("../models/LectureComponent");
+const errorCodes = require('../helpers/errorCodes');
+const adminOnly = require("../middlewares/adminOnly");
+
 const {
-  ContentCreatorApplication,
+	ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 const multer = require("multer");
 
-//Why is all this out commented? Have it been replaced whit something else?
-/*
-// Content Creator Application Route
-router.post("/course/", async (req, res) => {
-  const { title, description } = req.body;
-
-  const course = new CourseModel({
-    title: title,
-    description: description,
-    category: "",
-    _user: req.user.id,
-    dateCreated: Date.now(),
-    dateUpdated: Date.now(),
-    sections: [],
-  });
-
-  try {
-    await course.save();
-    res.send(course);
-  } catch (err) {
-    res.status(422).send(err);
-  }
-});
-
-// Course routes
-
-router.post("/courses", async (req, res) => {
-  const { title, description } = req.body;
-
-  const course = new CourseModel({
-    title: title,
-    description: description,
-    category: "",
-    _user: req.user.id,
-    dateCreated: Date.now(),
-    dateUpdated: Date.now(),
-    sections: [],
-  });
-
-  try {
-    await course.save();
-    res.send(course);
-  } catch (err) {
-    res.status(422).send(err);
-  }
-});
-
-// Update Course
-router.post("/course/update", requireLogin, async (req, res) => {
-  const { course } = req.body;
-  const dbCourse = await CourseModel.findByIdAndUpdate(
-    course._id,
-    {
-      title: course.title,
-      description: course.description,
-      sections: course.sections,
-    },
-    function (err, docs) {
-      if (err) {
-        console.log("Error:", err);
-        res.send(err);
-      } else {
-        console.log("Updated Course: ", docs);
-      }
-    }
-  );
-  res.send("Course Update Complete");
-});
-
-
-
-
-// Get all courses id
-router.get("/courses/all/id", async (req, res) => {
-
-  try {
-    // Searching for all courses in database
-    const course = await CourseModel.find();
-    console.log("ID: " + course._id);
-    if (!course) {
-      // If no course is found, return an error message
-      console.log("No courses found")
-      return res.status(404).json({
-        "message": "No courses found"
-      });
-    } else {
-      console.log("ID: " + course.id);
-      return res.status(202).json({
-        status: 'course fetched successful',
-        course: {
-          id: course.id,
-        },
-      });
-  }
-  } catch (err) { 
-    console.log(err)
-    return res.status(500).json({ 
-      "error": { "code": 500, "message": "Server could not be reached" }
-    });
-  }
-});
-
-
-// Update course title
-router.post("/course/update/title", async (req, res) => {
-  const { text, course_id } = req.body;
-
-  // find object in database and update title to new value
-  (await CourseModel.findOneAndUpdate({ _id: course_id }, { title: text }))
-    .save;
-  course = await CourseModel.findById(course_id);
-
-  // Send response
-  res.send(course);
-});
-
-// Update course description
-router.post("/course/update/description", async (req, res) => {
-  const { text, course_id } = req.body;
-
-  // find object in database and update title to new value
-  (
-    await CourseModel.findOneAndUpdate(
-      { _id: course_id },
-      { description: text }
-    )
-  ).save;
-  course = await CourseModel.findById(course_id);
-
-  // Send response
-  res.send(course);
-});
-
-// Update course category
-router.post("/course/update/category", async (req, res) => {
-  const { text, course_id } = req.body;
-
-  // find object in database and update title to new value
-  (await CourseModel.findOneAndUpdate({ _id: course_id }, { category: text }))
-    .save;
-  course = await CourseModel.findById(course_id);
-
-  // Send response
-  res.send(course);
-});
-
-// Update course published state
-router.post("/course/update/published", async (req, res) => {
-  const { published, course_id } = req.body;
-
-  // find object in database and update title to new value
-  (
-    await CourseModel.findOneAndUpdate(
-      { _id: course_id },
-      { published: published }
-    )
-  ).save;
-  course = await CourseModel.findById(course_id);
-
-  // Send response
-  res.send(course);
-});
-
-// Delete all documents for user - the Nueclear option.
-router.post("/course/delete", requireLogin, async (req, res) => {
-  const { course_id } = req.body;
-  let course;
-  try {
-    course = await CourseModel.findById(course_id).catch((err) => {
-      console.log(err);
-    });
-  } catch (error) {
-    res.status(422).send(err);
-  }
-  const sectionIds = course.sections;
-
-  sectionIds.map(async (section_id, index) => {
-    let section;
-    try {
-      section = await SectionModel.findById(section_id).catch((err) => {
-        console.log(err);
-      });
-    } catch (error) {
-      res.status(422).send(err);
-    }
-    const componentIds = section.components;
-    componentIds.map(async (component_id, index) => {
-      await ComponentModel.deleteOne({ _id: component_id }, (err) => {
-        console.log(err);
-      });
-    });
-    await SectionModel.deleteOne({ _id: section_id }, (err) => {
-      console.log(err);
-    });
-  });
-
-  await CourseModel.deleteOne({ _id: course_id }, (err) => {
-    console.log(err);
-  });
-
-  res.send("Completed");
-});
-
-*/
 
 // New GCP Bucket Instance
 const storage = new Storage({
@@ -363,31 +163,6 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
     return res.send(err);
   }
 });
-
-//CREATED BY VIDEOSTREAMING TEAM
-//add lecture component to lecture and update lecture
-// router.post("/component/create", async (req, res) => {
-//   const { parentLecture, title, text } = req.body;
-
-//   if (!parentLecture || !title || !text)
-//     return res.status(422).send("Missing parentLecture , title or text");
-
-//   const newComponent = new LectureContentModel({
-//     title: title,
-//     text: text,
-//     parentLecture: parentLecture,
-//   });
-
-//   try {
-//     await newComponent.save();
-//     lecture = await LectureModel.findById(parentLecture);
-//     await lecture.components.push(newComponent._id);
-//     await lecture.save();
-//     return res.send(lecture);
-//   } catch (err) {
-//     return res.send(err);
-//   }
-// });
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
@@ -775,6 +550,43 @@ router.get("/courses", async (req, res) => {
   }
 });
 
+/*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
+
+// Get all courses 
+/*router.get('/', adminOnly, async (req, res) => {
+	const result = await CourseModel.find({});
+	res.send(result);
+});*/
+
+// Get all courses for one user
+router.get('/creator/:id', requireLogin, async (req, res) => {
+  const id = req.params.id; // Get user id from request
+  const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
+	
+  res.send(courses); // Send response
+});
+
+//Get all courses
+router.get('/', async (req, res) => {
+
+	try {
+		// find all courses in the database
+		const courses = await CourseModel.find();
+
+		// check if sections exist
+		if (courses.length === 0) {
+			// Handle "courses not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0005'] });
+		}
+
+		res.send(courses);
+	} catch (error) {
+		// If the server could not be reached, return an error message
+		console.log(error);
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+});
+
 // Get specific course
 router.get("/courses/:id", async (req, res) => {
   try {
@@ -951,6 +763,170 @@ router.get("/users", async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
+});
+router.get('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// find a course based on it's id
+		const course = await CourseModel.findById(id);
+
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+		res.send(course);
+	} catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+});
+
+// Get all sections from course
+router.get('/:id/sections', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+
+		// find a course based on it's id
+		const course = await CourseModel.findById(id);
+
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		const sectionsInCourse = course.sections;
+
+		// check if course contains sections
+		if (sectionsInCourse.length === 0) {
+			// Handle "course does not contain sections" error response here
+			return res.status(404).json({ 'error': errorCodes['E0009'] });
+		}
+
+		// check if the sections exists
+		const sectionsList = await SectionModel.find({ '_id': { $in: sectionsInCourse } });
+		if (sectionsList.length === 0) {
+			// Handle "course does not contain sections" error response here
+			return res.status(404).json({ 'error': errorCodes['E0007'] });
+		}
+
+		res.send(sectionsList);
+
+	} catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+// Get a specififc section 
+router.get('/:courseId/sections/:sectionId', async (req, res) => {
+
+	try {
+		const { courseId, sectionId } = req.params;
+
+		const course = await CourseModel.findById(courseId);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+		// find a specific section within the given course by both IDs
+		const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
+
+		// check if section exist
+		if (!section) {
+			// Handle "section not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0008'] });
+		}
+
+		res.send(section);
+
+	} catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+});
+
+/*** SUBSCRIPTION ROUTES ***/
+
+// Subscribe to course 
+router.post('/:id/subscribe', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+		const { user_id } = req.body;
+
+		const user = await UserModel.findById(user_id);
+
+		//checks if user exist
+		if (!user) {
+			// Handle "user not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0004'] });
+		}
+
+		const course = await CourseModel.findById(id);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		// find user based on id, and add the course's id to the user's subscriptions field
+		(await UserModel.findOneAndUpdate(
+			{ _id: user_id },
+			{ $push: { subscriptions: id } }))
+			.save;
+
+		res.send(user);
+
+	} catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+// Unsubscribe to course
+router.post('/:id/unsubscribe', async (req, res) => {
+
+	try {
+		const { id } = req.params;
+		const { user_id } = req.body;
+
+		const user = await UserModel.findById(user_id);
+		//checks if user exist
+		if (!user) {
+			// Handle "user not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0004'] });
+		}
+
+		const course = await CourseModel.findById(id);
+		// check if courses exist
+		if (!course) {
+			// Handle "course not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0006'] });
+		}
+
+		// find user based on id, and remove the course's id from the user's subscriptions field
+		(await UserModel.findOneAndUpdate(
+			{ _id: user_id },
+			{ $pull: { subscriptions: id } }))
+			.save;
+
+		res.send(user)
+
+	} catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+
+});
+
+// Get all exercises for section
+router.get('/:section_id/exercises', async (req, res) => {
+	const { section_id } = req.params;
+	const section = await SectionModel.findById(section_id);
+	const list = await ExerciseModel.find({ _id: section.exercises });
+	res.send(list);
 });
 
 module.exports = router;

@@ -1,8 +1,8 @@
 node_modules
 config/dev.js
 config/gcp_service.json
+
 *.DS_Store
-package-lock.json
 dev.js
 config/.env
 config/gcp_service.json
@@ -14,3 +14,5 @@ deezgiz.json
 .env.*
 config/educado-*.json
 config/keys.js
+config/gcp_service.json
+__tests__/setup/globalConfigMongo.json

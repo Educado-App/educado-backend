@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-let connection, db
+let connection, db;
 
 module.exports = async function connectDb() {
     connection =
@@ -9,10 +9,12 @@ module.exports = async function connectDb() {
             global.__MONGO_URI__,
             {
                 useNewUrlParser: true,
-                useFindAndModify: false
+                useUnifiedTopology: true,
+                useFindAndModify: false,
+                useCreateIndex: true,
             }
         )
-    //db = db || connection.db(global.MONGO_DB_NAME)
+    //db = db || connection.db(global.__MONGO_DB_NAME__)
     db = db || connection.connection.db; // Assign the database object
 
     return db; // Return the database object

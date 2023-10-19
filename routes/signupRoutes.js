@@ -1,104 +1,64 @@
-const router = require("express").Router();
-const { encrypt } = require("../helpers/Password");
-const { ContentCreatorApplication } = require("../models/ContentCreatorApplication");
-const {User} = require("../models/User");
+const router = require('express').Router();
+const { encrypt } = require('../helpers/password');
+const { validateEmail, validateName } = require('../helpers/validation');
+const { ContentCreatorApplication } = require('../models/ContentCreatorApplication');
+const { UserModel } = require('../models/Users');
+const errorCodes = require('../helpers/errorCodes');
 
 // Content Creator Application Route
-router.post("/content-creator", async (req, res) => {
-  const form = req.body;
+router.post('/content-creator', async (req, res) => {
+	const form = req.body;
 
-  // Validate form ...
-  try {
-    const doc = ContentCreatorApplication(form);
-    const created = await doc.save();
+	// Validate form ...
+	try {
+		const doc = ContentCreatorApplication(form);
+		const created = await doc.save();
 
-    res.status(201);
-    res.send(created);
-  } catch (error) {
-    res.status(400);
-    res.send(error.message);
-  }
+		res.status(201);
+		res.send(created);
+	} catch (error) {
+		res.status(400);
+		res.send(error.message);
+	}
 });
 
-router.post("/user", async (req, res) => {
-  const form = req.body;
-  form.joinedAt = Date.now();
-  form.modifiedAt = Date.now();
+router.post('/user', async (req, res) => {
+	const form = req.body;
+	form.joinedAt = Date.now();
+	form.modifiedAt = Date.now();
 
-  // Validate form ...
-  if(isMissing(form.password)){
-    res.status(400);
-    res.send("Error 400: Password is required");
-    return;
-  }
+	// Validate form ...
+	try {
+		// Validate user info
+		if(isMissing(form.password)){
+			throw errorCodes['E0212']; // Password is required
+		}
+		const nameValid = validateName(form.firstName) &&
+                      validateName(form.lastName);
+                      
+		const emailValid = await validateEmail(form.email);
 
-  try {
-    validateEmail(form.email);
-    validateName(form.name);
-
-    // Hashing the password for security
-    const hashedPassword = encrypt(form.password);
-    //Overwriting the plain text password with the hashed password 
-    form.password = hashedPassword;
-
-    const doc = User(form);
-    const created = await doc.save();
-
-    res.status(201);
-    res.send(created);
-  } catch (error) {
-    res.status(400);
-    res.send("Error: " + error.message);
-  }
+		if(nameValid && emailValid) {
+			// Hashing the password for security
+			const hashedPassword = encrypt(form.password);
+			//Overwriting the plain text password with the hashed password 
+			form.password = hashedPassword;
+			const doc = UserModel(form);
+			const created = await doc.save();  // Save user
+			res.status(201);
+			res.send(created);
+		} 
+  
+	} catch (error) {
+		res.status(400);
+		res.send({
+			error: error
+		});
+	}
 });
 
 module.exports = router;
 
-function validateEmail(input) {
-  if (isMissing(input)) {
-    throw new Error("Email is required");
-  }
-  if (input.length < 6) {
-    throw new Error("Email must be at least 6 characters");
-  }
-  if (!input.includes("@") || !input.includes(".")) {
-    throw new Error("Email must contain '@' and '.'");
-  }
-  /**
-   * Email must contain a sequence of any letters, numbers or dots
-   * followed by an @ symbol, followed by a sequence of any letters
-   * followed by a dot, followed by a sequence of two to four domain 
-   * extension letters.
-   */
-  if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input))) {
-    throw new Error("Invalid email")
-  }
-
-  return true;
-}
-
-function validateName(input) {
-  if (isMissing(input)) {
-    throw new Error("Name is required");
-  }
-  if (input.length < 2 || input.length > 50) {
-    throw new Error("Name must be between 2 and 50 characters");
-  }
-  /**
-   * Name can contain a sequence of any letters (including foreign 
-   * language letters such as ñ, Д, and 盘) followed by
-   * a space, hyphen or apostrophe, repeated any number of times,
-   * and ending with a sequence of any letters (at least one name). 
-   */
-  if(!(input.match(/^(\p{L}+[ -'])*\p{L}+$/u))){
-    throw new Error("Name must contain only letters (seperate names with spaces, - or ')");
-  }
-
-  return true;
-}
-
-
 function isMissing(input) {
-  return input === undefined || input === null || input === "";
+	return input === undefined || input === null || input === '';
 }
-

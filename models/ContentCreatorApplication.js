@@ -1,9 +1,9 @@
 // Mongoose model class for User
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const {Schema} = mongoose;
 
 // Class description
-const contentCreatorSchema = new Schema({
+const ContentCreatorSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true },
@@ -15,8 +15,8 @@ const contentCreatorSchema = new Schema({
 });
 
 const ContentCreator = mongoose.model(
-  "contentCreator",
-  contentCreatorSchema
+  'contentCreators',
+  ContentCreatorSchema
 );
 
 
