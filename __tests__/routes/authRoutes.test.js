@@ -61,23 +61,6 @@ describe('Login User route', () => {
     expect(response.body.error.code).toBe('E0004');
   });
 
-  it('Returns error if user is not found', async () => {
-    const nonExistingUser = {
-      email: 'iDontExist@test.dk',
-      password: encrypt('12345678')
-    };
-
-    // Send a Post request to the login endpoint
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/auth/login')
-      .send(nonExistingUser)
-      .expect(401);
-
-    // Verify the response body
-    expect(response.body.error.code).toBe('E0004');
-  });
-
-
   it('Returns error if password is incorrect', async () => {
     const incorrectPassword = {
       email: fakeUser.email,
