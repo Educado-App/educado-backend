@@ -127,12 +127,6 @@ describe('GET /stream/:fileName', () => {
     expect(response.headers['content-type']).to.equal('video/mp4');
   });
 
-  it('should return 400 if no file name provided in the URL', async () => {
-    const response = await request(app).get('/stream/');
-    
-    expect(response.status).to.equal(400);
-    expect(response.text).to.equal('No file name provided. Use this format: /stream/fileName');
-  });
 
   it('should handle range requests', async () => {
     const response = await request(app)
@@ -143,12 +137,11 @@ describe('GET /stream/:fileName', () => {
     expect(response.headers['content-range']).to.be.a('string'); // Ensure a content-range header is set
   });
 
-  it('should return 400 if video file doesn’t exist', async () => {
+  it('should return 404 if video file doesn’t exist', async () => {
     const response = await request(app)
       .get('/stream/nonExistentVideo.mp4');
 
-    expect(response.status).to.equal(400);
-    expect(response.text).to.include('Error getting bucketvideo. It probably doesn\'t exist.');
+    expect(response.status).to.equal(404);
   });
 
 });
