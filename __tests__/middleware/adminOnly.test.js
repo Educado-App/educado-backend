@@ -37,8 +37,6 @@ describe('Admin token verify', () => {
 			.get('/api/test/adminOnly')
 			.set('token', token)
 
-    console.log(response.body.error)
-
 		expect(response.body.error).toBeDefined();
 	});
 

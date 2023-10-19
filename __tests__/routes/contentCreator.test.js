@@ -12,7 +12,6 @@ app.use('/api/creators', router);
 // Start the Express app on a specific port for testing
 const PORT = 5020;
 const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
 });
 
 
