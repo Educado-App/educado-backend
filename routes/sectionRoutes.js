@@ -7,7 +7,6 @@ const mongoose = require("mongoose");
 const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
-const { ExerciseModel } = require("../models/Exercises");
 const { UserModel } = require("../models/Users");
 const {
   ContentCreatorApplication,
@@ -15,17 +14,17 @@ const {
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 
-// Get all exercises
+// Get all sections
 router.get("/", async (req, res) => {
-  const list = await ExerciseModel.find();
+  const list = await SectionModel.find();
   res.send(list);
 });
 
-// Get specific exercise
+// Get specific section
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const exercise = await ExerciseModel.findById(id);
-  res.send(exercise);
+  const section = await SectionModel.findById(id);
+  res.send(section);
 });
 
 module.exports = router;
