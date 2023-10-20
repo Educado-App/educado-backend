@@ -152,7 +152,7 @@ router.post('/reset-password-code', async (req, res) => {
 
 });
 
-router.put('/reset-password', async (req, res) => {
+router.patch('/reset-password', async (req, res) => {
   const { email, token, newPassword } = req.body;
   const user = await UserModel.findOne({ email: email });
 
@@ -182,7 +182,7 @@ router.put('/reset-password', async (req, res) => {
 });
 
 // Logout simulation
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });

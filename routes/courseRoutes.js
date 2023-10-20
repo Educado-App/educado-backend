@@ -17,12 +17,6 @@ const { IdentityStore } = require("aws-sdk");
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
-// Get all courses 
-/*router.get('/', adminOnly, async (req, res) => {
-	const result = await CourseModel.find({});
-	res.send(result);
-});*/
-
 // Get all courses for one user
 router.get('/creator/:id', requireLogin, async (req, res) => {
   const id = req.params.id; // Get user id from request
