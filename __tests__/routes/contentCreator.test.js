@@ -41,7 +41,7 @@ describe('DELETE /api/creators/:id', () => {
   it('should delete a content creator profile', async () => {
 
     const creator = await db.collection('content-creators').findOne({
-      email: 'fake@gmail.com'
+      email: fakeCreator.email
     });
     const creatorId = creator._id
 
@@ -56,7 +56,7 @@ describe('DELETE /api/creators/:id', () => {
     // Verify that the creator is deleted from the database
 
     const deletedCreator = await db.collection('content-creators').findOne({
-      email: 'test1@mail.dk'
+      email: fakeCreator.email
     });
     expect(deletedCreator).toBeNull();
   });
