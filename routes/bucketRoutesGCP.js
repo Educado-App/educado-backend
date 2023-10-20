@@ -107,6 +107,8 @@ router.get("/stream/:fileName", async (req, res) => {
 
   const { fileName } = req.params;
 
+  console.log("fileName:", fileName);
+
   if (!fileName) {
     res
       .status(400)
@@ -128,7 +130,7 @@ router.get("/stream/:fileName", async (req, res) => {
     const fileSize = stat.size;
     const range = req.headers.range;
 
-    if (range) {
+    if (range) {  
       const parts = range.replace(/bytes=/, "").split("-");
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -153,7 +155,7 @@ router.get("/stream/:fileName", async (req, res) => {
   } catch (err) {
     console.log("Error getting bucketvideo. It probably doesn't exist.");
 
-    res.status(400).send(`Error: ${err.message}`);
+    res.status(404).send(`Error: ${err.message}`);
   }
 });
 
@@ -204,7 +206,7 @@ router.delete("/delete", async (req, res) => {
     res.status(200).send(`${fileName} deleted from bucket ${bucketName}`);
   } catch (err) {
     console.log(err);
-    res.status(400).send(`Error: ${err.message}`);
+    res.status(404).send(`Error: ${err.message}`);
   }
 });
 

@@ -143,12 +143,13 @@ router.post("/lecture/create", upload.single("file"), async (req, res) => {
         }
         //Delete the original file from the _vids dir
         fs.unlinkSync(localPath);
+        newLecture.video = newLecture._id.toString();
       }
 
-      newLecture.video = newLecture._id.toString();
 
       await newLecture.save();
       const section = await SectionModel.findById(parentSection);
+      console.log(section);
       section.components.push(newLecture._id);
       await section.save();
 
