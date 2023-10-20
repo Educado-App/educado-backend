@@ -13,7 +13,7 @@ const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
 const { UserModel } = require("../models/Users");
 const { LectureModel } = require("../models/Lecture");
-const { ExerciseModel } = require('../models/Exercises');
+const { ExerciseModel } = require("../models/Exercises");
 
 const { Storage } = require("@google-cloud/storage");
 const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -23,16 +23,15 @@ const dir = "./_vids";
 const transcoder = require("../services/transcoderHub");
 
 //const { LectureContentModel } = require("../models/LectureComponent");
-const errorCodes = require('../helpers/errorCodes');
+const errorCodes = require("../helpers/errorCodes");
 const adminOnly = require("../middlewares/adminOnly");
 
 const {
-	ContentCreatorApplication,
+  ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 const multer = require("multer");
-
 
 // New GCP Bucket Instance
 const storage = new Storage({
@@ -58,136 +57,6 @@ const upload = multer({
       cb(new Error("Invalid file type"), false);
     }
   },
-});
-
-router.post("/lecture/create", upload.single("file"), async (req, res) => {
-  const { parentSection, title, description } = req.body;
-  const uploadedFile = req.file;
-  const buffer = req.file.buffer;
-
-  // Check if the request contains a file
-  if (!uploadedFile) return res.status(400).send("Missing file");
-
-  console.log("creating lecture with this data:");
-  console.log("body", req.body);
-
-  if (!parentSection || !title || !description)
-    return res.status(422).send("Missing title, parentSection or description");
-
-  const newLecture = new LectureModel({
-    title: title,
-    description: description,
-    parentSection: parentSection,
-    image: "",
-    video: "",
-    completed: false,
-  });
-
-  try {
-    await newLecture.save();
-
-    if (!newLecture._id || !uploadedFile || !buffer) {
-      return res.status(422).send("Error within the upload function");
-    }
-    try {
-      if (uploadedFile.mimetype.startsWith("image/")) {
-        // Upload to GCP bucket
-        await storage
-          .bucket(bucketName)
-          .file(newLecture._id.toString())
-          .save(buffer, {
-            metadata: {
-              contentType: uploadedFile.mimetype,
-            },
-          });
-        newLecture.image = newLecture._id.toString();
-      } else if (uploadedFile.mimetype.startsWith("video/")) {
-        if (!fs.existsSync("./_vids")) fs.mkdirSync("./_vids");
-
-        const localPath = `./_vids/${newLecture._id.toString()}.mp4`; // Assuming the video is in mp4 format. Adjust the extension if necessary.
-
-        // Write buffer to the file
-        fs.writeFileSync(localPath, buffer);
-
-        // Transcode the video to different sizes
-        const sizes = [
-          { width: 1080, height: 1920 },
-          { width: 720, height: 1280 },
-          { width: 360, height: 640 },
-          { width: 180, height: 320 },
-        ];
-        const baseOutputPath = localPath;
-        const format = "mp4";
-        console.log("Transcoding video...");
-        await transcoder.transcode(localPath, baseOutputPath, sizes, format);
-        console.log("Transcoding complete");
-
-        // Upload the transcoded files to GCP
-        for (let size of sizes) {
-          const ext = path.extname(baseOutputPath);
-          const nameWithoutExt = path.basename(baseOutputPath, ext);
-          const dir = path.dirname(baseOutputPath);
-          const outputFilename = `${nameWithoutExt}_transcoded${size.width}x${size.height}${ext}`;
-          const outputPath = path.join(dir, outputFilename);
-
-          await storage
-            .bucket(bucketName)
-            .file(outputFilename)
-            .save(fs.readFileSync(outputPath), {
-              metadata: {
-                contentType: uploadedFile.mimetype,
-              },
-            });
-          //Delete the transcoded file from the _vids dir
-          fs.unlinkSync(outputPath);
-        }
-        //Delete the original file from the _vids dir
-        fs.unlinkSync(localPath);
-        newLecture.video = newLecture._id.toString();
-      }
-
-
-      await newLecture.save();
-      const section = await SectionModel.findById(parentSection);
-      console.log(section);
-      section.components.push(newLecture._id);
-      await section.save();
-
-      return res.send(section);
-    } catch (err) {
-      console.error("Error in GCP upload:", err.message);
-      return res.status(422).send("Error within the upload function");
-    }
-  } catch (err) {
-    console.log(err);
-    return res.send(err);
-  }
-});
-
-//CREATED BY VIDEOSTREAMING TEAM
-//get lecture by id
-router.get("/lecture/:lectureId", async (req, res) => {
-  if (!req.params.lectureId) return res.send("Missing query parameters");
-
-  const lectureId = req.params.lectureId;
-
-  let lecture = await LectureModel.findById(lectureId).catch((err) => {
-    console.log(err);
-  });
-
-  if (lecture === null)
-    return res.send("No section found with id: " + lectureId);
-
-  // //get LectureComponents
-  // const components = await LectureContentModel.find({
-  //   parentLecture: lectureId,
-  // }).catch((err) => {
-  //   console.log(err);
-  // });
-
-  // lecture.components = components;
-
-  return res.send(lecture);
 });
 
 //CREATED BY VIDEOSTREAMING TEAM
@@ -219,61 +88,6 @@ router.get("/section/:sectionId", async (req, res) => {
   _tempSection.components = lectures;
 
   return res.send(_tempSection);
-});
-
-//CREATED BY VIDEOSTREAMING TEAM
-//post pass to next lecture
-
-router.post("/lecture/:lectureId/passlecture", async (req, res) => {
-  const lectureId = req.params.lectureId;
-
-  if (!lectureId) {
-    return res.status(400).send("Missing lectureId in the request.");
-  }
-
-  try {
-    // Find the current lecture based on lectureId
-    const currentLecture = await LectureModel.findById(lectureId);
-
-    if (!currentLecture) {
-      return res.status(404).send("Lecture not found.");
-    }
-
-    // Mark the current lecture as completed
-    currentLecture.completed = true;
-    await currentLecture.save();
-
-    // Find the section of the current lecture
-    const section = await SectionModel.findById(currentLecture.parentSection);
-
-    if (!section) {
-      return res.status(404).send("Section not found.");
-    }
-
-    // Find the index of the current lecture in the section's components
-    const currentIndex = section.components.indexOf(lectureId);
-
-    // Check if there is a next lecture in the same section
-    if (currentIndex < section.components.length - 1) {
-      const nextLectureId = section.components[currentIndex + 1];
-      const nextLecture = await LectureModel.findById(nextLectureId);
-
-      if (!nextLecture) {
-        return res.status(404).send("Next lecture not found.");
-      }
-
-      // Respond with the details of the next lecture
-      return res.json(nextLecture);
-    }
-
-    // If there is no next lecture in the same section
-    return res.status(404).send("No next lecture in the same section.");
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .send("An error occurred while processing your request.");
-  }
 });
 
 // Section routes
@@ -552,39 +366,38 @@ router.get("/courses", async (req, res) => {
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
-// Get all courses 
+// Get all courses
 /*router.get('/', adminOnly, async (req, res) => {
 	const result = await CourseModel.find({});
 	res.send(result);
 });*/
 
 // Get all courses for one user
-router.get('/creator/:id', requireLogin, async (req, res) => {
+router.get("/creator/:id", requireLogin, async (req, res) => {
   const id = req.params.id; // Get user id from request
-  const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
-	
+  const courses = await CourseModel.find({ creator: id }); // Find courses for a specific user
+
   res.send(courses); // Send response
 });
 
 //Get all courses
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
+  try {
+    // find all courses in the database
+    const courses = await CourseModel.find();
 
-	try {
-		// find all courses in the database
-		const courses = await CourseModel.find();
+    // check if sections exist
+    if (courses.length === 0) {
+      // Handle "courses not found" error response here
+      return res.status(404).json({ error: errorCodes["E0005"] });
+    }
 
-		// check if sections exist
-		if (courses.length === 0) {
-			// Handle "courses not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0005'] });
-		}
-
-		res.send(courses);
-	} catch (error) {
-		// If the server could not be reached, return an error message
-		console.log(error);
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
+    res.send(courses);
+  } catch (error) {
+    // If the server could not be reached, return an error message
+    console.log(error);
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
 // Get specific course
@@ -609,18 +422,6 @@ router.delete("/sections/:id", async (req, res) => {
     // find a section based on it's id and delete it
     const section = await SectionModel.findByIdAndDelete(id);
     res.send(section);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-router.delete("/lectures/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // find a section based on it's id and delete it
-    const lecture = await LectureModel.findByIdAndDelete(id);
-    res.send(lecture);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -764,169 +565,167 @@ router.get("/users", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-router.get('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-		// find a course based on it's id
-		const course = await CourseModel.findById(id);
+    // find a course based on it's id
+    const course = await CourseModel.findById(id);
 
-		// check if courses exist
-		if (!course) {
-			// Handle "course not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0006'] });
-		}
-		res.send(course);
-	} catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ error: errorCodes["E0006"] });
+    }
+    res.send(course);
+  } catch (error) {
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
 // Get all sections from course
-router.get('/:id/sections', async (req, res) => {
+router.get("/:id/sections", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-	try {
-		const { id } = req.params;
+    // find a course based on it's id
+    const course = await CourseModel.findById(id);
 
-		// find a course based on it's id
-		const course = await CourseModel.findById(id);
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ error: errorCodes["E0006"] });
+    }
 
-		// check if courses exist
-		if (!course) {
-			// Handle "course not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0006'] });
-		}
+    const sectionsInCourse = course.sections;
 
-		const sectionsInCourse = course.sections;
+    // check if course contains sections
+    if (sectionsInCourse.length === 0) {
+      // Handle "course does not contain sections" error response here
+      return res.status(404).json({ error: errorCodes["E0009"] });
+    }
 
-		// check if course contains sections
-		if (sectionsInCourse.length === 0) {
-			// Handle "course does not contain sections" error response here
-			return res.status(404).json({ 'error': errorCodes['E0009'] });
-		}
+    // check if the sections exists
+    const sectionsList = await SectionModel.find({
+      _id: { $in: sectionsInCourse },
+    });
+    if (sectionsList.length === 0) {
+      // Handle "course does not contain sections" error response here
+      return res.status(404).json({ error: errorCodes["E0007"] });
+    }
 
-		// check if the sections exists
-		const sectionsList = await SectionModel.find({ '_id': { $in: sectionsInCourse } });
-		if (sectionsList.length === 0) {
-			// Handle "course does not contain sections" error response here
-			return res.status(404).json({ 'error': errorCodes['E0007'] });
-		}
-
-		res.send(sectionsList);
-
-	} catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-
+    res.send(sectionsList);
+  } catch (error) {
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
-// Get a specififc section 
-router.get('/:courseId/sections/:sectionId', async (req, res) => {
+// Get a specififc section
+router.get("/:courseId/sections/:sectionId", async (req, res) => {
+  try {
+    const { courseId, sectionId } = req.params;
 
-	try {
-		const { courseId, sectionId } = req.params;
+    const course = await CourseModel.findById(courseId);
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ error: errorCodes["E0006"] });
+    }
+    // find a specific section within the given course by both IDs
+    const section = await SectionModel.findOne({
+      parentCourse: courseId,
+      _id: sectionId,
+    });
 
-		const course = await CourseModel.findById(courseId);
-		// check if courses exist
-		if (!course) {
-			// Handle "course not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0006'] });
-		}
-		// find a specific section within the given course by both IDs
-		const section = await SectionModel.findOne({ parentCourse: courseId, _id: sectionId });
+    // check if section exist
+    if (!section) {
+      // Handle "section not found" error response here
+      return res.status(404).json({ error: errorCodes["E0008"] });
+    }
 
-		// check if section exist
-		if (!section) {
-			// Handle "section not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0008'] });
-		}
-
-		res.send(section);
-
-	} catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
+    res.send(section);
+  } catch (error) {
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
 /*** SUBSCRIPTION ROUTES ***/
 
-// Subscribe to course 
-router.post('/:id/subscribe', async (req, res) => {
+// Subscribe to course
+router.post("/:id/subscribe", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
 
-	try {
-		const { id } = req.params;
-		const { user_id } = req.body;
+    const user = await UserModel.findById(user_id);
 
-		const user = await UserModel.findById(user_id);
+    //checks if user exist
+    if (!user) {
+      // Handle "user not found" error response here
+      return res.status(404).json({ error: errorCodes["E0004"] });
+    }
 
-		//checks if user exist
-		if (!user) {
-			// Handle "user not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0004'] });
-		}
+    const course = await CourseModel.findById(id);
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ error: errorCodes["E0006"] });
+    }
 
-		const course = await CourseModel.findById(id);
-		// check if courses exist
-		if (!course) {
-			// Handle "course not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0006'] });
-		}
+    // find user based on id, and add the course's id to the user's subscriptions field
+    (
+      await UserModel.findOneAndUpdate(
+        { _id: user_id },
+        { $push: { subscriptions: id } }
+      )
+    ).save;
 
-		// find user based on id, and add the course's id to the user's subscriptions field
-		(await UserModel.findOneAndUpdate(
-			{ _id: user_id },
-			{ $push: { subscriptions: id } }))
-			.save;
-
-		res.send(user);
-
-	} catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-
+    res.send(user);
+  } catch (error) {
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
 // Unsubscribe to course
-router.post('/:id/unsubscribe', async (req, res) => {
+router.post("/:id/unsubscribe", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
 
-	try {
-		const { id } = req.params;
-		const { user_id } = req.body;
+    const user = await UserModel.findById(user_id);
+    //checks if user exist
+    if (!user) {
+      // Handle "user not found" error response here
+      return res.status(404).json({ error: errorCodes["E0004"] });
+    }
 
-		const user = await UserModel.findById(user_id);
-		//checks if user exist
-		if (!user) {
-			// Handle "user not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0004'] });
-		}
+    const course = await CourseModel.findById(id);
+    // check if courses exist
+    if (!course) {
+      // Handle "course not found" error response here
+      return res.status(404).json({ error: errorCodes["E0006"] });
+    }
 
-		const course = await CourseModel.findById(id);
-		// check if courses exist
-		if (!course) {
-			// Handle "course not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0006'] });
-		}
+    // find user based on id, and remove the course's id from the user's subscriptions field
+    (
+      await UserModel.findOneAndUpdate(
+        { _id: user_id },
+        { $pull: { subscriptions: id } }
+      )
+    ).save;
 
-		// find user based on id, and remove the course's id from the user's subscriptions field
-		(await UserModel.findOneAndUpdate(
-			{ _id: user_id },
-			{ $pull: { subscriptions: id } }))
-			.save;
-
-		res.send(user)
-
-	} catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-
+    res.send(user);
+  } catch (error) {
+    return res.status(500).json({ error: errorCodes["E0003"] });
+  }
 });
 
 // Get all exercises for section
-router.get('/:section_id/exercises', async (req, res) => {
-	const { section_id } = req.params;
-	const section = await SectionModel.findById(section_id);
-	const list = await ExerciseModel.find({ _id: section.exercises });
-	res.send(list);
+router.get("/:section_id/exercises", async (req, res) => {
+  const { section_id } = req.params;
+  const section = await SectionModel.findById(section_id);
+  const list = await ExerciseModel.find({ _id: section.exercises });
+  res.send(list);
 });
 
 module.exports = router;
