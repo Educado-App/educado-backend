@@ -22,7 +22,7 @@ const sectionSchema = new Schema({
         default: Date.now
     },
     components: [{ type: Schema.Types.ObjectId, ref: 'Component' }],
-    parentCourse: [{ type: Schema.Types.ObjectId, ref: 'Courses' }]
+    parentCourse: { type: Schema.Types.ObjectId, ref: 'Courses' }
 });
 
 const SectionModel = mongoose.model('sections', sectionSchema);
