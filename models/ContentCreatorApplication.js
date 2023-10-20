@@ -4,10 +4,9 @@ const {Schema} = mongoose;
 
 // Class description
 const ContentCreatorSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true },
-  motivation: { type: String },
+  password: { type: String, required:true },
   approved: { type: Boolean, default: false },
   rejectionReason: { type: String, required: false },
   createdAt: { type: Date },
@@ -15,7 +14,7 @@ const ContentCreatorSchema = new Schema({
 });
 
 const ContentCreator = mongoose.model(
-  'contentCreators',
+  'content-creators',
   ContentCreatorSchema
 );
 

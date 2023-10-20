@@ -12,7 +12,6 @@ app.use('/api/creators', router);
 // Start the Express app on a specific port for testing
 const PORT = 5020;
 const server = app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
 });
 
 
@@ -30,19 +29,19 @@ describe('DELETE /api/creators/:id', () => {
 
   beforeEach(async () => {
     // Insert the fake creator into the database
-    await db.collection('contentcreators').insertOne(fakeCreator);
+    await db.collection('content-creators').insertOne(fakeCreator);
   });
 
   afterEach(async () => {
     // Remove the user from the database after each test
-    await db.collection('contentcreators').deleteOne({ _id: fakeCreator._id });
+    await db.collection('content-creators').deleteOne({ _id: fakeCreator._id });
   });
 
 
   it('should delete a content creator profile', async () => {
 
-    const creator = await db.collection('contentcreators').findOne({
-      email: 'test1@mail.dk'
+    const creator = await db.collection('content-creators').findOne({
+      email: fakeCreator.email
     });
     const creatorId = creator._id
 
@@ -56,8 +55,8 @@ describe('DELETE /api/creators/:id', () => {
 
     // Verify that the creator is deleted from the database
 
-    const deletedCreator = await db.collection('contentcreators').findOne({
-      email: 'test1@mail.dk'
+    const deletedCreator = await db.collection('content-creators').findOne({
+      email: fakeCreator.email
     });
     expect(deletedCreator).toBeNull();
   });
@@ -85,9 +84,8 @@ describe('DELETE /api/creators/:id', () => {
   });
 
   afterAll(async () => {
-    await db.collection('contentcreators').deleteMany({}); // Delete all documents in the 'contentcreator' collection
+    await db.collection('content-creators').deleteMany({}); // Delete all documents in the 'contentcreator' collection
     await server.close();
     await mongoose.connection.close();
   });
-
 });

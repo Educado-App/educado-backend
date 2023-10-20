@@ -202,7 +202,6 @@ router.post('/:id/unsubscribe', async (req, res) => {
 			{ _id: user_id },
 			{ $pull: { subscriptions: id } }))
 			.save;
-
 		res.send(user)
 
 	} catch (error) {
