@@ -59,38 +59,6 @@ const upload = multer({
   },
 });
 
-//CREATED BY VIDEOSTREAMING TEAM
-//get section by id
-router.get("/section/:sectionId", async (req, res) => {
-  if (!req.params.sectionId)
-    return res.send(
-      "Missing query parameters. use endpoint like this: /section/section_id"
-    );
-
-  const section_id = req.params.sectionId;
-
-  let section = await SectionModel.findById(section_id).catch((err) => {
-    throw err;
-  });
-
-  if (section === null)
-    return res.send("No section found with id: " + section_id);
-
-  //get lectures
-
-  const lectures = await LectureModel.find({
-    parentSection: section_id,
-  }).catch((err) => {
-    throw err;
-  });
-
-  let _tempSection = JSON.parse(JSON.stringify(section));
-  _tempSection.components = lectures;
-
-  return res.send(_tempSection);
-});
-
-
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 
@@ -113,30 +81,14 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* idk if this is from last year ?
-// delete section by id - USE WITH CAUTION SO YOU DONT MESS UP DATABASE RELATIONS
-router.delete("/sections/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // find a section based on it's id and delete it
-    const section = await SectionModel.findByIdAndDelete(id);
-    res.send(section);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-*/
 
 // Checks if user is subscribed to a specific course
-router.get("/users", async (req, res) => {
+router.get("/:courseId/users/:userId", async (req, res) => {
   try {
-    const { course_id, user_id } = req.query;
+    const { courseId, userId } = req.params;
 
     // checks if the course id exist in the users subscriptions field
-    const user = await User.findOne({ _id: user_id, subscriptions: course_id });
+    const user = await UserModel.findOne({ _id: userId, subscriptions: courseId });
 
     // return true if it exist and false if it does not
     if (user == null) {
