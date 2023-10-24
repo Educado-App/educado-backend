@@ -22,8 +22,6 @@ function transcode(inputPath, baseOutputPath, sizes, format = 'mp4') {
                     '-2'
                 ])
                 .toFormat(format);
-            
-            console.log(`Transcoding ${inputPath} to ${outputPath}`);
         }
 
         command.on('end', resolve)

@@ -36,8 +36,6 @@ const upload = multer({
 
 // Get all content from bucket - filename, type, etc.
 router.get("/list", async (req, res) => {
-  console.log("GETTING LIST OF FILES FROM BUCKET");
-
   try {
     const [files] = await storage.bucket(bucketName).getFiles();
 
@@ -53,15 +51,12 @@ router.get("/list", async (req, res) => {
 
     res.status(200).send(fileData);
   } catch (err) {
-    console.log("An error occurred:", err);
     res.status(400).send(`Error: ${err.message}`);
   }
 });
 
 // Get image from GCP bucket
 router.get("/download", async (req, res) => {
-  console.log("GETTING IMAGE FROM BUCKET");
-
   if (!req.query.fileName) {
     res
       .status(400)
@@ -94,20 +89,15 @@ router.get("/download", async (req, res) => {
     const base64 = fileContents.toString("base64");
     res.status(200).send(base64);
   } catch (err) {
-    console.log("ERROR GETTING BUCKETIMAGE", err);
-
     res.status(400).send(`Error: ${err.message}`);
   }
 });
 
 //VIDEO STREAMING TEAM SHOULD BE USED FOR STREAMING VIDEOS
 router.get("/stream/:fileName", async (req, res) => {
-  console.log("GETTING VIDEO FROM BUCKET");
   //download video from bucket
 
   const { fileName } = req.params;
-
-  console.log("fileName:", fileName);
 
   if (!fileName) {
     res
@@ -153,8 +143,6 @@ router.get("/stream/:fileName", async (req, res) => {
       fs.createReadStream(videoPath).pipe(res);
     }
   } catch (err) {
-    console.log("Error getting bucketvideo. It probably doesn't exist.");
-
     res.status(404).send(`Error: ${err.message}`);
   }
 });
@@ -170,9 +158,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 
   const buffer = req.file.buffer;
-  console.log("buffer:", buffer);
-  console.log("fileName:", fileName);
-  console.log("multerFile:", multerFile);
 
   //upload to bucket
   uploadFile().catch(console.error);
@@ -188,7 +173,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         },
       });
 
-    // console.log(`${fileName} uploaded to ${bucketName}.`);
   }
   res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
 });
@@ -196,16 +180,13 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 router.delete("/delete", async (req, res) => {
   try {
     const fileName = req.query.fileName;
-    console.log("fileName:", fileName);
-    console.log("bucketName:", bucketName);
 
     // Delete the file from the bucket
     await storage.bucket(bucketName).file(fileName).delete();
 
-    console.log(`${fileName} deleted from ${bucketName}.`);
     res.status(200).send(`${fileName} deleted from bucket ${bucketName}`);
   } catch (err) {
-    console.log(err);
+
     res.status(404).send(`Error: ${err.message}`);
   }
 });

@@ -67,7 +67,7 @@ router.get("/:lectureId", async (req, res) => {
   const lectureId = req.params.lectureId;
 
   let lecture = await LectureModel.findById(lectureId).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
   if (lecture === null)
@@ -77,7 +77,7 @@ router.get("/:lectureId", async (req, res) => {
   // const components = await LectureContentModel.find({
   //   parentLecture: lectureId,
   // }).catch((err) => {
-  //   console.log(err);
+    // throw err;
   // });
 
   // lecture.components = components;

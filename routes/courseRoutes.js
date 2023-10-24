@@ -70,7 +70,7 @@ router.get("/section/:sectionId", async (req, res) => {
   const section_id = req.params.sectionId;
 
   let section = await SectionModel.findById(section_id).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
   if (section === null)
@@ -81,7 +81,7 @@ router.get("/section/:sectionId", async (req, res) => {
   const lectures = await LectureModel.find({
     parentSection: section_id,
   }).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
   let _tempSection = JSON.parse(JSON.stringify(section));
@@ -94,9 +94,6 @@ router.get("/section/:sectionId", async (req, res) => {
 router.post("/section/create", async (req, res) => {
   const { title, course_id, description } = req.body; // Or query?...
 
-  console.log("body", req.body);
-  console.log("creating section with this data:");
-
   const section = new SectionModel({
     title: title,
     exercises: [],
@@ -108,7 +105,6 @@ router.post("/section/create", async (req, res) => {
     dateUpdated: Date.now(),
     components: [],
   });
-  console.log("section", section);
 
   try {
     await section.save();
@@ -200,7 +196,7 @@ router.post("/section/delete", requireLogin, async (req, res) => {
   const { section_id, course_id } = req.body;
 
   const course = await CourseModel.findById(course_id).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
   let sectionIds = course.sections;
@@ -218,7 +214,7 @@ router.post("/section/delete", requireLogin, async (req, res) => {
   ).save;
 
   await SectionModel.deleteOne({ _id: section_id }, (err) => {
-    console.log(err);
+    throw err;
   });
 
   res.send(sectionIds);
@@ -291,7 +287,7 @@ router.post("/component/delete", requireLogin, async (req, res) => {
   const { component_id, section_id } = req.body;
 
   const section = await SectionModel.findById(section_id).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
   let componentIds = section.components;
@@ -309,7 +305,7 @@ router.post("/component/delete", requireLogin, async (req, res) => {
   ).save;
 
   await ComponentModel.deleteOne({ _id: component_id }, (err) => {
-    console.log(err);
+    throw err;
   });
 
   res.send(componentIds);
@@ -318,13 +314,13 @@ router.post("/component/delete", requireLogin, async (req, res) => {
 // Delete all documents for user
 router.get("/course/delete_all", requireLogin, async (req, res) => {
   await CourseModel.deleteMany({ _user: req.user.id }, (err) => {
-    console.log(err);
+    throw err;
   });
   await SectionModel.deleteMany({}, (err) => {
-    console.log(err);
+    throw err;
   });
   await ComponentModel.deleteMany({}, (err) => {
-    console.log(err);
+    throw err;
   });
   res.send("Completed");
 });
@@ -395,7 +391,6 @@ router.get("/", async (req, res) => {
     res.send(courses);
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error);
     return res.status(500).json({ error: errorCodes["E0003"] });
   }
 });

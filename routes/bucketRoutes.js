@@ -37,7 +37,7 @@ router.get("/download-s3", requireLogin, async (req, res) => {
     const encoded = data.Body.toString("base64");
     res.send({ img: encoded });
   } catch (e) {
-    console.log(e);
+    throw e
   }
 }
 );
