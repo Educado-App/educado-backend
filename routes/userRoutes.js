@@ -110,7 +110,6 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
       res.status(400);
     }
     
-    console.log(error);
     res.send({
       error: error
     });

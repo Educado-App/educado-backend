@@ -14,6 +14,8 @@ const TestRoutes = require("../routes/testRoutes");
 const ContentCreatorRoutes = require("../routes/contentCreatorRoutes");
 const bucketRoutesGCP = require("./bucketRoutesGCP");
 const LectureRoutes = require("./lectureRoutes");
+const SectionRoutes = require('./sectionRoutes');
+const CredentialsRoutes = require('./credentialsRoutes.js');
 
 // Print all routes defined in app
 router.get("/api", (req, res) => {
@@ -31,6 +33,11 @@ router.use("/api/mail", MailRoutes);
 router.use("/api/users", UserRoutes);
 router.use("/api/creators", ContentCreatorRoutes);
 router.use("/api/lectures", LectureRoutes);
+router.use('/api/sections', SectionRoutes);
+router.use('/api/credentials', CredentialsRoutes);
+router.use('/api/mail', MailRoutes);
+router.use('/api/users', UserRoutes);
+
 
 // Test route
 router.use("/api/test", TestRoutes);
