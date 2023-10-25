@@ -10,7 +10,6 @@ config/gcp_service.json
 
 # enviroment
 .env
-deezgiz.json
 .env.*
 config/educado-*.json
 config/keys.js
