@@ -1,5 +1,4 @@
 const router = require("express").Router();
-
 const express = require("express");
 const app = express();
 app.use(express.json());
@@ -8,63 +7,15 @@ const fs = require("fs");
 const path = require("path");
 
 // Models
-const { CourseModel } = require("../models/Courses");
 const { SectionModel } = require("../models/Sections");
-const { ComponentModel } = require("../models/Components");
-const { UserModel } = require("../models/Users");
 const { LectureModel } = require("../models/Lecture");
-const { ExerciseModel } = require("../models/Exercises");
-
-const { Storage } = require("@google-cloud/storage");
-const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-// Constant variables
-const bucketName = "educado-bucket";
-const dir = "./_vids";
-const transcoder = require("../services/transcoderHub");
-
-//const { LectureContentModel } = require("../models/LectureComponent");
-const errorCodes = require("../helpers/errorCodes");
-const adminOnly = require("../middlewares/adminOnly");
-
-const {
-  ContentCreatorApplication,
-} = require("../models/ContentCreatorApplication");
-const requireLogin = require("../middlewares/requireLogin");
-const { IdentityStore } = require("aws-sdk");
-const multer = require("multer");
-
-// New GCP Bucket Instance
-const storage = new Storage({
-  projectId: credentials.project_id,
-  keyFilename: credentials,
-});
-
-//CREATED BY VIDEOSTREAMING TEAM
-//create lecture
-// Update Multer configuration
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 50 * 1024 * 1024, // increased to 50mb to accommodate video
-  },
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype.startsWith("image/") ||
-      file.mimetype.startsWith("video/")
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error("Invalid file type"), false);
-    }
-  },
-});
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
-router.get("/:lectureId", async (req, res) => {
-  if (!req.params.lectureId) return res.send("Missing query parameters");
+router.get("/:id", async (req, res) => {
+  if (!req.params.id) return res.send("Missing query parameters");
 
-  const lectureId = req.params.lectureId;
+  const lectureId = req.params.id;
 
   let lecture = await LectureModel.findById(lectureId).catch((err) => {
     throw err;
@@ -72,24 +23,14 @@ router.get("/:lectureId", async (req, res) => {
 
   if (lecture === null)
     return res.send("No section found with id: " + lectureId);
-
-  // //get LectureComponents
-  // const components = await LectureContentModel.find({
-  //   parentLecture: lectureId,
-  // }).catch((err) => {
-    // throw err;
-  // });
-
-  // lecture.components = components;
-
   return res.send(lecture);
 });
 
 //CREATED BY VIDEOSTREAMING TEAM
 //post pass to next lecture
 
-router.post("/:lectureId/passlecture", async (req, res) => {
-  const lectureId = req.params.lectureId;
+router.put("/:id/passlecture", async (req, res) => {
+  const lectureId = req.params.id;
 
   if (!lectureId) {
     return res.status(400).send("Missing lectureId in the request.");
