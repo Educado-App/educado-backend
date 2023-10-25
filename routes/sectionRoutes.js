@@ -32,6 +32,7 @@ router.put("/:course_id", /*requireLogin,*/ async (req, res) => {
     description: "",
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
+    totalPoints: 0,
     lectures: [],
     exercises: [],
   });

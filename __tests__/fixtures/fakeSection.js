@@ -1,6 +1,7 @@
 module.exports = function makeFakeSection() {
 
     return {
+        lectures: [],
         exercises: [],
         title: 'test section',
         description: 'this is a test section',

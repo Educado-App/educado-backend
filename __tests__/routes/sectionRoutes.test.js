@@ -82,7 +82,7 @@ describe('DELETE: Delete Sections route', () => {
     sectionCreate = await request(app)
       .put('/api/sections/' + fakeCourse._id)
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test Section' })
+      .send({ title: 'Test Section', description: 'Sewing test', lectures: [], exercises: [], totalPoints: 5 })
       .expect(201);
 
     expect(sectionCreate.body.title).toBe('Test Section');
