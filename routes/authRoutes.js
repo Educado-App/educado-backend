@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
 				accessToken: token,
 				userInfo: {
           id: user.id,
-          firstName: user.name,
+          firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
 				},
