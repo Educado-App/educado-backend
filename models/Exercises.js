@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const exerciseSchema = new Schema({
     parentSection: { type: Schema.Types.ObjectId, ref: 'Sections' },
-    description: {
+    question: {
         type: String,
         required: true
     },
@@ -40,4 +40,4 @@ const exerciseSchema = new Schema({
 
 const ExerciseModel = mongoose.model('exercises', exerciseSchema);
 
-module.exports = { ExerciseModel };
+module.exports = { ExerciseModel }
