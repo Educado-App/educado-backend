@@ -59,7 +59,7 @@ describe('Login User route', () => {
       expect(202);
 
       // Verify the response body
-      expect(response.body.user.email).toBe('fake@gmail.com');
+      expect(response.body.userInfo.email).toBe('fake@gmail.com');
   });
 
   it('Returns error if user is not found', async () => {
