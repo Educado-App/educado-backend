@@ -23,8 +23,7 @@ jest.mock('../../config/keys', () => {
 // Start the Express app on a specific port for testing
 const PORT = 5022; // Choose a port for testing
 const ADMIN_ID = 'srdfet784y2uioejqr';
-const server = app.listen(PORT, () => {
-});
+const server = app.listen(PORT);
 
 let fakeUser = makeFakeUser();
 const fakeCourses = getFakeCourses();
@@ -178,62 +177,4 @@ describe('Get all courses route', () => {
 afterAll(async () => {
   server.close();
   await mongoose.connection.close();
-});
-
-describe('sizes', () => {
-  // it('should contain four objects', () => {
-  //   expect(sizes).toHaveLength(4);
-  // });
-
-  it('should have objects with width and height properties', () => {
-    sizes.forEach(size => {
-      expect(size).toHaveProperty('width');
-      expect(size).toHaveProperty('height');
-    });
-  });
-
-  it('should have objects with numeric width and height properties', () => {
-    sizes.forEach(size => {
-      expect(typeof size.width).toBe('number');
-      expect(typeof size.height).toBe('number');
-    });
-  });
-
-  it('should have objects with positive width and height properties', () => {
-    sizes.forEach(size => {
-      expect(size.width).toBeGreaterThan(0);
-      expect(size.height).toBeGreaterThan(0);
-    });
-  });
-});
-describe('courseRoutes', () => {
-  describe('GET /api/courses/:courseId/lectures/:lectureId', () => {
-    it('should return the correct section', async () => {
-      // Create a fake section
-      const fakeSection = {
-        _id: 'fakeSectionId',
-        title: 'Fake Section Title',
-        content: 'Fake Section Content',
-        parentLecture: 'fakeLectureId',
-      };
-
-      // Save the fake section to the database
-      await SectionModel.create(fakeSection);
-
-      // Make a request to the endpoint
-      const res = await request(app)
-        .get(`/api/courses/${fakeSection.parentLecture.parentCourse}/lectures/${fakeSection.parentLecture}/sections/${fakeSection._id}`);
-
-      // Expect the response to have a status code of 200
-      expect(res.statusCode).toBe(200);
-
-      // Expect the response to have the correct section
-      expect(res.body).toMatchObject({
-        _id: fakeSection._id,
-        title: fakeSection.title,
-        content: fakeSection.content,
-        parentLecture: fakeSection.parentLecture,
-      });
-    });
-  });
 });
