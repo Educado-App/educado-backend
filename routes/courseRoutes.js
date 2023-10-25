@@ -31,12 +31,6 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
   res.send(courses); // Send response
 });
 
-// Get all courses for user ADDED TEMPORARY
-router.get("/eml/getall", async (req, res) => {
-	const list = await CourseModel.find();
-	res.send(list);
-  });
-
 //Get all courses
 router.get('/', async (req, res) => {
 
