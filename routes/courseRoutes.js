@@ -12,7 +12,6 @@ const {
 	ContentCreatorApplication,
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
-const { IdentityStore } = require("aws-sdk");
 
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
