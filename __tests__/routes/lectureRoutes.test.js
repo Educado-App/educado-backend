@@ -1,6 +1,5 @@
 const express = require('express');
 const request = require('supertest');
-const { expect } = require('chai');
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -42,13 +41,10 @@ describe('Lecture Routes', () => {
 
     // Test GET /:id
     it('GET /:id should return a lecture', async () => {
-        const res = await request(app)
-            .get(`/${newLecture.insertedId}`)
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200);
-        expect(res.body).to.have.property('title', 'Test Lecture');
-        expect(res.body).to.have.property('description', 'Test Description');
-        expect(res.body).to.have.property('parentSection', '6529091fddfe5294668541e2');
+        const res = await request(app).get(`/${newLecture.insertedId}`);
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveProperty('title', 'Test Lecture');
+        expect(res.body).toHaveProperty('description', 'Test Description');
+        expect(res.body).toHaveProperty('parentSection', '6529091fddfe5294668541e2');
     });
 });
