@@ -33,11 +33,6 @@ const courseSchema = new Schema({
     min: 1,
     max: 3
   },
-  // This is only a temporary variable, as the mobile use difficulty and web use level.
-  // Web is being changed to use difficulty, so this will be removed in the future.
-  level: {
-    type: String,
-  },
   status: {
     type: String,
     enum: ['draft', 'published', 'hidden'],
