@@ -14,7 +14,6 @@ const { LectureModel } = require("../models/Lecture");
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
 router.get("/:id", async (req, res) => {
-    console.log(req.params.id, "HELLOALOALOAOLAOPKAOJDIODJIOWDJIOIODWJIOJDIJOWDIOJDWIOJWDIJODWIJO");
   if (!req.params.id) return res.send("Missing query parameters");
 
   const lectureId = req.params.id;

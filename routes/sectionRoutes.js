@@ -28,7 +28,7 @@ router.get("/:sectionId", async (req, res) => {
   const section_id = req.params.sectionId;
 
   let section = await SectionModel.findById(section_id).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
 
@@ -36,16 +36,13 @@ router.get("/:sectionId", async (req, res) => {
   if (section === null)
     return res.send("No section found with id: " + section_id);
 
-  //get lectures
-  console.log("section_id", section_id);
-  console.log("section", section);
+
   const lectures = await LectureModel.find({
     parentSection: section_id,
   }).catch((err) => {
-    console.log(err);
+    throw err;
   });
 
-  console.log(lectures);
 
   // Convert the Mongoose document to a plain JavaScript object
   let _tempSection = section.toObject();
@@ -53,8 +50,6 @@ router.get("/:sectionId", async (req, res) => {
   // Now you can modify it
   _tempSection.components = lectures;
 
-  //log lectures
-  console.log(lectures);
 
   return res.send(_tempSection);
 });

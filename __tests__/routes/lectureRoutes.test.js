@@ -31,7 +31,6 @@ describe('Lecture Routes', () => {
         });
 
         newLecture = await db.collection("lectures").insertOne(lecture);
-        console.log("id: ", newLecture.insertedId);
 
     });
 

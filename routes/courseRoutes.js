@@ -46,7 +46,6 @@ router.get('/', async (req, res) => {
 		res.send(courses);
 	} catch (error) {
 		// If the server could not be reached, return an error message
-		console.log(error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
