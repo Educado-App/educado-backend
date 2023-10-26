@@ -152,13 +152,28 @@ router.get("/stream/:fileName", async (req, res) => {
   }
 });
 
+//Function to sanitize file name to prevent path traversal attacks
+function sanitizeFileName(fileName) {
+  return fileName.replace(/\.\./g, '').replace(/[^a-zA-Z0-9_.-]/g, '_');
+}
+
 // Upload file to GCP bucket
 router.post("/upload", upload.single("file"), async (req, res) => {
   const multerFile = req.file;
-  const fileName = req.body.fileName;
+  const fileName = sanitizeFileName(req.body.fileName);
+
 
   if (!multerFile) {
     res.status(400).send("No file uploaded.");
+    return;
+  }
+
+  // Validate MIME type
+  const validImageMimeTypes = [
+    "image/jpeg", "image/png", "video/mp4", 
+  ];
+  if (!validImageMimeTypes.includes(multerFile.mimetype)) {
+    res.status(400).send("Invalid file type. Please upload an image.");
     return;
   }
 
@@ -168,18 +183,22 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   uploadFile().catch(console.error);
 
   async function uploadFile() {
-    // Uploads a local file to the bucket
-    await storage
-      .bucket(bucketName)
-      .file(fileName)
-      .save(buffer, {
-        metadata: {
-          contentType: multerFile.mimetype,
-        },
-      });
-
+    try {
+      await storage
+        .bucket(bucketName)
+        .file(uniqueFileName)
+        .save(buffer, {
+          metadata: {
+            contentType: multerFile.mimetype,
+          },
+        });
+      res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
+    } 
+    catch (err) {
+      console.error(err);
+      res.status(500).send(`Error: ${err.message}`);
+    }
   }
-  res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
 });
 
 router.delete("/delete", async (req, res) => {
