@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8888
 
 # Define the command to start your Express.js application
-CMD ["npm", "run", "prod"]
+CMD ["npm", "run", "staging"]
