@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 // Get all content from bucket - filename, type, etc.
-router.get("/list", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const [files] = await storage.bucket(bucketName).getFiles();
 
@@ -56,18 +56,16 @@ router.get("/list", async (req, res) => {
 });
 
 // Get image from GCP bucket
-router.get("/download", async (req, res) => {
-  if (!req.query.fileName) {
+router.get("/:fileName", async (req, res) => {
+  const fileName = req.params.fileName;
+  if (!fileName) {
     res
       .status(400)
-      .send(
-        "No file name provided. Use this format: /download?fileName=fileName"
-      );
+      .send("No file name provided. Use this format: /:fileName. For example: /image.jpg");
     return;
   }
 
   try {
-    const fileName = req.query.fileName;
     const options = { destination: `${dir}/${fileName}` };
 
     // Create directory if it doesn't exist
@@ -201,9 +199,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-router.delete("/delete", async (req, res) => {
+router.delete("/:fileName", async (req, res) => {
   try {
-    const fileName = req.query.fileName;
+    const fileName = req.params.fileName;
 
     // Delete the file from the bucket
     await storage.bucket(bucketName).file(fileName).delete();
