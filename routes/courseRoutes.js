@@ -2,6 +2,8 @@ const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
 const adminOnly = require("../middlewares/adminOnly");
 
+// TODO: Update subscriber count to check actual value in DB
+
 // Models
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
