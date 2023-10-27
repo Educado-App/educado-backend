@@ -71,8 +71,7 @@ router.post("/login", async (req, res) => {
 
     //If both email and passwords match, a 202 response will be generated, and used in the frontend to validate the login
     if (compare(password, contentCreator.password) && email == contentCreator.email) {
-      // Sign token
-      const token = signAccessToken({ id: contentCreator._id });
+      const token = jwt.sign({ id: contentCreator._id, email: contentCreator.email }, 'secretfortoken', { expiresIn: '3h' });
       return res.status(202).json({
         status: 'login successful',
         accessToken: token,
@@ -85,7 +84,6 @@ router.post("/login", async (req, res) => {
     }
 
   } catch (err) {
-    console.log(err)
     return res.status(500).json({ error: errorCodes['E0101'] }); //Something went wrong
   }
 });
