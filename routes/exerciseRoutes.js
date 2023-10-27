@@ -49,7 +49,7 @@ router.put("/:section_id", async (req, res) => {
       section = await SectionModel.findById(section_id);
       await section.exercises.push(exercise._id);
       await section.save();
-      res.send(section);
+      res.status(201).send(exercise);
     } catch (err) {
       res.status(422).send(err);
     }
@@ -67,7 +67,7 @@ router.put("/:section_id", async (req, res) => {
     const eid = req.params.eid;
     
   
-    const dbCourse = await ExerciseModel.findByIdAndUpdate(
+    const dbExercise = await ExerciseModel.findByIdAndUpdate(
       eid,
       {
         title: exercise.title,
@@ -83,7 +83,7 @@ router.put("/:section_id", async (req, res) => {
         }
       }
     );
-    res.send("Exercise Update Complete");
+    res.status(200).send(dbExercise);
   });
   
   

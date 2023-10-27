@@ -3,13 +3,12 @@ const { Schema } = mongoose;
 
 const exerciseSchema = new Schema({
     parentSection: { type: Schema.Types.ObjectId, ref: 'Sections' },
-    question: {
+    title: {
         type: String,
         required: true
     },
-    content: {
-        type: Schema.Types.ObjectId,
-        ref: 'Component',
+    question: {
+        type: String,
         required: true
     },
     answers: [{

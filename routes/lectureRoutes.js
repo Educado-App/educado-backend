@@ -19,11 +19,8 @@ const { SectionModel } = require("../models/Sections");
  * 
  */
 router.put("/create/:section_id", /*requireLogin,*/ async (req, res) => {
-  console.log(req.body)
   const {title} = req.body; //Handles the data in "data" from the request
   const section_id = req.params.section_id; //Handles the data in "params" from the request
-  
-  console.log("lecture saved: " + section_id);
 
   const lecture = new LectureModel ({
     parentSection: section_id,
@@ -33,15 +30,13 @@ router.put("/create/:section_id", /*requireLogin,*/ async (req, res) => {
     dateUpdated: Date.now()
   });
 
-  
-  console.log("lecture: " + lecture);
 
   try {
     await lecture.save();
     section = await SectionModel.findById(section_id);
     await section.lectures.push(lecture._id);
     await section.save();
-    res.send(section);
+    res.status(201).send(lecture);
   } catch (err) {
     res.status(422).send(err);
   }
@@ -70,12 +65,10 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       if (err) {
         console.log("Error:", err);
         res.send(err);
-      } else {
-        console.log("Updated Lecture: ", docs);
       }
     }
   );
-  res.send("Lecture Update Complete");
+  res.status(200).send(dbLecture);
 });
 
 
@@ -119,7 +112,7 @@ router.delete("/delete/:id"/*, requireLogin*/, async (req, res) => {
   });
 
   // Send response
-  res.send("Lecture Deleted");
+  res.status(200).send("Lecture Deleted");
 });
 
 
