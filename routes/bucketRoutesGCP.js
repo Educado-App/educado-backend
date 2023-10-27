@@ -184,7 +184,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     try {
       await storage
         .bucket(bucketName)
-        .file(uniqueFileName)
+        .file(fileName)
         .save(buffer, {
           metadata: {
             contentType: multerFile.mimetype,
