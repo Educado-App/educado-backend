@@ -23,23 +23,23 @@ router.post('/', makeExpressCallback(authEndpointHandler))
 */
 router.post("/signup", async (req, res) => {
   const form = req.body;
-  
+
   const email = req.body.email;
   const hashpassword = encrypt(req.body.password)
   form.password = hashpassword;
 
-try {
-  if(await ContentCreator.findOne({ email: email })){
-    return res.status(400).send({error: errorCodes['E0201']}); //An account with his email already exists
-}
+  try {
+    if (await ContentCreator.findOne({ email: email })) {
+      return res.status(400).send({ error: errorCodes['E0201'] }); //An account with his email already exists
+    }
 
-  const doc = ContentCreator(form);
-  const created = doc.save();
+    const doc = ContentCreator(form);
+    const created = doc.save();
 
     return res.status(201).send(created);
-    
+
   } catch (err) {
-    return res.status(500).send({error: errorCodes['E0101']}); //Something went wrong
+    return res.status(500).send({ error: errorCodes['E0101'] }); //Something went wrong
   }
 });
 
@@ -58,23 +58,24 @@ router.post("/login", async (req, res) => {
     const email = req.body.email;
     //Find the specific content creator by their email for subsequent use
     const contentCreator = await ContentCreator.findOne({ email: email })
-    
+
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
-    if(!contentCreator){
-      return res.status(401).json({error: errorCodes['E0105']}); //A user with this email does not exist
+    if (!contentCreator) {
+      return res.status(401).json({ error: errorCodes['E0105'] }); //A user with this email does not exist
     }
-    
+
     //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
-    if (!compare(password, contentCreator.password)){
-      return res.status(401).json({error: errorCodes['E0105'] }); //Wrong password
+    if (!compare(password, contentCreator.password)) {
+      return res.status(401).json({ error: errorCodes['E0105'] }); //Wrong password
     }
-    
+
     //If both email and passwords match, a 202 response will be generated, and used in the frontend to validate the login
-    if (compare(password, contentCreator.password) && email == contentCreator.email){
-      const token = jwt.sign({id: contentCreator._id, email: contentCreator.email},'secretfortoken',{ expiresIn: '3h' });
-      return res.status(202).json({ 
+    if (compare(password, contentCreator.password) && email == contentCreator.email) {
+      // Sign token
+      const token = signAccessToken({ id: contentCreator._id });
+      return res.status(202).json({
         status: 'login successful',
-        accessToken: token, 
+        accessToken: token,
         user: {
           name: contentCreator.name,
           email: contentCreator.email,
@@ -84,7 +85,8 @@ router.post("/login", async (req, res) => {
     }
 
   } catch (err) {
-    return res.status(500).json({error: errorCodes['E0101']}); //Something went wrong
+    console.log(err)
+    return res.status(500).json({ error: errorCodes['E0101'] }); //Something went wrong
   }
 });
 
