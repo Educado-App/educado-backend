@@ -14,13 +14,12 @@ const {
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 
-
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 // Get all courses for one user
 router.get('/creator/:id', requireLogin, async (req, res) => {
   const id = req.params.id; // Get user id from request
-  const courses = await CourseModel.find({creator: id}); // Find courses for a specific user
+  const courses = await CourseModel.find({ creator: id }); // Find courses for a specific user
 	
   res.send(courses); // Send response
 });

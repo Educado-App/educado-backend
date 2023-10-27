@@ -39,8 +39,8 @@ router.get("/auth/google/callback",
 // Login
 router.post('/login', async (req, res) => {
 	try {
-		// Searching for a single user in the database, with the email provided in the request body
-		const user = await UserModel.findOne({ email: req.body.email});
+		// Searching for a single user in the database, with the email provided in the request body. 
+		const user = await UserModel.findOne({ email: {$regex: req.body.email, $options: 'i'} });
 		// If email is found, compare the password provided in the request body with the password in the database
 		if (!user) {
 			// Invalid email (email not found)
@@ -58,10 +58,12 @@ router.post('/login', async (req, res) => {
 			return res.status(202).json({
 				status: 'login successful',
 				accessToken: token,
-				user: {
-          name: user.name,
-          email: user.email,
+				userInfo: {
           id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          completedCourses: user.completedCourses,
 				},
 			});
 		} else {

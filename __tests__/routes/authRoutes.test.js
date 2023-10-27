@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
 const { sendResetPasswordEmail } = require('../../helpers/email');
 const token = require('../../helpers/token');
+const { UserModel } = require('../../models/Users');
 
 const app = express();
 app.use(express.json());
@@ -43,6 +44,22 @@ describe('Login User route', () => {
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
+  });
+
+  it('should find a user mail without differentiating between upper- and lowercase', async () => {
+
+    const uppercaseMail = {
+      email: 'Fake@gmail.com',
+      password: 'ABC123456!'
+    };
+
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/login')
+      .send(uppercaseMail).
+      expect(202);
+
+      // Verify the response body
+      expect(response.body.userInfo.email).toBe('fake@gmail.com');
   });
 
   it('Returns error if user is not found', async () => {
@@ -173,7 +190,7 @@ describe('Reset password request route', () => {
   it('Returns error if token is wrong', async () => {
     const fakeToken = makeFakeResetPasswordToken('6859');
     await db.collection('passwordResetTokenSchema').insertOne(fakeToken);
-    const fakeCredentials = {token: fakeToken.token, email: fakeUser.email};
+    const fakeCredentials = { token: fakeToken.token, email: fakeUser.email };
     sendResetPasswordEmail.mockImplementation(() => false);
     const res = await request(`http://localhost:${PORT}`)
       .post('/api/auth/reset-password-code')
