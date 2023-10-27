@@ -13,8 +13,6 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
-const mongoose = require('mongoose');
-
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
