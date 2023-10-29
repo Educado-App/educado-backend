@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const sectionSchema = new Schema({
     title: String,
     description: String,
+    lectures: [{ type: Schema.Types.ObjectId, ref: "lectures" }],
     exercises: [{ type: Schema.Types.ObjectId, ref: 'Exercises' }],
     sectionNumber: Number,
     totalPoints: {
@@ -25,6 +26,6 @@ const sectionSchema = new Schema({
     parentCourse: { type: Schema.Types.ObjectId, ref: 'Courses' }
 });
 
-const SectionModel = mongoose.model('sections', sectionSchema);
+const SectionModel = mongoose.model("sections", sectionSchema);
 
-module.exports = { SectionModel };
+module.exports = { SectionModel }

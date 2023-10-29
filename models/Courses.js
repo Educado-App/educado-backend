@@ -19,18 +19,19 @@ const courseSchema = new Schema({
   },
 	dateCreated: Date,
 	dateUpdated: Date,
-	coverImg: component,
+	coverImg: String,
 	category: {
     type: String,
-    enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics', 'other'],
+    enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics'],
   },
-	published: Boolean,
   creator: { 
     type: Schema.Types.ObjectId, 
     ref: 'contentCreator' 
   },
   difficulty: {
     type: Number,
+    min: 1,
+    max: 3
   },
   status: {
     type: String,
@@ -39,7 +40,8 @@ const courseSchema = new Schema({
   },
   estimatedHours: Number,
   rating: {
-    Number,
+    type: Number,
+    default: 0,
   },
   numOfSubscriptions:{
     type: Number,
@@ -50,6 +52,6 @@ const courseSchema = new Schema({
   }],
 });
 
-const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
+const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema
 
 module.exports = { CourseModel };
