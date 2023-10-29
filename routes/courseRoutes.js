@@ -32,7 +32,6 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
   res.send(courses); // Send response
 });
 
-
 //Get all courses
 router.get('/', async (req, res) => {
 
