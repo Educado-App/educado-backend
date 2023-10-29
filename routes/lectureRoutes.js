@@ -18,18 +18,17 @@ const { SectionModel } = require("../models/Sections");
  * @returns {object} course NOT SURE
  * 
  */
-router.put("/create/:section_id", /*requireLogin,*/ async (req, res) => {
-  const {title} = req.body; //Handles the data in "data" from the request
+router.put("/:section_id", /*requireLogin,*/ async (req, res) => {
+  const {title, description} = req.body; //Handles the data in "data" from the request
   const section_id = req.params.section_id; //Handles the data in "params" from the request
 
   const lecture = new LectureModel ({
     parentSection: section_id,
     title: title,
-    description: "",
+    description: description,
     dateCreated: Date.now(),
     dateUpdated: Date.now()
   });
-
 
   try {
     await lecture.save();
@@ -73,13 +72,27 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
 
 
 /**
+ * Get all lectures from a specific section id
+ * @param {string} sid - section id
+ * @returns {object} - lectures
+ */
+router.get("/getall/:sid", async (req, res) => {
+  const id = req.params.sid; // destructure params
+  const lecture = await LectureModel.find({parentSection: id});
+  console.log("the lectures are ",lecture);
+  res.send(lecture);
+});
+  
+
+
+/**
  * Delete lecture from id
  * Remove it from the section lectures array
  * 
  * @param {string} id - lecture id
  * @returns {string} - Just sends a message to confirm that the deletion is complete
  */
-router.delete("/delete/:id"/*, requireLogin*/, async (req, res) => {
+router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params; // destructure params
 
   // Get the lecture object

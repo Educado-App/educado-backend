@@ -49,7 +49,7 @@ describe('Create exercise route', () => {
     const response = await request(app)
       .put('/api/exercises/' + fakeSection._id)
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test exercise', question: 'Test question', answers: {text: "test", correct: false} })
+      .send({ title: 'Test exercise', question: 'Test question', answers: {text: "test", correct: false, feedback: "test"} })
       .expect(201);
 
     expect(response.body.title).toBe('Test exercise');
