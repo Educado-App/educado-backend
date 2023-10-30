@@ -265,10 +265,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        console.log("Error:", err);
         res.send(err);
-      } else {
-        console.log("Updated Course: ", docs);
       }
     }
   );
@@ -289,7 +286,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Get the course object
   const course = await CourseModel.findById(id).catch((err) => {
-    console.log(err);
+
   });
 
   // Get the section array from the course object
@@ -300,7 +297,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
     // Get the section object from the id in sectionIds array
     let section = await SectionModel.findById(section_id).catch((err) => {
-      console.log(err);
+
     });
 
     // Get the lecture array from the section object
@@ -311,20 +308,19 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
       // Delete the lecture
       await LectureModel.findByIdAndDelete( lecture_id, (err) => {
-        console.log(err);
+
       });
     });
 
     // Delete the section
     await SectionModel.findByIdAndDelete( section_id , (err) => {
-      console.log(err);
+
 
     });
   });
 
   // Delete the course
   await CourseModel.findByIdAndDelete( id , (err) => {
-    console.log(err);
   });
 
   // Send response
