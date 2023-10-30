@@ -285,7 +285,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
   // Get the course object
-  const course = await CourseModel.findById(id).catch((err) => res.status(422).send(err));
+  const course = await CourseModel.findById(id).catch((err) => res.status(204).send(err));
 
 
   // Get the section array from the course object
