@@ -295,26 +295,35 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   sectionIds.map(async (section_id) => {
 
     // Get the section object from the id in sectionIds array
-    let section = await SectionModel.findById(section_id).catch((err) => res.status(422).send(err));
+    let section = await SectionModel.findById(section_id).catch((err) => res.status(404).send(err));
 
 
     // Get the lecture array from the section object
     const lectureIds = section.lectures;
+	const exerciseIds = section.exercises;
 
     // Loop through all lectures in section
     lectureIds.map(async (lecture_id) => {
 
       // Delete the lecture
-      await LectureModel.findByIdAndDelete(lecture_id).catch((err) => res.status(422).send(err));
+      await LectureModel.findByIdAndDelete(lecture_id).catch((err) => res.status(404).send(err));
 
     });
 
+	// Loop through all exercises in section
+	exerciseIds.map(async (exercise_id) => {
+
+		// Delete the exercise
+		await ExerciseModel.findByIdAndDelete(exercise_id).catch((err) => res.status(404).send(err));
+
+	});
+
     // Delete the section
-    await SectionModel.findByIdAndDelete(section_id).catch((err) => res.status(422).send(err));
+    await SectionModel.findByIdAndDelete(section_id).catch((err) => res.status(404).send(err));
   });
 
   // Delete the course
-  await CourseModel.findByIdAndDelete(id).catch((err) => res.status(422).send(err));
+  await CourseModel.findByIdAndDelete(id).catch((err) => res.status(204).send(err));
 
 
   // Send response

@@ -119,27 +119,16 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Get the lecture object
   const lecture = await LectureModel.findById(id).catch((err) => res.status(204).send(err));
 
-  // Get the section object
-  const section_id = lecture.parentSection;
-  const section = await SectionModel.findById(section_id).catch((err) => res.status(422).send(err));
-  
 
   // Remove the lecture from the section lectures array
-  let lectureIds = section.lectures;
-  const index = lectureIds.indexOf(id);
-  if (index > -1) {
-    lectureIds.splice(index, 1);
-  }
-  (
-    await SectionModel.findByIdAndUpdate(
-      section_id,
-      { lectures: lectureIds }
-    )
-  ).save();
+  await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {lectures: lecture._id}}).catch((err) => {
+    res.status(404).send({ error: errorCodes['E0012'] })
+  }) // 404, because if is not found here it should no just send an 204 as that indicates it was succesful. But in this case it only deleted from the parent array and not the object.
+
 
   // Delete the lecture object
   await LectureModel.findByIdAndDelete(id).catch((err) => {
-    res.status(422).send(err);
+    res.status(204).send(err);
   });
 
   // Send response
