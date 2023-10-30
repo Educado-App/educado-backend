@@ -14,6 +14,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const TestRoutes = require('../routes/testRoutes');
 const CredentialsRoutes = require('./credentialsRoutes.js');
 const ContentCreatorRoutes = require('../routes/contentCreatorRoutes');
+const UtilityRoutes = require('../routes/utilityRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -32,6 +33,7 @@ router.use('/api/applications', ApplicationRoutes);
 router.use('/api/mail', MailRoutes);
 router.use('/api/users', UserRoutes);
 router.use('/api/creators', ContentCreatorRoutes);
+router.use('/api/utility', UtilityRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);
