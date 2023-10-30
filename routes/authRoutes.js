@@ -72,7 +72,6 @@ router.post('/login', async (req, res) => {
 		}
 	} catch (err) { 
 		// If the server could not be reached, return an error message
-		console.log(err);
 		return res.status(500).json({ 'error': errorCodes['E0003']});
 	}
 });

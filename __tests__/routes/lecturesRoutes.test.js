@@ -47,7 +47,7 @@ describe('Create lectures route', () => {
   it('Creates a lecture for a given course', async () => {
     const token = signAccessToken({id: fakeUser._id});
     const response = await request(app)
-      .put('/api/lectures/create/' + fakeSection._id)
+      .put('/api/lectures/' + fakeSection._id)
       .set('Authorization', `Bearer ${token}`)
       .send({ title: 'Test lectures' })
       .expect(201);
@@ -80,7 +80,7 @@ describe('DELETE: Delete lectures route', () => {
   it('Creates a lecture for a given course', async () => {
     const token = signAccessToken({id: fakeUser._id});
     lectureCreate = await request(app)
-      .put('/api/lectures/create/' + fakeSection._id)
+      .put('/api/lectures/' + fakeSection._id)
       .set('Authorization', `Bearer ${token}`)
       .send({ title: 'Test lecture' })
       .expect(201);
@@ -92,7 +92,7 @@ describe('DELETE: Delete lectures route', () => {
     const token = signAccessToken({id: fakeUser._id});
 
     const response = await request(app)
-      .delete('/api/lectures/delete/' + lectureCreate.body._id)
+      .delete('/api/lectures/' + lectureCreate.body._id)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 

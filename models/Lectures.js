@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 
 // Class description
 const lectureSchema = new Schema({
-    parentSection: { type: Schema.Types.ObjectId, ref: "Course" },
+    parentSection: { type: Schema.Types.ObjectId, ref: "Section" },
     title: String,
     description: String,
     dateCreated: Date,
