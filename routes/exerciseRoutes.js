@@ -111,16 +111,18 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Get the exercise object
   const exercise = await ExerciseModel.findById(id).catch((err) => {
-    res.status(422).send(err)
+    res.status(204).send(err)
   });
 
   // Remove the exercise from the section exercises array
   await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}}).catch((err) => {
+
     res.status(422).send({ error: errorCodes['E0012'] })
   });
 
   // Delete the exercise object
   await ExerciseModel.findByIdAndDelete(id).catch((err) => {
+
     res.status(422).send({ error: errorCodes['E0012'] })
   });
 

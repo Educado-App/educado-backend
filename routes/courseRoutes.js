@@ -287,6 +287,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Get the course object
   const course = await CourseModel.findById(id).catch((err) => res.status(422).send(err));
 
+
   // Get the section array from the course object
   const sectionIds = course.sections;
 
@@ -295,6 +296,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
     // Get the section object from the id in sectionIds array
     let section = await SectionModel.findById(section_id).catch((err) => res.status(422).send(err));
+
 
     // Get the lecture array from the section object
     const lectureIds = section.lectures;
@@ -313,6 +315,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Delete the course
   await CourseModel.findByIdAndDelete(id).catch((err) => res.status(422).send(err));
+
 
   // Send response
   res.send("Course Deleted");

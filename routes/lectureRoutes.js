@@ -1,13 +1,35 @@
 const router = require("express").Router();
+const express = require("express");
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const fs = require("fs");
+const path = require("path");
 
 // Models
-const { LectureModel } = require("../models/Lectures");
 const { ComponentModel } = require("../models/Components");
-const {
-  ContentCreatorApplication,
-} = require("../models/ContentCreatorApplication");
+const {ContentCreatorApplication,} = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { SectionModel } = require("../models/Sections");
+const { LectureModel } = require("../models/Lecture");
+
+
+//CREATED BY VIDEOSTREAMING TEAM
+//get lecture by id
+router.get("/:id", async (req, res) => {
+  if (!req.params.id) return res.send("Missing query parameters");
+
+  const lectureId = req.params.id;
+
+  let lecture = await LectureModel.findById(lectureId).catch((err) => {
+    throw err;
+  });
+
+  if (lecture === null)
+    return res.send("No section found with id: " + lectureId);
+  return res.send(lecture);
+});
+
 
 
 /**
@@ -78,6 +100,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = req.params.id; // destructure params
   const lecture = await LectureModel.find({parentSection: id});
+
   res.send(lecture);
 });
   
@@ -100,6 +123,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const section_id = lecture.parentSection;
   const section = await SectionModel.findById(section_id).catch((err) => res.status(422).send(err));
   
+
   // Remove the lecture from the section lectures array
   let lectureIds = section.lectures;
   const index = lectureIds.indexOf(id);

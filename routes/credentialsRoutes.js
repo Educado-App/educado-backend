@@ -77,7 +77,7 @@ router.post("/login", async (req, res) => {
       return res.status(202).json({
         status: 'login successful',
         accessToken: token,
-        user: {
+        userInfo: {
           name: contentCreator.name,
           email: contentCreator.email,
           id: contentCreator._id,
@@ -86,6 +86,7 @@ router.post("/login", async (req, res) => {
     }
 
   } catch (err) {
+
     return res.status(500).json({ error: errorCodes['E0101'] }); //Something went wrong
   }
 });
