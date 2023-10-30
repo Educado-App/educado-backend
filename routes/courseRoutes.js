@@ -38,13 +38,6 @@ router.get('/', async (req, res) => {
 	try {
 		// find all courses in the database
 		const courses = await CourseModel.find();
-
-		// check if sections exist
-		if (courses.length === 0) {
-			// Handle "courses not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0005'] });
-		}
-
 		res.send(courses);
 	} catch (error) {
 		// If the server could not be reached, return an error message
@@ -243,7 +236,7 @@ router.put("/", async (req, res) => {
     await course.save();
 	res.status(201).send(course);
   } catch (err) {
-    res.status(422).send(err);
+    res.status(400).send(err);
   }
 });
 
@@ -265,11 +258,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        res.send(err);
-      }
+        res.status(400).send(err);
+      } 
     }
   );
-  res.send(dbCourse);
+  res.status(200).send(dbCourse);
 });
 
 
@@ -285,9 +278,8 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
   // Get the course object
-  const course = await CourseModel.findById(id).catch((err) => {
+  const course = await CourseModel.findById(id).catch((err) => res.status(204).send(err));
 
-  });
 
   // Get the section array from the course object
   const sectionIds = course.sections;
@@ -296,32 +288,36 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   sectionIds.map(async (section_id) => {
 
     // Get the section object from the id in sectionIds array
-    let section = await SectionModel.findById(section_id).catch((err) => {
+    let section = await SectionModel.findById(section_id);
 
-    });
 
     // Get the lecture array from the section object
     const lectureIds = section.lectures;
+	const exerciseIds = section.exercises;
 
     // Loop through all lectures in section
     lectureIds.map(async (lecture_id) => {
 
       // Delete the lecture
-      await LectureModel.findByIdAndDelete( lecture_id, (err) => {
+      await LectureModel.findByIdAndDelete(lecture_id);
 
-      });
     });
+
+	// Loop through all exercises in section
+	exerciseIds.map(async (exercise_id) => {
+
+		// Delete the exercise
+		await ExerciseModel.findByIdAndDelete(exercise_id);
+
+	});
 
     // Delete the section
-    await SectionModel.findByIdAndDelete( section_id , (err) => {
-
-
-    });
+    await SectionModel.findByIdAndDelete(section_id);
   });
 
   // Delete the course
-  await CourseModel.findByIdAndDelete( id , (err) => {
-  });
+  await CourseModel.findByIdAndDelete(id).catch((err) => res.status(204).send(err));
+
 
   // Send response
   res.send("Course Deleted");
