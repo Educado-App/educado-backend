@@ -33,33 +33,13 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 //Get all courses
 router.get('/', async (req, res) => {
 
-	try {
-		// find all courses in the database
-		const courses = await CourseModel.find();
-
-		// check if sections exist
-		if (courses.length === 0) {
-			// Handle "courses not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0005'] });
-		}
-
-		res.send(courses);
-	} catch (error) {
-		// If the server could not be reached, return an error message
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-});
-
-    // check if sections exist
-    if (courses.length === 0) {
-      // Handle "courses not found" error response here
-      return res.status(404).json({ 'error': errorCodes['E0005'] });
-    }
-
+  try {
+    // find all courses in the database
+    const courses = await CourseModel.find();
     res.send(courses);
+
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
@@ -86,8 +66,8 @@ router.get('/:id', async (req, res) => {
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
 
-	try {
-		const { id } = req.params;
+  try {
+    const { id } = req.params;
 
 
     // find a course based on it's id
@@ -223,7 +203,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
       return res.status(404).json({ 'error': errorCodes['E0006'] });
     }
 
-    if(!user.subscriptions.includes(id)){
+    if (!user.subscriptions.includes(id)) {
       return res.status(400).json({ 'error': errorCodes['E0606'] }); //TODO: change error code
     }
 
@@ -263,7 +243,7 @@ router.get('/:section_id/exercises', async (req, res) => {
 //Create course route
 router.put("/", async (req, res) => {
   const { title, category, difficulty, description, estimatedHours } = req.body;
-	console.dir(req.body);
+  console.dir(req.body);
   const course = new CourseModel({
     title: title,
     category: category,
@@ -276,12 +256,12 @@ router.put("/", async (req, res) => {
     dateUpdated: Date.now(),
     sections: [],
     estimatedHours: estimatedHours,
-	rating: 0,
+    rating: 0,
   });
 
   try {
     await course.save();
-	res.status(201).send(course);
+    res.status(201).send(course);
   } catch (err) {
     res.status(422).send(err);
   }
@@ -295,13 +275,13 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
   const dbCourse = await CourseModel.findByIdAndUpdate(
     id,
     {
-	  title: course.title,
-	  description: course.description,
-	  category: course.category,
-	  difficulty: course.difficulty,
-	  estimatedHours: course.estimatedHours,
+      title: course.title,
+      description: course.description,
+      category: course.category,
+      difficulty: course.difficulty,
+      estimatedHours: course.estimatedHours,
       published: course.published,
-	  dateUpdated: Date.now()
+      dateUpdated: Date.now()
     },
     function (err, docs) {
       if (err) {
@@ -323,7 +303,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  * 
  * @param {string} id - course id
  * @returns {string} - Just sends a message to confirm that the deletion is complete
- */ 
+ */
 router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
@@ -350,20 +330,20 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     lectureIds.map(async (lecture_id) => {
 
       // Delete the lecture
-      await LectureModel.findByIdAndDelete( lecture_id, (err) => {
+      await LectureModel.findByIdAndDelete(lecture_id, (err) => {
         console.log(err);
       });
     });
 
     // Delete the section
-    await SectionModel.findByIdAndDelete( section_id , (err) => {
+    await SectionModel.findByIdAndDelete(section_id, (err) => {
       console.log(err);
 
     });
   });
 
   // Delete the course
-  await CourseModel.findByIdAndDelete( id , (err) => {
+  await CourseModel.findByIdAndDelete(id, (err) => {
     console.log(err);
   });
 

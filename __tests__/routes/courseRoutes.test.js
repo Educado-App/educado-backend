@@ -167,8 +167,10 @@ describe('Get all courses route', () => {
     const response = await request(`http://localhost:${PORT}`)
       .get('/api/courses')
       .set('token', signAccessToken({ id: ADMIN_ID }))
-      .expect(404)
-    expect(response.body.error.code).toBe('E0005');
+      .expect(200)
+
+    // expect empty array
+    expect(response.body).toHaveLength(0);
   });
 
   afterAll(async () => {
@@ -189,7 +191,7 @@ describe('PUT: Create Course route', () => {
   });
 
   it('Creates a course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
+    const token = signAccessToken({ id: fakeUser._id });
     const response = await request(app)
       .put('/api/courses/')
       .set('Authorization', `Bearer ${token}`)
@@ -224,7 +226,7 @@ describe('DELETE: Delete Course route', () => {
   });
 
   it('Delete the fake course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
+    const token = signAccessToken({ id: fakeUser._id });
     const response = await request(app)
       .delete('/api/courses/' + fakeCourse._id)
       .set('Authorization', `Bearer ${token}`)
@@ -254,7 +256,7 @@ describe('PATCH: Update course route', () => {
   });
 
   it('Update the fake course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
+    const token = signAccessToken({ id: fakeUser._id });
     const response = await request(app)
       .patch('/api/courses/' + fakeCourse._id)
       .set('Authorization', `Bearer ${token}`)
