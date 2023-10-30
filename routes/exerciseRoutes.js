@@ -90,9 +90,9 @@ router.put("/:section_id", async (req, res) => {
    * @param {string} sid - section id
    * @returns {object} - exercises
    */
-  router.get("/getall/:sid", async (req, res) => {
+  router.get("/section/:id", async (req, res) => {
   
-    const id = req.params.sid; // destructure params
+    const id = req.params.id; // destructure params
     const exercise= await ExerciseModel.find({parentSection: id});
     res.send(exercise);
   });

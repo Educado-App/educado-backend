@@ -303,18 +303,16 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     lectureIds.map(async (lecture_id) => {
 
       // Delete the lecture
-      await LectureModel.findByIdAndDelete( lecture_id, (err) => 
-		res.status(422).send(err)
-	  );
+      await LectureModel.findByIdAndDelete(lecture_id).catch((err) => res.status(422).send(err));
+
     });
 
     // Delete the section
-    await SectionModel.findByIdAndDelete( section_id , (err) =>
-	res.status(422).send(err));
+    await SectionModel.findByIdAndDelete(section_id).catch((err) => res.status(422).send(err));
   });
 
   // Delete the course
-  await CourseModel.findByIdAndDelete( id , (err) => res.status(422).send(err));
+  await CourseModel.findByIdAndDelete(id).catch((err) => res.status(422).send(err));
 
   // Send response
   res.send("Course Deleted");

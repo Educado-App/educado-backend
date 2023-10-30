@@ -94,11 +94,11 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params; // destructure params
 
   // Get the lecture object
-  const lecture = await LectureModel.findById(id).catch((err));
+  const lecture = await LectureModel.findById(id).catch((err) => res.status(422).send(err));
 
   // Get the section object
   const section_id = lecture.parentSection;
-  const section = await SectionModel.findById(section_id).catch((err));
+  const section = await SectionModel.findById(section_id).catch((err) => res.status(422).send(err));
   
   // Remove the lecture from the section lectures array
   let lectureIds = section.lectures;

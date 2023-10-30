@@ -99,7 +99,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  */
 router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
-  
+
   // Get the section object
   const section = await SectionModel.findById(id).catch((err) => {
     res.status(422).send(err);
@@ -130,19 +130,15 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Delete all lectures and excercises in the section
   lectureIds.map(async (lecture_id) => {
     // Delete the lecture
-    await LectureModel.findByIdAndDelete( lecture_id, (err) => {
-      res.status(422).send(err);
-    });
+    await LectureModel.findByIdAndDelete( lecture_id).catch((err) => res.status(422).send(err));
   });
 
   // Delete the section
-  await SectionModel.deleteOne({ _id: id }, (err) => {
-    res.status(422).send(err);
-  });
+  await SectionModel.deleteOne({ _id: id }).catch((err) => res.status(422).send(err));
 
 
   // Send response
-  res.status(422).send("Section Deleted");
+  res.status(200).send("Section Deleted");
 });
 
 module.exports = router;
