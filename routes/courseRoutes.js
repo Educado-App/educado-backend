@@ -39,12 +39,7 @@ router.get('/', async (req, res) => {
 		// find all courses in the database
 		const courses = await CourseModel.find();
 
-		// check if sections exist
-		if (courses.length === 0) {
-			// Handle "courses not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0005'] });
-		}
-
+		
 		res.send(courses);
 	} catch (error) {
 		// If the server could not be reached, return an error message
