@@ -406,8 +406,31 @@ describe('Course Routes', () => {
       expect(updatedUser.subscriptions).toHaveLength(1);
       expect(updatedUser.subscriptions.find((element) => element == courseId));
     });
-  });
 
+    it('should handle user already subscribed error', async () => {
+      // find a course
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // find the first user
+      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+      const userId = user._id;
+
+      // make user subscribe to a course
+      const response1 = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + course._id + '/subscribe')
+        .send({ user_id: user._id });
+      expect(response1.status).toBe(200);
+
+      // make user subscribe to the course again
+      const response2 = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + course._id + '/subscribe')
+        .send({ user_id: user._id });
+      expect(response2.status).toBe(400);
+      // Cannot subscribe to course: User is already subscribed to course
+      expect(response2.body.error.code).toBe('E0605');
+    });
+  });
   describe('POST /courses/:id/unsubscribe', () => {
     it('Error when unsubscribing to course with no subscriptions', async () => {
       // find a course and set number of subscription to 3
@@ -528,3 +551,4 @@ describe('Course Routes', () => {
     expect(userNew.subscriptions).toHaveLength(0);
   });
 });
+
