@@ -295,7 +295,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   sectionIds.map(async (section_id) => {
 
     // Get the section object from the id in sectionIds array
-    let section = await SectionModel.findById(section_id).catch((err) => res.status(404).send(err));
+    let section = await SectionModel.findById(section_id);
 
 
     // Get the lecture array from the section object
@@ -306,7 +306,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     lectureIds.map(async (lecture_id) => {
 
       // Delete the lecture
-      await LectureModel.findByIdAndDelete(lecture_id).catch((err) => res.status(404).send(err));
+      await LectureModel.findByIdAndDelete(lecture_id);
 
     });
 
@@ -314,12 +314,12 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 	exerciseIds.map(async (exercise_id) => {
 
 		// Delete the exercise
-		await ExerciseModel.findByIdAndDelete(exercise_id).catch((err) => res.status(404).send(err));
+		await ExerciseModel.findByIdAndDelete(exercise_id);
 
 	});
 
     // Delete the section
-    await SectionModel.findByIdAndDelete(section_id).catch((err) => res.status(404).send(err));
+    await SectionModel.findByIdAndDelete(section_id);
   });
 
   // Delete the course

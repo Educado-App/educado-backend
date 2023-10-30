@@ -114,11 +114,10 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     res.status(204).send(err)
   });
 
+  
   // Remove the exercise from the section exercises array
-  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}}).catch((err) => {
+  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}})
 
-    res.status(404).send({ error: errorCodes['E0012'] })
-  }) // 404, because if is not found here it should no just send an 204 as that indicates it was succesful. But in this case it only deleted from the parent array and not the object.
 
   // Delete the exercise object
   await ExerciseModel.findByIdAndDelete(id).catch((err) => {
