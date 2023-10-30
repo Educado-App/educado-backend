@@ -50,7 +50,7 @@ describe('Login Content Creator route', () => {
       .send(nonExistingContentCreator)
       .expect(401);
     // Verify the response body
-    expect(response.body.error.code).toBe('E0105');
+    expect(response.body.error.code).toBe('E0101');
   });
 
   it('Returns error if password is incorrect', async () => {

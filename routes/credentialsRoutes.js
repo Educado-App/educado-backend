@@ -39,7 +39,7 @@ router.post("/signup", async (req, res) => {
     return res.status(201).send(created);
 
   } catch (err) {
-    return res.status(500).send({ error: errorCodes['E0101'] }); //Something went wrong
+    return res.status(500).send({error: errorCodes['E0000']}); //Something went wrong
   }
 });
 
@@ -60,8 +60,8 @@ router.post("/login", async (req, res) => {
     const contentCreator = await ContentCreator.findOne({ email: email })
 
     //If the email isn't found, an error will be thrown, which can be displayed in the frontend
-    if (!contentCreator) {
-      return res.status(401).json({ error: errorCodes['E0105'] }); //A user with this email does not exist
+    if(!contentCreator){
+      return res.status(401).json({error: errorCodes['E0101']}); //A user with this email does not exist
     }
 
     //If the passwords don't match, an error will be thrown, which can also be displayed in the frontend
@@ -86,8 +86,7 @@ router.post("/login", async (req, res) => {
     }
 
   } catch (err) {
-
-    return res.status(500).json({ error: errorCodes['E0101'] }); //Something went wrong
+    return res.status(500).json({error: errorCodes['E0000']}); //Something went wrong
   }
 });
 
