@@ -133,13 +133,6 @@ describe('Reset password request route', () => {
 
   it('Returns success if email is found and email is sent', async () => {
     sendResetPasswordEmail.mockImplementation(() => true);
-    /*jest.mock('../../helpers/email', () => {
-      return {
-        sendResetPasswordEmail: jest.fn((email, token) => {
-          return true;
-        }),
-      };
-    });*/
     const existingEmail = { email: fakeUser.email }
     const res = await request(`http://localhost:${PORT}`)
       .post('/api/auth/reset-password-request')

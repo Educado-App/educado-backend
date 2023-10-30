@@ -202,6 +202,14 @@ module.exports = {
 		code: 'E0604',
 		message: 'Could not check users subscriptions'
 	},
+  E0605: {
+    code: 'E0605',
+    message: 'Cannot subscribe to course: User is already subscribed to course.'
+  },
+  E0606: {
+    code: 'E0606',
+    message: 'Cannot unsubscribe from course: User is not subscribed to course.'
+  },
 
 	// E07 - Point system errors
 	E0701: {
