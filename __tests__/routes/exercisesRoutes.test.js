@@ -95,6 +95,50 @@ describe('PATCH: Update exercise route', () => {
 });
 
 
+describe('DELETE: Delete exercise route', () => {
+
+  let db; // Store the database connection
+  let exerciseCreate; // Store the exercise created
+
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database
+
+    // Insert the fake user into the database
+    await db.collection('users').insertOne(fakeUser);
+    await db.collection('sections').insertOne(fakeSection);
+  });
+
+  it('Creates a exercise for a given course', async () => {
+    const token = signAccessToken({id: fakeUser._id});
+    exerciseCreate = await request(app)
+      .put('/api/exercises/' + fakeSection._id)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Test exercise', question: 'Test question', answers: {text: "test", correct: false, feedback: "test"} })
+      .expect(201);
+
+    expect(exerciseCreate.body.title).toBe('Test exercise');
+  });
+
+  console.log(exerciseCreate);
+  it('Delete the created exercise', async () => {
+    const token = signAccessToken({id: fakeUser._id});
+
+    const response = await request(app)
+      .delete('/api/exercises/' + exerciseCreate.body._id)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.text).toBe("Exercise Deleted");
+  });
+
+  afterAll(async () => {
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+    await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+  });
+
+});
+
 afterAll(async () => {
   server.close();
   await mongoose.connection.close();
