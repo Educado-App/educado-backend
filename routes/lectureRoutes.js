@@ -86,7 +86,6 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        console.log("Error:", err);
         res.send(err);
       }
     }
@@ -103,7 +102,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
 router.get("/getall/:sid", async (req, res) => {
   const id = req.params.sid; // destructure params
   const lecture = await LectureModel.find({parentSection: id});
-  console.log("the lectures are ",lecture);
+
   res.send(lecture);
 });
   
@@ -121,13 +120,13 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Get the lecture object
   const lecture = await LectureModel.findById(id).catch((err) => {
-    console.log(err);
+
   });
 
   // Get the section object
   const section_id = lecture.parentSection;
   const section = await SectionModel.findById(section_id).catch((err) => {
-    console.log(err);
+
   });
 
   // Remove the lecture from the section lectures array
@@ -145,7 +144,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Delete the lecture object
   await LectureModel.findByIdAndDelete(id).catch((err) => {
-    console.log(err);
+
   });
 
   // Send response
