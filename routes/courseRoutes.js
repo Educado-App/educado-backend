@@ -236,7 +236,7 @@ router.put("/", async (req, res) => {
     await course.save();
 	res.status(201).send(course);
   } catch (err) {
-    res.status(422).send(err);
+    res.status(400).send(err);
   }
 });
 
@@ -258,7 +258,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        res.status(422).send(err);
+        res.status(400).send(err);
       } 
     }
   );

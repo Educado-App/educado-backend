@@ -51,7 +51,7 @@ router.put("/:section_id", async (req, res) => {
       await section.save();
       res.status(201).send(exercise);
     } catch (err) {
-      res.status(422).send(err);
+      res.status(400).send(err);
     }
   });
   
@@ -77,7 +77,7 @@ router.put("/:section_id", async (req, res) => {
       },
       function (err, docs) {
         if (err) {
-          res.status(422).send(err);
+          res.status(400).send(err);
         }
       }
     );
