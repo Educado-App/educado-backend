@@ -73,6 +73,7 @@ router.put("/:section_id", async (req, res) => {
         title: exercise.title,
         question: exercise.question,
         answers: exercise.answers,
+        modifiedAt: Date.now(),
       },
       function (err, docs) {
         if (err) {
@@ -99,4 +100,39 @@ router.put("/:section_id", async (req, res) => {
     res.send(exercise);
   });
   
+
+
+/**
+ * Delete exercise from id
+ * Remove it from the section exercises array
+ * 
+ * @param {string} id - Exercise id
+ * @returns {string} - Just sends a message to confirm that the deletion is complete
+ */
+router.delete("/:id"/*, requireLogin*/, async (req, res) => {
+  const { id } = req.params; // destructure params
+
+  // Get the exercise object
+  const exercise = await ExerciseModel.findById(id).catch((err) => {
+    console.log(err)
+    res.status(204).send(err)
+  });
+
+  // Remove the exercise from the section exercises array
+  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}}).catch((err) => {
+    console.log(err)
+    res.status(422).send({ error: errorCodes['E0012'] })
+  });
+
+  // Delete the exercise object
+  await ExerciseModel.findByIdAndDelete(id).catch((err) => {
+    console.log(err)
+    res.status(422).send({ error: errorCodes['E0012'] })
+  });
+
+  // Send response
+  res.status(200).send("Exercise Deleted")
+});
+
+
   module.exports = router;

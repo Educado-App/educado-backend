@@ -33,9 +33,22 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 //Get all courses
 router.get('/', async (req, res) => {
 
-  try {
-    // find all courses in the database
-    const courses = await CourseModel.find();
+	try {
+		// find all courses in the database
+		const courses = await CourseModel.find();
+
+		// check if sections exist
+		if (courses.length === 0) {
+			// Handle "courses not found" error response here
+			return res.status(404).json({ 'error': errorCodes['E0005'] });
+		}
+
+		res.send(courses);
+	} catch (error) {
+		// If the server could not be reached, return an error message
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+});
 
     // check if sections exist
     if (courses.length === 0) {
