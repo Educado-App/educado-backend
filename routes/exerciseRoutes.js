@@ -77,10 +77,7 @@ router.put("/:section_id", async (req, res) => {
       },
       function (err, docs) {
         if (err) {
-          console.log("Error:", err);
-          res.send(err);
-        } else {
-          console.log("Updated Exercise: ", docs);
+          res.status(422).send(err);
         }
       }
     );
@@ -114,19 +111,16 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Get the exercise object
   const exercise = await ExerciseModel.findById(id).catch((err) => {
-    console.log(err)
-    res.status(204).send(err)
+    res.status(422).send(err)
   });
 
   // Remove the exercise from the section exercises array
   await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}}).catch((err) => {
-    console.log(err)
     res.status(422).send({ error: errorCodes['E0012'] })
   });
 
   // Delete the exercise object
   await ExerciseModel.findByIdAndDelete(id).catch((err) => {
-    console.log(err)
     res.status(422).send({ error: errorCodes['E0012'] })
   });
 

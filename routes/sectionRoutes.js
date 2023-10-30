@@ -81,14 +81,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        console.log("Error:", err);
-        res.send(err);
-      } else {
-        console.log("Updated section: ", docs);
+        res.status(422).send(err);
       }
     }
   );
-  res.send(dbSection);
+  res.status(200).send(dbSection);
 });
 
 
@@ -102,18 +99,16 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  */
 router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
-
-  console.log("Deleting section: ", id);
-
+  
   // Get the section object
   const section = await SectionModel.findById(id).catch((err) => {
-    console.log(err);
+    res.status(422).send(err);
   });
 
   // Get the course, from the section object
   const course_id = section.parentCourse;
   const course = await CourseModel.findById(course_id).catch((err) => {
-    console.log(err);
+    res.status(422).send(err);
   });
 
   // Remove the section from the course section array
@@ -136,18 +131,18 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   lectureIds.map(async (lecture_id) => {
     // Delete the lecture
     await LectureModel.findByIdAndDelete( lecture_id, (err) => {
-      console.log(err);
+      res.status(422).send(err);
     });
   });
 
   // Delete the section
   await SectionModel.deleteOne({ _id: id }, (err) => {
-    console.log(err);
+    res.status(422).send(err);
   });
 
 
   // Send response
-  res.send("Section Deleted");
+  res.status(422).send("Section Deleted");
 });
 
 module.exports = router;
