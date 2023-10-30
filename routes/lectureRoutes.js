@@ -97,7 +97,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  * @param {string} sid - section id
  * @returns {object} - lectures
  */
-router.get("/:id", async (req, res) => {
+router.get("/section/:id", async (req, res) => {
   const id = req.params.id; // destructure params
   const lecture = await LectureModel.find({parentSection: id});
 
