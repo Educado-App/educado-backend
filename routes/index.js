@@ -17,10 +17,11 @@ const LectureRoutes = require('./lectureRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
-	res.send(router.stack);
-});
+    res.send(router.stack)
+})
 
 router.use('/api/courses', CourseRoutes);
+router.use('/api/exercises', ExerciseRoutes)
 router.use('/api/sections', SectionRoutes);
 router.use('/api/exercises', ExerciseRoutes);
 router.use('/api/auth', AuthRoutes);
@@ -35,4 +36,6 @@ router.use('/api/lectures', LectureRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);
+
+
 module.exports = router;

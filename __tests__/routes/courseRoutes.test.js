@@ -3,6 +3,7 @@ const express = require('express');
 const router = require('../../routes/courseRoutes'); // Import your router file here
 const connectDb = require('../../__tests__/fixtures/db');
 const makeFakeUser = require('../../__tests__/fixtures/fakeUser');
+const makeFakeCourse = require('../../__tests__/fixtures/fakeCourse');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../../__tests__/fixtures/fakeCourses');
 const mongoose = require('mongoose');
 const { signAccessToken } = require('../../helpers/token');
@@ -27,6 +28,7 @@ const server = app.listen(PORT);
 
 let fakeUser = makeFakeUser();
 const fakeCourses = getFakeCourses();
+let fakeCourse = makeFakeCourse();
 
 describe('Get all courses for user route', () => {
 
@@ -173,6 +175,104 @@ describe('Get all courses route', () => {
     await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
   });
 });
+
+describe('PUT: Create Course route', () => {
+
+  let db; // Store the database connection
+
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database
+
+    // Insert the fake user into the database
+    await db.collection('users').insertOne(fakeUser);
+  });
+
+  it('Creates a course', async () => {
+    const token = signAccessToken({id: fakeUser._id});
+    const response = await request(app)
+      .put('/api/courses/')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+      .expect(201);
+
+    expect(response.body.title).toBe('Test');
+    expect(response.body.category).toBe('sewing');
+    expect(response.body.difficulty).toBe(1);
+    expect(response.body.description).toBe('Sewing test');
+    expect(response.body.estimatedHours).toBe(2);
+
+  });
+
+  afterAll(async () => {
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+  });
+});
+
+
+describe('DELETE: Delete Course route', () => {
+
+  let db; // Store the database connection
+
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database
+
+    // Insert the fake user into the database
+    await db.collection('users').insertOne(fakeUser);
+    await db.collection('courses').insertOne(fakeCourse);
+  });
+
+  it('Delete the fake course', async () => {
+    const token = signAccessToken({id: fakeUser._id});
+    const response = await request(app)
+      .delete('/api/courses/' + fakeCourse._id)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.text).toBe("Course Deleted");
+  });
+
+  afterAll(async () => {
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+  });
+
+});
+
+
+describe('PATCH: Update course route', () => {
+
+  let db; // Store the database connection
+
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database
+
+    // Insert the fake user into the database
+    await db.collection('users').insertOne(fakeUser);
+    await db.collection('courses').insertOne(fakeCourse);
+  });
+
+  it('Update the fake course', async () => {
+    const token = signAccessToken({id: fakeUser._id});
+    const response = await request(app)
+      .patch('/api/courses/' + fakeCourse._id)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+      .expect(200);
+
+    expect(response.body.title).toBe('Test');
+    expect(response.body.category).toBe('sewing');
+    expect(response.body.difficulty).toBe(1);
+    expect(response.body.description).toBe('Sewing test');
+    expect(response.body.estimatedHours).toBe(2);
+  });
+
+  afterAll(async () => {
+    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
+  });
+});
+
 
 afterAll(async () => {
   server.close();
