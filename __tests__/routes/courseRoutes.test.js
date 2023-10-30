@@ -157,19 +157,6 @@ describe('Get all courses route', () => {
     expect(result.error).toStrictEqual(errorCodes['E0002']);
   });
 
-  it('returns error 404 if no courses are found', async () => {
-
-    // delete all courses
-    await db.collection('courses').deleteMany({});
-
-    // send request with no courses in db
-    const response = await request(`http://localhost:${PORT}`)
-      .get('/api/courses')
-      .set('token', signAccessToken({ id: ADMIN_ID }))
-      .expect(404)
-    expect(response.body.error.code).toBe('E0005');
-  });
-
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
     await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection

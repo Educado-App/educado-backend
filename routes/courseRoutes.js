@@ -38,8 +38,6 @@ router.get('/', async (req, res) => {
 	try {
 		// find all courses in the database
 		const courses = await CourseModel.find();
-
-		
 		res.send(courses);
 	} catch (error) {
 		// If the server could not be reached, return an error message
