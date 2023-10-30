@@ -1,14 +1,16 @@
 module.exports = function makeFakeCourse() {
 
-  return {
-    sections: [],
-    title: 'test course',
-    category: 'test',
-    difficulty: 1,
-    hours: 10,
-    description: "This course is a test course",
-    dateCreated: new Date(),
-    dateUpdated: new Date(),
+	return {
+		title: 'test course',
+		description: 'test course description',
+		dateCreated: Date.now(),
+		dateUpdated: Date.now(),
+		category: 'sewing',
+		published: false,
+		sections: [],
+		difficulty: 1,
+		estimatedHours: 1,
+		rating: 5,
     numOfSubscriptions: 0,
-  };
+	};
 };

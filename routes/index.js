@@ -3,6 +3,7 @@ const router = require('express').Router();
 const CourseRoutes = require('./courseRoutes');
 const SectionRoutes = require('./sectionRoutes');
 const ExerciseRoutes = require('./exerciseRoutes');
+const LectureRoutes = require('./lectureRoutes');
 const AWSRoutes = require('./bucketRoutes');
 const AuthRoutes = require('./authRoutes');
 const SignupRoutes = require('./signupRoutes');
@@ -16,12 +17,13 @@ const ContentCreatorRoutes = require('../routes/contentCreatorRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
-	res.send(router.stack);
-});
+    res.send(router.stack)
+})
 
 router.use('/api/courses', CourseRoutes);
+router.use('/api/exercises', ExerciseRoutes)
 router.use('/api/sections', SectionRoutes);
-router.use('/api/exercises', ExerciseRoutes);
+router.use('/api/lectures', LectureRoutes);
 router.use('', AWSRoutes);
 router.use('/api/auth', AuthRoutes);
 router.use('/api/signup', SignupRoutes);
@@ -33,4 +35,6 @@ router.use('/api/creators', ContentCreatorRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);
+
+
 module.exports = router;
