@@ -25,7 +25,8 @@ jest.mock('../../config/keys', () => {
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
 const ADMIN_ID = 'srdfet784y2uioejqr';
-const server = app.listen(PORT);
+const server = app.listen(PORT, () => {
+});
 
 // Create a fake user, course and section
 let fakeUser = makeFakeUser();
@@ -466,6 +467,7 @@ describe('Course Routes', () => {
 
   });
   it('should handle user not found error when unsubscribing', async () => {
+
 
     const course = await db.collection('courses').findOne({ title: 'test course' });
     const courseId = course._id;

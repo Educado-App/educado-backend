@@ -51,7 +51,7 @@ router.put("/:section_id", async (req, res) => {
       await section.save();
       res.status(201).send(exercise);
     } catch (err) {
-      res.status(422).send(err);
+      res.status(400).send(err);
     }
   });
   
@@ -77,10 +77,7 @@ router.put("/:section_id", async (req, res) => {
       },
       function (err, docs) {
         if (err) {
-
-          res.send(err);
-        } else {
-
+          res.status(400).send(err);
         }
       }
     );
@@ -93,9 +90,9 @@ router.put("/:section_id", async (req, res) => {
    * @param {string} sid - section id
    * @returns {object} - exercises
    */
-  router.get("/getall/:sid", async (req, res) => {
+  router.get("/section/:id", async (req, res) => {
   
-    const id = req.params.sid; // destructure params
+    const id = req.params.id; // destructure params
     const exercise= await ExerciseModel.find({parentSection: id});
     res.send(exercise);
   });
@@ -114,20 +111,17 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   // Get the exercise object
   const exercise = await ExerciseModel.findById(id).catch((err) => {
-
     res.status(204).send(err)
   });
 
+  
   // Remove the exercise from the section exercises array
-  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}}).catch((err) => {
+  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}})
 
-    res.status(422).send({ error: errorCodes['E0012'] })
-  });
 
   // Delete the exercise object
   await ExerciseModel.findByIdAndDelete(id).catch((err) => {
-
-    res.status(422).send({ error: errorCodes['E0012'] })
+    res.status(204).send({ error: errorCodes['E0012'] })
   });
 
   // Send response
