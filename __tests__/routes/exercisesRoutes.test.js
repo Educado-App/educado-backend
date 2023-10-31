@@ -119,7 +119,7 @@ describe('DELETE: Delete exercise route', () => {
     expect(exerciseCreate.body.title).toBe('Test exercise');
   });
 
-  console.log(exerciseCreate);
+  
   it('Delete the created exercise', async () => {
     const token = signAccessToken({id: fakeUser._id});
 

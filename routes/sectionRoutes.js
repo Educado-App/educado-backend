@@ -84,7 +84,7 @@ router.put("/:course_id", /*requireLogin,*/ async (req, res) => {
     await course.save();
 	  res.status(201).send(section);
   } catch (err) {
-    res.status(422).send(err);
+    res.status(400).send(err);
   }
 });
 
@@ -109,12 +109,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-
-        res.send(err);
-      } 
+        res.status(400).send(err);
+      }
     }
   );
-  res.send(dbSection);
+  res.status(200).send(dbSection);
 });
 
 
@@ -129,51 +128,44 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
 router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
-
-
   // Get the section object
   const section = await SectionModel.findById(id).catch((err) => {
+    res.status(204).send(err);
 
   });
 
   // Get the course, from the section object
   const course_id = section.parentCourse;
-  const course = await CourseModel.findById(course_id).catch((err) => {
+  const course = await CourseModel.findById(course_id)
 
-  });
 
   // Remove the section from the course section array
-  let sectionIds = course.sections;
-  const index = sectionIds.indexOf(id);
-  if (index > -1) {
-    sectionIds.splice(index, 1);
-  }
-  (
-    await CourseModel.findByIdAndUpdate(
-      course_id,
-      { sections: sectionIds }
-    )
-  ).save;
+  await CourseModel.updateOne({_id: section.parentCourse}, {$pull: {sections: section._id}})
+
 
   // Get lecture array from section
   const lectureIds = section.lectures;
+  const exerciseIds = section.exercises;
 
   // Delete all lectures and excercises in the section
   lectureIds.map(async (lecture_id) => {
     // Delete the lecture
-    await LectureModel.findByIdAndDelete( lecture_id, (err) => {
-
-    });
+    await LectureModel.findByIdAndDelete( lecture_id);
   });
+
+  // Loop through all exercises in section
+	exerciseIds.map(async (exercise_id) => {
+		// Delete the exercise
+		await ExerciseModel.findByIdAndDelete(exercise_id);
+	}); 
 
   // Delete the section
-  await SectionModel.deleteOne({ _id: id }, (err) => {
+  await SectionModel.deleteOne({ _id: id }).catch((err) => res.status(204).send(err));
 
-  });
 
 
   // Send response
-  res.send("Section Deleted");
+  res.status(200).send("Section Deleted");
 });
 
 module.exports = router;

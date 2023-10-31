@@ -32,8 +32,6 @@ router.get("/:id", async (req, res) => {
 
 
 
-
-
 /**
  * Create Lecture for section
  *  
@@ -61,7 +59,7 @@ router.put("/:section_id", /*requireLogin,*/ async (req, res) => {
     await section.save();
     res.status(201).send(lecture);
   } catch (err) {
-    res.status(422).send(err);
+    res.status(400).send(err);
   }
 });
 
@@ -86,7 +84,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        res.send(err);
+        res.status(400).send(err);
       }
     }
   );
@@ -99,8 +97,8 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  * @param {string} sid - section id
  * @returns {object} - lectures
  */
-router.get("/getall/:sid", async (req, res) => {
-  const id = req.params.sid; // destructure params
+router.get("/section/:id", async (req, res) => {
+  const id = req.params.id; // destructure params
   const lecture = await LectureModel.find({parentSection: id});
 
   res.send(lecture);
@@ -119,32 +117,16 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params; // destructure params
 
   // Get the lecture object
-  const lecture = await LectureModel.findById(id).catch((err) => {
+  const lecture = await LectureModel.findById(id).catch((err) => res.status(204).send(err));
 
-  });
-
-  // Get the section object
-  const section_id = lecture.parentSection;
-  const section = await SectionModel.findById(section_id).catch((err) => {
-
-  });
 
   // Remove the lecture from the section lectures array
-  let lectureIds = section.lectures;
-  const index = lectureIds.indexOf(id);
-  if (index > -1) {
-    lectureIds.splice(index, 1);
-  }
-  (
-    await SectionModel.findByIdAndUpdate(
-      section_id,
-      { lectures: lectureIds }
-    )
-  ).save();
+  await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {lectures: lecture._id}})
+
 
   // Delete the lecture object
   await LectureModel.findByIdAndDelete(id).catch((err) => {
-
+    res.status(204).send(err);
   });
 
   // Send response
