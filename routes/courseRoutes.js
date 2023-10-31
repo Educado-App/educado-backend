@@ -30,17 +30,9 @@ router.get('/', async (req, res) => {
 	try {
 		// find all courses in the database
 		const courses = await CourseModel.find();
-
-		// check if sections exist
-		if (courses.length === 0) {
-			// Handle "courses not found" error response here
-			return res.status(404).json({ 'error': errorCodes['E0005'] });
-		}
-
 		res.send(courses);
 	} catch (error) {
 		// If the server could not be reached, return an error message
-		console.log(error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
@@ -67,7 +59,6 @@ router.get('/:id', async (req, res) => {
 
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
-
 	try {
 		const { id } = req.params;
 
@@ -211,5 +202,137 @@ router.get('/:section_id/exercises', async (req, res) => {
 	const list = await ExerciseModel.find({ _id: section.exercises });
 	res.send(list);
 });
+
+/*** CREATE COURSE ROUTES ***/
+
+//Create course route
+router.put("/", async (req, res) => {
+  const { title, category, difficulty, description, estimatedHours } = req.body;
+	console.dir(req.body);
+  const course = new CourseModel({
+    title: title,
+    category: category,
+    difficulty: difficulty,
+    description: description,
+    //temporarily commented out as login has not been fully implemented yet
+    //_user: req.user.id,
+    published: false,
+    dateCreated: Date.now(),
+    dateUpdated: Date.now(),
+    sections: [],
+    estimatedHours: estimatedHours,
+	rating: 0,
+  });
+
+  try {
+    await course.save();
+	res.status(201).send(course);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Update Course
+router.patch("/:id", /*requireLogin,*/ async (req, res) => {
+  const course = req.body;
+  const { id } = req.params;
+
+  const dbCourse = await CourseModel.findByIdAndUpdate(
+    id,
+    {
+	  title: course.title,
+	  description: course.description,
+	  category: course.category,
+	  difficulty: course.difficulty,
+	  estimatedHours: course.estimatedHours,
+      published: course.published,
+	  dateUpdated: Date.now()
+    },
+    function (err, docs) {
+      if (err) {
+        res.status(400).send(err);
+      } 
+    }
+  );
+  res.status(200).send(dbCourse);
+});
+
+
+/**
+ * Delete course by id
+ * Delete all sections in course
+ * Delete all lectures and excercises in every section in course
+ * 
+ * @param {string} id - course id
+ * @returns {string} - Just sends a message to confirm that the deletion is complete
+ */ 
+router.delete("/:id"/*, requireLogin*/, async (req, res) => {
+  const { id } = req.params;
+
+  // Get the course object
+  const course = await CourseModel.findById(id).catch((err) => res.status(204).send(err));
+
+
+  // Get the section array from the course object
+  const sectionIds = course.sections;
+
+  // Loop through all sections in course
+  sectionIds.map(async (section_id) => {
+
+    // Get the section object from the id in sectionIds array
+    let section = await SectionModel.findById(section_id);
+
+
+    // Get the lecture array from the section object
+    const lectureIds = section.lectures;
+	const exerciseIds = section.exercises;
+
+    // Loop through all lectures in section
+    lectureIds.map(async (lecture_id) => {
+
+      // Delete the lecture
+      await LectureModel.findByIdAndDelete(lecture_id);
+
+    });
+
+	// Loop through all exercises in section
+	exerciseIds.map(async (exercise_id) => {
+
+		// Delete the exercise
+		await ExerciseModel.findByIdAndDelete(exercise_id);
+
+	});
+
+    // Delete the section
+    await SectionModel.findByIdAndDelete(section_id);
+  });
+
+  // Delete the course
+  await CourseModel.findByIdAndDelete(id).catch((err) => res.status(204).send(err));
+
+
+  // Send response
+  res.send("Course Deleted");
+
+});
+
+
+// Update course published state
+router.post("/update/published", async (req, res) => {
+  const { published, course_id } = req.body;
+
+  // find object in database and update title to new value
+  (
+    await CourseModel.findOneAndUpdate(
+      { _id: course_id },
+      { published: published }
+    )
+  ).save;
+  course = await CourseModel.findById(course_id);
+
+  // Send response
+  res.send(course);
+});
+
 
 module.exports = router;

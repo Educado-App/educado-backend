@@ -3,13 +3,12 @@ const { Schema } = mongoose;
 
 const exerciseSchema = new Schema({
     parentSection: { type: Schema.Types.ObjectId, ref: 'Sections' },
-    description: {
+    title: {
         type: String,
         required: true
     },
-    content: {
-        type: Schema.Types.ObjectId,
-        ref: 'Component',
+    question: {
+        type: String,
         required: true
     },
     answers: [{
@@ -19,6 +18,10 @@ const exerciseSchema = new Schema({
         },
         correct: {
             type: Boolean,
+            required: true
+        },
+        feedback: {
+            type: String,
             required: true
         },
         modifiedAt: {
@@ -31,6 +34,11 @@ const exerciseSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Component'
     },
+    dateCreated: {
+        type: Date,
+        default: Date.now,
+        required: true
+    },
     modifiedAt: {
         type: Date,
         default: Date.now,
@@ -40,4 +48,4 @@ const exerciseSchema = new Schema({
 
 const ExerciseModel = mongoose.model('exercises', exerciseSchema);
 
-module.exports = { ExerciseModel };
+module.exports = { ExerciseModel }
