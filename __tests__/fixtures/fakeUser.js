@@ -11,6 +11,5 @@ module.exports = function makeFakeUser(email = 'fake@gmail.com', attempts = []) 
         firstName: 'Fake first name',
         lastName: 'Fake last name',
         resetAttempts: attempts,
-        subscriptions: []
     }
 }

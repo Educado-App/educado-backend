@@ -1,6 +1,6 @@
 const Id = require('../../helpers/Id');
 
-module.exports = function makeFakeContentCreatorApplication(overrides = {}) {
+module.exports = function makeFakeContentCreator(overrides = {}) {
 
 	const application = {
 		id: Id.makeId(),

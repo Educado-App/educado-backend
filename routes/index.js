@@ -14,6 +14,7 @@ const CredentialsRoutes = require('./credentialsRoutes.js');
 const ContentCreatorRoutes = require('../routes/contentCreatorRoutes');
 const BucketRoutes = require('./bucketRoutesGCP');
 const LectureRoutes = require('./lectureRoutes');
+const StudentRoutes = require('../routes/studentRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -33,6 +34,7 @@ router.use('/api/users', UserRoutes);
 router.use('/api/creators', ContentCreatorRoutes);
 router.use('/api/bucket', BucketRoutes);
 router.use('/api/lectures', LectureRoutes);
+router.use('api/students', StudentRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

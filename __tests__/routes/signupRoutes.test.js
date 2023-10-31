@@ -1,6 +1,6 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../../routes/signupRoutes');
+const router = require('../../routes/authRoutes');
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const mongoose = require('mongoose');
@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
-app.use('/api/signup', router); // Mount the router under '/api/signup' path
+app.use('/api/auth', router); // Mount the router under '/api/signup' path
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
@@ -39,7 +39,7 @@ describe('Signup User route', () => {
 
 	it('Saves the user in the database', async () => {
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(userInput)
 			.expect(201);
 
@@ -53,7 +53,7 @@ describe('Signup User route', () => {
 	it('Returns error if email is missing', async () => {
     userInput.email = '';
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(userInput)
 			.expect(400);
 
@@ -69,7 +69,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 		
@@ -86,7 +86,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 
@@ -103,7 +103,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 
@@ -118,7 +118,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 
@@ -134,7 +134,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 
@@ -151,7 +151,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 
@@ -168,7 +168,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(201);
 
@@ -187,7 +187,7 @@ describe('Signup User route', () => {
 		};
 
 		const response = await request(`http://localhost:${PORT}`)
-			.post('/api/signup/users')
+			.post('/api/auth/signup')
 			.send(input)
 			.expect(400);
 

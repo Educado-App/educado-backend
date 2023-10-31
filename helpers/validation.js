@@ -88,10 +88,25 @@ function validatePoints(input) {
 	return true;
 }
 
+function ensureNewValues(newValues, oldValues) {
+  const newEntries = Object.entries(newValues);
+
+  for (const [fieldName, fieldValue] of newEntries) {
+    if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
+      return false;
+    } else if (fieldValue === oldValues[fieldName]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 module.exports = {
 	validateEmail,
 	validateName,
 	validatePoints,
 	validatePassword,
-	isMissing
+	isMissing,
+  ensureNewValues,
 };

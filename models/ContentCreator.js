@@ -9,14 +9,13 @@ const ContentCreatorSchema = new Schema({
   password: { type: String, required:true },
   approved: { type: Boolean, default: false },
   rejectionReason: { type: String, required: false },
-  createdAt: { type: Date },
-  modifiedAt: { type: Date },
+  baseUser: { type: Schema.Types.ObjectId, ref: 'Users' },
 });
 
-const ContentCreator = mongoose.model(
+const ContentCreatorModel = mongoose.model(
   'content-creators',
   ContentCreatorSchema
 );
 
 
-module.exports = { ContentCreator };
+module.exports = { ContentCreatorModel };

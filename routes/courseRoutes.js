@@ -11,8 +11,8 @@ const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
 const { UserModel } = require('../models/Users');
 const {
-  ContentCreatorApplication,
-} = require("../models/ContentCreatorApplication");
+	ContentCreator,
+} = require("../models/ContentCreator");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 
