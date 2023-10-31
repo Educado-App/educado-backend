@@ -31,16 +31,10 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 //Get all courses
 router.get('/', async (req, res) => {
 
-	try {
-		// find all courses in the database
-		const courses = await CourseModel.find();
-		res.send(courses);
-	} catch (error) {
-		// If the server could not be reached, return an error message
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-});
-
+  try {
+    // find all courses in the database
+    const courses = await CourseModel.find();
+    res.send(courses);
   } catch (error) {
     // If the server could not be reached, return an error message
     return res.status(500).json({ 'error': errorCodes['E0003'] });
@@ -289,7 +283,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     function (err, docs) {
       if (err) {
         res.status(400).send(err);
-      } 
+      }
     }
   );
   res.status(200).send(dbCourse);
@@ -323,7 +317,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
     // Get the lecture array from the section object
     const lectureIds = section.lectures;
-	const exerciseIds = section.exercises;
+    const exerciseIds = section.exercises;
 
     // Loop through all lectures in section
     lectureIds.map(async (lecture_id) => {
@@ -333,13 +327,13 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
     });
 
-	// Loop through all exercises in section
-	exerciseIds.map(async (exercise_id) => {
+    // Loop through all exercises in section
+    exerciseIds.map(async (exercise_id) => {
 
-		// Delete the exercise
-		await ExerciseModel.findByIdAndDelete(exercise_id);
+      // Delete the exercise
+      await ExerciseModel.findByIdAndDelete(exercise_id);
 
-	});
+    });
 
     // Delete the section
     await SectionModel.findByIdAndDelete(section_id);
