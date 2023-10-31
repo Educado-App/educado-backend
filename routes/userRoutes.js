@@ -9,7 +9,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-router.delete('/delete/:id', requireLogin, async (req, res) => {
+router.delete('/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -55,7 +55,7 @@ describe('Users Routes', () => {
     it('deletes a user successfully', async () => {
       // Delete the user using the API
       await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/delete/${actualUser._id}`)
+        .delete(`/api/users/${actualUser._id}`)
         .set('token', token) // Include the token in the request headers
         .expect(200);
 
@@ -68,7 +68,7 @@ describe('Users Routes', () => {
       const nonExistentUserId = new mongoose.Types.ObjectId();
 
       await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/delete/${nonExistentUserId}`)
+        .delete(`/api/users/${nonExistentUserId}`)
         .set('token', token) // Include the token in the request headers
         .expect(204);
     });*/

@@ -13,16 +13,8 @@ const {
 } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
-const mongoose = require('mongoose');
-
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
-
-// Get all courses 
-/*router.get('/', adminOnly, async (req, res) => {
-	const result = await CourseModel.find({});
-	res.send(result);
-});*/
 
 // Get all courses for one user
 router.get('/creator/:id', requireLogin, async (req, res) => {

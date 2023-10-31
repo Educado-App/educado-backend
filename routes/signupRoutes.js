@@ -22,7 +22,7 @@ router.post('/content-creator', async (req, res) => {
 	}
 });
 
-router.post('/user', async (req, res) => {
+router.post('/users', async (req, res) => {
 	const form = req.body;
 	form.joinedAt = Date.now();
 	form.modifiedAt = Date.now();
