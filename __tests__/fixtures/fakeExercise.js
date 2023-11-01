@@ -4,7 +4,7 @@ module.exports = function makeFakeExercise() {
         question: 'This is a sample exercise for testing purposes.',
         answers: [{text: "Sample answer", correct: false}],
         parentSection: '', // Replace this with an actual section ID from your database
-        createdAt: new Date(),
-        modifiedAt: new Date(),
+        dateCreated: new Date(),
+        dateUpdated: new Date(),
     };
 };

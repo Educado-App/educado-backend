@@ -4,7 +4,7 @@ module.exports = function buildMakeUser({ Email, Password }) {
         email,
         password,
         joinedAt = new Date(),
-        modifiedAt = new Date(),
+        dateUpdated = new Date(),
         firstName = `Fake first name`,
 		lastName = `Fake last name`
     } = {}) {
@@ -21,7 +21,7 @@ module.exports = function buildMakeUser({ Email, Password }) {
             email: email,
             password: encrypted,
             joinedAt: joinedAt,
-            modifiedAt: modifiedAt,
+            dateUpdated: dateUpdated,
             firstName: firstName,
 			lastName: lastName
         })
