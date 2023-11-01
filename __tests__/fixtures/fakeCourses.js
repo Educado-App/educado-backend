@@ -9,7 +9,7 @@ const courses = [
     "sections": [],
     "creator": [],
     "difficulty": 1,
-    "time": 1,
+    "estimatedHours": 1,
     "rating": 5,
   },
   {
@@ -22,7 +22,7 @@ const courses = [
     "sections": [],
     "creator": ['1234567891011'],
     "difficulty": 1,
-    "time": 1,
+    "estimatedHours": 1,
     "rating": 5,
   },
   {
@@ -35,7 +35,7 @@ const courses = [
     "sections": [],
     "creator": [],
     "difficulty": 2,
-    "time": 3,
+    "estimatedHours": 3,
     "rating": 5,
   },
   {
@@ -48,7 +48,7 @@ const courses = [
     "sections": [],
     "creator": ['1234567891011'],
     "difficulty": 6,
-    "time": 2,
+    "estimatedHours": 2,
     "rating": 3,
   }
 ];
