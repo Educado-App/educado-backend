@@ -10,22 +10,28 @@ const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
 const { UserModel } = require('../models/Users');
-const {
-	ContentCreator,
-} = require("../models/ContentCreator");
+const { ContentCreatorModel } = require("../models/ContentCreator");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
+const mongoose = require('mongoose');
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 // Get all courses for one user
 router.get('/creator/:id', requireLogin, async (req, res) => {
-  const id = req.params.id; // Get user id from request
-  const courses = await CourseModel.find({ creator: id }); // Find courses for a specific user
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+  }
+  const creator = await ContentCreatorModel.findOne({ baseUser: mongoose.Types.ObjectId(req.params.id) }); // Get user id from request
 
+  if (!creator) {
+    return res.status(400).send({ error: errorCodes['E0004'] }); // If user does not exist, return error
+  }
 
+  const courses = await CourseModel.find({ creator: creator._id }); // Find courses for a specific user
+  
+  return res.status(200).send(courses); // Send response
 
-  res.send(courses); // Send response
 });
 
 //Get all courses
@@ -239,8 +245,10 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put("/", async (req, res) => {
-  const { title, category, difficulty, description, estimatedHours } = req.body;
-  console.dir(req.body);
+  const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+
+  const { id } = await ContentCreatorModel.findOne({ baseUser: creator });
+
   const course = new CourseModel({
     title: title,
     category: category,
@@ -248,6 +256,7 @@ router.put("/", async (req, res) => {
     description: description,
     //temporarily commented out as login has not been fully implemented yet
     //_user: req.user.id,
+    creator: id,
     published: false,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
