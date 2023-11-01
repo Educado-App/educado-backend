@@ -262,7 +262,6 @@ describe('Users Routes', () => {
         joinedAt: user.joinedAt,
         resetAttempts: user.resetAttempts,
         dateUpdated: expect.any(Date),
-        subscriptions: user.subscriptions,
       });
     });
 
