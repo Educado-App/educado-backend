@@ -4,19 +4,16 @@ const {Schema} = mongoose;
 
 // Class description
 const ContentCreatorSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required:true },
   approved: { type: Boolean, default: false },
   rejectionReason: { type: String, required: false },
-  dateCreated: { type: Date },
-  dateUpdated: { type: Date },
+  baseUser: { type: Schema.Types.ObjectId, ref: 'Users' },
 });
 
-const ContentCreator = mongoose.model(
+const ContentCreatorModel = mongoose.model(
   'content-creators',
   ContentCreatorSchema
 );
 
 
-module.exports = { ContentCreator };
+module.exports = { ContentCreatorModel };
+
