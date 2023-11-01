@@ -7,20 +7,19 @@ const errorCodes = require('../helpers/errorCodes');
 
 // Content Creator Application Route
 router.post('/content-creator', async (req, res) => {
-	const form = req.body;
+  const form = req.body;
 
-	// Validate form ...
-	try {
-		const doc = ContentCreator(form);
-		const created = await doc.save();
+  // Validate form ...
+  try {
+    const doc = ContentCreator(form);
+    const created = await doc.save();
 
-		res.status(201);
-		res.send(created);
-	} catch (error) {
-		res.status(400);
-		res.send(error.message);
-	}
+    res.status(201);
+    res.send(created);
+  } catch (error) {
+    res.status(400);
+    res.send(error.message);
+  }
 });
-
 
 module.exports = router;

@@ -66,7 +66,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
       const updatedUser = await UserModel.findByIdAndUpdate(
         id,
-        { $set: updateFields, modifiedAt: Date.now() },
+        { $set: updateFields, dateUpdated: Date.now() },
         { new: true } // This ensures that the updated user document is returned
       );
 
