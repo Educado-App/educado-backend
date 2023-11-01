@@ -8,6 +8,8 @@ const makeFakeCourse = require('../fixtures/fakeCourse');
 const makeFakeSection = require('../fixtures/fakeSection');
 const { signAccessToken } = require('../../helpers/token');
 const errorCodes = require('../../helpers/errorCodes');
+const makeFakeCreator = require('../fixtures/fakeContentCreator');
+const makeFakeStudent = require('../fixtures/fakeStudent');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 
 const app = express();
@@ -30,6 +32,8 @@ const server = app.listen(PORT, () => {
 
 // Create a fake user, course and section
 let fakeUser = makeFakeUser();
+let fakeCreator;
+let fakeStudent;
 let fakeCourse = makeFakeCourse();
 let fakeSection = makeFakeSection();
 let fakeCourses = getFakeCourses();
@@ -37,7 +41,7 @@ let fakeCourses = getFakeCourses();
 
 describe('Course Routes', () => {
 
-  let db; // Store the database connection
+  let db, actualUser; // Store the database connection
 
   beforeAll(async () => {
     db = await connectDb(); // Connect to the database
@@ -48,6 +52,12 @@ describe('Course Routes', () => {
     await db.collection('users').insertOne(fakeUser);
     await db.collection('courses').insertOne(fakeCourse);
     await db.collection('sections').insertOne(fakeSection);
+
+    actualUser = await db.collection('users').findOne({ email: fakeUser.email });
+    fakeCreator = makeFakeCreator(actualUser._id);
+    fakeStudent = makeFakeStudent(actualUser._id);
+    await db.collection('content-creators').insertOne(fakeCreator);
+    await db.collection('students').insertOne(fakeStudent);
   });
 
   afterEach(async () => {
@@ -96,8 +106,8 @@ describe('Course Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/courses/this-is-an-invalid-courseId');
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
   });
 
@@ -149,8 +159,8 @@ describe('Course Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/courses/this-is-an-invalid-courseId/sections');
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
     // error handling for no sections will be tested in the bottom
   });
@@ -219,8 +229,8 @@ describe('Course Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/courses/this-is-an-invalid-courseId/sections/' + sectionId);
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
 
     it('should handle section not found error', async () => {
@@ -249,8 +259,8 @@ describe('Course Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .get('/api/courses/' + courseId + '/sections/this-is-an-invalid-sectionId');
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
   });
 
@@ -357,8 +367,8 @@ describe('Course Routes', () => {
         .post('/api/courses/' + courseId + '/subscribe')
         .send({ user_id: 'this-is-an-invalid-userId' });
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
 
     it('should handle course not found error when subscribing', async () => {
@@ -389,8 +399,8 @@ describe('Course Routes', () => {
         .post('/api/courses/this-is-aninvalid-courseId/subscribe')
         .send({ user_id: userId });
 
-      expect(response.status).toBe(500);
-      expect(response.body.error.code).toBe('E0003');
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
     });
 
     it('Increments number of subscribers for a course, when subscribing', async () => {
@@ -443,24 +453,19 @@ describe('Course Routes', () => {
   });
   describe('POST /courses/:id/unsubscribe', () => {
     it('Error when unsubscribing to course with no subscriptions', async () => {
-      // find a course and set number of subscription to 3
-      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const course = await db.collection('courses').findOne({ title: fakeCourse.title });
       const courseId = course._id;
-
-      // find a user and add the course to the user's subscriptions
-      const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-      const userId = user._id;
 
       const response = await request(`http://localhost:${PORT}`)
         .post('/api/courses/' + courseId + '/unsubscribe')
-        .send({ user_id: userId });
+        .send({ user_id: actualUser._id });
       // check the post request is successful
       expect(response.status).toBe(400);
       expect(response.body.error.code).toBe('E0606');
 
       // check the number of subscribers is correct
       const courseNew = await db.collection('courses').findOne({ _id: courseId });
-      const userNew = await db.collection('users').findOne({ _id: userId });
+      const userNew = await db.collection('students').findOne({ baseUser: actualUser._id });
       expect(courseNew.numOfSubscriptions).toBe(0);
       expect(userNew.subscriptions).toHaveLength(0);
     });
@@ -496,8 +501,8 @@ describe('Course Routes', () => {
       .post('/api/courses/' + courseId + '/unsubscribe')
       .send({ user_id: 'this-is-an-invalid-userId' });
 
-    expect(response.status).toBe(500);
-    expect(response.body.error.code).toBe('E0003');
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('E0014');
   });
 
   it('should handle course not found error when unsubscribing', async () => {
@@ -528,8 +533,8 @@ describe('Course Routes', () => {
       .post('/api/courses/this-is-aninvalid-courseId/unsubscribe')
       .send({ user_id: userId });
 
-    expect(response.status).toBe(500);
-    expect(response.body.error.code).toBe('E0003');
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('E0014');
   });
 
   it('Decrements number of subscribers for a course, when unsubscribing', async () => {
@@ -577,6 +582,7 @@ describe('Course Routes', () => {
       const res = await request(`http://localhost:${PORT}`)
         .get(`/api/courses/creator/${fakeUser._id}`)
         .set('token', signAccessToken({ id: fakeUser._id }));
+
       expect(res.statusCode).toEqual(200);
       // Verify response body
       const result = res.body;
@@ -702,9 +708,9 @@ describe('Course Routes', () => {
       const response = await request(app)
         .put('/api/courses/')
         .set('Authorization', `Bearer ${token}`)
-        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
-        .expect(201);
+        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id })
 
+      expect(response.status).toBe(201);
       expect(response.body.title).toBe('Test');
       expect(response.body.category).toBe('sewing');
       expect(response.body.difficulty).toBe(1);

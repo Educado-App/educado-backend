@@ -170,7 +170,8 @@ describe('Signup User route', () => {
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/auth/signup')
 			.send(input)
-			.expect(201);
+      
+    expect(response.status).toBe(201);
 
 		// Verify that the password is not stored as plain text
 		const user = await db.collection('users').findOne({ email: input.email });

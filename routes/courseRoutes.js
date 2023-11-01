@@ -22,6 +22,7 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
   }
+
   const creator = await ContentCreatorModel.findOne({ baseUser: mongoose.Types.ObjectId(req.params.id) }); // Get user id from request
 
   if (!creator) {
@@ -52,6 +53,10 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
+
     // find a course based on it's id
     const course = await CourseModel.findById(id);
 
@@ -72,6 +77,9 @@ router.get('/:id/sections', async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     // find a course based on it's id
     const course = await CourseModel.findById(id);
@@ -111,6 +119,10 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
   try {
     const { courseId, sectionId } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(sectionId)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
+
     const course = await CourseModel.findById(courseId);
     // check if courses exist
     if (!course) {
@@ -141,6 +153,10 @@ router.post('/:id/subscribe', async (req, res) => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     const user = await UserModel.findById(user_id);
 
@@ -176,7 +192,7 @@ router.post('/:id/subscribe', async (req, res) => {
     );
 
 
-    res.status(200).send(user);
+    return res.status(200).send(user);
 
   } catch (error) {
     console.log(error);
@@ -191,6 +207,10 @@ router.post('/:id/unsubscribe', async (req, res) => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     const user = await UserModel.findById(user_id);
     //checks if user exist
@@ -224,7 +244,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
       { numOfSubscriptions: course.numOfSubscriptions }
     );
 
-    res.send(user)
+    return res.status(200).send(user)
 
   } catch (error) {
     console.log(error);
@@ -247,7 +267,13 @@ router.get('/:section_id/exercises', async (req, res) => {
 router.put("/", async (req, res) => {
   const { title, category, difficulty, description, estimatedHours, creator } = req.body;
 
-  const { id } = await ContentCreatorModel.findOne({ baseUser: creator });
+  const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
+
+  if (!creatorProfile) {
+    return res.status(400).send({ error: errorCodes['E0004'] }); // If user does not exist, return error
+  }
+
+  const id = creatorProfile._id;
 
   const course = new CourseModel({
     title: title,
@@ -267,9 +293,9 @@ router.put("/", async (req, res) => {
 
   try {
     await course.save();
-    res.status(201).send(course);
+    return res.status(201).send(course);
   } catch (err) {
-    res.status(400).send(err);
+    return res.status(400).send(err);
   }
 });
 
@@ -291,11 +317,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        res.status(400).send(err);
+        return res.status(400).send(err);
       }
     }
   );
-  res.status(200).send(dbCourse);
+  return res.status(200).send(dbCourse);
 });
 
 
@@ -353,7 +379,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
 
   // Send response
-  res.send("Course Deleted");
+  return res.status(200).send("Course Deleted");
 
 });
 
