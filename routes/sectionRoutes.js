@@ -1,9 +1,9 @@
 const router = require("express").Router();
 
 // Models
-const { LectureModel } = require("../models/Lectures");
+const { SectionModel } = require('../models/Sections');
+const { LectureModel } = require('../models/Lecture');
 const { CourseModel } = require("../models/Courses");
-const { SectionModel } = require("../models/Sections");
 const { ComponentModel } = require("../models/Components");
 const {  ContentCreatorApplication } = require("../models/ContentCreatorApplication");
 const requireLogin = require("../middlewares/requireLogin");
@@ -14,6 +14,46 @@ router.get('/', async (req, res) => {
   res.send(list);
 });
 
+
+//CREATED BY VIDEOSTREAMING TEAM
+//get section by id
+router.get("/:sectionId", async (req, res) => {
+  if (!req.params.sectionId)
+    return res.send(
+      "Missing query parameters. use endpoint like this: /section/section_id"
+    );
+
+  const section_id = req.params.sectionId;
+
+  let section = await SectionModel.findById(section_id).catch((err) => {
+    throw err;
+  });
+
+
+
+  if (section === null)
+    return res.send("No section found with id: " + section_id);
+
+
+  const lectures = await LectureModel.find({
+    parentSection: section_id,
+  }).catch((err) => {
+    throw err;
+  });
+
+
+  // Convert the Mongoose document to a plain JavaScript object
+  let _tempSection = section.toObject();
+
+  // Now you can modify it
+  _tempSection.components = lectures;
+
+
+  return res.send(_tempSection);
+});
+
+
+module.exports = router;
 /**
  * Create section for course
  *  
@@ -44,22 +84,10 @@ router.put("/:course_id", /*requireLogin,*/ async (req, res) => {
     await course.save();
 	  res.status(201).send(section);
   } catch (err) {
-    res.status(422).send(err);
+    res.status(400).send(err);
   }
 });
 
-
-/**
- * Get section by id
- * 
- * @param {string} id - section id
- * @returns {object} section
- */
-router.get("/:id", async (req, res) => {
-  const { id } = req.params; // destructure params
-  const section = await SectionModel.findById(id);
-  res.send(section);
-});
 
 /**
  * Update section by id with the update button
@@ -81,14 +109,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        console.log("Error:", err);
-        res.send(err);
-      } else {
-        console.log("Updated section: ", docs);
+        res.status(400).send(err);
       }
     }
   );
-  res.send(dbSection);
+  res.status(200).send(dbSection);
 });
 
 
@@ -103,51 +128,44 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
 router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
-  console.log("Deleting section: ", id);
-
   // Get the section object
   const section = await SectionModel.findById(id).catch((err) => {
-    console.log(err);
+    res.status(204).send(err);
+
   });
 
   // Get the course, from the section object
   const course_id = section.parentCourse;
-  const course = await CourseModel.findById(course_id).catch((err) => {
-    console.log(err);
-  });
+  const course = await CourseModel.findById(course_id)
+
 
   // Remove the section from the course section array
-  let sectionIds = course.sections;
-  const index = sectionIds.indexOf(id);
-  if (index > -1) {
-    sectionIds.splice(index, 1);
-  }
-  (
-    await CourseModel.findByIdAndUpdate(
-      course_id,
-      { sections: sectionIds }
-    )
-  ).save;
+  await CourseModel.updateOne({_id: section.parentCourse}, {$pull: {sections: section._id}})
+
 
   // Get lecture array from section
   const lectureIds = section.lectures;
+  const exerciseIds = section.exercises;
 
   // Delete all lectures and excercises in the section
   lectureIds.map(async (lecture_id) => {
     // Delete the lecture
-    await LectureModel.findByIdAndDelete( lecture_id, (err) => {
-      console.log(err);
-    });
+    await LectureModel.findByIdAndDelete( lecture_id);
   });
 
+  // Loop through all exercises in section
+	exerciseIds.map(async (exercise_id) => {
+		// Delete the exercise
+		await ExerciseModel.findByIdAndDelete(exercise_id);
+	}); 
+
   // Delete the section
-  await SectionModel.deleteOne({ _id: id }, (err) => {
-    console.log(err);
-  });
+  await SectionModel.deleteOne({ _id: id }).catch((err) => res.status(204).send(err));
+
 
 
   // Send response
-  res.send("Section Deleted");
+  res.status(200).send("Section Deleted");
 });
 
 module.exports = router;

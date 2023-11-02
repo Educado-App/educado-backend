@@ -60,8 +60,8 @@ module.exports = function makeContentCreatorApplicationController({ contentCreat
                 password: validCCApplication.getPassword(),
                 approved: validCCApplication.isApproved(),
                 rejectionReason: validCCApplication.getRejectReason(),
-                createdAt: validCCApplication.getCreatedAt(),
-                modifiedAt: validCCApplication.getModifiedAt(),
+                dateCreated: validCCApplication.getdateCreated(),
+                dateUpdated: validCCApplication.getdateUpdated(),
             })
 
 			return {
@@ -113,7 +113,7 @@ module.exports = function makeContentCreatorApplicationController({ contentCreat
 				id: application.getId(),
 				approved: application.isApproved(),
 				rejectReason: application.getRejectReason(),
-				modifiedAt: new Date()
+				dateUpdated: new Date()
 			});
 
 			return {

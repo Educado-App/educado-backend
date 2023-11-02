@@ -20,7 +20,11 @@ const exerciseSchema = new Schema({
             type: Boolean,
             required: true
         },
-        modifiedAt: {
+        feedback: {
+            type: String,
+            required: true
+        },
+        dateUpdated: {
             type: Date,
             default: Date.now,
             required: true
@@ -30,7 +34,12 @@ const exerciseSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Component'
     },
-    modifiedAt: {
+    dateCreated: {
+        type: Date,
+        default: Date.now,
+        required: true
+    },
+    dateUpdated: {
         type: Date,
         default: Date.now,
         required: true

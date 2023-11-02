@@ -87,7 +87,6 @@ async function sendResetPasswordEmail(user, token) {
     const mail = await sendMail({ subject, to, text, html });
     return mail;
   } catch (e) {
-    console.log(e);
     throw e;
   }
 }

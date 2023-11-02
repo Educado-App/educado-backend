@@ -9,7 +9,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-router.delete('/delete/:id', requireLogin, async (req, res) => {
+router.delete('/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -60,7 +60,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
       const updatedUser = await UserModel.findByIdAndUpdate(
         id,
-        { $set: otherFields, modifiedAt: Date.now() },
+        { $set: otherFields, dateUpdated: Date.now() },
         { new: true } // This ensures that the updated user document is returned
       );
 

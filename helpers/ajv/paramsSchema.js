@@ -9,7 +9,7 @@ function extendFindAllSchema(overides = {}) {
 	const base = {
 		type: 'object',
 		properties: {
-			'sortBy': { enum: ['createdAt', '-createdAt'] },
+			'sortBy': { enum: ['dateCreated', '-dateCreated'] },
 			'limit': { type: 'integer', minimum: 0 },
 			'offset': { type: 'integer', minimum: 0 }
 		}

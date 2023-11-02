@@ -8,9 +8,9 @@ module.exports = function makeFakeCourse() {
 		category: 'sewing',
 		published: false,
 		sections: [],
-		creator: [],
 		difficulty: 1,
-		time: 1,
+		estimatedHours: 1,
 		rating: 5,
+    numOfSubscriptions: 0,
 	};
 };
