@@ -5,7 +5,7 @@ const { SectionModel } = require('../models/Sections');
 const { LectureModel } = require('../models/Lecture');
 const { CourseModel } = require("../models/Courses");
 const { ComponentModel } = require("../models/Components");
-const {  ContentCreatorApplication } = require("../models/ContentCreator");
+const {  ContentCreatorApplication } = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
 
 // Get all sections

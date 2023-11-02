@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { UserModel } = require('../models/Users'); // Import User model
-const { ContentCreatorModel } = require('../models/ContentCreator'); // Import Content Creator model
+const { ContentCreatorModel } = require('../models/ContentCreators'); // Import Content Creator model
 const { StudentModel } = require('../models/Students'); // Import Student model
 
 const { makeExpressCallback } = require('../helpers/express');

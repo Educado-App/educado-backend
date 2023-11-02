@@ -3,7 +3,7 @@ const { validateEmail, validateName, validatePoints, validatePassword, ensureNew
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
-const { ContentCreatorModel } = require('../models/ContentCreator');
+const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');

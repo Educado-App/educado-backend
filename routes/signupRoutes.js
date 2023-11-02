@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { encrypt } = require('../helpers/password');
 const { validateEmail, validateName } = require('../helpers/validation');
-const { ContentCreator } = require('../models/ContentCreator');
+const { ContentCreator } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
 
