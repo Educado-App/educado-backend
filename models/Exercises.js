@@ -24,7 +24,7 @@ const exerciseSchema = new Schema({
             type: String,
             required: true
         },
-        modifiedAt: {
+        dateUpdated: {
             type: Date,
             default: Date.now,
             required: true
@@ -39,7 +39,7 @@ const exerciseSchema = new Schema({
         default: Date.now,
         required: true
     },
-    modifiedAt: {
+    dateUpdated: {
         type: Date,
         default: Date.now,
         required: true

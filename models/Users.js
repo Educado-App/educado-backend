@@ -73,7 +73,7 @@ const userSchema = new Schema({
   },
   password: String,
   joinedAt: Date,
-  modifiedAt: Date,
+  dateUpdated: Date,
   subscriptions: [{
       type: Schema.Types.ObjectId,
       ref: 'Courses'

@@ -8,8 +8,8 @@ module.exports = function makeFakeContentCreatorApplication(overrides = {}) {
 		lastName: 'User',
 		email: 'fake@gmail.com',
 		motivation: 'I am a test user who would like to create content on the educado platform',
-		createdAt : new Date(),
-		modifiedAt: new Date(),
+		dateCreated : new Date(),
+		dateUpdated: new Date(),
 		approved: false
 	};
 

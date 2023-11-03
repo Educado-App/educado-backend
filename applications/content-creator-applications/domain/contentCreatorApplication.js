@@ -6,8 +6,8 @@ module.exports = function buildMakeContentCreatorApplication({ Id }) {
         email,
         password,
         approved = false,
-        createdAt = new Date(),
-        modifiedAt = new Date()
+        dateCreated = new Date(),
+        dateUpdated = new Date()
     }) {
 
         if (!name) throw new Error('A name must be provided in the application')
@@ -22,8 +22,8 @@ module.exports = function buildMakeContentCreatorApplication({ Id }) {
             getPassword: () => password,
             isApproved: () => approved,
             getRejectReason: () => rejectReason,
-            getCreatedAt: () => createdAt,
-            getModifiedAt: () => modifiedAt,
+            getdateCreated: () => dateCreated,
+            getdateUpdated: () => dateUpdated,
             fullname: () => `${firstName} ${lastName}`,
             approve: () => approved = true,
             decline: ({ reason = 'No reason given' } = {}) => {

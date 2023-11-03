@@ -18,7 +18,7 @@ module.exports = function makeContentCreatorApplicationList({ dbModel, Params, P
 	});
 
 	async function findAll({
-		sortBy = '-createdAt',
+		sortBy = '-dateCreated',
 		limit = 50,
 		offset = 0,
 		...conditions
@@ -32,8 +32,8 @@ module.exports = function makeContentCreatorApplicationList({ dbModel, Params, P
 		const query = {
 			$and: [
 				typeof approved !== 'undefined' ? { approved } : {},
-				before ? { createdAt: { $lte: new Date(before) } } : {},
-				after ? { createdAt: { $gte: new Date(after) } } : {},
+				before ? { dateCreated: { $lte: new Date(before) } } : {},
+				after ? { dateCreated: { $gte: new Date(after) } } : {},
 			]
 		};
 
