@@ -279,8 +279,8 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       difficulty: course.difficulty,
       estimatedHours: course.estimatedHours,
       published: course.published,
-	  status: course.status,
-	  dateUpdated: Date.now()
+	    status: course.status,
+	    dateUpdated: Date.now()
     },
     function (err, docs) {
       if (err) {
