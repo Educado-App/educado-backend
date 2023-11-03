@@ -73,7 +73,7 @@ router.put("/:section_id", async (req, res) => {
         title: exercise.title,
         question: exercise.question,
         answers: exercise.answers,
-        modifiedAt: Date.now(),
+        dateUpdated: Date.now(),
       },
       function (err, docs) {
         if (err) {

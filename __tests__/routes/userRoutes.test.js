@@ -591,7 +591,7 @@ describe('Users Routes', () => {
         password: expect.any(String),
         joinedAt: user.joinedAt,
         resetAttempts: user.resetAttempts,
-        modifiedAt: expect.any(Date),
+        dateUpdated: expect.any(Date),
         subscriptions: user.subscriptions,
       });
     });
@@ -626,14 +626,14 @@ describe('Users Routes', () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + user._id)
         .set('token', token) // Include the token in the request headers
-        .send({ createdAt: Date.now() })
+        .send({ dateCreated: Date.now() })
         .expect(400); // Expecting a 400 response
 
         expect(res.body.error.code).toBe('E0801');
     });
 
-    it('return succesful updated object with new modifiedAt value ', async () => {
-      // wait 1 second to make sure modifiedAt is not the same
+    it('return succesful updated object with new dateUpdated value ', async () => {
+      // wait 1 second to make sure dateUpdated is not the same
       await new Promise(resolve => setTimeout(resolve, 1000));
       const user = await db.collection('users').findOne({ email: fakeUser.email });
       const res = await request(`http://localhost:${PORT}`)
@@ -644,7 +644,7 @@ describe('Users Routes', () => {
         .expect(200); // Expecting a 200 OK response
       
       const updatedUser = await db.collection('users').findOne({ _id: user._id });
-      expect(updatedUser.modifiedAt-0).not.toBe(user.modifiedAt-0);
+      expect(updatedUser.dateUpdated-0).not.toBe(user.dateUpdated-0);
     });
 
     it('return error if email you try to PATCH is identical', async () => {

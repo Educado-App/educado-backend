@@ -12,12 +12,12 @@ const sectionSchema = new Schema({
         type: Number,
         required: true
     },
-    createdAt: {
+    dateCreated: {
         type: Date,
         required: true,
         default: Date.now
     },
-    modifiedAt: {
+    dateUpdated: {
         type: Date,
         required: true,
         default: Date.now
