@@ -252,6 +252,7 @@ router.put("/", async (req, res) => {
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
+	status: "draft",
     estimatedHours: estimatedHours,
     rating: 0,
   });
@@ -278,7 +279,8 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       difficulty: course.difficulty,
       estimatedHours: course.estimatedHours,
       published: course.published,
-      dateUpdated: Date.now()
+	    status: course.status,
+	    dateUpdated: Date.now()
     },
     function (err, docs) {
       if (err) {
@@ -350,7 +352,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
 
 // Update course published state
-router.post("/update/published", async (req, res) => {
+router.patch("/published", async (req, res) => {
   const { published, course_id } = req.body;
 
   // find object in database and update title to new value
