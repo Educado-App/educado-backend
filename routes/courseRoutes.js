@@ -196,7 +196,6 @@ router.post('/:id/subscribe', async (req, res) => {
     return res.status(200).send(user);
 
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 
@@ -249,7 +248,6 @@ router.post('/:id/unsubscribe', async (req, res) => {
     return res.status(200).send(user)
 
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 
