@@ -250,6 +250,14 @@ module.exports = {
     code: 'E0804',
     message: 'Points must be a positive number.'
   },
+  E0805: {
+    code: 'E0805',
+    message: 'Old and new password required.'
+  },
+  E0806: {
+    code: 'E0806',
+    message: 'Old password is incorrect.'
+  },
 
 	// E09 - Answer Exercises Errors
 	E0901: {

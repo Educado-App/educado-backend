@@ -83,6 +83,45 @@ router.patch('/:id', requireLogin, async (req, res) => {
   }
 });
 
+// Update User password
+router.patch('/:id/password', requireLogin, async (req, res) => {
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).send({ error: errorCodes['E0014'] });
+  }
+
+  const id = mongoose.Types.ObjectId(req.params.id);
+  const { oldPassword, newPassword } = req.body;
+
+  if(!oldPassword || !newPassword) {
+    return res.status(400).send({ error: errorCodes['E0805'] });
+  }
+
+  const user = await UserModel.findById(id);
+
+  if(!user) {
+    return res.status(400).send({ error: errorCodes['E0004'] });
+  }
+
+  if(!compare(oldPassword, user.password)) {
+    return res.status(400).send({ error: errorCodes['E0806'] });
+  }
+
+  try {
+    validatePassword(newPassword);
+  } catch (err) {
+    return res.status(400).send({ error: err });
+  }
+
+  user.password = encrypt(newPassword);
+  user.dateUpdated = Date.now();
+
+  const resUser = await UserModel.findByIdAndUpdate(id, user, { new: true });
+
+  resUser.password = undefined;
+
+  return res.status(200).send(user);
+});
+
 /**
  * Validates the fields to be updated dynamically
  */

@@ -1,4 +1,4 @@
-const { ContentCreatorApplication } = require('../../../models/ContentCreator');
+const { ContentCreatorApplication } = require('../../../models/ContentCreators');
 const Params = require('../../../helpers/ajv/params');
 const ParamsSchema = require('../../../helpers/ajv/paramsSchema');
 
