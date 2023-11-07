@@ -10,22 +10,29 @@ const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
 const { UserModel } = require('../models/Users');
-const {
-  ContentCreatorApplication,
-} = require("../models/ContentCreatorApplication");
+const { ContentCreatorModel } = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
+const mongoose = require('mongoose');
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
 // Get all courses for one user
 router.get('/creator/:id', requireLogin, async (req, res) => {
-  const id = req.params.id; // Get user id from request
-  const courses = await CourseModel.find({ creator: id }); // Find courses for a specific user
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+  }
 
+  const creator = await ContentCreatorModel.findOne({ baseUser: mongoose.Types.ObjectId(req.params.id) }); // Get user id from request
 
+  if (!creator) {
+    return res.status(400).send({ error: errorCodes['E0004'] }); // If user does not exist, return error
+  }
 
-  res.send(courses); // Send response
+  const courses = await CourseModel.find({ creator: creator._id }); // Find courses for a specific user
+  
+  return res.status(200).send(courses); // Send response
+
 });
 
 //Get all courses
@@ -45,6 +52,10 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     // find a course based on it's id
     const course = await CourseModel.findById(id);
@@ -66,6 +77,9 @@ router.get('/:id/sections', async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     // find a course based on it's id
     const course = await CourseModel.findById(id);
@@ -105,6 +119,10 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
   try {
     const { courseId, sectionId } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(sectionId)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
+
     const course = await CourseModel.findById(courseId);
     // check if courses exist
     if (!course) {
@@ -135,6 +153,10 @@ router.post('/:id/subscribe', async (req, res) => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     const user = await UserModel.findById(user_id);
 
@@ -170,7 +192,7 @@ router.post('/:id/subscribe', async (req, res) => {
     );
 
 
-    res.status(200).send(user);
+    return res.status(200).send(user);
 
   } catch (error) {
     console.log(error);
@@ -185,6 +207,10 @@ router.post('/:id/unsubscribe', async (req, res) => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(user_id) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+    }
 
     const user = await UserModel.findById(user_id);
     //checks if user exist
@@ -218,7 +244,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
       { numOfSubscriptions: course.numOfSubscriptions }
     );
 
-    res.send(user)
+    return res.status(200).send(user)
 
   } catch (error) {
     console.log(error);
@@ -239,8 +265,16 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put("/", async (req, res) => {
-  const { title, category, difficulty, description, estimatedHours } = req.body;
-  console.dir(req.body);
+  const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+
+  const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
+
+  if (!creatorProfile) {
+    return res.status(400).send({ error: errorCodes['E0004'] }); // If user does not exist, return error
+  }
+
+  const id = creatorProfile._id;
+
   const course = new CourseModel({
     title: title,
     category: category,
@@ -248,6 +282,7 @@ router.put("/", async (req, res) => {
     description: description,
     //temporarily commented out as login has not been fully implemented yet
     //_user: req.user.id,
+    creator: id,
     published: false,
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
@@ -259,9 +294,9 @@ router.put("/", async (req, res) => {
 
   try {
     await course.save();
-    res.status(201).send(course);
+    return res.status(201).send(course);
   } catch (err) {
-    res.status(400).send(err);
+    return res.status(400).send(err);
   }
 });
 
@@ -284,11 +319,11 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     },
     function (err, docs) {
       if (err) {
-        res.status(400).send(err);
+        return res.status(400).send(err);
       }
     }
   );
-  res.status(200).send(dbCourse);
+  return res.status(200).send(dbCourse);
 });
 
 
@@ -346,7 +381,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
 
   // Send response
-  res.send("Course Deleted");
+  return res.status(200).send("Course Deleted");
 
 });
 
