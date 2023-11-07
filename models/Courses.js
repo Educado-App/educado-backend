@@ -26,7 +26,7 @@ const courseSchema = new Schema({
   },
   creator: { 
     type: Schema.Types.ObjectId, 
-    ref: 'contentCreator' 
+    ref: 'content-creators' 
   },
   difficulty: {
     type: Number,

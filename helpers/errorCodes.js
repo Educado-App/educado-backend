@@ -58,6 +58,10 @@ module.exports = {
     code: 'E0013',
     message: 'Content creator not found'
   },
+  E0014: {
+    code: 'E0014',
+    message: 'Invalid id'
+  },
 
   // E01 - Login errors
   E0101: {
@@ -238,6 +242,22 @@ module.exports = {
 		code: 'E0802',
 		message: 'Field value is identical to the current value.'
 	},
+  E0803: {
+    code: 'E0803',
+    message: 'Cannot update password directly.'
+  },
+  E0804: {
+    code: 'E0804',
+    message: 'Points must be a positive number.'
+  },
+  E0805: {
+    code: 'E0805',
+    message: 'Old and new password required.'
+  },
+  E0806: {
+    code: 'E0806',
+    message: 'Old password is incorrect.'
+  },
 
 	// E09 - Answer Exercises Errors
 	E0901: {
