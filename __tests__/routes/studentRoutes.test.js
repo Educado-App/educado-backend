@@ -21,6 +21,8 @@ const server = app.listen(PORT);
 let db;
 let fakeStudent;
 let fakeCourse = makeFakeCourse();
+let fakeSection = makeFakeSection();
+let fakeExercise = makeFakeExercise();
 const userId = mongoose.Types.ObjectId('5f841c2b1c8cfb2c58b78d68');
 
 jest.mock('../../middlewares/requireLogin', () => {
@@ -213,9 +215,7 @@ describe('GET /students/:id/subscriptions', () => {
   });
 });
 
-describe('Handles answering exercises', () => {
-  let actualCourse, actualSection, actualExercise;
-  let fakeCourse, fakeSection, fakeExercise;
+describe('Handles answering exercises', () => { 
   beforeEach(async () => {
     fakeCourse = makeFakeCourse();
     fakeSection = makeFakeSection();
@@ -230,84 +230,208 @@ describe('Handles answering exercises', () => {
     // Insert the fake exercise into the database
     await db.collection('exercises').insertOne(fakeExercise);
 
-    actualCourse = await db.collection('courses').findOne({ title: fakeCourse.title });
-    actualSection = await db.collection('sections').findOne({ title: fakeSection.title });
-    actualExercise = await db.collection('exercises').findOne({ title: fakeExercise.title });
-
     // Add the connection between the course, section, and exercise
-    actualCourse.sections.push(actualCourse._id);
+    fakeCourse.sections.push(fakeSection._id);
 
-    actualSection.exercises.push(actualExercise._id);
-    actualSection.parentCourse = actualCourse._id;
+    fakeSection.exercises.push(fakeExercise._id);
+    fakeSection.parentCourse = fakeCourse._id;
 
-    actualExercise.parentSection = actualSection._id;
+    fakeExercise.parentSection = fakeSection._id;
 
     // Update course in the database
-    await db.collection('courses').updateOne({ _id: actualCourse._id }, { $set: actualCourse });
+    await db.collection('courses').updateOne({ _id: fakeCourse._id }, { $set: fakeCourse });
 
     // Update section in the database
-    await db.collection('sections').updateOne({ _id: actualSection._id }, { $set: actualSection });
+    await db.collection('sections').updateOne({ _id: fakeSection._id }, { $set: fakeSection });
 
     // Update exercise in the database
-    await db.collection('exercises').updateOne({ _id: actualExercise._id }, { $set: actualExercise });
-  });
+    await db.collection('exercises').updateOne({ _id: fakeExercise._id }, { $set: fakeExercise });
+});
 
 
-  afterAll(async () => {
+  afterEach(async () => {
     // Remove the user from the database after each test
-    await db.collection('students').deleteMany();
+    await db.collection('students').deleteOne({ _id: fakeStudent._id });
 
     // Remove the course from the database after each test
-    await db.collection('courses').deleteMany();
+    await db.collection('courses').deleteOne({ _id: fakeCourse._id });
 
     // Remove the section from the database after each test
-    await db.collection('sections').deleteMany();
+    await db.collection('sections').deleteOne({ _id: fakeSection._id });
 
     // Remove the exercise from the database after each test
-    await db.collection('exercises').deleteMany();
+    await db.collection('exercises').deleteOne({ _id: fakeExercise._id });
   });
 
   it('Adds exerciseId to completed exercises correctly', async () => {
-    const exerciseId = actualExercise._id; // Replace this with an actual exercise ID from your database
+    const exerciseId = fakeExercise._id; // Replace this with an actual exercise ID from your database
 
-    const response = await request(`http://localhost:${PORT}`)
+    await request(`http://localhost:${PORT}`)
       .patch('/api/students/' + userId + '/completed')
       .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId })
+      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
+      .expect(200);
+  
+    // Fetch the user from the database to verify the changes
+    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+        
+    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
+  }); 
 
-    expect(response.status).toBe(200); // Expecting a 200 OK response
+  it('Adds two exerciseIds to completed exercises correctly, with different parentCourses', async () => {
+    // creates the second exercise
+    let fakeCourse2 = makeFakeCourse();
+    let fakeSection2 = makeFakeSection();
+    let fakeExercise2 = makeFakeExercise();
 
+    // Insert the fake course into the database
+    await db.collection('courses').insertOne(fakeCourse2);
+
+    // Insert the fake section into the database
+    await db.collection('sections').insertOne(fakeSection2);
+
+    // Insert the fake exercise into the database
+    await db.collection('exercises').insertOne(fakeExercise2);
+
+    // Add the connection between the course, section, and exercise
+    fakeCourse2.sections.push(fakeSection2._id);
+
+    fakeSection2.exercises.push(fakeExercise2._id);
+    fakeSection2.parentCourse = fakeCourse2._id;
+
+    fakeExercise2.parentSection = fakeSection2._id;
+
+    // Update course, section and exericse in the database
+    await db.collection('courses').updateOne({ _id: fakeCourse2._id }, { $set: fakeCourse2 });
+    await db.collection('sections').updateOne({ _id: fakeSection2._id }, { $set: fakeSection2 });
+    await db.collection('exercises').updateOne({ _id: fakeExercise2._id }, { $set: fakeExercise2 });
+
+    const exerciseId = fakeExercise._id;
+    const exerciseId2 = fakeExercise2._id;
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
+      .expect(200);
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId2, isComplete: true, points: 10 })
+      .expect(200);
 
     // Fetch the user from the database to verify the changes
-    const updatedProfile = await db.collection('students').findOne({ baseUser: userId });
+    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
 
-    const completedExerciseIds = updatedProfile.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    const completedExerciseIds2 = updatedUser.completedCourses[1].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
+    expect(completedExerciseIds2).toEqual([exerciseId2.toString()]);
   });
 
+  it('Adds two exerciseIds to completed exercises correctly, with same parentCourse', async () => {
+    // creates the second exercise
+    fakeExercise2 = makeFakeExercise();
+
+    // Insert the fake exercise into the database
+    await db.collection('exercises').insertOne(fakeExercise2);
+
+    // Add the connection between the course, section, and exercise
+    fakeSection.exercises.push(fakeExercise2._id);
+    fakeExercise2.parentSection = fakeSection._id;
+
+    // Update course, section and exericse in the database
+    await db.collection('sections').updateOne({ _id: fakeSection._id }, { $set: fakeSection });
+    await db.collection('exercises').updateOne({ _id: fakeExercise2._id }, { $set: fakeExercise2 });
+
+    const exerciseId = fakeExercise._id;
+    const exerciseId2 = fakeExercise2._id;
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
+      .expect(200);
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId2, isComplete: true, points: 10 })
+      .expect(200);
+
+    // Fetch the user from the database to verify the changes
+    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+
+    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    expect(completedExerciseIds[0]).toEqual(exerciseId.toString());
+    expect(completedExerciseIds[1]).toEqual(exerciseId2.toString());
+  });
+
+  it('First adds an exercise as failed, then completes it', async () => {
+    const exerciseId = fakeExercise._id; // Replace this with an actual exercise ID from your database
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId, isComplete: false, points: 0 })
+      .expect(200);
+
+    // Fetch the user from the database to verify the changes
+    let updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+        
+    let completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    let pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
+    let isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
+    
+    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
+    expect(pointsGivenForExercise).toEqual([0]);  
+    expect(isExerciseComplete).toEqual([false]);
+
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: exerciseId, isComplete: true, points: 5 })
+      .expect(200);
+  
+    // Fetch the user from the database to verify the changes
+    updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+        
+    completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
+    pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
+    isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
+    
+
+    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
+    expect(pointsGivenForExercise).toEqual([5]);
+    expect(isExerciseComplete).toEqual([true]);
+  });
+  
   it('Fails to add non-existing exerciseId to completed exercises', async () => {
     const nonExistingExerciseId = new mongoose.Types.ObjectId();
-
+  
     const response = await request(`http://localhost:${PORT}`)
       .patch('/api/students/' + userId + '/completed')
       .set('token', token)
       .send({ exerciseId: nonExistingExerciseId })
-      .expect(400);
-
-    expect(response.body.error.code).toBe('E0012');
+      .expect(404);
+  
+      expect(response.body.error.code).toBe('E0012');
   });
-
+  
   it('Fails to add exerciseId to completed exercises for non-existing user', async () => {
     const exerciseId = fakeExercise._id;
-    const nonExistingUserId = mongoose.Types.ObjectId('5f841c2b1c8cfb2c58b78d68');
-
+    const nonExistingUserId = new mongoose.Types.ObjectId();
+  
     const response = await request(`http://localhost:${PORT}`)
       .patch('/api/students/' + nonExistingUserId + '/completed')
       .set('token', token)
       .send({ exerciseId: exerciseId })
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('E0014');
+      .expect(404);
+  
+      expect(response.body.error.code).toBe('E0004');
   });
 });
 
