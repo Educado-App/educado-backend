@@ -379,6 +379,69 @@ describe('Users Routes', () => {
     });
   });
 
+  describe('GET /api/users/:id/password', () => {
+    it('should change password', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id + '/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'ABC123456!', newPassword: 'newPassword' })
+
+      expect(res.status).toBe(200);
+      const updatedUser = await db.collection('users').findOne({ _id: actualUser._id });
+      expect(updatedUser.password).not.toBe(actualUser.password);
+    });
+
+    it('should return error if old password is wrong', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id + '/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'wrongPassword', newPassword: 'newPassword' })
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('E0806');
+    });
+
+    it('should return error if new password is invalid', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id + '/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'ABC123456!', newPassword: 'new' })
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('E0213');
+    });
+
+    it('should return error if new password is missing', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + actualUser._id + '/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'ABC123456!' })
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('E0805');
+    });
+
+    it('should return error if id is invalid', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/invalidId/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'ABC123456!', newPassword: 'newPassword' })
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('E0014');
+    });
+
+    it('should return error if no user is found with the id', async () => {
+      const res = await request(`http://localhost:${PORT}`)
+        .patch('/api/users/' + new mongoose.Types.ObjectId() + '/password')
+        .set('token', token) // Include the token in the request headers
+        .send({ oldPassword: 'ABC123456!', newPassword: 'newPassword' })
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('E0004');
+    });
+  });
+
 
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
