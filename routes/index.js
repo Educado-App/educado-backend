@@ -29,7 +29,7 @@ router.use('/api/mail', MailRoutes);
 router.use('/api/users', UserRoutes);
 router.use('/api/bucket', BucketRoutes);
 router.use('/api/lectures', LectureRoutes);
-router.use('api/students', StudentRoutes);
+router.use('/api/students', StudentRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

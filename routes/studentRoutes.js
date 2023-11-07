@@ -127,39 +127,46 @@ async function updateUserLevel(userId, points, level) {
 }
 
 // Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', requireLogin, async (req, res) => {
+router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
   try {
+    const { id } = req.params;
+    let { exerciseId, isComplete, points } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      throw errorCodes['E0014'];
+    // Sets points to 0 because the exercise was not answered correctly
+    if (!isComplete) {
+      points = 0;
     }
-
-    const id = mongoose.Types.ObjectId(req.params.id);
-
-    const { exerciseId } = req.body;
-
+    
     // Retrieve the user by ID
-    let user = await StudentModel.findOne({ baseUser: id });
+    let student = await StudentModel.findOne({ baseUser: id });
 
-    if (!user) {
+    if (!student) {
       throw errorCodes['E0004'];
     }
 
-    const updatedUser = await markAsCompleted(user, exerciseId);
+    const updatedUser = await markAsCompleted(student, exerciseId, points, isComplete);
+
+
+    if (!isNaN(points)) {
+      updateUserLevel(updatedUser, points)
+    }
 
     res.status(200).send(updatedUser);
   } catch (error) {
-    // Handle "user not found" error response here
-    return res.status(400).send({ error: error });
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
+      // Handle "user not found" error response here
+      res.status(404);
+    } else {
+      res.status(400);
+    }
 
+    res.send({
+      error: error
+    });
   }
 });
 
-async function markAsCompleted(user, exerciseId) {
-
-  if (!mongoose.Types.ObjectId.isValid(exerciseId)) {
-    throw errorCodes['E0014'];
-  }
+async function markAsCompleted(user, exerciseId, points, isComplete) {
 
   // Retrieve the exercise by ID to find sectionId
   const exercise = await ExerciseModel.findById(exerciseId);
@@ -169,9 +176,6 @@ async function markAsCompleted(user, exerciseId) {
   }
 
   const sectionIdString = exercise.parentSection;
-  if (!mongoose.Types.ObjectId.isValid(sectionIdString)) {
-    throw errorCodes['E0014'];
-  }
   const sectionId = mongoose.Types.ObjectId(sectionIdString.toString());
   const section = await SectionModel.findById(sectionId);
 
@@ -180,12 +184,10 @@ async function markAsCompleted(user, exerciseId) {
   }
 
   const courseIdString = section.parentCourse;
-  if (!mongoose.Types.ObjectId.isValid(courseIdString)) {
-    throw errorCodes['E0014'];
-  }
   const courseId = mongoose.Types.ObjectId(courseIdString.toString());
 
-  await markExerciseAsCompleted(user, courseId, sectionId, exerciseId);
+  
+  await markExerciseAsCompleted(user, courseId, sectionId, exerciseId, points, isComplete);
 
   // Check if all exercises in the section are completed
   user = await StudentModel.findById(user._id);
@@ -193,14 +195,19 @@ async function markAsCompleted(user, exerciseId) {
   // Redefine the completedCourseIndex with the updated user
   const completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
   const completedSection = user.completedCourses[completedCourseIndex].completedSections.find(completedSection => completedSection.sectionId.equals(sectionId));
-  const allExercisesCompleted = completedSection.completedExercises.length === section.exercises.length;
+
+  // Check if all exercises are present and marked as complete
+  const allExercisesCompleted = completedSection.completedExercises.length === section.exercises.length &&
+    completedSection.completedExercises.every(completedExercise => completedExercise.isComplete);
+
 
   // Update section's isComplete status
   await StudentModel.findByIdAndUpdate(
     user._id,
     {
       $set: {
-        [`completedCourses.${completedCourseIndex}.completedSections.$[section].isComplete`]: allExercisesCompleted
+        [`completedCourses.${completedCourseIndex}.completedSections.$[section].isComplete`]: allExercisesCompleted,
+        [`completedCourses.${completedCourseIndex}.completedSections.$[section].completionDate`]: Date.now()
       }
     },
     {
@@ -218,7 +225,8 @@ async function markAsCompleted(user, exerciseId) {
     user._id,
     {
       $set: {
-        [`completedCourses.${completedCourseIndex}.isComplete`]: allSectionsCompleted
+        [`completedCourses.${completedCourseIndex}.isComplete`]: allSectionsCompleted,
+        [`completedCourses.${completedCourseIndex}.completionDate`]: Date.now()
       }
     }
   );
@@ -226,11 +234,8 @@ async function markAsCompleted(user, exerciseId) {
   return await StudentModel.findById(user._id);
 }
 
-async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
+async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId, points, isComplete) {
   const completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
-
-  // Check that all ids are valid
-
   if (completedCourseIndex === -1) {
     // Course not found, add it along with completedSections and completedExercises
     await StudentModel.findByIdAndUpdate(
@@ -239,8 +244,7 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
         $push: {
           completedCourses: {
             courseId,
-            completedSections: [{ sectionId, completedExercises: [{ exerciseId }] }],
-            isComplete: false
+            completedSections: [{ sectionId, completedExercises: [{ exerciseId, isComplete: isComplete, pointsGiven: points }] }]
           }
         }
       }
@@ -256,29 +260,60 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId) {
           $push: {
             [`completedCourses.${completedCourseIndex}.completedSections`]: {
               sectionId,
-              completedExercises: [{ exerciseId }],
-              isComplete: false
+              completedExercises: [{ exerciseId, isComplete: isComplete, pointsGiven: points }]
             }
           }
         }
       );
     } else {
-      const isExerciseAlreadyCompleted = user.completedCourses[completedCourseIndex].completedSections.some(completedSection =>
-        completedSection.sectionId.equals(sectionId) &&
-        completedSection.completedExercises.some(completedExercise => completedExercise.exerciseId.equals(exerciseId))
-      );
+      let exerciseFound;
 
-      // Returns if the exercise is already completed
-      if (isExerciseAlreadyCompleted) {
-        throw errorCodes['E0801'];
-      }
+      // Check if the exercise is in the user's completedExercises array
+      user.completedCourses[completedCourseIndex].completedSections.some(section => {
+          section.completedExercises.forEach(exercise => {
+            if (exercise.exerciseId == exerciseId) {
+              // Found the matching exerciseId, set exerciseIsComplete to the associated isComplete value
+              exerciseFound = exercise;
+            }
+          });
+        });
+
+
+      // If the exercise is already marked as complete, check it's isComplete value, if true throw error,
+      // else update the exercise field "isComplete" to true, and points to the points given (5)
+      if (exerciseFound) {
+        if (exerciseFound.isComplete) {
+          throw errorCodes['E0801'];
+        } else {
+          // Update the exercise field "isComplete" to true, and points to the points given
+          await StudentModel.updateOne(
+            {
+              _id: user._id,
+              'completedCourses.courseId': courseId,
+              'completedCourses.completedSections.sectionId': sectionId,
+              'completedCourses.completedSections.completedExercises.exerciseId': exerciseId
+            },
+            {
+              $set: {
+                'completedCourses.$.completedSections.$[section].completedExercises.$[exercise].pointsGiven': points,
+                'completedCourses.$.completedSections.$[section].completedExercises.$[exercise].isComplete': isComplete,
+                'completedCourses.$.completedSections.$[section].completedExercises.$[exercise].completionDate': Date.now()
+              }
+            },
+            {
+              arrayFilters: [{ 'section.sectionId': sectionId }, { 'exercise.exerciseId': exerciseId }]
+            }
+          );
+          return;
+        }
+      } 
 
       // Adds the exercise to the user's completedExercises array
       await StudentModel.findByIdAndUpdate(
         user._id,
         {
           $addToSet: {
-            [`completedCourses.${completedCourseIndex}.completedSections.$[section].completedExercises`]: { exerciseId }
+            [`completedCourses.${completedCourseIndex}.completedSections.$[section].completedExercises`]: { exerciseId, isComplete: isComplete, pointsGiven: points }
           }
         },
         {

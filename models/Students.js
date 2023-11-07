@@ -18,40 +18,53 @@ const studentSchema = new Schema({
   }],
   completedCourses: [
     {
-      courseId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Courses'
-      },
-      isComplete: {
-        type: Boolean,
-        default: false
-      },
-      completedSections: [
-        {
-          sectionId: {
+        courseId: {
             type: Schema.Types.ObjectId,
-            ref: 'Sections'
-          },
-          isComplete: {
+            ref: 'Courses'
+        },
+        isComplete: {
             type: Boolean,
-            default: false
-          },
-          completedExercises: [
+            default: true
+        },
+        completionDate: {
+            type: Date,
+            default: Date.now
+        },
+        completedSections: [
             {
-              exerciseId: {
-                type: Schema.Types.ObjectId,
-                ref: 'Exercises'
-              },
-              isComplete: {
-                type: Boolean,
-                default: true
-              }
+                sectionId: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Sections'
+                },
+                isComplete: {
+                  type: Boolean,
+                  default: true
+                },
+                completionDate: {
+                    type: Date,
+                    default: Date.now
+                },
+                completedExercises: [
+                    {
+                        exerciseId: {
+                          type: Schema.Types.ObjectId,
+                          ref: 'Exercises'
+                        },
+                        isComplete: {
+                          type: Boolean,
+                          default: true
+                        },
+                        completionDate: {
+                          type: Date,
+                          default: Date.now
+                        },
+                        pointsGiven: Number
+                    }
+                ]
             }
-          ],
-        }
-      ],
+        ]
     }
-  ],
+],
   baseUser: {
     type: Schema.Types.ObjectId,
     ref: 'Users'
