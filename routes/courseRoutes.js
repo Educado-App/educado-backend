@@ -9,11 +9,11 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
-const { UserModel } = require('../models/Users');
 const { ContentCreatorModel } = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
 const mongoose = require('mongoose');
+const { StudentModel } = require('../models/Students');
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
@@ -30,7 +30,7 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
   }
 
   const courses = await CourseModel.find({ creator: creator._id }); // Find courses for a specific user
-  
+
   return res.status(200).send(courses); // Send response
 
 });
@@ -158,7 +158,8 @@ router.post('/:id/subscribe', async (req, res) => {
       return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
     }
 
-    const user = await UserModel.findById(user_id);
+    const studentId = mongoose.Types.ObjectId(user_id);
+    const user = await StudentModel.findOne({ baseUser: studentId });
 
     //checks if user exist
     if (!user) {
@@ -182,8 +183,8 @@ router.post('/:id/subscribe', async (req, res) => {
 
 
     // find user based on id, and add the course's id to the user's subscriptions field
-    await UserModel.findOneAndUpdate(
-      { _id: user_id },
+    await StudentModel.findOneAndUpdate(
+      { baseUser: studentId },
       { subscriptions: user.subscriptions });
 
     await CourseModel.findOneAndUpdate(
@@ -212,7 +213,8 @@ router.post('/:id/unsubscribe', async (req, res) => {
       return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
     }
 
-    const user = await UserModel.findById(user_id);
+    const studentId = mongoose.Types.ObjectId(user_id);
+    const user = await StudentModel.findOne({ baseUser: studentId });
     //checks if user exist
     if (!user) {
       // Handle "user not found" error response here
@@ -235,8 +237,8 @@ router.post('/:id/unsubscribe', async (req, res) => {
     user.subscriptions.indexOf(id) > -1 && user.subscriptions.splice(user.subscriptions.indexOf(id), 1);
 
     // find user based on id, and remove the course's id from the user's subscriptions field
-    await UserModel.findOneAndUpdate(
-      { _id: user_id },
+    await StudentModel.findOneAndUpdate(
+      { baseUser: studentId },
       { subscriptions: user.subscriptions })
 
     await CourseModel.findOneAndUpdate(
@@ -287,7 +289,7 @@ router.put("/", async (req, res) => {
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
-	status: "draft",
+    status: "draft",
     estimatedHours: estimatedHours,
     rating: 0,
   });
@@ -314,8 +316,8 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       difficulty: course.difficulty,
       estimatedHours: course.estimatedHours,
       published: course.published,
-	    status: course.status,
-	    dateUpdated: Date.now()
+      status: course.status,
+      dateUpdated: Date.now()
     },
     function (err, docs) {
       if (err) {
