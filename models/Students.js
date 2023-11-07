@@ -22,6 +22,10 @@ const studentSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Courses'
         },
+        totalPoints: {
+          type: Number,
+          default: 0
+        },
         isComplete: {
             type: Boolean,
             default: true
@@ -36,6 +40,10 @@ const studentSchema = new Schema({
                     type: Schema.Types.ObjectId,
                     ref: 'Sections'
                 },
+                totalPoints: {
+                  type: Number,
+                  default: 0
+                },
                 isComplete: {
                   type: Boolean,
                   default: true
@@ -44,6 +52,7 @@ const studentSchema = new Schema({
                     type: Date,
                     default: Date.now
                 },
+                
                 completedExercises: [
                     {
                         exerciseId: {
@@ -70,6 +79,24 @@ const studentSchema = new Schema({
     ref: 'Users'
   }
 });
+
+
+// Den fatter ikke exercise.pointsGiven...
+studentSchema.post('updateOne', async function(next) {
+  const completedCourses = this.schema.obj.completedCourses || [];
+
+  completedCourses.forEach(course => {
+    course.totalPoints = course.completedSections.reduce((acc, section) => {
+      return acc + section.completedExercises.reduce((exerciseAcc, exercise) => {
+        console.log(JSON.stringify(exercise));
+        return exerciseAcc + (exercise.isComplete ? (exercise.pointsGiven || 0) : 0);
+      }, 0);
+    }, 0);
+  });
+
+  this.schema.obj.completedCourses = completedCourses;
+});
+
 
 const StudentModel = mongoose.model('students', studentSchema);
 
