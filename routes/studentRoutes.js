@@ -76,12 +76,12 @@ router.get('/subscriptions', async (req, res) => {
   try {
     const { user_id, course_id } = req.query;
 
-    if (mongoose.Types.ObjectId.isValid(user_id) && mongoose.Types.ObjectId.isValid(course_id)) {
+    if (!mongoose.Types.ObjectId.isValid(user_id) || !mongoose.Types.ObjectId.isValid(course_id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
 
     // Check if the course_id exists in the user's subscriptions array
-    const user = await StudentModel.findById(user_id);
+    const user = await StudentModel.findOne({baseUser: user_id});
 
     //checks if user exist
     if (!user) {
