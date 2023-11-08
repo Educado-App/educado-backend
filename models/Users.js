@@ -74,55 +74,7 @@ const userSchema = new Schema({
   password: String,
   joinedAt: Date,
   dateUpdated: Date,
-  subscriptions: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Courses'
-  }],
   resetAttempts: [Date],
-  points: {
-    type: Number,
-    default: 0
-  },
-  level: {
-      type: Number,
-      default: 1
-  },
-  completedCourses: [
-    {
-        courseId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Courses'
-        },
-        completedSections: [
-            {
-                sectionId: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'Sections'
-                },
-                completedExercises: [
-                    {
-                        exerciseId: {
-                            type: Schema.Types.ObjectId,
-                            ref: 'Exercises'
-                        },
-                        isComplete: {
-                          type: Boolean,
-                          default: true
-                        }
-                    }
-                ],
-                isComplete: {
-                    type: Boolean,
-                    default: false
-                }
-            }
-        ],
-        isComplete: {
-            type: Boolean,
-            default: false
-        }
-    }
-]
 });
 
 const UserModel = mongoose.model('users', userSchema);
