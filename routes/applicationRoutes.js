@@ -1,10 +1,31 @@
 const router = require('express').Router();
+const errorCodes = require('../helpers/errorCodes');
+const { ApplicationsModel } = require('../models/Applications')
+const mongoose = require('mongoose');
+const { CourseModel } = require('../models/Courses');
 
-const { makeExpressCallback } = require('../helpers/express');
-const { contentCreatorController } = require('../applications/content-creator-applications/controller');
+router.get('/', async (req, res) => {
+    try {
+        const applications = await ApplicationsModel.find();
+        res.send({success: true,
+            status: 200,
+            data: applications});
 
-router.get('', makeExpressCallback(contentCreatorController));
-router.get('/:id', makeExpressCallback(contentCreatorController));
-router.post('/:id', makeExpressCallback(contentCreatorController));
-    
+    } catch (error) {
+        return res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const application = await ApplicationsModel.findOne({_id: id})
+        res.send({success: true,
+            status: 200,
+            data: application});
+    } catch(error) {
+        return res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
+
+});
 module.exports = router;
