@@ -3,7 +3,7 @@ const multer = require("multer");
 const axios = require("axios");
 const FormData = require('form-data');
 
-const serviceUrl = "http://130.225.39.221:8080/bucket"
+const serviceUrl = "http://130.225.39.221:8080";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -11,7 +11,7 @@ const upload = multer({ storage: storage });
 // Get list of all files in bucket
 router.get("/", (req, res) => {
   //Forward to service api
-  axios.get(serviceUrl).then((response) => {
+  axios.get(serviceUrl + "/bucket/").then((response) => {
     res.send(response.data);
   }).catch((error) => {
     res.send("Error: " + error);
@@ -21,7 +21,7 @@ router.get("/", (req, res) => {
 // Get file from bucket
 router.get("/:filename", (req, res) => {
   //Forward to service api
-  axios.get(serviceUrl + "/" + req.params.filename).then((response) => {
+  axios.get(serviceUrl + "/bucket/" + req.params.filename).then((response) => {
     res.send(response.data);
   }).catch((error) => {
     res.send("Error: " + error);
@@ -31,14 +31,12 @@ router.get("/:filename", (req, res) => {
 // Delete file from bucket
 router.delete("/:filename", (req, res) => {
   //Forward to service api
-  axios.delete(serviceUrl + "/" + req.params.filename).then((response) => {
+  axios.delete(serviceUrl + "/bucket/" + req.params.filename).then((response) => {
     res.send(response.data);
   }).catch((error) => {
     res.send("Error: " + error);
   });
 });
-
-
 
 // Upload file to bucket
 router.post("/", upload.single("file"), (req, res) => {
@@ -60,6 +58,25 @@ router.post("/", upload.single("file"), (req, res) => {
       res.send("Error: " + error);
     });
 });
+
+// Stream file from bucket
+router.get("/stream/:filename", (req, res) => {
+  // Forward to Go service stream handler
+  const streamUrl = serviceUrl + "/stream/" + req.params.filename;
+  
+  // Make a GET request to the Go service and pipe the response back to the client
+  axios({
+    method: 'get',
+    url: streamUrl,
+    responseType: 'stream'
+  }).then(response => {
+    res.set(response.headers);
+    response.data.pipe(res);
+  }).catch(error => {
+    res.status(500).send("Error: " + error);
+  });
+});
+
 
 
 module.exports = router;
