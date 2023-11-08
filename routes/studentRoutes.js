@@ -201,7 +201,7 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
     completedSection.completedExercises.every(completedExercise => completedExercise.isComplete);
 
 
-  // Update section's isComplete status
+  // Update section's isComplete status, and afterwards update the points for the specific course and section for the user.
   await StudentModel.updateOne(
     {
       _id: user._id
@@ -215,7 +215,30 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
     {
       arrayFilters: [{ 'section.sectionId': sectionId }]
     }
-  );  
+  ).post(async function() {
+    // Calculate the totalPoints for the updated section
+    const completedCourse = user.completedCourses[completedCourseIndex];
+    const updatedSection = completedCourse.completedSections.find(completedSection => completedSection.sectionId.equals(sectionId))
+
+    updatedSection.totalPoints = updatedSection.completedExercises.reduce((total, exercise) => total + exercise.pointsGiven, 0);
+
+    // Update the totalPoints for the completedCourse
+    completedCourse.totalPoints = completedCourse.completedSections.reduce((total, section) => total + section.totalPoints, 0);
+
+    // Update the user's totalPoints
+    await StudentModel.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          [`completedCourses.${completedCourseIndex}.totalPoints`]: completedCourse.totalPoints,
+          [`completedCourses.${completedCourseIndex}.completedSections.$[section].totalPoints`]: updatedSection.totalPoints
+        }
+      },
+      {
+        arrayFilters: [{ 'section.sectionId': sectionId }]
+      }
+    );
+  });
 
   user = await StudentModel.findById(user._id);
 

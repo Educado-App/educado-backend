@@ -80,24 +80,6 @@ const studentSchema = new Schema({
   }
 });
 
-
-// Den fatter ikke exercise.pointsGiven...
-studentSchema.post('updateOne', async function(next) {
-  const completedCourses = this.schema.obj.completedCourses || [];
-
-  completedCourses.forEach(course => {
-    course.totalPoints = course.completedSections.reduce((acc, section) => {
-      return acc + section.completedExercises.reduce((exerciseAcc, exercise) => {
-        console.log(JSON.stringify(exercise));
-        return exerciseAcc + (exercise.isComplete ? (exercise.pointsGiven || 0) : 0);
-      }, 0);
-    }, 0);
-  });
-
-  this.schema.obj.completedCourses = completedCourses;
-});
-
-
 const StudentModel = mongoose.model('students', studentSchema);
 
 module.exports = { StudentModel };
