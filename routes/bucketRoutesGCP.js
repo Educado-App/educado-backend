@@ -5,7 +5,8 @@ const FormData = require('form-data');
 
 const serviceUrl = "http://130.225.39.221:8080/bucket"
 
-const dotenv = require("dotenv");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Get list of all files in bucket
 router.get("/", (req, res) => {
@@ -37,20 +38,20 @@ router.delete("/:filename", (req, res) => {
   });
 });
 
-// Upload file to bucket (take file and fileName). 
-// Multer is used to store file in memory before upload
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
+// Upload file to bucket
 router.post("/", upload.single("file"), (req, res) => {
   const form = new FormData();
+
+  // Add file and filename to form
   form.append('file', req.file.buffer, {
     filename: req.file.originalname,
     contentType: req.file.mimetype
   });
   form.append('fileName', req.body.fileName);
 
+  // Forward to service api
   axios.post(serviceUrl, form, { headers: form.getHeaders() })
     .then(response => {
       res.send(response.data);
