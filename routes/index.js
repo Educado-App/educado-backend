@@ -4,7 +4,6 @@ const CourseRoutes = require('./courseRoutes');
 const SectionRoutes = require('./sectionRoutes');
 const ExerciseRoutes = require('./exerciseRoutes');
 const AuthRoutes = require('./authRoutes');
-const SignupRoutes = require('./signupRoutes');
 const ApplicationRoutes = require('./applicationRoutes');
 const MailRoutes = require('./mailRoutes');
 const UserRoutes = require('./userRoutes');
@@ -23,7 +22,6 @@ router.use('/api/exercises', ExerciseRoutes)
 router.use('/api/sections', SectionRoutes);
 router.use('/api/exercises', ExerciseRoutes);
 router.use('/api/auth', AuthRoutes);
-router.use('/api/signup', SignupRoutes);
 router.use('/api/applications', ApplicationRoutes);
 router.use('/api/mail', MailRoutes);
 router.use('/api/users', UserRoutes);
