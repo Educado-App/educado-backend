@@ -52,7 +52,6 @@ const studentSchema = new Schema({
                     type: Date,
                     default: Date.now
                 },
-                
                 completedExercises: [
                     {
                         exerciseId: {
