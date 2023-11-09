@@ -224,8 +224,8 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
     completedCourse.totalPoints = completedCourse.completedSections.reduce((total, section) => total + section.totalPoints, 0);
 
     // Update the user's totalPoints
-    await StudentModel.updateOne(
-      { _id: user._id },
+    await StudentModel.findOneAndUpdate(
+      { baseUser: user.baseUser },
       {
         $set: {
           [`completedCourses.${completedCourseIndex}.totalPoints`]: completedCourse.totalPoints,
