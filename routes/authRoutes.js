@@ -42,7 +42,7 @@ router.post('/login', async (req, res) => {
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
-      const token = signAccessToken({ id: user.id });
+      const token = signAccessToken({ id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email });
       // Return the token
       return res.status(202).json({
         status: 'login successful',

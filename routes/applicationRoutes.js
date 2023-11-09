@@ -6,7 +6,7 @@ const { CourseModel } = require('../models/Courses');
 
 router.get('/', async (req, res) => {
     try {
-        const applications = await ApplicationsModel.find();
+        const applications = await ApplicationsModel.find({rejected: false});
         res.send({success: true,
             status: 200,
             data: applications});
@@ -28,4 +28,6 @@ router.get('/:id', async (req, res) => {
     }
 
 });
+
+
 module.exports = router;
