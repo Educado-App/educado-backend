@@ -3,7 +3,7 @@ const multer = require("multer");
 const axios = require("axios");
 const FormData = require('form-data');
 
-const serviceUrl = "http://130.225.39.221:8080";
+const serviceUrl = "https://video-service-staging-x7rgvjso4a-ew.a.run.app/";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
