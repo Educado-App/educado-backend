@@ -4,14 +4,13 @@ const { Schema } = mongoose;
 
 // Class description
 const ApplicationSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  motivation: { type: String },
-  approved: { type: Boolean, default: false },
-  rejectionReason: { type: String, required: false },
-  createdAt: { type: Date },
-  modifiedAt: { type: Date },
+  _id: Schema.Types.ObjectId,
+  ContentCreatorId: String,
+  motivation: String,
+  professionalExperience: String,
+  academicExperience: String,
+  createdAt: String,
+  modifiedAt: Date,
 });
 
 const ApplicationsModel = mongoose.model(
@@ -20,3 +19,4 @@ const ApplicationsModel = mongoose.model(
 );
 
 module.exports = { ApplicationsModel };
+

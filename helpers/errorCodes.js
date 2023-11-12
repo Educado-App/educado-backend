@@ -264,4 +264,15 @@ module.exports = {
 		code: 'E0901',
 		message: 'This exercise is already in completedExercises.'
 	},
+
+  // E10 - Content Creator Approval Errors
+  E1001: {
+    code: 'E1001',
+    message: "This Content Creator has not been approved"
+  },
+
+  E1002: {
+    code: 'E1002',
+    message: "This Content Creator has been rejected"
+  },
 };

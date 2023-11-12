@@ -34,7 +34,19 @@ router.post('/login', async (req, res) => {
     if (!user) {
       // Invalid email (email not found)
       return res.status(401).json({ 'error': errorCodes['E0004'] });
-    } else {
+    } 
+    
+    else if(user.approved == false){
+      // User not approved
+      return res.status(403).json({ 'error': errorCodes['E1001'] });
+    } 
+    
+    else if(user.rejected == true){
+      // User is rejected
+      return res.status(403).json({ 'error': errorCodes['E1002'] });
+    }
+    
+    else {
       // If the email is found, compare the passwords
 
       result = compare(req.body.password, user.password);
