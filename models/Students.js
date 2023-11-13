@@ -22,6 +22,10 @@ const studentSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Courses'
         },
+        totalPoints: {
+          type: Number,
+          default: 0
+        },
         isComplete: {
             type: Boolean,
             default: true
@@ -35,6 +39,10 @@ const studentSchema = new Schema({
                 sectionId: {
                     type: Schema.Types.ObjectId,
                     ref: 'Sections'
+                },
+                totalPoints: {
+                  type: Number,
+                  default: 0
                 },
                 isComplete: {
                   type: Boolean,

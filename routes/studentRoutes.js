@@ -146,7 +146,6 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
 
     const updatedUser = await markAsCompleted(student, exerciseId, points, isComplete);
 
-
     if (!isNaN(points)) {
       updateUserLevel(updatedUser, points)
     }
@@ -201,7 +200,8 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
     completedSection.completedExercises.every(completedExercise => completedExercise.isComplete);
 
 
-  // Update section's isComplete status
+
+  // Update section's isComplete status, and afterwards update the points for the specific course and section for the user.
   await StudentModel.findOneAndUpdate(
     { baseUser: user.baseUser },
     {
@@ -213,7 +213,30 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
     {
       arrayFilters: [{ 'section.sectionId': sectionId }]
     }
-  );
+  ).post(async function() {
+    // Calculate the totalPoints for the updated section
+    const completedCourse = user.completedCourses[completedCourseIndex];
+    const updatedSection = completedCourse.completedSections.find(completedSection => completedSection.sectionId.equals(sectionId))
+
+    updatedSection.totalPoints = updatedSection.completedExercises.reduce((total, exercise) => total + exercise.pointsGiven, 0);
+
+    // Update the totalPoints for the completedCourse
+    completedCourse.totalPoints = completedCourse.completedSections.reduce((total, section) => total + section.totalPoints, 0);
+
+    // Update the user's totalPoints
+    await StudentModel.findOneAndUpdate(
+      { baseUser: user.baseUser },
+      {
+        $set: {
+          [`completedCourses.${completedCourseIndex}.totalPoints`]: completedCourse.totalPoints,
+          [`completedCourses.${completedCourseIndex}.completedSections.$[section].totalPoints`]: updatedSection.totalPoints
+        }
+      },
+      {
+        arrayFilters: [{ 'section.sectionId': sectionId }]
+      }
+    );
+  });
 
   user = await StudentModel.findOne({ baseUser: user.baseUser });
 
@@ -229,7 +252,7 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
         [`completedCourses.${completedCourseIndex}.completionDate`]: Date.now()
       }
     }
-  );
+  );  
 
   return await StudentModel.findOne({ baseUser: user.baseUser });
 }
@@ -244,11 +267,11 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId, po
         $push: {
           completedCourses: {
             courseId,
-            completedSections: [{ sectionId, completedExercises: [{ exerciseId, isComplete: isComplete, pointsGiven: points }] }]
+            completedSections: [{ sectionId, completedExercises: [{ exerciseId, isComplete, pointsGiven: points }] }]
           }
         }
       }
-    );
+    );    
   } else {
     const completedSectionIndex = user.completedCourses[completedCourseIndex].completedSections.findIndex(completedSection => completedSection.sectionId.equals(sectionId));
 
@@ -258,13 +281,13 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId, po
         { baseUser: user.baseUser },
         {
           $push: {
-            [`completedCourses.${completedCourseIndex}.completedSections`]: {
+            'completedCourses.$.completedSections': {
               sectionId,
-              completedExercises: [{ exerciseId, isComplete: isComplete, pointsGiven: points }]
+              completedExercises: [{ exerciseId, isComplete, pointsGiven: points }]
             }
           }
         }
-      );
+      );      
     } else {
       let exerciseFound;
 
@@ -310,16 +333,20 @@ async function markExerciseAsCompleted(user, courseId, sectionId, exerciseId, po
 
       // Adds the exercise to the user's completedExercises array
       await StudentModel.findOneAndUpdate(
-        {baseUser: user.baseUser},
+        {
+          baseUser: user.baseUser,
+          'completedCourses.courseId': courseId,
+          'completedCourses.completedSections.sectionId': sectionId
+        },
         {
           $addToSet: {
-            [`completedCourses.${completedCourseIndex}.completedSections.$[section].completedExercises`]: { exerciseId, isComplete: isComplete, pointsGiven: points }
+            'completedCourses.$.completedSections.$[section].completedExercises': { exerciseId, isComplete, pointsGiven: points }
           }
         },
         {
           arrayFilters: [{ 'section.sectionId': sectionId }]
         }
-      );
+      );      
     }
   }
 }

@@ -329,6 +329,12 @@ describe('Handles answering exercises', () => {
     const completedExerciseIds2 = updatedUser.completedCourses[1].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
     expect(completedExerciseIds2).toEqual([exerciseId2.toString()]);
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(10);
+    expect(totalPointsForSection).toEqual(10);
   });
 
   it('Adds two exerciseIds to completed exercises correctly, with same parentCourse', async () => {
@@ -367,6 +373,12 @@ describe('Handles answering exercises', () => {
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds[0]).toEqual(exerciseId.toString());
     expect(completedExerciseIds[1]).toEqual(exerciseId2.toString());
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(20);
+    expect(totalPointsForSection).toEqual(20);
   });
 
   it('First adds an exercise as failed, then completes it', async () => {
@@ -408,7 +420,7 @@ describe('Handles answering exercises', () => {
     expect(pointsGivenForExercise).toEqual([5]);
     expect(isExerciseComplete).toEqual([true]);
   });
-  
+
   it('Fails to add non-existing exerciseId to completed exercises', async () => {
     const nonExistingExerciseId = new mongoose.Types.ObjectId();
   
