@@ -3,7 +3,8 @@ const multer = require("multer");
 const axios = require("axios");
 const FormData = require('form-data');
 
-const serviceUrl = "https://video-service-staging-x7rgvjso4a-ew.a.run.app/";
+//Get serviceUrl from environment variable
+const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
