@@ -275,4 +275,24 @@ module.exports = {
     code: 'E1002',
     message: "This Content Creator has been rejected"
   },
+
+  E1003: {
+    code: "E1003",
+    message: "Could not approve Content Creator"
+  },
+
+  E1004: {
+    code: "E1004",
+    message: "Could not reject Content Creator"
+  },
+
+  E1005: {
+    code: "E1005",
+    message: "Could not get Content Creator application"
+  },
+
+  E1006: {
+    code: "E1006",
+    message: "Could not upload application"
+  },
 };
