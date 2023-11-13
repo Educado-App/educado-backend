@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 
 router.get('/online/', async (req, res) => {
-	res.send(true);
+	return res.send(true);
 });
 
 
