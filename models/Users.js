@@ -79,8 +79,6 @@ const userSchema = new Schema({
       ref: 'Courses'
   }],
   resetAttempts: [Date],
-  status: {type: String},
-  type: {type: String},
 });
 
 const UserModel = mongoose.model('users', userSchema);

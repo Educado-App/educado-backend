@@ -1,12 +1,19 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const { ApplicationsModel } = require('../models/Applications')
+const { ApplicationsModel } = require('../models/Applications');
+const { ContentCreatorModel } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users');
 const mongoose = require('mongoose');
 
 router.get('/', async (req, res) => {
     try {
-        const applicators = await UserModel.find({status: "pending" });
+        const contentCreators = await ContentCreatorModel.find({ approved: false })
+        const baseUserArray = contentCreators.map(array => array.baseUser);
+        
+        const applicators = await UserModel.find({ _id: { $in: baseUserArray } });
+
+
+        
         
         res.send({success: true,
             status: 200,
