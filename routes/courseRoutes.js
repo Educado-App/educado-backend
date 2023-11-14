@@ -265,7 +265,7 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put("/", async (req, res) => {
-  const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+  const { title, category, difficulty, description, estimatedHours, creator, status } = req.body;
 
   const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
@@ -287,7 +287,7 @@ router.put("/", async (req, res) => {
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
-	  status: "draft",
+	  status: status,
     estimatedHours: 0,
     rating: 0,
   });
