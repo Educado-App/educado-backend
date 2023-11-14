@@ -287,8 +287,8 @@ router.put("/", async (req, res) => {
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
-	status: "draft",
-    estimatedHours: estimatedHours,
+	  status: "draft",
+    estimatedHours: 0,
     rating: 0,
   });
 
