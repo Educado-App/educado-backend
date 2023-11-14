@@ -27,7 +27,6 @@ describe('Test online response', () => {
         const response = await request(`http://localhost:${PORT}`)
             .get('/api/utility/online')
             .expect(200);
-        console.log(response.body)
         expect(response.body).toBe(true);
 
     });
