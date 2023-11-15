@@ -2,6 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const axios = require("axios");
 const FormData = require('form-data');
+const { PassThrough } = require('stream');
 
 //Get serviceUrl from environment variable
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
@@ -87,23 +88,69 @@ router.post("/", upload.single("file"), (req, res) => {
 });
 
 
+
+axios.interceptors.response.use(response => {
+  // This will process successful responses (within 2xx status codes)
+  return response;
+}, error => {
+  // Handle error responses
+  if (error.response && error.response.data && typeof error.response.data.on === 'function') {
+    return new Promise((resolve, reject) => {
+      let errorData = '';
+
+      error.response.data.on('data', (chunk) => {
+        errorData += chunk;
+      });
+
+      error.response.data.on('end', () => {
+        // Once the entire error message is read from the stream, update the error object
+        error.response.data = errorData;
+        reject(error);
+      });
+    });
+  } else {
+    // Pass the original error through if the response data is not a stream
+    return Promise.reject(error);
+  }
+});
+
 // Stream file from bucket
-router.get("/stream/:filename", (req, res) => {
-  // Forward to Go service stream handler
-  const streamUrl = serviceUrl + "/stream/" + req.params.filename;
-  
-  // Make a GET request to the Go service and pipe the response back to the client
-  axios.get(streamUrl, { responseType: "stream" }).then((response) => {
-    response.data.pipe(res);
-  }).catch((error) => {
-    if (error.response && error.response.data) {
-      // Forward the status code from the Axios error if available
-      res.status(error.response.status || 500).send(error.response.data);
-    } else {
-      // Handle cases where the error does not have a response part (like network errors)
-      res.status(500).send({ message: "An error occurred during streaming." });
-    }
-  });
+router.get("/stream/:filename", async (req, res) => {
+  try {
+      // Forward to Go service stream handler
+      const streamUrl = serviceUrl + "/stream/" + req.params.filename;
+
+      // Make a GET request to the Go service
+      const response = await axios({
+          method: 'get',
+          url: streamUrl,
+          responseType: 'stream'
+      });
+
+      // Check for errors from the Go service
+      if (response.status !== 200) {
+          res.status(response.status).send(response.data);
+          return;
+      }
+
+      // Set the headers from the Go service response
+      res.set(response.headers);
+
+      // Pipe the response stream back to the client
+      const passThrough = new PassThrough();
+      response.data.pipe(passThrough);
+      passThrough.pipe(res);
+
+      // Handle any errors during streaming
+      passThrough.on('error', (error) => {
+          console.error('Error during streaming:', error);
+          res.status(500).send("Error during streaming");
+      });
+  } catch (error) {
+      console.error('Error in request to Go service:', error.message);
+      // Use the error response data (if available) when sending the error to the client
+      res.status(500).send(error.response ? error.response.data : "Error in request to Go service");
+  }
 });
 
 
