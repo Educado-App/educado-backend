@@ -2,11 +2,10 @@ name: Run Tests
 
 on:
   pull_request:
-    branches:
-      - main
-      - staging
-      - dev
-      - Cert
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 #Run npm run test 
 jobs:

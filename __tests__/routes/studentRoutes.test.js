@@ -166,11 +166,11 @@ describe('GET /students/:id/subscriptions', () => {
   it('should get user subscriptions', async () => {
 
     const courseId = '651d3a15cda7d5bd2878dfc7';
-    const user = await db.collection('students').findOne({ email: 'fake@gmail.com' });
+    const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
 
     // Find the user and update their subscriptions
     const result = await db.collection('students').findOneAndUpdate(
-      { _id: userId }, // Convert userId to ObjectId if needed
+      { baseUser: userId }, // Convert userId to ObjectId if needed
       { $push: { subscriptions: courseId } },
       { returnDocument: 'after' } // 'after' returns the updated document
     );
@@ -251,7 +251,7 @@ describe('Handles answering exercises', () => {
 
   afterEach(async () => {
     // Remove the user from the database after each test
-    await db.collection('students').deleteOne({ _id: fakeStudent._id });
+    await db.collection('students').deleteOne({ baseUser: userId });
 
     // Remove the course from the database after each test
     await db.collection('courses').deleteOne({ _id: fakeCourse._id });
@@ -273,7 +273,7 @@ describe('Handles answering exercises', () => {
       .expect(200);
   
     // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
         
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
@@ -323,12 +323,18 @@ describe('Handles answering exercises', () => {
       .expect(200);
 
     // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
 
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     const completedExerciseIds2 = updatedUser.completedCourses[1].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
     expect(completedExerciseIds2).toEqual([exerciseId2.toString()]);
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(10);
+    expect(totalPointsForSection).toEqual(10);
   });
 
   it('Adds two exerciseIds to completed exercises correctly, with same parentCourse', async () => {
@@ -362,11 +368,17 @@ describe('Handles answering exercises', () => {
       .expect(200);
 
     // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
 
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds[0]).toEqual(exerciseId.toString());
     expect(completedExerciseIds[1]).toEqual(exerciseId2.toString());
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(20);
+    expect(totalPointsForSection).toEqual(20);
   });
 
   it('First adds an exercise as failed, then completes it', async () => {
@@ -379,7 +391,7 @@ describe('Handles answering exercises', () => {
       .expect(200);
 
     // Fetch the user from the database to verify the changes
-    let updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+    let updatedUser = await db.collection('students').findOne({ baseUser: userId });
         
     let completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     let pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
@@ -397,7 +409,7 @@ describe('Handles answering exercises', () => {
       .expect(200);
   
     // Fetch the user from the database to verify the changes
-    updatedUser = await db.collection('students').findOne({ _id: fakeStudent._id });
+    updatedUser = await db.collection('students').findOne({ baseUser: userId });
         
     completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
@@ -408,7 +420,7 @@ describe('Handles answering exercises', () => {
     expect(pointsGivenForExercise).toEqual([5]);
     expect(isExerciseComplete).toEqual([true]);
   });
-  
+
   it('Fails to add non-existing exerciseId to completed exercises', async () => {
     const nonExistingExerciseId = new mongoose.Types.ObjectId();
   
