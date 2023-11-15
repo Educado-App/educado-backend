@@ -10,6 +10,7 @@ const UserRoutes = require('./userRoutes');
 const TestRoutes = require('../routes/testRoutes');
 const BucketRoutes = require('./bucketRoutesGCP');
 const LectureRoutes = require('./lectureRoutes');
+const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
 
 // Print all routes defined in app
@@ -27,6 +28,7 @@ router.use('/api/mail', MailRoutes);
 router.use('/api/users', UserRoutes);
 router.use('/api/bucket', BucketRoutes);
 router.use('/api/lectures', LectureRoutes);
+router.use('/api/utility', UtilityRoutes);
 router.use('/api/students', StudentRoutes);
 
 // Test route
