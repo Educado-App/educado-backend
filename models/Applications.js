@@ -4,19 +4,27 @@ const { Schema } = mongoose;
 
 // Class description
 const ApplicationSchema = new Schema({
-  _id: Schema.Types.ObjectId,
-  ContentCreatorId: String,
+  baseUser: String,
   motivation: String,
-  professionalExperience: String,
-  academicExperience: String,
-  createdAt: String,
-  modifiedAt: Date,
+
+  academicLevel: String,
+  academicStatus: String,
+  major: String,
+  institution: String,
+  educationStartDate: String,
+  educationEndDate: String,
+
+  company: String,
+  position: String,
+  workStartDate: String,
+  workEndDate: String,
+  workActivities: String,
 });
 
-const ApplicationsModel = mongoose.model(
+const ApplicationModel = mongoose.model(
   "applications",
   ApplicationSchema
 );
 
-module.exports = { ApplicationsModel };
+module.exports = { ApplicationModel };
 
