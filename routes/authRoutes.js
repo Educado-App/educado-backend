@@ -38,18 +38,19 @@ router.post('/login', async (req, res) => {
     // For content creators, a matching content-creator entry will be found to see if they are approved or rejected
     const contentCreator = await ContentCreatorModel.findOne({baseUser: user._id})
     //Content creator must not be allowed entry if they are either rejected or not yet approved
-    if(contentCreator.approved == false){
+    if(contentCreator.approved == false && contentCreator.rejected == false){
       // User not approved
+      console.log(contentCreator)
       return res.status(403).json({ 'error': errorCodes['E1001'] });
     } 
     
-    else if(contentCreator.rejected == true){
+    if(contentCreator.rejected == true && contentCreator.approved == false){
       // User is rejected
       return res.status(403).json({ 'error': errorCodes['E1002'] });
     }
     
     else {
-      // If the email is found, compare the passwords
+      // If the email is found, and content creator is approved compare the passwords
 
       result = compare(req.body.password, user.password);
     }
