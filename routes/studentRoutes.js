@@ -3,6 +3,7 @@ const errorCodes = require('../helpers/errorCodes');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
+const { findTop100Students } = require('../helpers/leaderboard');
 
 const { ExerciseModel } = require('../models/Exercises');
 const { StudentModel } = require('../models/Students');
@@ -66,12 +67,11 @@ router.get('/:id/subscriptions', async (req, res) => {
 
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error)
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
 
-// Checks if user is subscribed to a specific course
+// Checks if student is subscribed to a specific course
 router.get('/subscriptions', async (req, res) => {
   try {
     const { user_id, course_id } = req.query;
@@ -123,7 +123,11 @@ async function updateUserLevel(userId, points, level) {
   }
 
   // Update user points and level in the database
-  await StudentModel.findOneAndUpdate({ baseUser: userId }, { points: points, level: level });
+  await StudentModel.findOneAndUpdate(
+    { baseUser: userId },
+    { $inc: { points: points }, $set: { level: level } },
+    { new: true } // Set to true if you want to get the updated document as a result
+  );
 }
 
 // Mark courses, sections, and exercises as completed for a user
@@ -144,11 +148,13 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
       throw errorCodes['E0004'];
     }
 
-    const updatedUser = await markAsCompleted(student, exerciseId, points, isComplete);
+    await markAsCompleted(student, exerciseId, points, isComplete);
 
     if (!isNaN(points)) {
-      updateUserLevel(updatedUser, points)
+      await updateUserLevel(id, points, student.level);
     }
+
+    const updatedUser = await StudentModel.findOne({ baseUser: id });
 
     res.status(200).send(updatedUser);
   } catch (error) {
@@ -164,6 +170,30 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     });
   }
 });
+
+
+// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { timeInterval } = req.body;
+
+    if (!timeInterval) {
+      throw errorCodes['E0015'];
+    }
+
+    const leaderboard = await findTop100Students(timeInterval);
+
+    res.status(200).send(leaderboard);
+  } catch (error) {
+    // Handle errors appropriately
+    if (error === errorCodes['E0015']) {
+      res.status(500).json({ 'error': errorCodes['E0015'] });
+    } else {
+      res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
+  }
+});
+
 
 async function markAsCompleted(user, exerciseId, points, isComplete) {
 

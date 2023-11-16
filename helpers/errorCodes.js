@@ -62,6 +62,10 @@ module.exports = {
     code: 'E0014',
     message: 'Invalid id'
   },
+  E0015: {
+    code: 'E0015',
+    message: "Invalid time interval. Use 'day', 'week', 'month' or 'all'."
+  },
 
   // E01 - Login errors
   E0101: {
