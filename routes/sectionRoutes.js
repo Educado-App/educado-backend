@@ -133,35 +133,15 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   });
 
-  // Get the course, from the section object
-  const course_id = section.parentCourse;
-  const course = await CourseModel.findById(course_id)
-
-
   // Remove the section from the course section array
   await CourseModel.updateOne({_id: section.parentCourse}, {$pull: {sections: section._id}})
-
-
-  // Get lecture array from section
-  const lectureIds = section.lectures;
-  const exerciseIds = section.exercises;
-
+  
   // Delete all lectures and excercises in the section
-  lectureIds.map(async (lecture_id) => {
-    // Delete the lecture
-    await LectureModel.findByIdAndDelete( lecture_id);
-  });
-
-  // Loop through all exercises in section
-	exerciseIds.map(async (exercise_id) => {
-		// Delete the exercise
-		await ExerciseModel.findByIdAndDelete(exercise_id);
-	}); 
+  await LectureModel.deleteMany({parentSection: section._id})
+  await ExerciseModel.deleteMany({parentSection: section._id})
 
   // Delete the section
   await SectionModel.deleteOne({ _id: id }).catch((err) => res.status(204).send(err));
-
-
 
   // Send response
   res.status(200).send("Section Deleted");

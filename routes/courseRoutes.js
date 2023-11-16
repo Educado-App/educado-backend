@@ -343,7 +343,6 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Get the course object
   const course = await CourseModel.findById(id).catch((err) => res.status(204).send(err));
 
-
   // Get the section array from the course object
   const sectionIds = course.sections;
 
@@ -353,26 +352,9 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     // Get the section object from the id in sectionIds array
     let section = await SectionModel.findById(section_id);
 
-
-    // Get the lecture array from the section object
-    const lectureIds = section.lectures;
-    const exerciseIds = section.exercises;
-
-    // Loop through all lectures in section
-    lectureIds.map(async (lecture_id) => {
-
-      // Delete the lecture
-      await LectureModel.findByIdAndDelete(lecture_id);
-
-    });
-
-    // Loop through all exercises in section
-    exerciseIds.map(async (exercise_id) => {
-
-      // Delete the exercise
-      await ExerciseModel.findByIdAndDelete(exercise_id);
-
-    });
+    // Delete all lectures and excercises in the section
+    await LectureModel.deleteMany({ parentSection: section._id })
+    await ExerciseModel.deleteMany({ parentSection: section._id })
 
     // Delete the section
     await SectionModel.findByIdAndDelete(section_id);
