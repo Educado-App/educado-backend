@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
         
         const applicators = await UserModel.find({ _id: { $in: baseUserArray } });
 
-        res.send({success: true,
+        res.send({
+            success: true,
             status: 200,
             data: applicators});
             
@@ -59,7 +60,7 @@ router.put('/:id?reject', async (req, res) => {
         
         await ContentCreatorModel.findOneAndUpdate(
             { baseUser: id },
-            { rejeted: true }
+            { rejected: true }
         );
 
         return res.status(200).json();
