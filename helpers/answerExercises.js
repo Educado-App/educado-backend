@@ -106,29 +106,7 @@ async function markExerciseAsCompleted(user) {
     if (completedCourseIndex === -1) {
         await addCourseWithSectionAndExercise(user);
     } else {
-        const completedSectionIndex = user.completedCourses[completedCourseIndex].completedSections.findIndex(completedSection => completedSection.sectionId.equals(sectionId));
-
-        if (completedSectionIndex === -1) {
-            // Section not found, add it along with completedExercises
-            await addSectionWithExercise(user, sectionId, exerciseId, points, isComplete)
-        } else {
-            let exerciseFound;
-
-            // Check if the exercise is in the user's completedExercises array
-            user.completedCourses[completedCourseIndex].completedSections.some(section => {
-                section.completedExercises.forEach(exercise => {
-                if (exercise.exerciseId == exerciseId) {
-                    // Found the matching exerciseId, set exerciseIsComplete to the associated isComplete value
-                    exerciseFound = exercise;
-                }
-                });
-            });
-
-            // If the exercise is already in the array, check it's isComplete value, if true throw error,
-            // else update the exercise field "isComplete" to true, and points to the points given (5).
-            // If exerciseFound is false, the exercise is simply added to the array.
-            await updateStatusForExercise(user, exerciseFound)    
-        }
+        await handleSectionOrExerciseNotFound(user, completedCourseIndex)
     }
 }
 
@@ -145,6 +123,32 @@ async function addCourseWithSectionAndExercise(user) {
             }
         }
     );  
+}
+
+async function handleSectionOrExerciseNotFound(user, completedCourseIndex) {
+    const completedSectionIndex = user.completedCourses[completedCourseIndex].completedSections.findIndex(completedSection => completedSection.sectionId.equals(sectionId));
+
+    if (completedSectionIndex === -1) {
+        // Section not found, add it along with completedExercises
+        await addSectionWithExercise(user, sectionId, exerciseId, points, isComplete)
+    } else {
+        let exerciseFound;
+
+        // Check if the exercise is in the user's completedExercises array
+        user.completedCourses[completedCourseIndex].completedSections.some(section => {
+            section.completedExercises.forEach(exercise => {
+            if (exercise.exerciseId == exerciseId) {
+                // Found the matching exerciseId, set exerciseIsComplete to the associated isComplete value
+                exerciseFound = exercise;
+            }
+            });
+        });
+
+        // If the exercise is already in the array, check it's isComplete value, if true throw error,
+        // else update the exercise field "isComplete" to true, and points to the points given (5).
+        // If exerciseFound is false, the exercise is simply added to the array.
+        await updateStatusForExercise(user, exerciseFound)    
+    }
 }
 
 async function addSectionWithExercise(user) {

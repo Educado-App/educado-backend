@@ -132,7 +132,7 @@ async function updateUserLevel(userId, points, level) {
 }
 
 // Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
+router.patch('/:id/completed', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     let { exerciseId, isComplete, points } = req.body;
