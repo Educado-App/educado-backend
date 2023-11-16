@@ -171,7 +171,7 @@ async function markAsCompleted(user, exerciseId, points, isComplete) {
   const exercise = await ExerciseModel.findById(exerciseId);
 
   if (!exercise) {
-    throw errorCodes['E0012'];
+    throw errorCodes['E1104'];
   }
 
   const sectionIdString = exercise.parentSection;

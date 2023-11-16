@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const errorCodes = require('../helpers/errorCodes');
 
 
 //Models
@@ -45,9 +46,12 @@ router.put("/:section_id", async (req, res) => {
 
   
     try {
-      await exercise.save();
       section = await SectionModel.findById(section_id);
-      await section.exercises.push(exercise._id);
+      if(section.components.length >= 10){
+        res.status(400).send({error: errorCodes['E1101']});
+      }
+      await exercise.save();
+      await section.components.push({compId: exercise._id, compType: "exercise"});
       await section.save();
       res.status(201).send(exercise);
     } catch (err) {
@@ -116,12 +120,12 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   
   // Remove the exercise from the section exercises array
-  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}})
+  await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {components: {compId: exercise._id}}})
 
 
   // Delete the exercise object
   await ExerciseModel.findByIdAndDelete(id).catch((err) => {
-    res.status(204).send({ error: errorCodes['E0012'] })
+    res.status(204).send({ error: errorCodes['E1104'] })
   });
 
   // Send response
