@@ -46,14 +46,6 @@ module.exports = {
 		code: 'E0010',
 		message: 'Email could not be sent'
 	},
-	E0011: {
-		code: 'E0011',
-		message: 'No exercises found'
-	},
-	E0012: {
-		code: 'E0012',
-		message: 'Exercise not found'
-	},
   E0013: {
     code: 'E0013',
     message: 'Content creator not found'
@@ -263,5 +255,32 @@ module.exports = {
 	E0901: {
 		code: 'E0901',
 		message: 'This exercise is already in completedExercises.'
+	},
+
+
+  // E11 - Component Errors
+  E1101: {
+		code: 'E1101',
+		message: 'The component array has reached its maximum size'
+	},
+	E1102: {
+		code: 'E1102',
+		message: 'The component array reached its maximum number of lectures'
+	},
+  E1103: {
+		code: 'E0013',
+		message: 'No exercises found'
+	},
+	E1104: {
+		code: 'E1104',
+		message: 'Exercise not found'
+	},
+  E1105: {
+		code: 'E1105',
+		message: 'No lectures found'
+	},
+	E1106: {
+		code: 'E1106',
+		message: 'Lecture not found'
 	},
 };

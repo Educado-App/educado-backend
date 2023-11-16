@@ -284,6 +284,7 @@ router.put("/", async (req, res) => {
     //_user: req.user.id,
     creator: id,
     published: false,
+    coverImg: "",
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
@@ -303,10 +304,10 @@ router.put("/", async (req, res) => {
 // Update Course
 router.patch("/:id", /*requireLogin,*/ async (req, res) => {
   const course = req.body;
-  const { id } = req.params;
+
 
   const dbCourse = await CourseModel.findByIdAndUpdate(
-    id,
+    course._id,
     {
       title: course.title,
       description: course.description,
@@ -315,6 +316,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       estimatedHours: course.estimatedHours,
       published: course.published,
 	    status: course.status,
+      coverImg: course._id + "_0",
 	    dateUpdated: Date.now()
     },
     function (err, docs) {
