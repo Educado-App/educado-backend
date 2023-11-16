@@ -39,14 +39,14 @@ beforeAll(async () => {
   db = await connectDb(); // Connect to the database
 });
 
-describe('Login User route', () => {
+describe('POST /auth/login', () => {
 
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
   });
 
-  it('should find a user mail without differentiating between upper- and lowercase', async () => {
+  it('Should find a user mail without differentiating between upper- and lowercase', async () => {
 
     const uppercaseMail = {
       email: 'Fake@gmail.com',
@@ -114,7 +114,7 @@ describe('Login User route', () => {
   });
 });
 
-describe('Reset password request route', () => {
+describe('POST /auth/reset-password-request', () => {
 
   beforeAll(async () => {
     // Insert the fake user into the database
@@ -166,7 +166,7 @@ describe('Reset password request route', () => {
     expect(res.body.error.code).toBe('E0406');
   });
 
-  it('clears reset password attempts after expiration', async () => {
+  it('Clears reset password attempts after expiration', async () => {
     const newFakeUser = makeFakeUser('user@test.com', [new Date() - 1000 * 60 * 5, new Date(), new Date()]);
     // Set reset password attempts to have 3 attempts with one being 5 minutes ago
     await db.collection('users').insertOne(newFakeUser);
