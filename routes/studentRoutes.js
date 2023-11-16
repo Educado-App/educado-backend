@@ -3,6 +3,7 @@ const errorCodes = require('../helpers/errorCodes');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
+const { findTop100Students } = require('../helpers/leaderboard');
 
 const { ExerciseModel } = require('../models/Exercises');
 const { StudentModel } = require('../models/Students');
@@ -66,7 +67,6 @@ router.get('/:id/subscriptions', async (req, res) => {
 
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error)
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
@@ -171,95 +171,26 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
   }
 });
 
-// Get the 100 students with the highest points
+
+// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
 router.get('/leaderboard', async (req, res) => {
   try {
-    // Fetch the top 100 students based on level and points in descending order
-    const leaderboard = await StudentModel.find()
-      .sort({ level: -1, points: -1 })
-      .limit(100)
-      .select('points level');
+    const { timeInterval } = req.body;
 
-      res.status(200).send(leaderboard);
-  } catch (error) {
-    // Handle errors appropriately
-    res.status(500).json({ 'error': errorCodes['E0003'] });
-  }
-});
+    if (!timeInterval) {
+      throw errorCodes['E0015'];
+    }
 
-
-// Get the 100 students with the highest points
-router.get('/leaderboard/month', async (req, res) => {
-  try {
-    // Get the current month and year
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // Month is zero-based
-    const currentYear = currentDate.getFullYear();
-
-    // Fetch the top 100 students based on points from completed exercises in the current month
-    const leaderboard = await StudentModel.aggregate([
-      {
-        $match: {
-          'completedCourses.completedSections.completedExercises.completionDate': {
-            $gte: new Date(`${currentYear}-${currentMonth}-01T00:00:00.000Z`),
-            $lt: new Date(`${currentYear}-${currentMonth + 1}-01T00:00:00.000Z`)
-          }
-        }
-      },
-      {
-        $unwind: '$completedCourses'
-      },
-      {
-        $unwind: '$completedCourses.completedSections'
-      },
-      {
-        $unwind: '$completedCourses.completedSections.completedExercises'
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'baseUser',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $unwind: '$user' // Unwind the result of $lookup so the first and last name is not an array
-      },
-      {
-        $project: {
-          firstName: '$user.firstName',
-          lastName: '$user.lastName',
-          points: 1,
-          level: 1,
-          completedExercisesPoints: '$completedCourses.completedSections.completedExercises.pointsGiven'
-        }
-      },
-      // Ensures the correct structure of the fields
-      {
-        $group: {
-          _id: '$_id',
-          firstName: { $first: '$firstName' },
-          lastName: { $first: '$lastName' },
-          points: { $first: '$points' },
-          level: { $first: '$level' },
-          completedExercisesPoints: { $sum: '$completedExercisesPoints' }
-        }
-      },
-      {
-        $sort: {
-          completedExercisesPoints: -1
-        }
-      },
-      {
-        $limit: 100
-      }
-    ]);
+    const leaderboard = await findTop100Students(timeInterval);
 
     res.status(200).send(leaderboard);
   } catch (error) {
     // Handle errors appropriately
-    res.status(500).json({ 'error': errorCodes['E0003'] });
+    if (error === errorCodes['E0015']) {
+      res.status(500).json({ 'error': errorCodes['E0015'] });
+    } else {
+      res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
   }
 });
 
