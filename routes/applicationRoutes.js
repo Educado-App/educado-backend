@@ -7,14 +7,11 @@ const mongoose = require('mongoose');
 
 router.get('/', async (req, res) => {
     try {
-        const contentCreators = await ContentCreatorModel.find({ approved: false })
+        const contentCreators = await ContentCreatorModel.find({ approved: false, rejected: false })
         const baseUserArray = contentCreators.map(array => array.baseUser);
         
         const applicators = await UserModel.find({ _id: { $in: baseUserArray } });
 
-
-        
-        
         res.send({success: true,
             status: 200,
             data: applicators});
@@ -27,8 +24,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const applicator = await UserModel.findOne({_id: id})
-        const application = await ApplicationModel.findOne({ContentCreatorId: id})
+        const applicator = await UserModel.findOne({_id: id}).select("-password")
+        const application = await ApplicationModel.findOne({baseUser: id})
         res.send({success: true,
             status: 200,
             application: application,
@@ -44,15 +41,15 @@ router.put('/:id?approve', async (req, res) => {
     try  {
         const { id } = req.params;
         
-        await UserModel.findByIdAndUpdate(
-            { _id: id },
-            { status: "approved" }
+        await ContentCreatorModel.findOneAndUpdate(
+            { baseUser: id },
+            { approved: true }
         );
         
         return res.status(200).json();
 
     } catch(error) {
-        return res.status(500).json({ 'error': errorCodes['E0003'] });
+        return res.status(500).json({ 'error': errorCodes['E0000'] });
     }
 });
 
@@ -60,15 +57,15 @@ router.put('/:id?reject', async (req, res) => {
     try  {
         const { id } = req.params;
         
-        await UserModel.findByIdAndUpdate(
-            { _id: id },
-            { status: "rejected" }
+        await ContentCreatorModel.findOneAndUpdate(
+            { baseUser: id },
+            { rejeted: true }
         );
 
         return res.status(200).json();
 
     } catch(error) {
-        return res.status(500).json({ 'error': errorCodes['E0003'] });
+        return res.status(500).json({ 'error': errorCodes['E0000'] });
     }
 });
 
