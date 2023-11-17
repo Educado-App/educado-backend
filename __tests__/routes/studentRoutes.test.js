@@ -414,7 +414,6 @@ describe('Handles answering exercises', () => {
     completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
     isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
-    
 
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
     expect(pointsGivenForExercise).toEqual([5]);
