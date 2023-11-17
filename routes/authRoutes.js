@@ -40,7 +40,6 @@ router.post('/login', async (req, res) => {
     //Content creator must not be allowed entry if they are either rejected or not yet approved
     if(contentCreator.approved == false && contentCreator.rejected == false){
       // User not approved
-      console.log(contentCreator)
       return res.status(403).json({ 'error': errorCodes['E1001'] });
     } 
     
