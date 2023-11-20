@@ -38,7 +38,8 @@ router.get('/:id', async (req, res) => {
         const application = await ApplicationModel.findOne({baseUser: id})
 
         //Send a success response, and the relevant data
-        res.send({success: true,
+        res.send({
+            success: true,
             status: 200,
             application: application,
             applicator: applicator});
@@ -94,18 +95,19 @@ router.put('/:id?reject', async (req, res) => {
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
-    try{
+    try {
         //Define the new application based on the data from the request body
         const data = req.body;
         //Save the data as part of the MongoDB ApplicationModel 
-        ApplicationModel(data).save();
-        
+        const createdApplication = await ApplicationModel.create(data); // Use create() instead of save() for simplicity
+
         //Return successful response
-        return res.status(200).json();
-    } catch{
-        //If anything unexpected happens, throw error
+        return res.status(201).json({application: createdApplication});
+    } catch (error) {
+        console.error(error);
+        console.error('Error in POST /newapplication route:', error);
         return res.status(500).json({ 'error': errorCodes['E0000'] });
     }
-})
+});
 
 module.exports = router;
