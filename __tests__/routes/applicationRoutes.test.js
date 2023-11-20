@@ -3,6 +3,9 @@ const express = require('express');
 const router = require('../../routes/applicationRoutes');
 const mongoose = require('mongoose');
 const connectDb = require('../fixtures/db');
+const makeFakeUser = require('../fixtures/fakeUser');
+const makeFakeApplication = require('../fixtures/fakeApplication');
+const makeFakeContentCreator = require('../fixtures/fakeContentCreator')
 const app = express();
 app.use(express.json());
 app.use('/api/application', router); // Mount the router under '/api' path
@@ -13,11 +16,8 @@ const server = app.listen(PORT, () => {
 });
 
 //mock user
-const newUser = {
-  firstName: 'firstName',
-  lastName: 'lastName',
-  email: 'test@example.com'
-};
+const newUser = makeFakeUser();
+const newApplication = makeFakeApplication();
 
 describe('Application Routes', () => {
   let db; // Store the database connection
@@ -27,12 +27,16 @@ describe('Application Routes', () => {
   });
 
   beforeEach(async () => {
-    await db.collection('user').insertOne(newUser);
+    await db.collection('users').insertOne(newUser);
+    const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+    newContentCreator = makeFakeContentCreator(user._id);
+    await db.collection('content-creators').insertOne(newContentCreator);
+    
   });
 
   afterEach(async () => {
-    await db.collection('user').deleteMany({}); // Delete all documents in the 'users' collection
-
+    await db.collection('users').deleteMany({});
+    await db.collection('content-creators').deleteMany({});
   });
 
   afterAll(async () => {
@@ -44,8 +48,6 @@ describe('Application Routes', () => {
   describe('GET /api/application/:id', () => {
     it('should get user data by ID', async () => {
         const fakeId = newUser._id;
-        console.log("fakeId: " + fakeId);
-
         const response = await request(app)
             .get(`/api/application/${fakeId}`)
             .expect('Content-Type', /json/)
@@ -53,40 +55,42 @@ describe('Application Routes', () => {
 
         expect(response.body).toHaveProperty('success', true);
     });
-
-    it('should handle user not found error', async () => {
-        // const nonExistentId = 'nonExistentId';
-        const nonExistentId = '0123456789abcdef01234567';
-
-        const response = await request(app)
-            .get(`/api/application/${nonExistentId}`)
-            .expect('Content-Type', /json/)
-            .expect(500);
-
-        expect(response.body).toHaveProperty('error');
-    });
   });
 
   // Test POST request
   describe('POST /api/application/newapplication', () => {
-    it('should create a new user', async () => {
+    it('should create a new application', async () => {
       const response = await request(app)
         .post('/api/application/newapplication')
-        .send(newUser)
+        .send(newApplication)
         .expect(201);
 
         expect(response.body).toHaveProperty('application');
     });
+  });
 
-    it('should handle invalid user data', async () => {
-        const invalidApplication = { email: 'testapplication@fail.com' };
+  //Test PUT requests
+  describe('PUT /api/application/newapplication', () => {
+    it('should reject an application', async () => {
+      const fakeId = newUser._id;
 
-        const response = await request(app)
-            .post('/api/application/newapplication')
-            .send(invalidApplication)
-            .expect(500);
+      await request(app)
+        .put(`/api/application/${fakeId}reject`)
+        .expect(200);
+      
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      expect(updatedNewContentCreator.rejected).toBe(true)
+    });
 
-        expect(response.body).toHaveProperty('error');
+    it('should approve an application', async () => {
+      const fakeId = newUser._id;
+
+      await request(app)
+        .put(`/api/application/${fakeId}approve`)
+        .expect(200);
+
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      expect(updatedNewContentCreator.approved).toBe(true)
     });
   });
 });

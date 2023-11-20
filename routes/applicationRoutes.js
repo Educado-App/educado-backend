@@ -34,9 +34,10 @@ router.get('/:id', async (req, res) => {
         const { id } = req.params;
         //Find the user whose id matches the above id, and make sure password isn't a part of the object
         const applicator = await UserModel.findOne({_id: id}).select("-password")
+
         //Find the content creator whose "baseUser" id matches the above id
         const application = await ApplicationModel.findOne({baseUser: id})
-
+    
         //Send a success response, and the relevant data
         res.send({
             success: true,
@@ -99,7 +100,7 @@ router.post('/newapplication', async (req, res) => {
         //Define the new application based on the data from the request body
         const data = req.body;
         //Save the data as part of the MongoDB ApplicationModel 
-        const createdApplication = await ApplicationModel.create(data); // Use create() instead of save() for simplicity
+        const createdApplication = await ApplicationModel.create(data); // Use create() instead of save() for simplicity //OK
 
         //Return successful response
         return res.status(201).json({application: createdApplication});

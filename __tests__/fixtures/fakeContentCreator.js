@@ -1,8 +1,9 @@
-const { encrypt } = require('../../helpers/password');
 const mongoose = require('mongoose');
 
-module.exports = function makeFakeContentCreator(baseUserId = mongoose.Types.ObjectId()) {
+module.exports = function makeFakeContentCreator(baseUserId) {
     return {
+        approved: false,
+        rejected: false,
         baseUser: baseUserId,
     }
 }
