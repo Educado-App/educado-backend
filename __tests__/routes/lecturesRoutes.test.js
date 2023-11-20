@@ -30,7 +30,7 @@ let fakeSection = makeFakeSection();
 let fakeLecture = makeFakeLecture();
 
 
-describe('Create lectures route', () => {
+describe('PUT /lectures/:lectureId', () => {
 
   let db; // Store the database connection
 
@@ -62,7 +62,7 @@ describe('Create lectures route', () => {
 });
 
 
-describe('DELETE: Delete lectures route', () => {
+describe('DELETE /lectures/:lectureId', () => {
 
   let db; // Store the database connection
   let lectureCreate; // Store the lecture created
@@ -106,7 +106,7 @@ describe('DELETE: Delete lectures route', () => {
 });
 
 
-describe('PATCH: Update lectures route', () => {
+describe('PATCH /lectures/:lectureId', () => {
 
   let db; // Store the database connection
 

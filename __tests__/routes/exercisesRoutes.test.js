@@ -30,7 +30,7 @@ let fakeSection = makeFakeSection();
 let fakeExercise = makeFakeExercise();
 
 
-describe('Create exercise route', () => {
+describe('PUT /api/exercises/:sectionId', () => {
 
   let db; // Store the database connection
 
@@ -62,7 +62,7 @@ describe('Create exercise route', () => {
 });
 
 
-describe('PATCH: Update exercise route', () => {
+describe('PATCH /exercises/:sectionId', () => {
 
   let db; // Store the database connection
 
@@ -93,7 +93,7 @@ describe('PATCH: Update exercise route', () => {
 });
 
 
-describe('DELETE: Delete exercise route', () => {
+describe('DELETE /exercises/:sectionId', () => {
 
   let db; // Store the database connection
   let exerciseCreate; // Store the exercise created

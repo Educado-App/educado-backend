@@ -21,7 +21,7 @@ const PORT = 5021; // Choose a port for testing
 const server = app.listen(PORT)
 
 
-describe('Test online response', () => {
+describe('GET /utility/online', () => {
 
     it('Test if online', async () => {
         const response = await request(`http://localhost:${PORT}`)
