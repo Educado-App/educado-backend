@@ -419,7 +419,6 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(pointsGivenForExercise).toEqual([5]);
     expect(isExerciseComplete).toEqual([true]);
   });
-
   it('Fails to add non-existing exerciseId to completed exercises', async () => {
     const nonExistingExerciseId = new mongoose.Types.ObjectId();
   
