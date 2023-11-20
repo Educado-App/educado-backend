@@ -29,7 +29,7 @@ describe('Application Routes', () => {
   beforeEach(async () => {
     await db.collection('users').insertOne(newUser);
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-    newContentCreator = makeFakeContentCreator(user._id);
+    newContentCreator = makeFakeContentCreator(user._id, approved = false, rejected = false);
     await db.collection('content-creators').insertOne(newContentCreator);
     
   });
@@ -46,7 +46,7 @@ describe('Application Routes', () => {
 
   // Test GET request
   describe('GET /api/application/:id', () => {
-    it('should get user data by ID', async () => {
+    it('Should get user data by ID', async () => {
         const fakeId = newUser._id;
         const response = await request(app)
             .get(`/api/application/${fakeId}`)
@@ -59,7 +59,7 @@ describe('Application Routes', () => {
 
   // Test POST request
   describe('POST /api/application/newapplication', () => {
-    it('should create a new application', async () => {
+    it('Should create a new application', async () => {
       const response = await request(app)
         .post('/api/application/newapplication')
         .send(newApplication)
@@ -71,7 +71,7 @@ describe('Application Routes', () => {
 
   //Test PUT requests
   describe('PUT /api/application/newapplication', () => {
-    it('should reject an application', async () => {
+    it('Should reject an application', async () => {
       const fakeId = newUser._id;
 
       await request(app)
@@ -82,7 +82,7 @@ describe('Application Routes', () => {
       expect(updatedNewContentCreator.rejected).toBe(true)
     });
 
-    it('should approve an application', async () => {
+    it('Should approve an application', async () => {
       const fakeId = newUser._id;
 
       await request(app)

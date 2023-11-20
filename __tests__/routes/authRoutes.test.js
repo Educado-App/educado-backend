@@ -3,6 +3,7 @@ const express = require('express');
 const router = require('../../routes/authRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
+const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
 const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
 
 const mongoose = require('mongoose');
@@ -44,6 +45,12 @@ describe('POST /auth/login', () => {
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
+    // Find the newly created fake user's id
+    const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+
+    // Creator a Content Creator entry from the id
+    newContentCreator = makeFakeContentCreator(user._id, approved = true, rejected = false);
+    await db.collection('content-creators').insertOne(newContentCreator);
   });
 
   it('Should find a user mail without differentiating between upper- and lowercase', async () => {
@@ -93,6 +100,63 @@ describe('POST /auth/login', () => {
     expect(response.body.error.code).toBe('E0105');
   });
 
+  it('Returns error if Content Creator is not approved', async () => {
+    const correctCredentials = {
+      email: fakeUser.email,
+      password: 'ABC123456!'
+    };
+
+    // Change the Content Creator data to match test specifications 
+    db.collection('content-creators').findOneAndUpdate({ baseUser: fakeUser._id }, { $set: { approved: false, rejected: false }})
+
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/login')
+      .send(correctCredentials)
+      .expect(403);
+
+    // Verify the response body
+    expect(response.body.error.code).toBe('E1001');
+    
+    // Reset Content Creator fields
+    db.collection('content-creators').findOneAndUpdate({ baseUser: fakeUser._id }, { $set: { approved: true, rejected: false }})
+  });
+
+  it('Returns error if Content Creator is rejected', async () => {
+    const correctCredentials = {
+      email: fakeUser.email,
+      password: 'ABC123456!'
+    };
+
+    // Change the Content Creator data to match test specifications 
+    db.collection('content-creators').findOneAndUpdate({ baseUser: fakeUser._id }, { $set: { approved: false, rejected: true }})
+
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/login')
+      .send(correctCredentials)
+      .expect(403);
+
+    // Verify the response body
+    expect(response.body.error.code).toBe('E1002');
+
+    // Reset Content Creator fields
+    db.collection('content-creators').findOneAndUpdate({ baseUser: fakeUser._id }, { $set: { approved: true, rejected: false }})
+  });
+
+  it('Returns error if password is incorrect', async () => {
+    const incorrectPassword = {
+      email: fakeUser.email,
+      password: 'incorrectPassword'
+    };
+
+    const response = await request(`http://localhost:${PORT}`)
+      .post('/api/auth/login')
+      .send(incorrectPassword)
+      .expect(401);
+
+    // Verify the response body
+    expect(response.body.error.code).toBe('E0105');
+  });
+
   it('Returns token if user is found and password is correct', async () => {
     const correctCredentials = {
       email: fakeUser.email,
@@ -110,7 +174,8 @@ describe('POST /auth/login', () => {
   });
 
   afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+    await db.collection('users').deleteMany({});// Delete all documents in the 'users' collection
+    await db.collection('content-creators').deleteMany({});// Delete all documents in the 'content-creators' collection
   });
 });
 
