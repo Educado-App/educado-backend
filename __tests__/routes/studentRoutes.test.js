@@ -162,8 +162,8 @@ beforeEach(async () => {
 
 });*/
 
-describe('GET /students/:id/subscriptions', () => {
-  it('should get user subscriptions', async () => {
+describe('GET /students/:userId/subscriptions', () => {
+  it('Should get user subscriptions', async () => {
 
     const courseId = '651d3a15cda7d5bd2878dfc7';
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
@@ -189,7 +189,7 @@ describe('GET /students/:id/subscriptions', () => {
 
   });
 
-  it('should handle user not found error', async () => {
+  it('Should handle user not found error', async () => {
 
     // create non existing userId
     const ObjectId = mongoose.Types.ObjectId;
@@ -204,7 +204,7 @@ describe('GET /students/:id/subscriptions', () => {
   });
 
 
-  it('should handle invalid user id', async () => {
+  it('Should handle invalid user id', async () => {
 
     // simulate a request with invalid user id
     const response = await request(`http://localhost:${PORT}`)
@@ -215,7 +215,7 @@ describe('GET /students/:id/subscriptions', () => {
   });
 });
 
-describe('Handles answering exercises', () => { 
+describe('PATCH /api/students/:userId/completed', () => { 
   beforeEach(async () => {
     fakeCourse = makeFakeCourse();
     fakeSection = makeFakeSection();
@@ -329,6 +329,12 @@ describe('Handles answering exercises', () => {
     const completedExerciseIds2 = updatedUser.completedCourses[1].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
     expect(completedExerciseIds2).toEqual([exerciseId2.toString()]);
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(10);
+    expect(totalPointsForSection).toEqual(10);
   });
 
   it('Adds two exerciseIds to completed exercises correctly, with same parentCourse', async () => {
@@ -367,6 +373,12 @@ describe('Handles answering exercises', () => {
     const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     expect(completedExerciseIds[0]).toEqual(exerciseId.toString());
     expect(completedExerciseIds[1]).toEqual(exerciseId2.toString());
+
+    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
+    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
+
+    expect(totalPointsForCourse).toEqual(20);
+    expect(totalPointsForSection).toEqual(20);
   });
 
   it('First adds an exercise as failed, then completes it', async () => {
@@ -402,13 +414,11 @@ describe('Handles answering exercises', () => {
     completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
     pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
     isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
-    
 
     expect(completedExerciseIds).toEqual([exerciseId.toString()]);
     expect(pointsGivenForExercise).toEqual([5]);
     expect(isExerciseComplete).toEqual([true]);
   });
-  
   it('Fails to add non-existing exerciseId to completed exercises', async () => {
     const nonExistingExerciseId = new mongoose.Types.ObjectId();
   
@@ -435,7 +445,7 @@ describe('Handles answering exercises', () => {
   });
 });
 
-describe('Update points and level', () => {
+describe('PATCH /api/students/:userId', () => {
   it('Update points succesfully', async () => {
     const points = 10;
 

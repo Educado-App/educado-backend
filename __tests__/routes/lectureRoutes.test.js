@@ -17,7 +17,7 @@ describe('Lecture Routes', () => {
     let db;
     let newLecture;
 
-    beforeAll(async () =>{
+    beforeAll(async () => {
         db = await connectDb();
 
         const lecture = new LectureModel({
@@ -39,12 +39,16 @@ describe('Lecture Routes', () => {
         await mongoose.connection.close();
     });
 
-    // Test GET /:id
-    it('GET /:id should return a lecture', async () => {
-        const res = await request(app).get(`/${newLecture.insertedId}`);
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('title', 'Test Lecture');
-        expect(res.body).toHaveProperty('description', 'Test Description');
-        expect(res.body).toHaveProperty('parentSection', '6529091fddfe5294668541e2');
+    describe('GET /lectures/:lectureId', () => {
+
+        // Test GET /:id
+        it('Should return a lecture', async () => {
+            const res = await request(app).get(`/${newLecture.insertedId}`);
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('title', 'Test Lecture');
+            expect(res.body).toHaveProperty('description', 'Test Description');
+            expect(res.body).toHaveProperty('parentSection', '6529091fddfe5294668541e2');
+        });
+
     });
 });

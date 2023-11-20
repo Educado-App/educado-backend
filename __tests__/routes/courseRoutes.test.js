@@ -73,9 +73,9 @@ describe('Course Routes', () => {
     await mongoose.connection.close();
   });
 
-  describe('GET /courses/:id', () => {
+  describe('GET /courses/:courseId', () => {
 
-    it('should get a specific course', async () => {
+    it('Should get a specific course', async () => {
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id
 
@@ -87,7 +87,7 @@ describe('Course Routes', () => {
       expect(response.body._id.toString()).toBe(courseId.toString());
     });
 
-    it('should handle course not found error', async () => {
+    it('Should handle course not found error', async () => {
 
       // create non existing courseId
       const ObjectId = mongoose.Types.ObjectId;
@@ -102,7 +102,7 @@ describe('Course Routes', () => {
     });
 
 
-    it('should handle invalid course id', async () => {
+    it('Should handle invalid course id', async () => {
 
       // simulate a request with invalid course id
       const response = await request(`http://localhost:${PORT}`)
@@ -113,8 +113,8 @@ describe('Course Routes', () => {
     });
   });
 
-  describe('GET /courses/:id/sections', () => {
-    it('should get all sections from a course', async () => {
+  describe('GET /courses/:courseId/sections', () => {
+    it('Should get all sections from a course', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -140,7 +140,7 @@ describe('Course Routes', () => {
       expect(response.body).toBeInstanceOf(Array);
     });
 
-    it('should handle course not found error', async () => {
+    it('Should handle course not found error', async () => {
 
       // create non existing courseId
       const ObjectId = mongoose.Types.ObjectId;
@@ -155,7 +155,7 @@ describe('Course Routes', () => {
     });
 
 
-    it('should handle invalid course id', async () => {
+    it('Should handle invalid course id', async () => {
 
       // simulate a request with invalid course id
       const response = await request(`http://localhost:${PORT}`)
@@ -169,7 +169,7 @@ describe('Course Routes', () => {
 
   describe('GET /courses/:courseId/sections/:sectionId', () => {
 
-    it('should get a specific section', async () => {
+    it('Should get a specific section', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -205,7 +205,7 @@ describe('Course Routes', () => {
       expect(response.body).toBeInstanceOf(Object);
     });
 
-    it('should handle course not found error', async () => {
+    it('Should handle course not found error', async () => {
 
       const section = await db.collection('sections').findOne({ title: 'test section' });
       const sectionId = section._id;
@@ -222,7 +222,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0006');
     });
 
-    it('should handle invalid course id', async () => {
+    it('Should handle invalid course id', async () => {
 
       const section = await db.collection('sections').findOne({ title: 'test section' });
       const sectionId = section._id;
@@ -235,7 +235,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0014');
     });
 
-    it('should handle section not found error', async () => {
+    it('Should handle section not found error', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -252,7 +252,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0008');
     });
 
-    it('should handle invalid section id', async () => {
+    it('Should handle invalid section id', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -266,9 +266,9 @@ describe('Course Routes', () => {
     });
   });
 
-  describe('GET /courses/:id/sections, error handling', () => {
+  describe('GET /courses/:courseId/sections, error handling', () => {
 
-    it('should handle course does not contain sections', async () => {
+    it('Should handle course does not contain sections', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -292,7 +292,7 @@ describe('Course Routes', () => {
 
     });
 
-    it('should handle sections not found', async () => {
+    it('Should handle sections not found', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -323,8 +323,8 @@ describe('Course Routes', () => {
     });
   });
 
-  describe('POST /courses/:id/subscribe', () => {
-    it('should subscribe a user to a course', async () => {
+  describe('POST /courses/:courseId/subscribe', () => {
+    it('Should subscribe a user to a course', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -340,7 +340,7 @@ describe('Course Routes', () => {
       expect(response.body).toBeInstanceOf(Object);
       expect(updatedUser.subscriptions.find((element) => element == courseId));
     });
-    it('should handle user not found error when subscribing', async () => {
+    it('Should handle user not found error when subscribing', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -359,7 +359,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0004');
     });
 
-    it('should handle invalid user id when subscribing', async () => {
+    it('Should handle invalid user id when subscribing', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });
       const courseId = course._id;
@@ -373,7 +373,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0014');
     });
 
-    it('should handle course not found error when subscribing', async () => {
+    it('Should handle course not found error when subscribing', async () => {
 
       const user = await db.collection('students').findOne({ baseUser: actualUser._id });
       const userId = user.baseUser;
@@ -391,7 +391,7 @@ describe('Course Routes', () => {
       expect(response.body.error.code).toBe('E0006');
     });
 
-    it('should handle invalid course id when subscribing', async () => {
+    it('Should handle invalid course id when subscribing', async () => {
 
       const user = await db.collection('students').findOne({ baseUser: actualUser._id });
       const userId = user._id;
@@ -429,7 +429,7 @@ describe('Course Routes', () => {
       expect(updatedUser.subscriptions.find((element) => element == courseId));
     });
 
-    it('should handle user already subscribed error', async () => {
+    it('Should handle user already subscribed error', async () => {
       // find a course
       const course = await db.collection('courses').findOne({ title: 'test course' });
 
@@ -451,7 +451,7 @@ describe('Course Routes', () => {
       expect(response2.body.error.code).toBe('E0605');
     });
   });
-  describe('POST /courses/:id/unsubscribe', () => {
+  describe('POST /courses/:courseId/unsubscribe', () => {
     it('Error when unsubscribing to course with no subscriptions', async () => {
       const course = await db.collection('courses').findOne({ title: fakeCourse.title });
       const courseId = course._id;
@@ -473,104 +473,106 @@ describe('Course Routes', () => {
       expect(userNew.subscriptions).toHaveLength(0);
     });
 
+
+    it('Should handle user not found error when unsubscribing', async () => {
+
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // create non existing user id
+      const ObjectId = mongoose.Types.ObjectId;
+      const userId = new ObjectId('5f841c2b1c8cfb2c58b78d66');
+
+      // Simulate a request to unsubscribe with an non existing user id
+      const response = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + courseId + '/unsubscribe')
+        .send({ user_id: userId });
+
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0004');
+    });
+
+    it('Should handle invalid user id when unsubscribing', async () => {
+
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+
+      // Simulate a request to unsubscribe with an invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + courseId + '/unsubscribe')
+        .send({ user_id: 'this-is-an-invalid-userId' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
+    });
+
+    it('Should handle course not found error when unsubscribing', async () => {
+
+      const user = await db.collection('students').findOne({ baseUser: actualUser._id });
+      const userId = user.baseUser;
+
+      // create non existing courseId
+      const ObjectId = mongoose.Types.ObjectId;
+      const courseId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+      // Simulate a request to unsubscribe with an invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + courseId + '/unsubscribe')
+        .send({ user_id: userId });
+
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('E0006');
+    });
+
+    it('Should handle invalid course id when unsubscribing', async () => {
+
+      const user = await db.collection('students').findOne({ baseUser: actualUser._id });
+      const userId = user._id;
+
+      // Simulate a request to unsubscribe with an invalid user id
+      const response = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/this-is-aninvalid-courseId/unsubscribe')
+        .send({ user_id: userId });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('E0014');
+    });
+
+    it('Should decrement the number of subscribers for a course, when unsubscribing', async () => {
+      // find a course and set number of subscription to 3
+      const courseUpdated = await db.collection('courses').findOneAndUpdate(
+        { title: 'test course' },
+        { $set: { numOfSubscriptions: 3 } },
+        { returnDocument: 'after' } // 'after' returns the updated document
+      );
+      const updatedCourse = courseUpdated.value;
+
+      // find a user and add the course to the user's subscriptions
+      const userUpdated = await db.collection('students').findOneAndUpdate(
+        { baseUser: actualUser._id },
+        { $push: { subscriptions: updatedCourse._id } },
+        { returnDocument: 'after' } // 'after' returns the updated document
+      );
+      const updatedUser = userUpdated.value;
+
+      const response = await request(`http://localhost:${PORT}`)
+        .post('/api/courses/' + updatedCourse._id + '/unsubscribe')
+        .send({ user_id: updatedUser.baseUser });
+      // check the post request is successful
+      expect(response.status).toBe(200);
+
+      // check the number of subscribers is decremented
+      const courseNew = await db.collection('courses').findOne({ _id: updatedCourse._id });
+      const userNew = await db.collection('students').findOne({ baseUser: actualUser._id });
+      expect(courseNew.numOfSubscriptions).toBe(2);
+      expect(userNew.subscriptions).toHaveLength(0);
+    });
+
   });
-  it('should handle user not found error when unsubscribing', async () => {
 
-
-    const course = await db.collection('courses').findOne({ title: 'test course' });
-    const courseId = course._id;
-
-    // create non existing user id
-    const ObjectId = mongoose.Types.ObjectId;
-    const userId = new ObjectId('5f841c2b1c8cfb2c58b78d66');
-
-    // Simulate a request to unsubscribe with an non existing user id
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/courses/' + courseId + '/unsubscribe')
-      .send({ user_id: userId });
-
-
-    expect(response.status).toBe(404);
-    expect(response.body.error.code).toBe('E0004');
-  });
-
-  it('should handle invalid user id when unsubscribing', async () => {
-
-    const course = await db.collection('courses').findOne({ title: 'test course' });
-    const courseId = course._id;
-
-    // Simulate a request to unsubscribe with an invalid user id
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/courses/' + courseId + '/unsubscribe')
-      .send({ user_id: 'this-is-an-invalid-userId' });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('E0014');
-  });
-
-  it('should handle course not found error when unsubscribing', async () => {
-
-    const user = await db.collection('students').findOne({ baseUser: actualUser._id });
-    const userId = user.baseUser;
-
-    // create non existing courseId
-    const ObjectId = mongoose.Types.ObjectId;
-    const courseId = new ObjectId('5f841c2b1c8cfb2c58b78d68');
-
-    // Simulate a request to unsubscribe with an invalid user id
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/courses/' + courseId + '/unsubscribe')
-      .send({ user_id: userId });
-
-    expect(response.status).toBe(404);
-    expect(response.body.error.code).toBe('E0006');
-  });
-
-  it('should handle invalid course id when unsubscribing', async () => {
-
-    const user = await db.collection('students').findOne({ baseUser: actualUser._id });
-    const userId = user._id;
-
-    // Simulate a request to unsubscribe with an invalid user id
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/courses/this-is-aninvalid-courseId/unsubscribe')
-      .send({ user_id: userId });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('E0014');
-  });
-
-  it('Decrements number of subscribers for a course, when unsubscribing', async () => {
-    // find a course and set number of subscription to 3
-    const courseUpdated = await db.collection('courses').findOneAndUpdate(
-      { title: 'test course' },
-      { $set: { numOfSubscriptions: 3 } },
-      { returnDocument: 'after' } // 'after' returns the updated document
-    );
-    const updatedCourse = courseUpdated.value;
-
-    // find a user and add the course to the user's subscriptions
-    const userUpdated = await db.collection('students').findOneAndUpdate(
-      { baseUser: actualUser._id },
-      { $push: { subscriptions: updatedCourse._id } },
-      { returnDocument: 'after' } // 'after' returns the updated document
-    );
-    const updatedUser = userUpdated.value;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .post('/api/courses/' + updatedCourse._id + '/unsubscribe')
-      .send({ user_id: updatedUser.baseUser });
-    // check the post request is successful
-    expect(response.status).toBe(200);
-
-    // check the number of subscribers is decremented
-    const courseNew = await db.collection('courses').findOne({ _id: updatedCourse._id });
-    const userNew = await db.collection('students').findOne({ baseUser: actualUser._id });
-    expect(courseNew.numOfSubscriptions).toBe(2);
-    expect(userNew.subscriptions).toHaveLength(0);
-  });
-
-  describe('Get all courses for user route', () => {
+  describe('GET /courses/creator/:userId', () => {
 
     it('Returns courses made by a given user', async () => {
 
@@ -630,7 +632,7 @@ describe('Course Routes', () => {
 
   });
 
-  describe('Get all courses route', () => {
+  describe('GET /courses', () => {
     it('Returns courses', async () => {
       // Send a get request to the courses endpoint
 
@@ -683,7 +685,7 @@ describe('Course Routes', () => {
       expect(result.error).toStrictEqual(errorCodes['E0002']);
     });
 
-    it('returns error 404 if no courses are found', async () => {
+    it('Returns error 404 if no courses are found', async () => {
 
       // delete all courses
       await db.collection('courses').deleteMany({});
@@ -704,7 +706,7 @@ describe('Course Routes', () => {
     });
   });
 
-  describe('PUT: Create Course route', () => {
+  describe('PUT /courses', () => {
 
     it('Creates a course', async () => {
       const token = signAccessToken({ id: fakeUser._id });
@@ -724,7 +726,7 @@ describe('Course Routes', () => {
   });
 
 
-  describe('DELETE: Delete Course route', () => {
+  describe('DELETE /courses/:courseId', () => {
 
     it('Delete the fake course', async () => {
       const token = signAccessToken({ id: fakeUser._id });
@@ -738,7 +740,7 @@ describe('Course Routes', () => {
   });
 
 
-  describe('PATCH: Update course route', () => {
+  describe('PATCH /courses/:courseId', () => {
 
     it('Update the fake course', async () => {
       const token = signAccessToken({ id: fakeUser._id });

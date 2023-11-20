@@ -30,7 +30,7 @@ let fakeCourse = makeFakeCourse();
 let fakeSection = makeFakeSection();
 
 
-describe('Create section route', () => {
+describe('PUT /sections/:sectionId', () => {
 
   let db; // Store the database connection
 
@@ -62,7 +62,7 @@ describe('Create section route', () => {
 });
 
 
-describe('DELETE: Delete Sections route', () => {
+describe('DELETE /sections/:courseId', () => {
 
   let db; // Store the database connection
   let sectionCreate; // Store the section created
@@ -106,7 +106,7 @@ describe('DELETE: Delete Sections route', () => {
 });
 
 
-describe('PATCH: Update sections route', () => {
+describe('PATCH /sections/section', () => {
 
   let db; // Store the database connection
 

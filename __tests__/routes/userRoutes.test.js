@@ -65,9 +65,9 @@ describe('Users Routes', () => {
     await db.collection('users').deleteOne({ _id: actualUser._id });
   });
 
-  describe('Update User Email Route', () => {
+  describe('DELETE /users/:userId', () => {
 
-    it('deletes a user successfully', async () => {
+    it('Deletes a user successfully', async () => {
       // Delete the user using the API
       await request(`http://localhost:${PORT}`)
         .delete(`/api/users/${actualUser._id}`)
@@ -88,7 +88,7 @@ describe('Users Routes', () => {
         .expect(204);
     });*/
 
-    it('updates user email successfully', async () => {
+    it('Updates user email successfully', async () => {
       const newEmail = 'newemail@example.com';
 
       await request(`http://localhost:${PORT}`)
@@ -103,7 +103,7 @@ describe('Users Routes', () => {
       expect(user.email).toBe(newEmail);
     });
 
-    it('Test that emails must be unique when updating', async () => {
+    it('Checks that emails must be unique when updating', async () => {
       const newEmail = fakeUser.email;
 
       const response = await request(`http://localhost:${PORT}`)
@@ -126,7 +126,7 @@ describe('Users Routes', () => {
         .expect(204); // Expecting a 204 No Content response for user not found
     });*/
 
-    it('updates user first name successfully', async () => {
+    it('Updates user first name successfully', async () => {
       const newFirstName = 'newFirstName';
 
       await request(`http://localhost:${PORT}`)
@@ -151,7 +151,7 @@ describe('Users Routes', () => {
         .expect(204);
     });*/
 
-    it('updates user last name successfully', async () => {
+    it('Updates user last name successfully', async () => {
       const newLastName = 'newLastName';
 
       const res = await request(`http://localhost:${PORT}`)
@@ -176,7 +176,7 @@ describe('Users Routes', () => {
         .expect(204);
     });*/
 
-    it('updates user fields successfully', async () => {
+    it('Updates user fields successfully', async () => {
       const newEmail = 'newemail@example.com';
       const newFirstName = 'Jane';
 
@@ -208,7 +208,7 @@ describe('Users Routes', () => {
         .expect(204); // Expecting a 204 No Content response for user not found
     });*/
 
-    it('handles validation errors for email', async () => {
+    it('Handles validation errors for email', async () => {
       const invalidEmail = 'invalidemail'; // Invalid email format
 
       const response = await request(`http://localhost:${PORT}`)
@@ -222,7 +222,7 @@ describe('Users Routes', () => {
       expect(response.body.error.code).toBe('E0206');
     });
 
-    it('handles validation errors for first name', async () => {
+    it('Handles validation errors for first name', async () => {
       const invalidFirstName = 'AASD!==#¤("DSN:_;>:'; // Invalid email format
 
       const response = await request(`http://localhost:${PORT}`)
@@ -237,9 +237,9 @@ describe('Users Routes', () => {
     });
   });
 
-  describe('User PATCH route', () => {
+  describe('PATCH /users/:userId', () => {
 
-    it('should change user credentials', async () => {
+    it('Should change user credentials', async () => {
       const user = await db.collection('users').findOne({ email: fakeUser.email });
 
       const res = await request(`http://localhost:${PORT}`)
@@ -265,7 +265,7 @@ describe('Users Routes', () => {
       });
     });
 
-    it('return error if trying to edit password', async () => {
+    it('Return error if trying to edit password', async () => {
       const user = await db.collection('users').findOne({ email: fakeUser.email });
 
       const res = await request(`http://localhost:${PORT}`)
@@ -277,7 +277,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0803');
     });
 
-    it('return error if there is an attempt to update an illegal field name', async () => {
+    it('Return error if there is an attempt to update an illegal field name', async () => {
       const user = await db.collection('users').findOne({ email: fakeUser.email });
 
       const res = await request(`http://localhost:${PORT}`)
@@ -289,7 +289,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0801');
     });
 
-    it('return succesful updated object with new dateUpdated value ', async () => {
+    it('Return succesful updated object with new dateUpdated value ', async () => {
       // wait 1 second to make sure dateUpdated is not the same
       await new Promise(resolve => setTimeout(resolve, 1000));
       const user = await db.collection('users').findOne({ email: fakeUser.email });
@@ -305,7 +305,7 @@ describe('Users Routes', () => {
       expect(updatedUser.dateUpdated-0).not.toBe(user.dateUpdated-0);
     });
 
-    it('return error if email you try to PATCH is identical', async () => {
+    it('Return error if email you try to PATCH is identical', async () => {
       const user = await db.collection('users').findOne({ email: fakeUser.email });
 
       const res = await request(`http://localhost:${PORT}`)
@@ -317,7 +317,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0201');
     });
 
-    it('return error if firstName you try to PATCH is identical', async () => {
+    it('Return error if firstName you try to PATCH is identical', async () => {
       const user = await db.collection('users').findOne({ email: fakeUser.email });
 
       const res = await request(`http://localhost:${PORT}`)
@@ -330,7 +330,9 @@ describe('Users Routes', () => {
     });
   });
 
-  describe('DELETE /api/users/:id', () => {
+  /** Not needed after refacoring
+   * Function already exist
+  describe('DELETE /api/users/:userId', () => {
 
     it('should delete a user profile', async () => {
 
@@ -379,8 +381,10 @@ describe('Users Routes', () => {
     });
   });
 
-  describe('GET /api/users/:id/password', () => {
-    it('should change password', async () => {
+  **/
+
+  describe('PATCH /api/users/:userId/password', () => {
+    it('Should change password', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + actualUser._id + '/password')
         .set('token', token) // Include the token in the request headers
@@ -391,7 +395,7 @@ describe('Users Routes', () => {
       expect(updatedUser.password).not.toBe(actualUser.password);
     });
 
-    it('should return error if old password is wrong', async () => {
+    it('Should return error if old password is wrong', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + actualUser._id + '/password')
         .set('token', token) // Include the token in the request headers
@@ -401,7 +405,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0806');
     });
 
-    it('should return error if new password is invalid', async () => {
+    it('Should return error if new password is invalid', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + actualUser._id + '/password')
         .set('token', token) // Include the token in the request headers
@@ -411,7 +415,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0213');
     });
 
-    it('should return error if new password is missing', async () => {
+    it('Should return error if new password is missing', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + actualUser._id + '/password')
         .set('token', token) // Include the token in the request headers
@@ -421,7 +425,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0805');
     });
 
-    it('should return error if id is invalid', async () => {
+    it('Should return error if id is invalid', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/invalidId/password')
         .set('token', token) // Include the token in the request headers
@@ -431,7 +435,7 @@ describe('Users Routes', () => {
       expect(res.body.error.code).toBe('E0014');
     });
 
-    it('should return error if no user is found with the id', async () => {
+    it('Should return error if no user is found with the id', async () => {
       const res = await request(`http://localhost:${PORT}`)
         .patch('/api/users/' + new mongoose.Types.ObjectId() + '/password')
         .set('token', token) // Include the token in the request headers
