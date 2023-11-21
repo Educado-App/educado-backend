@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 // Class description
 const ApplicationSchema = new Schema({
-  baseUser: String,
+  baseUser: { type: Schema.Types.ObjectId, ref: 'Users' },
   motivation: String,
 
   academicLevel: String,

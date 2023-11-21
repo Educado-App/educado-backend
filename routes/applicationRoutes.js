@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
             
     } catch (error) {
         //If anything unexpected happens, throw error
-        return res.status(500).json({ 'error': errorCodes['E0000'] });
+        return res.status(404).json({ 'error': errorCodes['E0004'] }); //User not found
     }
 });
 
@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
         
     } catch(error) {
         //If anything unexpected happens, throw error
-        return res.status(500).json({ 'error': errorCodes['E0000'] });
+        return res.status(404).json({ 'error': errorCodes['E1005'] }); //Could not get Content Creator application
     }
 });
 
@@ -69,7 +69,7 @@ router.put('/:id?approve', async (req, res) => {
 
     } catch(error) {
         //If anything unexpected happens, throw error
-        return res.status(500).json({ 'error': errorCodes['E0000'] });
+        return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
     }
 });
 
@@ -90,7 +90,7 @@ router.put('/:id?reject', async (req, res) => {
 
     } catch(error) {
         //If anything unexpected happens, throw error
-        return res.status(500).json({ 'error': errorCodes['E0000'] });
+        return res.status(400).json({ 'error': errorCodes['E1004'] }); //Could not reject Content Creator
     }
 });
 
@@ -107,7 +107,7 @@ router.post('/newapplication', async (req, res) => {
     } catch (error) {
         console.error(error);
         console.error('Error in POST /newapplication route:', error);
-        return res.status(500).json({ 'error': errorCodes['E0000'] });
+        return res.status(400).json({ 'error': errorCodes['E1006'] }); //Could not upload application
     }
 });
 
