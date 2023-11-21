@@ -1,216 +1,157 @@
 const router = require("express").Router();
 const multer = require("multer");
-const { Storage } = require("@google-cloud/storage");
-const fs = require("fs");
+const axios = require("axios");
+const FormData = require('form-data');
+const { PassThrough } = require('stream');
 
-const dotenv = require("dotenv");
+//Get serviceUrl from environment variable
+const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
+//const serviceUrl = "http://localhost:8080/api/v1";
 
-const path = require("path");
 
-// Models
-const { CourseModel } = require("../models/Courses");
-const { ComponentModel } = require("../models/Components");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-dotenv.config({ path: "./config/.env" });
-
-const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-// Creates a client
-
-// New GCP Bucket Instance
-const storage = new Storage({
-  projectId: credentials.project_id,
-  keyFilename: credentials,
-});
-
-// Constant variables
-const bucketName = "educado-bucket";
-const dir = "./_temp_bucketFiles";
-
-// New Multer Instance - for handling file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // no larger than 5mb
-  },
-});
-
-// Get all content from bucket - filename, type, etc.
-router.get("/", async (req, res) => {
-  try {
-    const [files] = await storage.bucket(bucketName).getFiles();
-
-    const fileNames = files.map((file) => file.name);
-    const fileTypes = files.map((file) => file.metadata.contentType);
-    const fileSizes = files.map((file) => file.metadata.size);
-
-    const fileData = {
-      fileNames: fileNames,
-      fileTypes: fileTypes,
-      fileSizes: fileSizes,
-    };
-
-    res.status(200).send(fileData);
-  } catch (err) {
-    res.status(400).send(`Error: ${err.message}`);
-  }
-});
-
-// Get image from GCP bucket
-router.get("/:fileName", async (req, res) => {
-  const fileName = req.params.fileName;
-  if (!fileName) {
-    res
-      .status(400)
-      .send("No file name provided. Use this format: /:fileName. For example: /image.jpg");
-    return;
-  }
-
-  try {
-    const options = { destination: `${dir}/${fileName}` };
-
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-
-    // Clear directory synchronously
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-      fs.unlinkSync(`${dir}/${file}`);
-    }
-
-    // Download file
-    await storage.bucket(bucketName).file(fileName).download(options);
-
-    // Read and send file
-    const fileContents = fs.readFileSync(`${dir}/${fileName}`);
-    const base64 = fileContents.toString("base64");
-    res.status(200).send(base64);
-  } catch (err) {
-    res.status(400).send(`Error: ${err.message}`);
-  }
-});
-
-//VIDEO STREAMING TEAM SHOULD BE USED FOR STREAMING VIDEOS
-router.get("/stream/:fileName", async (req, res) => {
-  //download video from bucket
-
-  const { fileName } = req.params;
-
-  if (!fileName) {
-    res
-      .status(400)
-      .send("No file name provided. Use this format: /stream/fileName");
-    return;
-  }
-
-  try {
-    //Create dir if it doesn't exist
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
-    
-    const options = { destination: `${dir}/${fileName}` };
-
-    const file = await storage
-      .bucket(bucketName)
-      .file(fileName)
-      .download(options);
-    //if file is not found
-
-    const videoPath = path.join(dir, fileName);
-    const stat = fs.statSync(videoPath);
-    const fileSize = stat.size;
-    const range = req.headers.range;
-
-    if (range) {  
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      const chunksize = end - start + 1;
-      const file = fs.createReadStream(videoPath, { start, end });
-      const head = {
-        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": chunksize,
-        "Content-Type": "video/mp4",
-      };
-      res.writeHead(206, head);
-      file.pipe(res);
+// Get list of all files in bucket
+router.get("/", (req, res) => {
+  //Forward to service api
+  axios.get(serviceUrl + "/bucket/").then((response) => {
+    res.send(response.data);
+  }).catch((error) => {
+    if (error.response && error.response.data) {
+      // Forward the status code from the Axios error if available
+      res.status(error.response.status || 500).send(error.response.data);
     } else {
-      const head = {
-        "Content-Length": fileSize,
-        "Content-Type": "video/mp4",
-      };
-      res.writeHead(200, head);
-      fs.createReadStream(videoPath).pipe(res);
+      // Handle cases where the error does not have a response part (like network errors)
+      res.status(500).send({ message: "An error occurred during fecthing." });
     }
-  } catch (err) {
-    res.status(404).send(`Error: ${err.message}`);
+  });
+});
+
+// Get file from bucket
+router.get("/:filename", (req, res) => {
+  //Forward to service api
+  axios.get(serviceUrl + "/bucket/" + req.params.filename).then((response) => {
+    res.send(response.data);
+  }).catch((error) => {
+    if (error.response && error.response.data) {
+      // Forward the status code from the Axios error if available
+      res.status(error.response.status || 500).send(error.response.data);
+    } else {
+      // Handle cases where the error does not have a response part (like network errors)
+      res.status(500).send({ message: "An error occurred during fetching." });
+    }
+  });
+});
+
+// Delete file from bucket
+router.delete("/:filename", (req, res) => {
+  //Forward to service api
+  axios.delete(serviceUrl + "/bucket/" + req.params.filename).then((response) => {
+    res.send(response.data);
+  }).catch((error) => {
+    if (error.response && error.response.data) {
+      // Forward the status code from the Axios error if available
+      res.status(error.response.status || 500).send(error.response.data);
+    } else {
+      // Handle cases where the error does not have a response part (like network errors)
+      res.status(500).send({ message: "An error occurred during deletion." });
+    }
+  });
+});
+
+// Upload file to bucket
+router.post("/", upload.single("file"), (req, res) => {
+  const form = new FormData();
+
+  // Add file and filename to form
+  form.append('file', req.file.buffer, {
+    filename: req.file.originalname,
+    contentType: req.file.mimetype
+  });
+  form.append('fileName', req.body.fileName);
+
+  // Forward to service api
+  axios.post(serviceUrl + '/bucket/', form, { headers: form.getHeaders() })
+    .then(response => {
+      res.send(response.data);
+    })
+    .catch(error => {
+      if (error.response && error.response.data) {
+        // Forward the status code from the Axios error if available
+        res.status(error.response.status || 500).send(error.response.data);
+      } else {
+        // Handle cases where the error does not have a response part (like network errors)
+        res.status(500).send({ message: "An error occurred during upload." });
+      }
+    });
+});
+
+
+
+axios.interceptors.response.use(response => {
+  // This will process successful responses (within 2xx status codes)
+  return response;
+}, error => {
+  // Handle error responses
+  if (error.response && error.response.data && typeof error.response.data.on === 'function') {
+    return new Promise((resolve, reject) => {
+      let errorData = '';
+
+      error.response.data.on('data', (chunk) => {
+        errorData += chunk;
+      });
+
+      error.response.data.on('end', () => {
+        // Once the entire error message is read from the stream, update the error object
+        error.response.data = errorData;
+        reject(error);
+      });
+    });
+  } else {
+    // Pass the original error through if the response data is not a stream
+    return Promise.reject(error);
   }
 });
 
-//Function to sanitize file name to prevent path traversal attacks
-function sanitizeFileName(fileName) {
-  return fileName.replace(/\.\./g, '').replace(/[^a-zA-Z0-9_.-]/g, '_');
-}
-
-// Upload file to GCP bucket
-router.post("/upload", upload.single("file"), async (req, res) => {
-  const multerFile = req.file;
-  const fileName = sanitizeFileName(req.body.fileName);
-
-
-  if (!multerFile) {
-    res.status(400).send("No file uploaded.");
-    return;
-  }
-
-  // Validate MIME type
-  const validImageMimeTypes = [
-    "image/jpeg", "image/png", "video/mp4", 
-  ];
-  if (!validImageMimeTypes.includes(multerFile.mimetype)) {
-    res.status(400).send("Invalid file type. Please upload an image.");
-    return;
-  }
-
-  const buffer = req.file.buffer;
-
-  //upload to bucket
-  uploadFile().catch(console.error);
-
-  async function uploadFile() {
-    try {
-      await storage
-        .bucket(bucketName)
-        .file(fileName)
-        .save(buffer, {
-          metadata: {
-            contentType: multerFile.mimetype,
-          },
-        });
-      res.status(200).send(`${fileName} uploaded to bucket ${bucketName}`);
-    } 
-    catch (err) {
-      console.error(err);
-      res.status(500).send(`Error: ${err.message}`);
-    }
-  }
-});
-
-router.delete("/:fileName", async (req, res) => {
+// Stream file from bucket
+router.get("/stream/:filename", async (req, res) => {
   try {
-    const fileName = req.params.fileName;
+      // Forward to Go service stream handler
+      const streamUrl = serviceUrl + "/stream/" + req.params.filename;
 
-    // Delete the file from the bucket
-    await storage.bucket(bucketName).file(fileName).delete();
+      // Make a GET request to the Go service
+      const response = await axios({
+          method: 'get',
+          url: streamUrl,
+          responseType: 'stream'
+      });
 
-    res.status(200).send(`${fileName} deleted from bucket ${bucketName}`);
-  } catch (err) {
+      // Check for errors from the Go service
+      if (response.status !== 200) {
+          res.status(response.status).send(response.data);
+          return;
+      }
 
-    res.status(404).send(`Error: ${err.message}`);
+      // Set the headers from the Go service response
+      res.set(response.headers);
+
+      // Pipe the response stream back to the client
+      const passThrough = new PassThrough();
+      response.data.pipe(passThrough);
+      passThrough.pipe(res);
+
+      // Handle any errors during streaming
+      passThrough.on('error', (error) => {
+          console.error('Error during streaming:', error);
+          res.status(500).send("Error during streaming");
+      });
+  } catch (error) {
+      console.error('Error in request to Go service:', error.message);
+      // Use the error response data (if available) when sending the error to the client
+      res.status(500).send(error.response ? error.response.data : "Error in request to Go service");
   }
 });
+
 
 module.exports = router;
