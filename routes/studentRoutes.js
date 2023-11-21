@@ -38,6 +38,26 @@ router.patch('/:id', requireLogin, async (req, res) => {
   return res.status(200).send(updatedUser);
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] });
+    }
+
+    const id = mongoose.Types.ObjectId(req.params.id);
+
+    const student = await StudentModel.findOne({ baseUser: id });
+
+    if (!student) {
+      return res.status(404).send({ error: errorCodes['E0004'] });
+    }
+
+    return res.status(200).send(student);
+  } catch (error) {
+    return res.status(500).send({ error: errorCodes['E0003'] });
+  }
+});
+
 /** SUBSCRIPTIONS **/
 
 // Get users subscriptions
