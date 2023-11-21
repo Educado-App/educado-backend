@@ -30,7 +30,6 @@ router.post('/login', async (req, res) => {
   try {
     // Searching for a single user in the database, with the email provided in the request body. 
     const user = await UserModel.findOne({ email: { $regex: req.body.email, $options: 'i' } });
-    const studentProfile = await StudentModel.findOne({ baseUser: user._id });
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
       // Invalid email (email not found)
@@ -40,6 +39,7 @@ router.post('/login', async (req, res) => {
 
       result = compare(req.body.password, user.password);
     }
+    const studentProfile = await StudentModel.findOne({ baseUser: user._id });
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
