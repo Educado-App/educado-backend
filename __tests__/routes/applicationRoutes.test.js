@@ -17,7 +17,7 @@ const server = app.listen(PORT, () => {
 
 //mock user
 const newUser = makeFakeUser();
-const newApplication = makeFakeApplication();
+
 
 describe('Application Routes', () => {
   let db; // Store the database connection
@@ -37,6 +37,7 @@ describe('Application Routes', () => {
   afterEach(async () => {
     await db.collection('users').deleteMany({});
     await db.collection('content-creators').deleteMany({});
+    await db.collection('applications').deleteMany({});
   });
 
   afterAll(async () => {
@@ -60,6 +61,8 @@ describe('Application Routes', () => {
   // Test POST request
   describe('POST /api/application/newapplication', () => {
     it('Should create a new application', async () => {
+
+      const newApplication = makeFakeApplication(newUser._id);
       const response = await request(app)
         .post('/api/application/newapplication')
         .send(newApplication)

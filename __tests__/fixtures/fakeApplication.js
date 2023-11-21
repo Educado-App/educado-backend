@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-module.exports = function makeFakeApplication(baseUser = "123456789123456") {
+module.exports = function makeFakeApplication(baseUser) {
     return {
         baseUser: baseUser,
         motivation: "My Motivation",

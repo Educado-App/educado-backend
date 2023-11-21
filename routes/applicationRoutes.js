@@ -99,14 +99,17 @@ router.post('/newapplication', async (req, res) => {
     try {
         //Define the new application based on the data from the request body
         const data = req.body;
-        //Save the data as part of the MongoDB ApplicationModel 
-        const createdApplication = await ApplicationModel.create(data); // Use create() instead of save() for simplicity //OK
+        const applicator = await UserModel.findOne({_id: req.body.baseUser})
 
+        //Save the data as part of the MongoDB ApplicationModel 
+        const application = ApplicationModel(data);
+        const createdApplication = await application.save({baseUser: applicator._id});
+        
+        
         //Return successful response
         return res.status(201).json({application: createdApplication});
     } catch (error) {
-        console.error(error);
-        console.error('Error in POST /newapplication route:', error);
+        
         return res.status(400).json({ 'error': errorCodes['E1006'] }); //Could not upload application
     }
 });
