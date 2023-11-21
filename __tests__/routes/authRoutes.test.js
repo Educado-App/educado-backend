@@ -4,6 +4,7 @@ const router = require('../../routes/authRoutes'); // Import your router file he
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
+const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
 
 const mongoose = require('mongoose');
@@ -35,6 +36,7 @@ const PORT = 5020; // Choose a port for testing
 const server = app.listen(PORT);
 
 const fakeUser = makeFakeUser();
+const fakeStudent = makeFakeStudent(fakeUser._id);
 let db; // Store the database connection
 beforeAll(async () => {
   db = await connectDb(); // Connect to the database
@@ -45,12 +47,17 @@ describe('POST /auth/login', () => {
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
-    // Find the newly created fake user's id
+
+    // Find the newly created fake user to use their id
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
 
     // Creator a Content Creator entry from the id
     newContentCreator = makeFakeContentCreator(user._id, approved = true, rejected = false);
     await db.collection('content-creators').insertOne(newContentCreator);
+   
+    //Insert fake student into the database
+    await db.collection('students').insertOne(fakeStudent);
+
   });
 
   it('Should find a user mail without differentiating between upper- and lowercase', async () => {
@@ -64,7 +71,6 @@ describe('POST /auth/login', () => {
       .post('/api/auth/login')
       .send(uppercaseMail).
       expect(202);
-
       // Verify the response body
       expect(response.body.userInfo.email).toBe('fake@gmail.com');
   });
