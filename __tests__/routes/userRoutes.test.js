@@ -330,59 +330,6 @@ describe('Users Routes', () => {
     });
   });
 
-  /** Not needed after refacoring
-   * Function already exist
-  describe('DELETE /api/users/:userId', () => {
-
-    it('should delete a user profile', async () => {
-
-      const creator = await db.collection('users').findOne({
-        email: actualUser.email
-      });
-
-      const creatorId = creator._id
-
-      // Perform the DELETE request
-      const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/${creatorId}`);
-
-      // Assert the response
-      expect(response.status).toBe(200);
-      expect(response.body).toBeDefined();
-
-      // Verify that the creator is deleted from the database
-
-      const deletedCreator = await db.collection('content-creators').findOne({
-        _id: creatorId
-      });
-      expect(deletedCreator).toBeNull();
-    });
-
-    it('should handle an invalid ID', async () => {
-      // Perform a DELETE request with an invalid ID
-      const response = await request(`http://localhost:${PORT}`)
-        .delete('/api/users/this-is-an-invalid-creatorId');
-
-      // Assert the response
-      expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('E0014');
-    });
-
-    it('should handle a non-existing user', async () => {
-      const ObjectId = mongoose.Types.ObjectId;
-      const non_existing_id = 'f19a9420d1ce3a2f9a5f3a2f';
-
-      // Perform the DELETE request
-      const response = await request(`http://localhost:${PORT}`)
-        .delete('/api/users/' + non_existing_id);
-
-      // Assert the response
-      expect(response.status).toBe(204);
-    });
-  });
-
-  **/
-
   describe('PATCH /api/users/:userId/password', () => {
     it('Should change password', async () => {
       const res = await request(`http://localhost:${PORT}`)
@@ -444,8 +391,36 @@ describe('Users Routes', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe('E0004');
     });
-  });
+	});
 
+	describe('GET /api/users/:userId', () => {
+		it('Should return a user with the given id', async () => {
+			const res = await request(`http://localhost:${PORT}`)
+				.get('/api/users/' + actualUser._id)
+				.set('token', token) // Include the token in the request headers
+				.expect(200);
+
+			expect(res.body).toMatchObject({
+				_id: actualUser._id.toString(),
+				firstName: actualUser.firstName,
+				lastName: actualUser.lastName,
+				email: actualUser.email,
+				joinedAt: actualUser.joinedAt.toISOString(),
+				resetAttempts: actualUser.resetAttempts,
+				dateUpdated: actualUser.dateUpdated.toISOString(),
+			});
+		});
+
+		it('Should return error if id is invalid', async () => {
+			const res = await request(`http://localhost:${PORT}`)
+				.get('/api/users/invalidId')
+				.set('token', token) // Include the token in the request headers
+				.expect(400);
+
+			expect(res.body.error.code).toBe('E0014');
+		});
+
+	});
 
   afterAll(async () => {
     await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
