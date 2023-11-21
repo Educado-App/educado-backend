@@ -233,7 +233,7 @@ describe('Handles answering exercises', () => {
     // Add the connection between the course, section, and exercise
     fakeCourse.sections.push(fakeSection._id);
 
-    fakeSection.exercises.push(fakeExercise._id);
+    fakeSection.components.push(fakeExercise._id);
     fakeSection.parentCourse = fakeCourse._id;
 
     fakeExercise.parentSection = fakeSection._id;
@@ -297,7 +297,7 @@ describe('Handles answering exercises', () => {
     // Add the connection between the course, section, and exercise
     fakeCourse2.sections.push(fakeSection2._id);
 
-    fakeSection2.exercises.push(fakeExercise2._id);
+    fakeSection2.components.push(fakeExercise2._id);
     fakeSection2.parentCourse = fakeCourse2._id;
 
     fakeExercise2.parentSection = fakeSection2._id;
@@ -345,7 +345,7 @@ describe('Handles answering exercises', () => {
     await db.collection('exercises').insertOne(fakeExercise2);
 
     // Add the connection between the course, section, and exercise
-    fakeSection.exercises.push(fakeExercise2._id);
+    fakeSection.components.push(fakeExercise2._id);
     fakeExercise2.parentSection = fakeSection._id;
 
     // Update course, section and exericse in the database
@@ -383,7 +383,7 @@ describe('Handles answering exercises', () => {
 
   it('First adds an exercise as failed, then completes it', async () => {
     const exerciseId = fakeExercise._id; // Replace this with an actual exercise ID from your database
-
+    console.log(exerciseId);
     await request(`http://localhost:${PORT}`)
       .patch('/api/students/' + userId + '/completed')
       .set('token', token) // Include the token in the request headers
@@ -430,7 +430,7 @@ describe('Handles answering exercises', () => {
       .send({ exerciseId: nonExistingExerciseId })
       .expect(404);
   
-      expect(response.body.error.code).toBe('E0012');
+      expect(response.body.error.code).toBe('E1104');
   });
   
   it('Fails to add exerciseId to completed exercises for non-existing user', async () => {

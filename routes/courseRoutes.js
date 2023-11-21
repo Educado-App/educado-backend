@@ -316,8 +316,8 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       estimatedHours: course.estimatedHours,
       published: course.published,
 	    status: course.status,
-      coverImg: course._id + "_0",
-	    dateUpdated: Date.now()
+      coverImg: course.i,
+	    dateUpdated: course._id+"_c"
     },
     function (err, docs) {
       if (err) {
