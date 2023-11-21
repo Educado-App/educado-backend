@@ -3,6 +3,7 @@ const express = require('express');
 const router = require('../../routes/authRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
+const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
 
 const mongoose = require('mongoose');
@@ -34,19 +35,21 @@ const PORT = 5020; // Choose a port for testing
 const server = app.listen(PORT);
 
 const fakeUser = makeFakeUser();
+const fakeStudent = makeFakeStudent(fakeUser._id);
 let db; // Store the database connection
 beforeAll(async () => {
   db = await connectDb(); // Connect to the database
 });
 
-describe('Login User route', () => {
+describe('POST /auth/login', () => {
 
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
+    await db.collection('students').insertOne(fakeStudent);
   });
 
-  it('should find a user mail without differentiating between upper- and lowercase', async () => {
+  it('Should find a user mail without differentiating between upper- and lowercase', async () => {
 
     const uppercaseMail = {
       email: 'Fake@gmail.com',
@@ -57,7 +60,6 @@ describe('Login User route', () => {
       .post('/api/auth/login')
       .send(uppercaseMail).
       expect(202);
-
       // Verify the response body
       expect(response.body.userInfo.email).toBe('fake@gmail.com');
   });
@@ -114,7 +116,7 @@ describe('Login User route', () => {
   });
 });
 
-describe('Reset password request route', () => {
+describe('POST /auth/reset-password-request', () => {
 
   beforeAll(async () => {
     // Insert the fake user into the database
@@ -166,7 +168,7 @@ describe('Reset password request route', () => {
     expect(res.body.error.code).toBe('E0406');
   });
 
-  it('clears reset password attempts after expiration', async () => {
+  it('Clears reset password attempts after expiration', async () => {
     const newFakeUser = makeFakeUser('user@test.com', [new Date() - 1000 * 60 * 5, new Date(), new Date()]);
     // Set reset password attempts to have 3 attempts with one being 5 minutes ago
     await db.collection('users').insertOne(newFakeUser);

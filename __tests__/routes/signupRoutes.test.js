@@ -19,7 +19,7 @@ let fakeUser = makeFakeUser();
 
 
 
-describe('Signup User route', () => {
+describe('POST auth/signup', () => {
 
 	let db; // Store the database connection
 
