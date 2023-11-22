@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { UserModel } = require('../models/Users'); // Import User model
 const { ContentCreatorModel } = require('../models/ContentCreators'); // Import Content Creator model
+const { InstitutionModel } = require('../models/Institutions'); //Import Institution model 
 const { StudentModel } = require('../models/Students'); // Import Student model
 
 const { makeExpressCallback } = require('../helpers/express');
@@ -105,15 +106,30 @@ router.post('/signup', async (req, res) => {
     const baseUser = UserModel(form);
     const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
     const studentProfile = StudentModel({ baseUser: baseUser._id });
+    
+
+    // Get user's email domain to find out whether or not they are a part of an onboarded institution
+    const emailDomain = baseUser.email.substring(baseUser.email.indexOf("@"));
+    const isOnboarded = await InstitutionModel.findOne({domain: emailDomain});
+    const isOnboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
+
 
     const createdBaseUser = await baseUser.save();  // Save user
-    const createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+    let createdContentCreator = await contentCreatorProfile.save() // Save content creator
     const createdStudent = await studentProfile.save(); // Save student
+
+    // If the email is under either of the two insttutions' domains, the content creator will automatically be approved
+    if (isOnboarded || isOnboardedSecondary){
+      await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
+      createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
+      
+    }
 
     res.status(201).send({
       baseUser: createdBaseUser,
       contentCreatorProfile: createdContentCreator,
-      studentProfile: createdStudent
+      studentProfile: createdStudent,
+      institution: isOnboarded,
     });
 
   } catch (error) {
