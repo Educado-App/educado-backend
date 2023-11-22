@@ -4,9 +4,178 @@ const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
 const { ContentCreatorModel } = require('../models/ContentCreators');
+const { ContentCreator } = require('../models/ContentCreatorApplication');
+const { ProfileModel } = require('../models/Profile');
+const { ProfileEducationModel } = require('../models/ProfileEducation');
+const { ProfileExperienceModel } = require('../models/ProfileExperience');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
+
+// Define a route for updating user profile data
+router.put('/updateProfile', async (req, res) => {
+  const {
+    userID,
+    userBio,
+    userLinkedInLink,
+    userName,
+    userEmail,
+    userPhoto
+  } = req.body;
+
+  if (!req.body.userEmail || !req.body.userID) {
+    return res.status(400).json({ error: errorCodes['E0202'] }); //Password or email is missing
+  }
+
+  try {
+    const user = await ProfileModel.findOne({ userID });
+    if (!user) {
+      const newProfile = new ProfileModel({
+        userID,
+        userPhoto: userPhoto,
+        userBio,
+        userLinkedInLink,
+        userName,
+        userEmail,
+      });
+
+      await newProfile.save();
+      return res.status(200).json({ message: 'Profile created successfully', user: newProfile });
+    }
+    const updatedData = {
+      userID,
+      userPhoto: userPhoto, // Use the existing photo if not provided in the request
+      userBio,
+      userLinkedInLink,
+      userName,
+      userEmail,
+    };
+
+    const updatedProfile = await ProfileModel.findOneAndUpdate(
+      { userID },
+      updatedData,
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      return res.status(404).json({ message: 'User profile not found' });
+    }
+
+    return res.status(200).json(updatedProfile);
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  } 
+});
+
+router.get('/fetch/:userID', async (req,res) => {
+  const {userID}=req.params; 
+  try {
+    const profile = await ProfileModel.findOne({userID});
+    if(profile)
+    {
+      res.status(200).json(profile);
+    }  
+    else{
+      res.status(404).json('user not found');
+    }
+  } catch (error) {
+    res.status(400).send('User Profile didnot exist!');
+  } 
+})
+
+router.get('/fetchuser/:email', async (req,res) =>{
+  const {email} = req.params; 
+  try {
+  const user = await ContentCreator.findOne({email});
+
+  if(user)
+  {
+    res.status(200).json(user);
+  }  
+  else{
+    res.status(404).json('user not found');
+  }
+} catch (error) {
+  res.status(400).send('User Profile didnot exist!');
+} 
+})
+
+// Dynamic form Academic experience CRUD
+
+router.post('/addEducation', async (req,res)=>{
+  const {userID, status, institution, course, educationLevel, startDate, endDate} = req.body;
+  try {
+    const newEntry = await ProfileEducationModel({userID, status, institution, course, educationLevel, startDate, endDate})
+    newEntry.save();
+    res.status(200).json(newEntry)
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
+})
+router.get('/getEducation', async(req,res)=>{
+  const {userID} = req.query;
+  try {
+  const data = await ProfileEducationModel.find({userID:userID});
+  res.status(200).json(data)
+} catch (err) {
+  res.status(500).send(err.message)
+}
+})
+
+ router.delete('/deleteEducation', async (req,res)=>{
+  const  {_id} = req.query;
+  
+  try { 
+
+    if(!_id){
+      res.status(404).send('_id is required')
+    }
+
+  const deleteEntry = await ProfileEducationModel.deleteOne({_id:_id});
+  res.status(200).send('Entry Deleted')
+
+} catch (err) {
+  res.status(500).send(err.message)
+} 
+ })
+// Dynamic form professional experience CRUD
+
+router.post('/addExperience', async (req,res)=>{
+  const {userID, company, jobTitle, checkBool, description, startDate, endDate} = req.body;
+  try {
+    const newEntry = await ProfileExperienceModel({userID, company, jobTitle, checkBool, description, startDate, endDate})
+    newEntry.save();
+    res.status(200).json(newEntry)
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
+})
+
+router.get('/getExperience', async(req,res)=>{
+  const {userID} = req.query;
+  try {
+  const data = await ProfileExperienceModel.find({userID:userID});
+  res.status(200).json(data)
+} catch (err) {
+  res.status(500).send(err.message)
+}
+})
+router.delete('/deleteExperience', async (req, res) => {
+  const  {_id} = req.query;
+  try {
+    
+    if(!_id){
+      res.status(404).send('_id is required')
+    }
+
+    const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
+    res.status(200).send('Entry Deleted')
+
+  } catch (err) {
+    res.status(500).send(err.message)
+  } 
+});
+
 
 router.delete('/:id', requireLogin, async (req, res) => {
   try {
