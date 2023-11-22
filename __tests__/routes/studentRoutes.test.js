@@ -525,6 +525,107 @@ describe('PATCH /api/students/:userId', () => {
   });
 });
 
+describe('Routes for leaderboard', () => {
+  beforeEach(async () => {
+    fakeStudent.completedCourses = [
+      {
+        courseId: fakeCourse._id,
+        totalPoints: 0,
+        isComplete: true,
+        completionDate: new Date(),
+        completedSections: [
+          {
+            sectionId: fakeSection._id,
+            totalPoints: 0,
+            isComplete: true,
+            completionDate: new Date(),
+            completedExercises: [
+              {
+                exerciseId: fakeExercise._id,
+                isComplete: true,
+                completionDate: new Date(),
+                pointsGiven: 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+
+    // Create a baseUser as the leaderboard also fetches the first- and last name of the user
+    const fakeUser = {
+      _id: mongoose.Types.ObjectId(fakeStudent.baseUser),
+      firstName: 'John',
+      lastName: 'Doe',
+    };
+
+    await db.collection('students').updateOne({ baseUser: fakeStudent.baseUser }, { $set: fakeStudent });
+    await db.collection('users').insertOne(fakeUser)
+  });
+
+  afterEach(async () => {
+    // Remove the user from the database after each test
+    await db.collection('students').deleteOne({ baseUser: userId });
+    await db.collection('users').deleteOne({ _id: userId });
+  });
+
+  it('Gets the leaderboard for all time', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'all'
+      })
+      .expect(200);
+
+    expect(response.body[0].firstName).toBe("John");  
+    expect(response.body[0].lastName).toBe("Doe");  
+  });
+
+  it('Gets the leaderboard for all month', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'month'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Gets the leaderboard for all week', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'week'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Gets the leaderboard for all day', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'day'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Return error code E0015 with illegal time interval', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'Illegal time interval'
+      })
+      .expect(500);
+
+    expect(response.body.error.code).toBe('E0015');
+  });
+});
+
 afterEach(async () => {
   await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 });
