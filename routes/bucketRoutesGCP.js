@@ -143,11 +143,9 @@ router.get("/stream/:filename", async (req, res) => {
 
       // Handle any errors during streaming
       passThrough.on('error', (error) => {
-          console.error('Error during streaming:', error);
           res.status(500).send("Error during streaming");
       });
   } catch (error) {
-      console.error('Error in request to Go service:', error.message);
       // Use the error response data (if available) when sending the error to the client
       res.status(500).send(error.response ? error.response.data : "Error in request to Go service");
   }
