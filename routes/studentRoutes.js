@@ -41,11 +41,11 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const id = mongoose.Types.ObjectId(req.params.id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
-
-    const id = mongoose.Types.ObjectId(req.params.id);
 
     const student = await StudentModel.findOne({ baseUser: id });
 
