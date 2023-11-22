@@ -17,10 +17,18 @@ router.get('/', async (req, res) => {
 });
 
 // Get specific exercise
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  const exercise = await ExerciseModel.findById(id);
-  res.send(exercise);
+router.get("/:id", async (req, res) => {
+  if (!req.params.id) return res.send("Missing query parameters");
+
+  const exerciseId = req.params.id;
+
+  let exercise = await ExerciseModel.findById(exerciseId).catch((err) => {
+    throw err;
+  });
+
+  if (exercise === null)
+    return res.send("No exercise found with id: " + exerciseId);
+  return res.send(exercise);
 });
 
 /**

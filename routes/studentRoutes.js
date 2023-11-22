@@ -4,6 +4,7 @@ const { markAsCompleted } = require('../helpers/answerExercises');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
+const { findTop100Students } = require('../helpers/leaderboard');
 
 const { ExerciseModel } = require('../models/Exercises');
 const { StudentModel } = require('../models/Students');
@@ -38,12 +39,30 @@ router.patch('/:id', requireLogin, async (req, res) => {
   return res.status(200).send(updatedUser);
 });
 
+router.get('/:id/info', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).send({ error: errorCodes['E0014'] });
+    }
+    const id = mongoose.Types.ObjectId(req.params.id);
+
+    const student = await StudentModel.findOne({ baseUser: id });
+
+    if (!student) {
+      return res.status(404).send({ error: errorCodes['E0004'] });
+    }
+
+    return res.status(200).send(student);
+  } catch (error) {
+    return res.status(500).send({ error: errorCodes['E0003'] });
+  }
+});
+
 /** SUBSCRIPTIONS **/
 
 // Get users subscriptions
 router.get('/:id/subscriptions', async (req, res) => {
   try {
-
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
@@ -67,12 +86,11 @@ router.get('/:id/subscriptions', async (req, res) => {
 
   } catch (error) {
     // If the server could not be reached, return an error message
-    console.log(error)
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
 
-// Checks if user is subscribed to a specific course
+// Checks if student is subscribed to a specific course
 router.get('/subscriptions', async (req, res) => {
   try {
     const { user_id, course_id } = req.query;
@@ -149,11 +167,13 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
       throw errorCodes['E0004'];
     }
 
-    const updatedUser = await markAsCompleted(student, exerciseId, points, isComplete);
+    await markAsCompleted(student, exerciseId, points, isComplete);
 
     if (!isNaN(points)) {
-      updateUserLevel(updatedUser, points)
+      await updateUserLevel(id, points, student.level);
     }
+
+    const updatedUser = await StudentModel.findOne({ baseUser: id });
 
     res.status(200).send(updatedUser);
   } catch (error) {
@@ -167,6 +187,28 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     res.send({
       error: error
     });
+  }
+});
+
+// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { timeInterval } = req.body;
+
+    if (!timeInterval) {
+      throw errorCodes['E0015'];
+    }
+
+    const leaderboard = await findTop100Students(timeInterval);
+
+    res.status(200).send(leaderboard);
+  } catch (error) {
+    // Handle errors appropriately
+    if (error === errorCodes['E0015']) {
+      res.status(500).json({ 'error': errorCodes['E0015'] });
+    } else {
+      res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
   }
 });
 

@@ -3,6 +3,7 @@ const express = require('express');
 const router = require('../../routes/authRoutes'); // Import your router file here
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
+const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
 
 const mongoose = require('mongoose');
@@ -34,6 +35,7 @@ const PORT = 5020; // Choose a port for testing
 const server = app.listen(PORT);
 
 const fakeUser = makeFakeUser();
+const fakeStudent = makeFakeStudent(fakeUser._id);
 let db; // Store the database connection
 beforeAll(async () => {
   db = await connectDb(); // Connect to the database
@@ -44,6 +46,7 @@ describe('POST /auth/login', () => {
   beforeAll(async () => {
     // Insert the fake user into the database
     await db.collection('users').insertOne(fakeUser);
+    await db.collection('students').insertOne(fakeStudent);
   });
 
   it('Should find a user mail without differentiating between upper- and lowercase', async () => {
@@ -57,7 +60,6 @@ describe('POST /auth/login', () => {
       .post('/api/auth/login')
       .send(uppercaseMail).
       expect(202);
-
       // Verify the response body
       expect(response.body.userInfo.email).toBe('fake@gmail.com');
   });

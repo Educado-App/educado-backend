@@ -39,6 +39,7 @@ router.post('/login', async (req, res) => {
 
       result = compare(req.body.password, user.password);
     }
+    const studentProfile = await StudentModel.findOne({ baseUser: user._id });
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
@@ -53,6 +54,7 @@ router.post('/login', async (req, res) => {
           lastName: user.lastName,
           email: user.email,
           completedCourses: user.completedCourses,
+          points: studentProfile.points,
         },
       });
     } else {
