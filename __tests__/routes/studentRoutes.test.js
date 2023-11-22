@@ -577,7 +577,8 @@ describe('Routes for leaderboard', () => {
       })
       .expect(200);
 
-    expect(response.body).toBeInstanceOf(Array);  
+    expect(response.body[0].firstName).toBe("John");  
+    expect(response.body[0].lastName).toBe("Doe");  
   });
 
   it('Gets the leaderboard for all month', async () => {
