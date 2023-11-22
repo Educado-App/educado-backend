@@ -293,8 +293,8 @@ router.put("/", async (req, res) => {
   });
 
   try {
-    await course.save();
-    return res.status(201).send(course);
+    const result = await course.save({ new: true });
+    return res.status(201).send(result);
   } catch (err) {
     return res.status(400).send(err);
   }
