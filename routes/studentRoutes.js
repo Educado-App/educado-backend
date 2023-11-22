@@ -39,13 +39,12 @@ router.patch('/:id', requireLogin, async (req, res) => {
   return res.status(200).send(updatedUser);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id/info', async (req, res) => {
   try {
-    const id = mongoose.Types.ObjectId(req.params.id);
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
+    const id = mongoose.Types.ObjectId(req.params.id);
 
     const student = await StudentModel.findOne({ baseUser: id });
 
@@ -64,7 +63,6 @@ router.get('/:id', async (req, res) => {
 // Get users subscriptions
 router.get('/:id/subscriptions', async (req, res) => {
   try {
-
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
