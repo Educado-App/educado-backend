@@ -110,8 +110,8 @@ router.post('/signup', async (req, res) => {
 
     // Get user's email domain to find out whether or not they are a part of an onboarded institution
     const emailDomain = baseUser.email.substring(baseUser.email.indexOf("@"));
-    const isOnboarded = await InstitutionModel.findOne({domain: emailDomain});
-    const isOnboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
+    const onboarded = await InstitutionModel.findOne({domain: emailDomain});
+    const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
 
 
     const createdBaseUser = await baseUser.save();  // Save user
@@ -119,7 +119,7 @@ router.post('/signup', async (req, res) => {
     const createdStudent = await studentProfile.save(); // Save student
 
     // If the email is under either of the two insttutions' domains, the content creator will automatically be approved
-    if (isOnboarded || isOnboardedSecondary){
+    if (onboarded || onboardedSecondary){
       await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
       createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
       
@@ -129,7 +129,7 @@ router.post('/signup', async (req, res) => {
       baseUser: createdBaseUser,
       contentCreatorProfile: createdContentCreator,
       studentProfile: createdStudent,
-      institution: isOnboarded,
+      institution: onboarded,
     });
 
   } catch (error) {

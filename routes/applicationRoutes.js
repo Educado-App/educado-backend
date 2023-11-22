@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
+//Import all relevant models
 const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
-const { UserModel } = require('../models/Users');
+const { UserModel } = require('../models/Users'); 
+const { InstitutionModel } = require('../models/Institutions'); 
 
 //Route for when getting all applications
 router.get('/', async (req, res) => {
@@ -112,6 +114,26 @@ router.post('/newapplication', async (req, res) => {
         
         return res.status(400).json({ 'error': errorCodes['E1006'] }); //Could not upload application
     }
+});
+
+//This is the only route currently required for the Institutional Onboarding, so it will be placed here for now
+router.post('/newinstitution', async (req, res) => {
+    try {
+
+        const data = req.body;
+        //Before saving the new Institution, make sure that both the email domains and the Institution name are unique
+        
+        const institutionData = InstitutionModel(data);
+        const institution = await institutionData.save()
+
+        
+        //Return successful response
+        return res.status(201).json({institution: institution});
+    }
+    catch{
+        return res.status(400).json({ 'error': errorCodes['E1201']}); //Could not upload institution
+    }
+
 });
 
 module.exports = router;
