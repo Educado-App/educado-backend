@@ -121,8 +121,17 @@ router.post('/newinstitution', async (req, res) => {
     try {
 
         const data = req.body;
-        //Before saving the new Institution, make sure that both the email domains and the Institution name are unique
-        
+        //Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
+        if (await InstitutionModel.findOne({institutionName: data.institution})){
+            return res.status(400).json({ 'error': errorCodes['E1201'], institution: data.institution}); 
+        }
+        if (await InstitutionModel.findOne({domain: data.domain})){
+            return res.status(400).json({ 'error': errorCodes['E1202'], email: data.email}); 
+        }
+        if (await InstitutionModel.findOne({secondaryDomain: data.secondaryDomain})){
+            return res.status(400).json({ 'error': errorCodes['E1202'], secondaryDomain: data.secondaryDomain}); 
+        }
+
         const institutionData = InstitutionModel(data);
         const institution = await institutionData.save()
 
@@ -131,7 +140,7 @@ router.post('/newinstitution', async (req, res) => {
         return res.status(201).json({institution: institution});
     }
     catch{
-        return res.status(400).json({ 'error': errorCodes['E1201']}); //Could not upload institution
+        return res.status(400).json({ 'error': errorCodes['E1203']}); //Could not upload institution
     }
 
 });
