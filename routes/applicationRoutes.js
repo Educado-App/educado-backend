@@ -121,15 +121,28 @@ router.post('/newinstitution', async (req, res) => {
     try {
 
         const data = req.body;
+        
         //Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
-        if (await InstitutionModel.findOne({institutionName: data.institution})){
-            return res.status(400).json({ 'error': errorCodes['E1201'], institution: data.institution}); 
+        const sharedName = await InstitutionModel.findOne({institutionName: data.institutionName});
+        if (sharedName){
+    
+            //This Institution already exists
+            return res.status(400).json({'error': errorCodes['E1202'], errorCause: data.institutionName });
         }
-        if (await InstitutionModel.findOne({domain: data.domain})){
-            return res.status(400).json({ 'error': errorCodes['E1202'], email: data.email}); 
+        
+        const sharedDomain = await InstitutionModel.findOne({domain: data.domain});
+        if (sharedDomain){
+            //This Email Domain already exists as part of another Institution
+            return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain}); 
         }
-        if (await InstitutionModel.findOne({secondaryDomain: data.secondaryDomain})){
-            return res.status(400).json({ 'error': errorCodes['E1202'], secondaryDomain: data.secondaryDomain}); 
+        
+        //Since the secondary domain is optional, forcibly set it to null, as to avoid any type errors
+        let sharedSecondaryDomain;
+        !(data.secondaryDomain) ? sharedSecondaryDomain = null : sharedSecondaryDomain = await InstitutionModel.findOne({secondaryDomain: data.secondaryDomain});
+        
+        if (sharedSecondaryDomain){
+            //This Secondary Email Domain already exists as part of another Institution
+            return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain}); 
         }
 
         const institutionData = InstitutionModel(data);
@@ -138,9 +151,10 @@ router.post('/newinstitution', async (req, res) => {
         
         //Return successful response
         return res.status(201).json({institution: institution});
+        
     }
-    catch{
-        return res.status(400).json({ 'error': errorCodes['E1203']}); //Could not upload institution
+    catch (err){
+        return res.status(500).json({ 'error': errorCodes['E1201']}); //Could not upload institution
     }
 
 });
