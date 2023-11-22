@@ -39,6 +39,28 @@ router.patch('/:id', requireLogin, async (req, res) => {
   return res.status(200).send(updatedUser);
 });
 
+// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { timeInterval } = req.body;
+
+    if (!timeInterval) {
+      throw errorCodes['E0015'];
+    }
+
+    const leaderboard = await findTop100Students(timeInterval);
+
+    res.status(200).send(leaderboard);
+  } catch (error) {
+    // Handle errors appropriately
+    if (error === errorCodes['E0015']) {
+      res.status(500).json({ 'error': errorCodes['E0015'] });
+    } else {
+      res.status(500).json({ 'error': errorCodes['E0003'] });
+    }
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const id = mongoose.Types.ObjectId(req.params.id);
@@ -189,28 +211,6 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     res.send({
       error: error
     });
-  }
-});
-
-// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
-router.get('/leaderboard', async (req, res) => {
-  try {
-    const { timeInterval } = req.body;
-
-    if (!timeInterval) {
-      throw errorCodes['E0015'];
-    }
-
-    const leaderboard = await findTop100Students(timeInterval);
-
-    res.status(200).send(leaderboard);
-  } catch (error) {
-    // Handle errors appropriately
-    if (error === errorCodes['E0015']) {
-      res.status(500).json({ 'error': errorCodes['E0015'] });
-    } else {
-      res.status(500).json({ 'error': errorCodes['E0003'] });
-    }
   }
 });
 
