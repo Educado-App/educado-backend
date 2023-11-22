@@ -6,13 +6,17 @@ async function giveExtraPointsForSection(section, student, extraPoints) {
 
   let sectionExists;
 
+  if (completedCourseIndex === -1) {
+    throw errorCodes['E0903'];
+  }
+
   // Looks for the section in completedCourses
   student.completedCourses[completedCourseIndex].completedSections.forEach((completedSection) => {
     if (completedSection.sectionId.equals(section._id)) {
       sectionExists = true;
     }
   });
-  
+
   if (!sectionExists) {
     throw errorCodes['E0902'];
   }

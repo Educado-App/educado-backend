@@ -114,7 +114,7 @@ router.get('/subscriptions', async (req, res) => {
 });
 
 // Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
+router.patch('/:id/completed', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     let { exerciseId, isComplete, points } = req.body;
@@ -148,8 +148,6 @@ router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
       res.status(400);
     }
 
-    console.log(error)
-
     res.send({
       error: error
     });
@@ -157,17 +155,20 @@ router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
 });
 
 // Give the student extra points for the completed section
-router.patch('/:id/extraPoints/section', /*requireLogin,*/ async (req, res) => {
+router.patch('/:id/extraPoints/section', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
+    const { sectionId, points } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(sectionId)) {
+      return res.status(400).send({ error: errorCodes['E0014'] });
+    }
 
     const student = await StudentModel.findOne({ baseUser: id });
 
     if (!student) {
       throw errorCodes['E0004'];
     }
-
-    const { sectionId, points } = req.body;
 
     if (!sectionId || !points) {
       throw errorCodes['E0016'];
@@ -189,8 +190,6 @@ router.patch('/:id/extraPoints/section', /*requireLogin,*/ async (req, res) => {
     } else {
       res.status(400);
     }
-
-    console.log(error)
 
     res.send({
       error: error

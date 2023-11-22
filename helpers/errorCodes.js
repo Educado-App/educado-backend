@@ -274,6 +274,10 @@ module.exports = {
 	},
   E0902: {
     code: 'E0902',
-    message: 'This section could not be found in the completedCourse array.'
+    message: 'This section could not be found in the completedSections array.'
+  },
+  E0903: {
+    code: 'E0903',
+    message: 'This course could not be found in the completedCourses array.'
   },
 };
