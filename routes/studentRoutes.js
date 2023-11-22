@@ -5,6 +5,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 const { findTop100Students } = require('../helpers/leaderboard');
+const { updateStudentLevel, giveExtraPointsForSection } = require('../helpers/pointSystem');
 
 const { ExerciseModel } = require('../models/Exercises');
 const { StudentModel } = require('../models/Students');
@@ -30,7 +31,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
   if (points !== null) {
     try {
-      updatedUser = await updateUserLevel(id, points + student.points, student.level);
+      updatedUser = await updateStudentLevel(id, points + student.points, student.level);
     } catch (err) {
       return res.status(400).send({ error: err });
     }
@@ -112,27 +113,8 @@ router.get('/subscriptions', async (req, res) => {
   }
 });
 
-// Update user points and level based on earned points
-async function updateUserLevel(userId, points, level) {
-
-  // Check if user has enough points to level up
-  const pointsToNextLevel = level * 100; // For example, 100 points * level to reach the next level
-  if (points >= pointsToNextLevel) {
-    // User has enough points to level up
-    points -= pointsToNextLevel; // Deduct points needed for the level up
-    level++;
-  }
-
-  // Update user points and level in the database
-  await StudentModel.findOneAndUpdate(
-    { baseUser: userId },
-    { $inc: { points: points }, $set: { level: level } },
-    { new: true } // Set to true if you want to get the updated document as a result
-  );
-}
-
 // Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', requireLogin, async (req, res) => {
+router.patch('/:id/completed', /*requireLogin,*/ async (req, res) => {
   try {
     const { id } = req.params;
     let { exerciseId, isComplete, points } = req.body;
@@ -152,7 +134,7 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     await markAsCompleted(student, exerciseId, points, isComplete);
 
     if (!isNaN(points)) {
-      await updateUserLevel(id, points, student.level);
+      await updateStudentLevel(id, points, student.level);
     }
 
     const updatedUser = await StudentModel.findOne({ baseUser: id });
@@ -166,11 +148,56 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
       res.status(400);
     }
 
+    console.log(error)
+
     res.send({
       error: error
     });
   }
 });
+
+// Give the student extra points for the completed section
+router.patch('/:id/extraPoints/section', /*requireLogin,*/ async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await StudentModel.findOne({ baseUser: id });
+
+    if (!student) {
+      throw errorCodes['E0004'];
+    }
+
+    const { sectionId, points } = req.body;
+
+    if (!sectionId || !points) {
+      throw errorCodes['E0016'];
+    }
+
+    const section = await SectionModel.findById(sectionId);
+
+    if (!section) {
+      throw errorCodes['E0008'];
+    }
+
+    const updatedStudent = await giveExtraPointsForSection(section, student, points);
+
+    res.status(200).send(updatedStudent)
+  } catch(error) {
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
+      // Handle "user not found" error response here
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    console.log(error)
+
+    res.send({
+      error: error
+    });
+  }
+});
+
 
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
 router.get('/leaderboard', async (req, res) => {
