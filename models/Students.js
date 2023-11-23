@@ -44,6 +44,10 @@ const studentSchema = new Schema({
                   type: Number,
                   default: 0
                 },
+                extraPoints: {
+                  type: Number,
+                  default: 0
+                },
                 isComplete: {
                   type: Boolean,
                   default: true
