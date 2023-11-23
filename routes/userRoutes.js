@@ -37,6 +37,23 @@ router.delete('/:id', requireLogin, async (req, res) => {
   }
 });
 
+// GET User by ID
+router.get('/:id', requireLogin, async (req, res) => {
+	try {
+		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+			return res.status(400).send({ error: errorCodes['E0014'] });
+		}
+		const id = mongoose.Types.ObjectId(req.params.id);
+
+		const user = await UserModel.findById(id);
+
+		return res.status(200).send(user);
+
+	} catch (error) {
+		return res.status(500).send({ error: errorCodes['E0003'] });
+	}
+});
+
 // Update User with dynamic fields
 router.patch('/:id', requireLogin, async (req, res) => {
   try {
