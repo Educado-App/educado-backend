@@ -525,6 +525,199 @@ describe('PATCH /api/students/:userId', () => {
   });
 });
 
+describe('Routes for leaderboard', () => {
+  beforeEach(async () => {
+    fakeStudent.completedCourses = [
+      {
+        courseId: fakeCourse._id,
+        totalPoints: 0,
+        isComplete: true,
+        completionDate: new Date(),
+        completedSections: [
+          {
+            sectionId: fakeSection._id,
+            totalPoints: 0,
+            isComplete: true,
+            completionDate: new Date(),
+            completedExercises: [
+              {
+                exerciseId: fakeExercise._id,
+                isComplete: true,
+                completionDate: new Date(),
+                pointsGiven: 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+
+    // Create a baseUser as the leaderboard also fetches the first- and last name of the user
+    const fakeUser = {
+      _id: mongoose.Types.ObjectId(fakeStudent.baseUser),
+      firstName: 'John',
+      lastName: 'Doe',
+    };
+
+    await db.collection('students').updateOne({ baseUser: fakeStudent.baseUser }, { $set: fakeStudent });
+    await db.collection('users').insertOne(fakeUser)
+  });
+
+  afterEach(async () => {
+    // Remove the user from the database after each test
+    await db.collection('students').deleteOne({ baseUser: userId });
+    await db.collection('users').deleteOne({ _id: userId });
+  });
+
+  it('Gets the leaderboard for all time', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'all'
+      })
+      .expect(200);
+
+    expect(response.body[0].firstName).toBe("John");  
+    expect(response.body[0].lastName).toBe("Doe");  
+  });
+
+  it('Gets the leaderboard for all month', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'month'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Gets the leaderboard for all week', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'week'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Gets the leaderboard for all day', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'day'
+      })
+      .expect(200);
+
+    expect(response.body).toBeInstanceOf(Array);  
+  });
+
+  it('Return error code E0015 with illegal time interval', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+      .get('/api/students/leaderboard')
+      .send({
+        timeInterval: 'Illegal time interval'
+      })
+      .expect(500);
+
+    expect(response.body.error.code).toBe('E0015');
+  });
+});
+
+describe('Handles extra points for sections', () => {
+  beforeEach(async () => {
+    fakeCourse = makeFakeCourse();
+    fakeSection = makeFakeSection();
+    fakeExercise = makeFakeExercise();
+
+    // Insert the fake course into the database
+    await db.collection('courses').insertOne(fakeCourse);
+
+    // Insert the fake section into the database
+    await db.collection('sections').insertOne(fakeSection);
+
+    // Insert the fake exercise into the database
+    await db.collection('exercises').insertOne(fakeExercise);
+
+    // Add the connection between the course, section, and exercise
+    fakeCourse.sections.push(fakeSection._id);
+
+    fakeSection.exercises.push(fakeExercise._id);
+    fakeSection.parentCourse = fakeCourse._id;
+
+    fakeExercise.parentSection = fakeSection._id;
+
+    // Update course in the database
+    await db.collection('courses').updateOne({ _id: fakeCourse._id }, { $set: fakeCourse });
+
+    // Update section in the database
+    await db.collection('sections').updateOne({ _id: fakeSection._id }, { $set: fakeSection });
+
+    // Update exercise in the database
+    await db.collection('exercises').updateOne({ _id: fakeExercise._id }, { $set: fakeExercise });
+
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + fakeStudent.baseUser + '/completed')
+      .set('token', token) // Include the token in the request headers
+      .send({ exerciseId: fakeExercise._id, isComplete: true, points: 10 })
+      .expect(200);
+  });
+
+  it('Gives extra point for a section and adds them to the user as well.', async () => {
+    const response = await request(`http://localhost:${PORT}`)
+    .patch(`/api/students/${fakeStudent.baseUser}/extraPoints/section`)
+    .send({
+      sectionId: fakeSection._id,
+      points: 2
+    })
+    .expect(200);
+
+    expect(response.body.points).toBe(12);
+  })
+
+  it('Handles student not found error', async () => {
+    const nonExistingStudentId = mongoose.Types.ObjectId('5f841c2b1c8cfb2c58b78d67');
+    await request(`http://localhost:${PORT}`)
+    .patch(`/api/students/${nonExistingStudentId}/extraPoints/section`)
+    .send({
+      sectionId: fakeSection._id,
+      points: 2
+    })
+    .expect(404);
+  });
+
+  it('Handles section not found error', async () => {
+    const nonExistingSectionId = mongoose.Types.ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+    await request(`http://localhost:${PORT}`)
+    .patch(`/api/students/${fakeStudent.baseUser}/extraPoints/section`)
+    .send({
+      sectionId: nonExistingSectionId,
+      points: 2
+    })
+    .expect(404);
+  });
+
+  it('Handles course not in completedCourses', async () => {
+    fakeSection2 = makeFakeSection();
+    await db.collection('sections').insertOne(fakeSection2);
+
+    const invalidSectionId = fakeSection2._id;
+
+    const response = await request(`http://localhost:${PORT}`)
+    .patch(`/api/students/${fakeStudent.baseUser}/extraPoints/section`)
+    .send({
+      sectionId: invalidSectionId,
+      points: 2
+    })
+    .expect(400);
+
+    expect(response.body.error.code).toBe('E0903');
+  });
+});
+
 afterEach(async () => {
   await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 });

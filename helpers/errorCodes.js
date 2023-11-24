@@ -62,6 +62,14 @@ module.exports = {
     code: 'E0014',
     message: 'Invalid id'
   },
+  E0015: {
+    code: 'E0015',
+    message: "Invalid time interval. Use 'day', 'week', 'month' or 'all'."
+  },
+  E0016: {
+    code: 'E0016',
+    message: 'Invalid parameters'
+  },
 
   // E01 - Login errors
   E0101: {
@@ -264,6 +272,14 @@ module.exports = {
 		code: 'E0901',
 		message: 'This exercise is already in completedExercises.'
 	},
+    E0902: {
+    code: 'E0902',
+    message: 'This section could not be found in the completedSections array.'
+  },
+  E0903: {
+    code: 'E0903',
+    message: 'This course could not be found in the completedCourses array.'
+  },
 
   // E10 - Content Creator Approval Errors
   E1001: {
@@ -294,5 +310,6 @@ module.exports = {
   E1006: {
     code: "E1006",
     message: "Could not upload application"
+
   },
 };
