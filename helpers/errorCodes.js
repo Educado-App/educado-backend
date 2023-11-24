@@ -312,4 +312,24 @@ module.exports = {
     message: "Could not upload application"
 
   },
+
+  // E12 - Institutinal Onboarding Errors
+  E1201: {
+    code: 'E1201',
+    message: "Could not upload Institution"
+  },
+
+  E1202: {
+    code: 'E1202',
+    message: "This Institution already exists"
+  },
+
+  E1203: {
+    code: 'E1203',
+    message: "This Email Domain already exists as part of another Institution"
+  },
+  E1204: {
+    code: 'E1203',
+    message: "This Secondary Email Domain already exists as part of another Institution"
+  },
 };

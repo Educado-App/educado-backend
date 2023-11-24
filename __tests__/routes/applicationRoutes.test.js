@@ -6,6 +6,8 @@ const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeApplication = require('../fixtures/fakeApplication');
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator')
+const makeFakeInstitution = require('../fixtures/fakeInstitution')
+
 const app = express();
 app.use(express.json());
 app.use('/api/application', router); // Mount the router under '/api' path
@@ -38,6 +40,7 @@ describe('Application Routes', () => {
     await db.collection('users').deleteMany({});
     await db.collection('content-creators').deleteMany({});
     await db.collection('applications').deleteMany({});
+    await db.collection('institutions').deleteMany({});
   });
 
   afterAll(async () => {
@@ -96,5 +99,21 @@ describe('Application Routes', () => {
       expect(updatedNewContentCreator.approved).toBe(true)
     });
   });
+
+  //Institution Tests
+  describe('POST /api/application/newinstitution', () => {
+
+    it('Should create a new institution', async () => {
+
+      const newInstitution = makeFakeApplication("companyName", "@mail.com", "@mail.sub.com");
+
+      const response = await request(app)
+        .post('/api/application/newinstitution')
+        .send(newInstitution)
+        .expect(201);
+
+        expect(response.body).toHaveProperty('institution');
+    });
+  })
 });
  
