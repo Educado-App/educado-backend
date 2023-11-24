@@ -60,7 +60,6 @@ router.put('/updateProfile', async (req, res) => {
     if (!updatedProfile) {
       return res.status(404).json({ message: 'User profile not found' });
     }
-
     return res.status(200).json(updatedProfile);
   } catch (error) {
     return res.status(500).json({ message: 'Internal server error' });
@@ -74,30 +73,20 @@ router.get('/fetch/:userID', async (req,res) => {
     if(profile)
     {
       res.status(200).json(profile);
-    }  
+    }
     else{
       res.status(404).json('user not found');
     }
   } catch (error) {
+    console.log('Errror: ',error);
     res.status(400).send('User Profile didnot exist!');
   } 
 })
 
 router.get('/fetchuser/:email', async (req,res) =>{
   const {email} = req.params; 
-  try {
   const user = await ContentCreator.findOne({email});
-
-  if(user)
-  {
-    res.status(200).json(user);
-  }  
-  else{
-    res.status(404).json('user not found');
-  }
-} catch (error) {
-  res.status(400).send('User Profile didnot exist!');
-} 
+  res.status(200).json(user);
 })
 
 // Dynamic form Academic experience CRUD
@@ -114,21 +103,17 @@ router.post('/addEducation', async (req,res)=>{
 })
 router.get('/getEducation', async(req,res)=>{
   const {userID} = req.query;
-  try {
   const data = await ProfileEducationModel.find({userID:userID});
   res.status(200).json(data)
-} catch (err) {
-  res.status(500).send(err.message)
-}
 })
 
  router.delete('/deleteEducation', async (req,res)=>{
   const  {_id} = req.query;
   
-  try { 
-
+  try {
+    
     if(!_id){
-      res.status(404).send('_id is required')
+      return res.status(404).send('_id is required')
     }
 
   const deleteEntry = await ProfileEducationModel.deleteOne({_id:_id});
@@ -153,19 +138,15 @@ router.post('/addExperience', async (req,res)=>{
 
 router.get('/getExperience', async(req,res)=>{
   const {userID} = req.query;
-  try {
   const data = await ProfileExperienceModel.find({userID:userID});
   res.status(200).json(data)
-} catch (err) {
-  res.status(500).send(err.message)
-}
 })
 router.delete('/deleteExperience', async (req, res) => {
   const  {_id} = req.query;
   try {
     
     if(!_id){
-      res.status(404).send('_id is required')
+      return res.status(404).send('_id is required')
     }
 
     const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
