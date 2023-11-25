@@ -16,7 +16,7 @@ const studentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Courses'
   }],
-  completedCourses: [
+  courses: [
     {
         courseId: {
             type: Schema.Types.ObjectId,
@@ -34,7 +34,7 @@ const studentSchema = new Schema({
             type: Date,
             default: Date.now
         },
-        completedSections: [
+        sections: [
             {
                 sectionId: {
                     type: Schema.Types.ObjectId,
@@ -52,13 +52,20 @@ const studentSchema = new Schema({
                     type: Date,
                     default: Date.now
                 },
-                completedExercises: [
+                components: [
                     {
-                        exerciseId: {
+                        compId: {
                           type: Schema.Types.ObjectId,
-                          ref: 'Exercises'
+                        },
+                        compType: {
+                          type: String,
+                          enum: ['lecture', 'exercise']
                         },
                         isComplete: {
+                          type: Boolean,
+                          default: true
+                        },
+                        isFirstAttempt: {
                           type: Boolean,
                           default: true
                         },

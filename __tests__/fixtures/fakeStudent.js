@@ -4,7 +4,7 @@ module.exports = function makeFakeStudent(userId) {
     points: 0,
     level: 1,
     subscriptions: [],
-    completedCourses: [],
+    courses: [],
     baseUser: userId
   };
 };

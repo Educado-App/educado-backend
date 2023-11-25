@@ -11,6 +11,7 @@ const errorCodes = require('../../helpers/errorCodes');
 const makeFakeCreator = require('../fixtures/fakeContentCreator');
 const makeFakeStudent = require('../fixtures/fakeStudent');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
+const { addIncompleteCourse } = require('../../helpers/completing');
 
 const app = express();
 app.use(express.json());
@@ -339,7 +340,19 @@ describe('Course Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
       expect(updatedUser.subscriptions.find((element) => element == courseId));
+      expect(updatedUser.courses.find((element) => element.courseId == courseId));
     });
+
+    it('add incomplete course when subbing', async () => {
+      const course = await db.collection('courses').findOne({ title: 'test course' });
+      const courseId = course._id;
+      
+      const obj = await addIncompleteCourse(course);
+
+      expect(obj).toBeInstanceOf(Object);
+      expect(obj.courseId).toEqual(courseId);
+    });
+
     it('Should handle user not found error when subscribing', async () => {
 
       const course = await db.collection('courses').findOne({ title: 'test course' });

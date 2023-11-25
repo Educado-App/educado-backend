@@ -7,8 +7,8 @@ const adminOnly = require("../middlewares/adminOnly");
 // Models
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
-const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
+const { LectureModel } = require("../models/Lecture");
 const { ContentCreatorModel } = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
 const { IdentityStore } = require("aws-sdk");
@@ -149,7 +149,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 
 // Subscribe to course 
 router.post('/:id/subscribe', async (req, res) => {
-
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -180,30 +179,31 @@ router.post('/:id/subscribe', async (req, res) => {
 
     course.numOfSubscriptions++;
     user.subscriptions.push(id);
-
-
+    
     // find user based on id, and add the course's id to the user's subscriptions field
     await StudentModel.findOneAndUpdate(
       { baseUser: studentId },
-      { subscriptions: user.subscriptions });
+      {
+        $set: {
+          subscriptions: user.subscriptions,
+        }
+      }
+    );
 
     await CourseModel.findOneAndUpdate(
       { _id: course._id },
       { numOfSubscriptions: course.numOfSubscriptions }
     );
 
-
     return res.status(200).send(user);
 
   } catch (error) {
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
-
 });
 
 // Unsubscribe to course
 router.post('/:id/unsubscribe', async (req, res) => {
-
   try {
     const { id } = req.params;
     const { user_id } = req.body;
