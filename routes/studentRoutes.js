@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const { markAsCompleted } = require('../helpers/completing');
+const { markAsCompleted, updateUserLevel } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { findTop100Students } = require('../helpers/leaderboard');
