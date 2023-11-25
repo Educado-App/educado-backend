@@ -9,6 +9,7 @@ module.exports = function makeFakeSection() {
         dateCreated: Date.now(),
         dateUpdated: Date.now(),
         totalPoints: 100,
+        extraPoints: 0,
         components: [],
         parentCourse: '',
     };

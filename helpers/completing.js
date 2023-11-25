@@ -21,15 +21,17 @@ async function markAsCompleted(student, comp, points, isComplete) {
   const courseId = mongoose.Types.ObjectId(section.parentCourse.toString());
 
   const courseStudent = findCourse(student, courseId);
-
   const sectionStudent = findSection(courseStudent, sectionId);
-
   const componentStudent = findComp(sectionStudent, comp._id);
 
   const obj = markComponentAsCompleted(courseStudent, sectionStudent, componentStudent, student, points, isComplete);
 
-  obj.section = markSectionAsCompleted(obj.section, isComplete);
+  obj.section = markSectionAsCompleted(student, obj.section, isComplete);
   obj.course = markCourseAsCompleted(obj.course, isComplete);
+
+  // update extra points
+  //obj.course.extraPoints += obj.section.extraPoints;
+  obj.student.points += obj.section.extraPoints; 
 
   const index = obj.student.courses.findIndex(course => course.courseId.toString() === courseId.toString());
 
@@ -85,12 +87,13 @@ function markComponentAsCompleted(course, section, component, student, points, i
   };
 }
 
-function markSectionAsCompleted(section, isComplete) {
+function markSectionAsCompleted(student, section, isComplete) {
   if (isComplete) {
     const anyComponentIncomplete = section.components.some(component => !component.isComplete);
 
     if (!anyComponentIncomplete) {
       section.isComplete = true;
+      section.extraPoints = student.currentExtraPoints;
       section.completionDate = Date.now();
     }
   }

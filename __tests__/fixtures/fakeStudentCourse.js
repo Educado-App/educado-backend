@@ -8,6 +8,7 @@ module.exports = function makeFakeStudentCourse(courseId, sectionId, lectureId, 
       {
         sectionId: sectionId,
         totalPoints: 0,
+        extraPoints: 0,
         isComplete: false,
         completionDate: Date.now(),
         components: [

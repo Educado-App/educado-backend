@@ -224,7 +224,7 @@ describe('GET /students/:userId/subscriptions', () => {
   });
 });
 
-describe('PATCH /api/students/:userId/completed', () => { 
+describe('PATCH /api/students/:userId/complete', () => { 
   beforeEach(async () => {
     fakeCourse = makeFakeCourse();
     fakeSection = makeFakeSection();
@@ -442,7 +442,7 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(obj.student.points).toBe(0);
   });
 
-  it('marks section complete when comps are completed', () => {
+  it('marks section complete when comps are complete', () => {
     const course = completing.findCourse(fakeStudent, fakeCourse._id);
     const section = completing.findSection(course, fakeSection._id);
     const compExercise = completing.findComp(section, fakeExercise._id);
@@ -461,13 +461,68 @@ describe('PATCH /api/students/:userId/completed', () => {
 
     expect(objLecture.component.isComplete).toBe(true);
 
-    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
 
     expect(completedSection.isComplete).toBe(true);
     expect(completedSection.completionDate).not.toBeUndefined();
   });
 
-  it('marks section not complete when comps are not completed', () => {
+  it('marks section extra points when comps are complete', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = true;
+    fakeStudent.currentExtraPoints = 20;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+    expect(section.extraPoints).toBe(0);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(true);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(true);
+
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
+
+    expect(completedSection.isComplete).toBe(true);
+    expect(completedSection.extraPoints).toBe(20);
+    expect(completedSection.completionDate).not.toBeUndefined();
+  });
+
+  it('dont give section extra points when comps are not complete', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = false;
+    fakeStudent.currentExtraPoints = 20;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+    expect(section.extraPoints).toBe(0);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(false);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(false);
+
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
+
+    expect(completedSection.isComplete).toBe(false);
+    expect(completedSection.extraPoints).toBe(0);
+  });
+
+  it('marks section not complete when comps are not complete', () => {
     const course = completing.findCourse(fakeStudent, fakeCourse._id);
     const section = completing.findSection(course, fakeSection._id);
     const compExercise = completing.findComp(section, fakeExercise._id);
@@ -486,12 +541,12 @@ describe('PATCH /api/students/:userId/completed', () => {
 
     expect(objLecture.component.isComplete).toBe(false);
 
-    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
 
     expect(completedSection.isComplete).toBe(false);
   });
 
-  it('marks course complete when section is completed', () => {
+  it('marks course complete when section is complete', () => {
     const course = completing.findCourse(fakeStudent, fakeCourse._id);
     const section = completing.findSection(course, fakeSection._id);
     const compExercise = completing.findComp(section, fakeExercise._id);
@@ -510,7 +565,7 @@ describe('PATCH /api/students/:userId/completed', () => {
 
     expect(objLecture.component.isComplete).toBe(true);
 
-    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
 
     expect(completedSection.isComplete).toBe(true);
     expect(completedSection.completionDate).not.toBeUndefined();
@@ -521,7 +576,7 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(completedCourse.completionDate).not.toBeUndefined();
   });
 
-  it('marks course not complete when section is not completed', () => {
+  it('marks course not complete when section is not complete', () => {
     const course = completing.findCourse(fakeStudent, fakeCourse._id);
     const section = completing.findSection(course, fakeSection._id);
     const compExercise = completing.findComp(section, fakeExercise._id);
@@ -540,7 +595,7 @@ describe('PATCH /api/students/:userId/completed', () => {
 
     expect(objLecture.component.isComplete).toBe(false);
 
-    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+    const completedSection = completing.markSectionAsCompleted(fakeStudent, section, isComplete);
 
     expect(completedSection.isComplete).toBe(false);
 
@@ -549,7 +604,7 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(completedCourse.isComplete).toBe(false);
   });
 
-  it('marks as completed in the db', async () => {
+  it('marks as complete in the db', async () => {
     const course = completing.findCourse(fakeStudent, fakeCourse._id);
     const section = completing.findSection(course, fakeSection._id);
 
@@ -589,7 +644,7 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(student.points).toBe(100);
   })
 
-  it('student doent level up', () => {
+  it('student doesnt level up', () => {
     fakeStudent.points = 50;
 
     expect(fakeStudent.points).toBe(50);
@@ -603,7 +658,7 @@ describe('PATCH /api/students/:userId/completed', () => {
   it('route should return 200 with the updated student (exercise)', async () => {
 
     const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
+      .patch('/api/students/' + userId + '/complete')
       .set('token', token)
       .send({ comp: fakeExercise, isComplete: true, points: 10 })
       .expect(200);
@@ -634,7 +689,7 @@ describe('PATCH /api/students/:userId/completed', () => {
   it('route should return 200 with the updated student (lecture)', async () => {
 
     const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
+      .patch('/api/students/' + userId + '/complete')
       .set('token', token)
       .send({ comp: fakeLecture, isComplete: true, points: 0 })
       .expect(200);
@@ -665,13 +720,13 @@ describe('PATCH /api/students/:userId/completed', () => {
   it('route should return 200 with the updated student (lecture + exercise)', async () => {
 
     await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
+      .patch('/api/students/' + userId + '/complete')
       .set('token', token)
       .send({ comp: fakeLecture, isComplete: true, points: 0 })
       .expect(200);
 
     await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
+      .patch('/api/students/' + userId + '/complete')
       .set('token', token)
       .send({ comp: fakeExercise, isComplete: true, points: 10 })
       .expect(200);
@@ -688,85 +743,6 @@ describe('PATCH /api/students/:userId/completed', () => {
     expect(updatedStudent.courses[0].sections[0].components[1].isComplete).toBe(true);
     expect(updatedStudent.points).toBe(10);
     expect(updatedStudent.level).toBe(1);
-  });
-});
-
-describe('PATCH /api/students/:userId', () => {
-  it('Update points succesfully', async () => {
-    const points = 10;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: points
-      })
-      .expect(200); // Expecting a 200 OK Request response
-
-    // Verify that the user was updated in the database
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-    expect(updatedUser.points).toBe(points);
-    expect(updatedUser.level).toBe(1);
-  });
-
-  it('Update level succesfully', async () => {
-    const points = 120;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: points
-      })
-    
-    expect(response.status).toBe(200); // Expecting a 200 OK Request response
-
-    // Verify that the user was updated in the database
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-    expect(updatedUser.points).toBe(20);
-    expect(updatedUser.level).toBe(2);
-  });
-
-  it('Handles validation errors for points', async () => {
-    const invalidPoints = 'invalidPoints';
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
-
-    expect(response.body.error.code).toBe('E0804');
-  });
-
-  it('Handles negative value for points', async () => {
-    const invalidPoints = -50;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
-
-    expect(response.body.error.code).toBe('E0804');
-  });
-
-  it('Handles 0 value for points', async () => {
-    const invalidPoints = 0;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
-
-    expect(response.body.error.code).toBe('E0804');
   });
 });
 
@@ -869,17 +845,4 @@ describe('Routes for leaderboard', () => {
 
     expect(response.body.error.code).toBe('E0015');
   });
-});
-
-afterEach(async () => {
-  await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
-});
-
-afterAll(async () => {
-  await db.collection('courses').deleteMany({}); // Delete all documents in the 'courses' collection
-  await db.collection('sections').deleteMany({}); // Delete all documents in the 'courses' collection
-  await db.collection('exercises').deleteMany({}); // Delete all documents in the 'courses' collection
-  await db.collection('students').deleteMany({}); // Delete all documents in the 'courses' collection
-  server.close();
-  await mongoose.connection.close();
 });

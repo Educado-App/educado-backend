@@ -8,6 +8,10 @@ const studentSchema = new Schema({
     type: Number,
     default: 0
   },
+  currentExtraPoints: {
+    type: Number,
+    default: 0
+  },
   level: {
     type: Number,
     default: 1
@@ -41,6 +45,10 @@ const studentSchema = new Schema({
                     ref: 'Sections'
                 },
                 totalPoints: {
+                  type: Number,
+                  default: 0
+                },
+                extraPoints: {
                   type: Number,
                   default: 0
                 },

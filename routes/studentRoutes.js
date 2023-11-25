@@ -11,34 +11,6 @@ const { StudentModel } = require('../models/Students');
 const { SectionModel } = require('../models/Sections');
 const { CourseModel } = require('../models/Courses');
 
-router.patch('/:id', requireLogin, async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).send({ error: errorCodes['E0014'] });
-  }
-
-  const id = mongoose.Types.ObjectId(req.params.id);
-
-  const { points, level } = req.body;
-
-  let student = await StudentModel.findOne({ baseUser: id });
-
-  let updatedUser;
-
-  if (points !== null && (points <= 0 || isNaN(points))) {
-    return res.status(400).send({ error: errorCodes['E0804'] });
-  }
-
-  if (points !== null) {
-    try {
-      updatedUser = await updateUserLevel(id, points + student.points, student.level);
-    } catch (err) {
-      return res.status(400).send({ error: err });
-    }
-  }
-
-  return res.status(200).send(updatedUser);
-});
-
 router.get('/:id/info', async (req, res) => {
   try {
     const id = mongoose.Types.ObjectId(req.params.id);
@@ -64,7 +36,6 @@ router.get('/:id/info', async (req, res) => {
 // Get users subscriptions
 router.get('/:id/subscriptions', async (req, res) => {
   try {
-
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
@@ -132,10 +103,9 @@ router.get('/subscriptions', async (req, res) => {
   }
 });
 
-router.patch('/:id/addCourse', requireLogin, async (req, res) => {
+router.patch('/:id/courses/:courseId/add', requireLogin, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { courseId } = req.body;
+    const { id, courseId } = req.params;
 
     const course = await CourseModel.findById(courseId);
 
@@ -172,13 +142,12 @@ router.patch('/:id/addCourse', requireLogin, async (req, res) => {
   }
 })
 
-// Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', requireLogin, async (req, res) => {
+// Mark courses, sections, and components as completed for a user
+router.patch('/:id/complete', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     let { comp, isComplete, points } = req.body;
 
-    // Retrieve the user by ID MAYBE CHANGE TO STUDENT ID
     let student = await StudentModel.findOne({ baseUser: id });
 
     if (!student) {
@@ -189,6 +158,44 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
 
     res.status(200).send(updatedStudent);
   } catch (error) {
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
+      // Handle "user not found" error response here
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    res.send({
+      error: error
+    });
+  }
+});
+
+// Update the current extra points for a student
+router.patch('/:id/extraPoints/update', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { extraPoints } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(sectionId)) {
+      return res.status(400).send({ error: errorCodes['E0014'] });
+    }
+
+    if (isNaN(extraPoints)) {
+      return res.status(400).send({ error: errorCodes['E0804'] });
+    }
+
+    const student = await StudentModel.findOneAndUpdate(
+      { baseUser: id },
+      {
+        $inc: {
+          currentExtraPoints: extraPoints
+        }
+      }
+    );
+    
+    res.status(200).send(student)
+  } catch(error) {
     if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
       // Handle "user not found" error response here
       res.status(404);

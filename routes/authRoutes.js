@@ -34,8 +34,22 @@ router.post('/login', async (req, res) => {
     if (!user) {
       // Invalid email (email not found)
       return res.status(401).json({ 'error': errorCodes['E0004'] });
-    } else {
-      // If the email is found, compare the passwords
+    } 
+    // For content creators, a matching content-creator entry will be found to see if they are approved or rejected
+    const contentCreator = await ContentCreatorModel.findOne({baseUser: user._id})
+    //Content creator must not be allowed entry if they are either rejected or not yet approved
+    if(contentCreator.approved == false && contentCreator.rejected == false){
+      // User not approved
+      return res.status(403).json({ 'error': errorCodes['E1001'] });
+    } 
+    
+    if(contentCreator.rejected == true && contentCreator.approved == false){
+      // User is rejected
+      return res.status(403).json({ 'error': errorCodes['E1002'] });
+    }
+    
+    else {
+      // If the email is found, and content creator is approved compare the passwords
 
       result = compare(req.body.password, user.password);
     }
@@ -43,7 +57,7 @@ router.post('/login', async (req, res) => {
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
-      const token = signAccessToken({ id: user.id });
+      const token = signAccessToken({ id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email });
       // Return the token
       return res.status(202).json({
         status: 'login successful',
