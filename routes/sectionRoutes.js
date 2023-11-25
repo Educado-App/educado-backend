@@ -3,6 +3,7 @@ const router = require("express").Router();
 // Models
 const { SectionModel } = require('../models/Sections');
 const { LectureModel } = require('../models/Lectures');
+const { ExerciseModel } = require('../models/Exercises');
 const { CourseModel } = require("../models/Courses");
 const { ComponentModel } = require("../models/Components");
 const {  ContentCreatorApplication } = require("../models/ContentCreators");
