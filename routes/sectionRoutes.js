@@ -3,10 +3,11 @@ const router = require("express").Router();
 // Models
 const { SectionModel } = require('../models/Sections');
 const { LectureModel } = require('../models/Lecture');
+const { ExerciseModel } = require('../models/Exercises');
 const { CourseModel } = require("../models/Courses");
-const { ComponentModel } = require("../models/Components");
 const {  ContentCreatorApplication } = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
+const { mongo, Mongoose } = require("mongoose");
 
 // Get all sections
 router.get('/', async (req, res) => {
@@ -14,6 +15,15 @@ router.get('/', async (req, res) => {
   res.send(list);
 });
 
+const ComponentType = {
+  LECTURE: 'lecture',
+  EXERCISE: 'exercise'
+}
+
+const LectureType = {
+  TEXT: 'text',
+  VIDEO: 'video',
+};
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get section by id
@@ -150,5 +160,52 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Send response
   res.status(200).send("Section Deleted");
 });
+
+router.get("/:id/components", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const section = await SectionModel.findById(id);
+    if (!section) {
+      return res.status(404).json({ error: errorCodes['E0007'] });
+    }
+
+    let obj = {
+      component: null,
+      type: null,
+      lectureType: null,
+    };
+
+    const components = [];
+
+    for (let comp of section.components) {
+      if (comp.compType === ComponentType.LECTURE) {
+        const lecture = await LectureModel.findById(comp.compId);
+        if (!lecture) {
+          return res.status(404).json({ error: errorCodes['E0007'] });
+        }
+        obj = {
+          component: lecture,
+          type: ComponentType.LECTURE,
+          lectureType: lecture.video ? LectureType.VIDEO : LectureType.TEXT,
+        };
+      } else {
+        const exercise = await ExerciseModel.findById(comp.compId);
+        if (!exercise) {
+          return res.status(404).json({ error: errorCodes['E0007'] });
+        }
+        obj = {
+          component: exercise,
+          type: ComponentType.EXERCISE,
+        };
+      }
+      components.push(obj);
+    }
+
+    res.status(200).send(components);
+  } catch (error) {
+    throw error;
+  }
+})
 
 module.exports = router;
