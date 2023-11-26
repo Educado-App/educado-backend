@@ -170,7 +170,7 @@ router.patch('/:id/complete', requireLogin, async (req, res) => {
   }
 });
 
-// Update the current extra points for a student
+// Update the current extra points for a student like daily streaks
 router.patch('/:id/extraPoints/update', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
