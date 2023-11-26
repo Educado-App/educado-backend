@@ -306,8 +306,6 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
   const course = req.body;
   const { id } = req.params;
 
-  console.log(course);
-  
   const dbCourse = await CourseModel.findByIdAndUpdate(
     id,
     {
@@ -316,7 +314,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       category: course.category,
       difficulty: course.difficulty,
 	    status: course.status,
-      coverImg: course._id + "_0",
+      coverImg: id + "_0",
 	    dateUpdated: Date.now()
     },
     function (err, docs) {
