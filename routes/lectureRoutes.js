@@ -3,15 +3,14 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const fs = require("fs");
-const path = require("path");
+const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const { ComponentModel } = require("../models/Components");
 const {ContentCreatorApplication,} = require("../models/ContentCreators");
 const requireLogin = require("../middlewares/requireLogin");
 const { SectionModel } = require("../models/Sections");
-const { LectureModel } = require("../models/Lecture");
+const { LectureModel } = require("../models/Lectures");
 
 
 //CREATED BY VIDEOSTREAMING TEAM
@@ -41,25 +40,32 @@ router.get("/:id", async (req, res) => {
  * 
  */
 router.put("/:section_id", /*requireLogin,*/ async (req, res) => {
-  const {title, description} = req.body; //Handles the data in "data" from the request
+  const {title, description, contentType} = req.body; //Handles the data in "data" from the request
   const section_id = req.params.section_id; //Handles the data in "params" from the request
 
   const lecture = new LectureModel ({
     parentSection: section_id,
     title: title,
     description: description,
+    contentType: contentType,
+    content: "",
     dateCreated: Date.now(),
     dateUpdated: Date.now()
   });
 
   try {
+    section = await SectionModel.findById(section_id)
+    
+    if(section.components.length >= 10){
+      res.status(400).send({error: errorCodes['E1101']});
+    }
+    
     await lecture.save();
-    section = await SectionModel.findById(section_id);
-    await section.lectures.push(lecture._id);
+    await section.components.push({compId: lecture._id, compType: "lecture"});
     await section.save();
     res.status(201).send(lecture);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send({error: errorCodes['E0000']});;
   }
 });
 
@@ -121,7 +127,7 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
 
   // Remove the lecture from the section lectures array
-  await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {lectures: lecture._id}})
+  await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {components:{compId: lecture._id}}})
 
 
   // Delete the lecture object

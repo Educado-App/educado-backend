@@ -9,7 +9,6 @@ module.exports = function makeFakeCourse() {
 		published: false,
 		sections: [],
 		difficulty: 1,
-		estimatedHours: 1,
 		rating: 5,
     numOfSubscriptions: 0,
 	};

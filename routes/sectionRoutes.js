@@ -2,7 +2,8 @@ const router = require("express").Router();
 
 // Models
 const { SectionModel } = require('../models/Sections');
-const { LectureModel } = require('../models/Lecture');
+const { LectureModel } = require('../models/Lectures');
+const { ExerciseModel } = require('../models/Exercises');
 const { CourseModel } = require("../models/Courses");
 const { ComponentModel } = require("../models/Components");
 const {  ContentCreatorApplication } = require("../models/ContentCreators");
@@ -56,8 +57,7 @@ router.put("/:course_id", /*requireLogin,*/ async (req, res) => {
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     totalPoints: 0,
-    lectures: [],
-    exercises: [],
+    components: []
   });
 
   try {
@@ -117,35 +117,15 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
   });
 
-  // Get the course, from the section object
-  const course_id = section.parentCourse;
-  const course = await CourseModel.findById(course_id)
-
-
   // Remove the section from the course section array
   await CourseModel.updateOne({_id: section.parentCourse}, {$pull: {sections: section._id}})
-
-
-  // Get lecture array from section
-  const lectureIds = section.lectures;
-  const exerciseIds = section.exercises;
-
+  
   // Delete all lectures and excercises in the section
-  lectureIds.map(async (lecture_id) => {
-    // Delete the lecture
-    await LectureModel.findByIdAndDelete( lecture_id);
-  });
-
-  // Loop through all exercises in section
-	exerciseIds.map(async (exercise_id) => {
-		// Delete the exercise
-		await ExerciseModel.findByIdAndDelete(exercise_id);
-	}); 
+  await LectureModel.deleteMany({parentSection: section._id})
+  await ExerciseModel.deleteMany({parentSection: section._id})
 
   // Delete the section
   await SectionModel.deleteOne({ _id: id }).catch((err) => res.status(204).send(err));
-
-
 
   // Send response
   res.status(200).send("Section Deleted");
