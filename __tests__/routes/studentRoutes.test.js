@@ -430,7 +430,7 @@ describe('Handles answering exercises', () => {
       .send({ exerciseId: nonExistingExerciseId })
       .expect(404);
   
-      expect(response.body.error.code).toBe('E0012');
+      expect(response.body.error.code).toBe('E1104');
   });
   
   it('Fails to add exerciseId to completed exercises for non-existing user', async () => {
