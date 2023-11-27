@@ -750,8 +750,6 @@ describe('Course Routes', () => {
         .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test'})
         .expect(200);
 
-        console.log(response);
-
       expect(response.body.title).toBe('Test');
       expect(response.body.category).toBe('sewing');
       expect(response.body.difficulty).toBe(1);
