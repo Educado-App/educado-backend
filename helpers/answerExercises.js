@@ -14,7 +14,7 @@ async function markAsCompleted(user, exerciseIdFromFunction, pointsFromFunction,
     exerciseId = exerciseIdFromFunction
   
     if (!exercise) {
-      throw errorCodes['E0012'];
+      throw errorCodes['E1104'];
     }
   
     const sectionIdString = exercise.parentSection;
