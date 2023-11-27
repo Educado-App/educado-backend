@@ -713,14 +713,14 @@ describe('Course Routes', () => {
       const response = await request(app)
         .put('/api/courses/')
         .set('Authorization', `Bearer ${token}`)
-        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id })
+        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', creator: actualUser._id })
 
       expect(response.status).toBe(201);
       expect(response.body.title).toBe('Test');
       expect(response.body.category).toBe('sewing');
       expect(response.body.difficulty).toBe(1);
       expect(response.body.description).toBe('Sewing test');
-      expect(response.body.estimatedHours).toBe(2);
+      expect(response.body.estimatedHours).toBe(0);
 
     });
   });
@@ -747,14 +747,13 @@ describe('Course Routes', () => {
       const response = await request(app)
         .patch('/api/courses/' + fakeCourse._id)
         .set('Authorization', `Bearer ${token}`)
-        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+        .send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test'})
         .expect(200);
 
       expect(response.body.title).toBe('Test');
       expect(response.body.category).toBe('sewing');
       expect(response.body.difficulty).toBe(1);
       expect(response.body.description).toBe('Sewing test');
-      expect(response.body.estimatedHours).toBe(2);
     });
   });
 });

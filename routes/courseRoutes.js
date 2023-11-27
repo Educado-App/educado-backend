@@ -265,7 +265,7 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put("/", async (req, res) => {
-  const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+  const { title, category, difficulty, description, creator, status } = req.body;
 
   const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
@@ -284,11 +284,12 @@ router.put("/", async (req, res) => {
     //_user: req.user.id,
     creator: id,
     published: false,
+    coverImg: "",
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
-    status: "draft",
-    estimatedHours: estimatedHours,
+	  status: status,
+    estimatedHours: 0,
     rating: 0,
   });
 
@@ -312,10 +313,9 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       description: course.description,
       category: course.category,
       difficulty: course.difficulty,
-      estimatedHours: course.estimatedHours,
-      published: course.published,
-      status: course.status,
-      dateUpdated: Date.now()
+	    status: course.status,
+      coverImg: id + "_c",
+	    dateUpdated: Date.now()
     },
     function (err, docs) {
       if (err) {
@@ -341,7 +341,6 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
   // Get the course object
   const course = await CourseModel.findById(id).catch((err) => res.status(204).send(err));
 
-
   // Get the section array from the course object
   const sectionIds = course.sections;
 
@@ -351,26 +350,9 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     // Get the section object from the id in sectionIds array
     let section = await SectionModel.findById(section_id);
 
-
-    // Get the lecture array from the section object
-    const lectureIds = section.lectures;
-    const exerciseIds = section.exercises;
-
-    // Loop through all lectures in section
-    lectureIds.map(async (lecture_id) => {
-
-      // Delete the lecture
-      await LectureModel.findByIdAndDelete(lecture_id);
-
-    });
-
-    // Loop through all exercises in section
-    exerciseIds.map(async (exercise_id) => {
-
-      // Delete the exercise
-      await ExerciseModel.findByIdAndDelete(exercise_id);
-
-    });
+    // Delete all lectures and excercises in the section
+    await LectureModel.deleteMany({ parentSection: section._id })
+    await ExerciseModel.deleteMany({ parentSection: section._id })
 
     // Delete the section
     await SectionModel.findByIdAndDelete(section_id);
