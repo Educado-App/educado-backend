@@ -746,7 +746,6 @@ describe('Course Routes', () => {
 			expect(response.body.difficulty).toBe(1);
 			expect(response.body.description).toBe('Sewing test');
 			expect(response.body.estimatedHours).toBe(2);
-
 		});
 	});
 

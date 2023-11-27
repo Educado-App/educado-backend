@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const express = require('express');
+const errorCodes = require('../helpers/errorCodes');
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -7,11 +8,6 @@ app.use(express.urlencoded({ extended: true }));
 // Models
 const { SectionModel } = require('../models/Sections');
 const { LectureModel } = require('../models/Lecture');
-
-const COMP_TYPES = {
-	LECTURE: 'lecture',
-	EXERCISE: 'exercise',
-};
 
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
@@ -40,28 +36,32 @@ router.get('/:id', async (req, res) => {
  * 
  */
 router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
-	const {title, description} = req.body; //Handles the data in "data" from the request
+	const {title, description, contentType} = req.body; //Handles the data in "data" from the request
 	const section_id = req.params.section_id; //Handles the data in "params" from the request
 
 	const lecture = new LectureModel ({
 		parentSection: section_id,
 		title: title,
 		description: description,
+		contentType: contentType,
+		content: '',
 		dateCreated: Date.now(),
 		dateUpdated: Date.now()
 	});
 
 	try {
-		await lecture.save();
 		const section = await SectionModel.findById(section_id);
-		await section.components.push({
-			compId: lecture._id,
-			compType: COMP_TYPES.LECTURE,
-		});
+    
+		if(section.components.length >= 10){
+			res.status(400).send({error: errorCodes['E1101']});
+		}
+    
+		await lecture.save();
+		await section.components.push({compId: lecture._id, compType: 'lecture'});
 		await section.save();
 		res.status(201).send(lecture);
 	} catch (err) {
-		res.status(400).send(err);
+		res.status(400).send({error: errorCodes['E0000']});
 	}
 });
 
@@ -105,7 +105,6 @@ router.get('/section/:id', async (req, res) => {
 
 	res.send(lecture);
 });
-  
 
 
 /**
@@ -121,10 +120,8 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 	// Get the lecture object
 	const lecture = await LectureModel.findById(id).catch((err) => res.status(204).send(err));
 
-
 	// Remove the lecture from the section lectures array
-	await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {lectures: lecture._id}});
-
+	await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {components:{compId: lecture._id}}});
 
 	// Delete the lecture object
 	await LectureModel.findByIdAndDelete(id).catch((err) => {

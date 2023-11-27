@@ -131,12 +131,12 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 
   
 	// Remove the exercise from the section exercises array
-	await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {exercises: exercise._id}});
+	await SectionModel.updateOne({_id: exercise.parentSection}, {$pull: {components: {compId: exercise._id}}});
 
 
 	// Delete the exercise object
 	await ExerciseModel.findByIdAndDelete(id).catch(() => {
-		res.status(204).send({ error: errorCodes['E0012'] });
+		res.status(204).send({ error: errorCodes['E1104'] });
 	});
 
 	// Send response

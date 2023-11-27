@@ -317,7 +317,7 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put('/', async (req, res) => {
-	const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+	const { title, category, difficulty, description, creator, status, estimatedHours } = req.body;
 
 	const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
@@ -336,10 +336,11 @@ router.put('/', async (req, res) => {
 		//_user: req.user.id,
 		creator: id,
 		published: false,
+		coverImg: '',
 		dateCreated: Date.now(),
 		dateUpdated: Date.now(),
 		sections: [],
-		status: 'draft',
+		status: status,
 		estimatedHours: estimatedHours,
 		rating: 0,
 	});
@@ -403,26 +404,9 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 		// Get the section object from the id in sectionIds array
 		let section = await SectionModel.findById(section_id);
 
-
-		// Get the lecture array from the section object
-		const lectureIds = section.lectures;
-		const exerciseIds = section.exercises;
-
-		// Loop through all lectures in section
-		lectureIds.map(async (lecture_id) => {
-
-			// Delete the lecture
-			await LectureModel.findByIdAndDelete(lecture_id);
-
-		});
-
-		// Loop through all exercises in section
-		exerciseIds.map(async (exercise_id) => {
-
-			// Delete the exercise
-			await ExerciseModel.findByIdAndDelete(exercise_id);
-
-		});
+		// Delete all lectures and excercises in the section
+		await LectureModel.deleteMany({ parentSection: section._id });
+		await ExerciseModel.deleteMany({ parentSection: section._id });
 
 		// Delete the section
 		await SectionModel.findByIdAndDelete(section_id);
