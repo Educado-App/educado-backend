@@ -154,7 +154,6 @@ router.patch('/:id/addCourse', requireLogin, async (req, res) => {
     }
 
     const obj = await addIncompleteCourse(course);
-    console.log(obj);
     student.courses.push(obj);
 
     await StudentModel.findOneAndUpdate(

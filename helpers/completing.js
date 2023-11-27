@@ -71,7 +71,9 @@ function markComponentAsCompleted(course, section, component, student, points, i
     student.points += points;
   }
 
-  component.isComplete = isComplete;
+  if (!component.isComplete) {
+    component.isComplete = isComplete;
+  }
 
   if (isComplete) {
     component.completionDate = Date.now();
@@ -148,36 +150,25 @@ async function addIncompleteCourse(course) {
     let section = {
       sectionId: sectionId,
       totalPoints: 0,
+      extraPoints: 0,
       isComplete: false,
       components: []
     };
 
-    await LectureModel.find({ parentSection: sectionId }).then((lectures) => {
-      for (let lecture of lectures) {
-        section.components.push({
-          compId: lecture._id,
-          compType: 'lecture',
-          isComplete: false,
-          pointsGiven: 0,
-        });
-      }
-    }).catch((err) => {
-      return res.status(404).json({ 'error': errorCodes['E0011'] });
-    })
+    const courseSection = await SectionModel.findById(sectionId);
+    if (!courseSection) {
+      return res.status(404).json({ error: errorCodes['E0006'] });
+    }
 
-    await ExerciseModel.find({ parentSection: sectionId }).then((exercises) => {
-      for (let exercise of exercises) {
-        section.components.push({
-          compId: exercise._id,
-          compType: 'exercise',
-          isComplete: false,
-          pointsGiven: 0,
-          isFirstAttempt: true,
-        });
-      }
-    }).catch((err) => {
-      return res.status(404).json({ 'error': errorCodes['E0011'] });
-    })
+    for (let comp of courseSection.components) {
+      section.components.push({
+        compId: comp.compId,
+        compType: comp.compType,
+        isComplete: false,
+        pointsGiven: 0,
+        isFirstAttempt: true,
+      });
+    }
 
     obj.sections.push(section);
   }
