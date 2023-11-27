@@ -159,7 +159,7 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
 
     res.status(200).send(updatedUser);
   } catch (error) {
-    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E1104']) {
       // Handle "user not found" error response here
       res.status(404);
     } else {

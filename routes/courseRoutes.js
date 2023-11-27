@@ -314,7 +314,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       category: course.category,
       difficulty: course.difficulty,
 	    status: course.status,
-      coverImg: id + "_0",
+      coverImg: id + "_c",
 	    dateUpdated: Date.now()
     },
     function (err, docs) {
