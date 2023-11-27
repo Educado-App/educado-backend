@@ -50,6 +50,7 @@ router.post('/login', async (req, res) => {
         // User is rejected
         return res.status(403).json({'error': errorCodes['E1002']});
       }
+      profile.points = 0;
     } else {
       profile = await StudentModel.findOne({baseUser: user._id});
     }
