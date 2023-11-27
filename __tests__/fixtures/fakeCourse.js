@@ -11,6 +11,6 @@ module.exports = function makeFakeCourse() {
 		difficulty: 1,
 		estimatedHours: 1,
 		rating: 5,
-    numOfSubscriptions: 0,
+		numOfSubscriptions: 0,
 	};
 };

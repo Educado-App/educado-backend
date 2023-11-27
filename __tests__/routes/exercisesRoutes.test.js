@@ -7,7 +7,6 @@ const makeFakeSection = require('../fixtures/fakeSection');
 const makeFakeExercise = require('../fixtures/fakeExercise');
 const mongoose = require('mongoose');
 const { signAccessToken } = require('../../helpers/token');
-const errorCodes = require('../../helpers/errorCodes')
 
 const app = express();
 app.use(express.json());
@@ -15,15 +14,15 @@ app.use('/api/exercises', router); // Add your router to the Express app
 
 // Mock Google OAuth2 clientID
 jest.mock('../../config/keys', () => {
-  return {
-    GOOGLE_CLIENT_ID: 'test',
-    TOKEN_SECRET: 'test',
-  };
+	return {
+		GOOGLE_CLIENT_ID: 'test',
+		TOKEN_SECRET: 'test',
+	};
 });
 
 // Start the Express app on a specific port for testing
 const PORT = 5022; // Choose a port for testing
-const server = app.listen(PORT)
+const server = app.listen(PORT);
 
 let fakeUser = makeFakeUser();
 let fakeSection = makeFakeSection();
@@ -32,112 +31,112 @@ let fakeExercise = makeFakeExercise();
 
 describe('PUT /api/exercises/:sectionId', () => {
 
-  let db; // Store the database connection
+	let db; // Store the database connection
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('sections').insertOne(fakeSection);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('sections').insertOne(fakeSection);
+	});
 
-  it('Creates a exercise for a given course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    const response = await request(app)
-      .put('/api/exercises/' + fakeSection._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test exercise', question: 'Test question', answers: {text: "test", correct: false, feedback: "test"} })
-      .expect(201);
+	it('Creates a exercise for a given course', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		const response = await request(app)
+			.put('/api/exercises/' + fakeSection._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test exercise', question: 'Test question', answers: {text: 'test', correct: false, feedback: 'test'} })
+			.expect(201);
 
-    expect(response.body.title).toBe('Test exercise');
-  });
+		expect(response.body.title).toBe('Test exercise');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+	});
 
 });
 
 
 describe('PATCH /exercises/:sectionId', () => {
 
-  let db; // Store the database connection
+	let db; // Store the database connection
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('exercises').insertOne(fakeExercise);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('exercises').insertOne(fakeExercise);
+	});
 
-  it('Update the fake exercise', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    const response = await request(app)
-      .patch('/api/exercises/' + fakeExercise._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test', question: 'Test question' })
-      .expect(200);
+	it('Update the fake exercise', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		const response = await request(app)
+			.patch('/api/exercises/' + fakeExercise._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test', question: 'Test question' })
+			.expect(200);
     
-    expect(response.body.title).toBe('Test');
-    expect(response.body.question).toBe('Test question');
-  });
+		expect(response.body.title).toBe('Test');
+		expect(response.body.question).toBe('Test question');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+	});
 });
 
 
 describe('DELETE /exercises/:sectionId', () => {
 
-  let db; // Store the database connection
-  let exerciseCreate; // Store the exercise created
+	let db; // Store the database connection
+	let exerciseCreate; // Store the exercise created
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('sections').insertOne(fakeSection);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('sections').insertOne(fakeSection);
+	});
 
-  it('Creates a exercise for a given course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    exerciseCreate = await request(app)
-      .put('/api/exercises/' + fakeSection._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test exercise', question: 'Test question', answers: {text: "test", correct: false, feedback: "test"} })
-      .expect(201);
+	it('Creates a exercise for a given course', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		exerciseCreate = await request(app)
+			.put('/api/exercises/' + fakeSection._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test exercise', question: 'Test question', answers: {text: 'test', correct: false, feedback: 'test'} })
+			.expect(201);
 
-    expect(exerciseCreate.body.title).toBe('Test exercise');
-  });
+		expect(exerciseCreate.body.title).toBe('Test exercise');
+	});
 
   
-  it('Delete the created exercise', async () => {
-    const token = signAccessToken({id: fakeUser._id});
+	it('Delete the created exercise', async () => {
+		const token = signAccessToken({id: fakeUser._id});
 
-    const response = await request(app)
-      .delete('/api/exercises/' + exerciseCreate.body._id)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+		const response = await request(app)
+			.delete('/api/exercises/' + exerciseCreate.body._id)
+			.set('Authorization', `Bearer ${token}`)
+			.expect(200);
 
-    expect(response.text).toBe("Exercise Deleted");
-  });
+		expect(response.text).toBe('Exercise Deleted');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+	});
 
 });
 
 afterAll(async () => {
-  server.close();
-  await mongoose.connection.close();
+	server.close();
+	await mongoose.connection.close();
 });

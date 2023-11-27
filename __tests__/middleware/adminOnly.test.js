@@ -1,9 +1,7 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../../routes/testRoutes'); // Import your router file here
-const connectDb = require('../fixtures/db');
+const router = require('../../routes/testRoutes'); 
 const { signAccessToken } = require('../../helpers/token');
-const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
@@ -24,18 +22,16 @@ jest.mock('../../config/keys', () => {
 });
 
 describe('Admin token verify', () => {
-	let db;
 
 	beforeAll(done => {
 		done();
-		db = connectDb(); // Connect to the database
 	});
 
 	it('Return an error if no valid admin token is present on private route', async () => {
 		const token = 'ImAnInvalidToken';
 		const response = await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
-			.set('token', token)
+			.set('token', token);
 
 		expect(response.body.error).toBeDefined();
 	});
@@ -44,7 +40,7 @@ describe('Admin token verify', () => {
 		const token = signAccessToken({ id: 'srdfet784y2uioejqr' });
 
 		// mock that token is valid
-		const response = await request(`http://localhost:${PORT}`)
+		await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
 			.set('token', token)
 			.expect(200);
@@ -52,7 +48,7 @@ describe('Admin token verify', () => {
 
 	it('Test for non-algorithm attack', async () => {
 		const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.' + btoa(`{"id":1,"iat":${'' + Date.now()},"exp":999999999999}`) + '.';
-		const response = await request(`http://localhost:${PORT}`)
+		await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
 			.set('token', token)
 			.expect(401);
@@ -60,6 +56,5 @@ describe('Admin token verify', () => {
 
 	afterAll(async () => {
 		server.close();
-		await mongoose.connection.close();
 	});
 });
