@@ -35,13 +35,15 @@ async function markAsCompleted(user, exerciseIdFromFunction, pointsFromFunction,
   
     // Check if all exercises in the section are completed
     user = await StudentModel.findOne({ baseUser: user.baseUser });
+
+    exercisesInSection = await ExerciseModel.find({ parentSection: sectionId });
   
     // Redefine the completedCourseIndex with the updated user
     const completedCourseIndex = user.completedCourses.findIndex(completedCourse => completedCourse.courseId.equals(courseId));
     const completedSection = user.completedCourses[completedCourseIndex].completedSections.find(completedSection => completedSection.sectionId.equals(sectionId));
   
     // Check if all exercises are present and marked as complete
-    const allExercisesCompleted = completedSection.completedExercises.length === section.exercises.length &&
+    const allExercisesCompleted = completedSection.completedExercises.length === exercisesInSection.length &&
       completedSection.completedExercises.every(completedExercise => completedExercise.isComplete);
   
     // Update the totalPoints field for the completedSection and completedCourse

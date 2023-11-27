@@ -644,7 +644,7 @@ describe('Handles extra points for sections', () => {
     // Add the connection between the course, section, and exercise
     fakeCourse.sections.push(fakeSection._id);
 
-    fakeSection.exercises.push(fakeExercise._id);
+    fakeSection.components.push(fakeExercise._id);
     fakeSection.parentCourse = fakeCourse._id;
 
     fakeExercise.parentSection = fakeSection._id;

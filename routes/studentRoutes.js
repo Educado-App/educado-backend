@@ -165,7 +165,8 @@ router.patch('/:id/completed', requireLogin, async (req, res) => {
     } else {
       res.status(400);
     }
-
+    
+    console.log(error); 
     res.send({
       error: error
     });
