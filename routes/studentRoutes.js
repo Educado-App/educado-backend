@@ -1,12 +1,10 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const { markAsCompleted } = require('../helpers/answerExercises');
+const { markAsCompleted, updateUserLevel } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { encrypt, compare } = require('../helpers/password');
 const { findTop100Students } = require('../helpers/leaderboard');
-const { updateStudentLevel, giveExtraPointsForSection } = require('../helpers/pointSystem');
-
+const { addIncompleteCourse } = require('../helpers/completing');
 const { ExerciseModel } = require('../models/Exercises');
 const { StudentModel } = require('../models/Students');
 const { SectionModel } = require('../models/Sections');
@@ -42,10 +40,11 @@ router.patch('/:id', requireLogin, async (req, res) => {
 
 router.get('/:id/info', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const id = mongoose.Types.ObjectId(req.params.id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
-    const id = mongoose.Types.ObjectId(req.params.id);
 
     const student = await StudentModel.findOne({ baseUser: id });
 
@@ -131,33 +130,61 @@ router.get('/subscriptions', async (req, res) => {
   }
 });
 
+router.patch('/:id/addCourse', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { courseId } = req.body;
+
+    const course = await CourseModel.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: errorCodes['E0006'] });
+    }
+
+    const student = await StudentModel.findOne({ baseUser: id });
+
+    if (!student) {
+      return res.status(404).json({ error: errorCodes['E0004'] });
+    }
+
+    if (student.courses.find(course => course.courseId.equals(id))) {
+      return res.status(400).json({ error: errorCodes['E0016'] });
+    }
+
+    const obj = await addIncompleteCourse(course);
+    student.courses.push(obj);
+
+    await StudentModel.findOneAndUpdate(
+      { baseUser: id },
+      {
+        $set: {
+          courses: student.courses
+        }
+      }
+    );
+
+    return res.status(200).send(student);
+  } catch (error) {
+    throw error;
+  }
+})
+
 // Mark courses, sections, and exercises as completed for a user
 router.patch('/:id/completed', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
-    let { exerciseId, isComplete, points } = req.body;
+    let { comp, isComplete, points } = req.body;
 
-    // Sets points to 0 because the exercise was not answered correctly
-    if (!isComplete) {
-      points = 0;
-    }
-
-    // Retrieve the user by ID
+    // Retrieve the user by ID MAYBE CHANGE TO STUDENT ID
     let student = await StudentModel.findOne({ baseUser: id });
 
     if (!student) {
       throw errorCodes['E0004'];
     }
 
-    await markAsCompleted(student, exerciseId, points, isComplete);
+    const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
 
-    if (!isNaN(points)) {
-      await updateStudentLevel(id, points, student.level);
-    }
-
-    const updatedUser = await StudentModel.findOne({ baseUser: id });
-
-    res.status(200).send(updatedUser);
+    res.status(200).send(updatedStudent);
   } catch (error) {
     if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
       // Handle "user not found" error response here

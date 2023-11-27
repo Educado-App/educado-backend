@@ -8,6 +8,9 @@ const makeFakeCourse = require('../fixtures/fakeCourse');
 const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeSection = require('../fixtures/fakeSection');
 const makeFakeExercise = require('../fixtures/fakeExercise');
+const makeFakeLecture = require('../fixtures/fakeLecture');
+const makeFakeStudentCourse = require('../fixtures/fakeStudentCourse');
+const completing = require('../../helpers/completing');
 
 const { signAccessToken, verify } = require('../../helpers/token');
 
@@ -23,7 +26,14 @@ let fakeStudent;
 let fakeCourse = makeFakeCourse();
 let fakeSection = makeFakeSection();
 let fakeExercise = makeFakeExercise();
+let fakeLecture = makeFakeLecture();
+let fakeStudentCourse = makeFakeStudentCourse();
 const userId = mongoose.Types.ObjectId('5f841c2b1c8cfb2c58b78d68');
+
+const COMP_TYPES = {
+  LECTURE: 'lecture',
+  EXERCISE: 'exercise'
+}
 
 jest.mock('../../middlewares/requireLogin', () => {
   return (req, res, next) => {
@@ -186,7 +196,6 @@ describe('GET /students/:userId/subscriptions', () => {
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body.find((element) => element == courseId));
-
   });
 
   it('Should handle user not found error', async () => {
@@ -220,308 +229,465 @@ describe('PATCH /api/students/:userId/completed', () => {
     fakeCourse = makeFakeCourse();
     fakeSection = makeFakeSection();
     fakeExercise = makeFakeExercise();
+    fakeLecture = makeFakeLecture();
 
-    // Insert the fake course into the database
     await db.collection('courses').insertOne(fakeCourse);
-
-    // Insert the fake section into the database
     await db.collection('sections').insertOne(fakeSection);
-
-    // Insert the fake exercise into the database
     await db.collection('exercises').insertOne(fakeExercise);
+    await db.collection('lectures').insertOne(fakeLecture);
 
-    // Add the connection between the course, section, and exercise
-    fakeCourse.sections.push(fakeSection._id);
-
-    fakeSection.exercises.push(fakeExercise._id);
     fakeSection.parentCourse = fakeCourse._id;
-
     fakeExercise.parentSection = fakeSection._id;
+    fakeLecture.parentSection = fakeSection._id;
 
-    // Update course in the database
+    fakeCourse.sections.push(fakeSection._id);
+    fakeSection.components.push({ compId: fakeExercise._id, compType: COMP_TYPES.EXERCISE });
+    fakeSection.components.push({ compId: fakeLecture._id, compType: COMP_TYPES.LECTURE });
+
+    fakeStudentCourse = makeFakeStudentCourse(fakeCourse._id, fakeSection._id, fakeLecture._id, fakeExercise._id);
+    fakeStudent.courses.push(fakeStudentCourse);
+    
     await db.collection('courses').updateOne({ _id: fakeCourse._id }, { $set: fakeCourse });
-
-    // Update section in the database
     await db.collection('sections').updateOne({ _id: fakeSection._id }, { $set: fakeSection });
-
-    // Update exercise in the database
     await db.collection('exercises').updateOne({ _id: fakeExercise._id }, { $set: fakeExercise });
-});
+    await db.collection('lectures').updateOne({ _id: fakeLecture._id }, { $set: fakeLecture });
+    await db.collection('students').updateOne({ baseUser: userId }, { $set: fakeStudent });
+  });
 
 
   afterEach(async () => {
-    // Remove the user from the database after each test
     await db.collection('students').deleteOne({ baseUser: userId });
-
-    // Remove the course from the database after each test
     await db.collection('courses').deleteOne({ _id: fakeCourse._id });
-
-    // Remove the section from the database after each test
     await db.collection('sections').deleteOne({ _id: fakeSection._id });
-
-    // Remove the exercise from the database after each test
     await db.collection('exercises').deleteOne({ _id: fakeExercise._id });
+    await db.collection('lectures').deleteOne({ _id: fakeLecture._id });
   });
 
-  it('Adds exerciseId to completed exercises correctly', async () => {
-    const exerciseId = fakeExercise._id; // Replace this with an actual exercise ID from your database
+  it('find course', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
 
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
-      .expect(200);
-  
-    // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-        
-    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
-  }); 
+    expect(course).toEqual(fakeStudent.courses[0]);
+    expect(course.courseId).toEqual(fakeCourse._id);
+  })
 
-  it('Adds two exerciseIds to completed exercises correctly, with different parentCourses', async () => {
-    // creates the second exercise
-    let fakeCourse2 = makeFakeCourse();
-    let fakeSection2 = makeFakeSection();
-    let fakeExercise2 = makeFakeExercise();
+  it('find section', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
 
-    // Insert the fake course into the database
-    await db.collection('courses').insertOne(fakeCourse2);
-
-    // Insert the fake section into the database
-    await db.collection('sections').insertOne(fakeSection2);
-
-    // Insert the fake exercise into the database
-    await db.collection('exercises').insertOne(fakeExercise2);
-
-    // Add the connection between the course, section, and exercise
-    fakeCourse2.sections.push(fakeSection2._id);
-
-    fakeSection2.exercises.push(fakeExercise2._id);
-    fakeSection2.parentCourse = fakeCourse2._id;
-
-    fakeExercise2.parentSection = fakeSection2._id;
-
-    // Update course, section and exericse in the database
-    await db.collection('courses').updateOne({ _id: fakeCourse2._id }, { $set: fakeCourse2 });
-    await db.collection('sections').updateOne({ _id: fakeSection2._id }, { $set: fakeSection2 });
-    await db.collection('exercises').updateOne({ _id: fakeExercise2._id }, { $set: fakeExercise2 });
-
-    const exerciseId = fakeExercise._id;
-    const exerciseId2 = fakeExercise2._id;
-
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
-      .expect(200);
-
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId2, isComplete: true, points: 10 })
-      .expect(200);
-
-    // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-
-    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    const completedExerciseIds2 = updatedUser.completedCourses[1].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
-    expect(completedExerciseIds2).toEqual([exerciseId2.toString()]);
-
-    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
-    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
-
-    expect(totalPointsForCourse).toEqual(10);
-    expect(totalPointsForSection).toEqual(10);
+    expect(section).toEqual(fakeStudent.courses[0].sections[0]);
+    expect(section.sectionId).toEqual(fakeSection._id);
   });
 
-  it('Adds two exerciseIds to completed exercises correctly, with same parentCourse', async () => {
-    // creates the second exercise
-    fakeExercise2 = makeFakeExercise();
+  it('find comp lecture', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeLecture._id);
 
-    // Insert the fake exercise into the database
-    await db.collection('exercises').insertOne(fakeExercise2);
-
-    // Add the connection between the course, section, and exercise
-    fakeSection.exercises.push(fakeExercise2._id);
-    fakeExercise2.parentSection = fakeSection._id;
-
-    // Update course, section and exericse in the database
-    await db.collection('sections').updateOne({ _id: fakeSection._id }, { $set: fakeSection });
-    await db.collection('exercises').updateOne({ _id: fakeExercise2._id }, { $set: fakeExercise2 });
-
-    const exerciseId = fakeExercise._id;
-    const exerciseId2 = fakeExercise2._id;
-
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId, isComplete: true, points: 10 })
-      .expect(200);
-
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId2, isComplete: true, points: 10 })
-      .expect(200);
-
-    // Fetch the user from the database to verify the changes
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-
-    const completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    expect(completedExerciseIds[0]).toEqual(exerciseId.toString());
-    expect(completedExerciseIds[1]).toEqual(exerciseId2.toString());
-
-    let totalPointsForCourse = updatedUser.completedCourses[0].totalPoints;
-    let totalPointsForSection = updatedUser.completedCourses[0].completedSections[0].totalPoints;
-
-    expect(totalPointsForCourse).toEqual(20);
-    expect(totalPointsForSection).toEqual(20);
+    expect(comp).toEqual(fakeStudent.courses[0].sections[0].components[0]);
+    expect(comp.compId).toEqual(fakeLecture._id);
   });
 
-  it('First adds an exercise as failed, then completes it', async () => {
-    const exerciseId = fakeExercise._id; // Replace this with an actual exercise ID from your database
+  it('find comp exercise', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeExercise._id);
 
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId, isComplete: false, points: 0 })
-      .expect(200);
-
-    // Fetch the user from the database to verify the changes
-    let updatedUser = await db.collection('students').findOne({ baseUser: userId });
-        
-    let completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    let pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
-    let isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
-    
-    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
-    expect(pointsGivenForExercise).toEqual([0]);  
-    expect(isExerciseComplete).toEqual([false]);
-
-
-    await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId + '/completed')
-      .set('token', token) // Include the token in the request headers
-      .send({ exerciseId: exerciseId, isComplete: true, points: 5 })
-      .expect(200);
-  
-    // Fetch the user from the database to verify the changes
-    updatedUser = await db.collection('students').findOne({ baseUser: userId });
-        
-    completedExerciseIds = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.exerciseId.toString());
-    pointsGivenForExercise = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.pointsGiven);
-    isExerciseComplete = updatedUser.completedCourses[0].completedSections[0].completedExercises.map(exercise => exercise.isComplete);
-
-    expect(completedExerciseIds).toEqual([exerciseId.toString()]);
-    expect(pointsGivenForExercise).toEqual([5]);
-    expect(isExerciseComplete).toEqual([true]);
+    expect(comp).toEqual(fakeStudent.courses[0].sections[0].components[1]);
+    expect(comp.compId).toEqual(fakeExercise._id);
   });
 
-  it('Fails to add non-existing exerciseId to completed exercises', async () => {
-    const nonExistingExerciseId = new mongoose.Types.ObjectId();
-  
+  it('find course - should fail', () => {
+    const nonExistingCourseId = 'nonExistingCourseId';
+    const course = completing.findCourse(fakeStudent, nonExistingCourseId);
+
+    expect(course).toBeUndefined();
+  });
+
+  it('find section - should fail', () => {
+    const nonExistingSectionId = 'nonExistingSectionId';
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, nonExistingSectionId);
+
+    expect(section).toBeUndefined();
+  });
+
+  it('find comp lecture - should fail', () => {
+    const nonExistingLectureId = 'nonExistingLectureId';
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, nonExistingLectureId);
+
+    expect(comp).toBeUndefined();
+  });
+
+  it('find comp exercise - should fail', () => {
+    const nonExistingExerciseId = 'nonExistingExerciseId';
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, nonExistingExerciseId);
+
+    expect(comp).toBeUndefined();
+  });
+
+  it('marks lecture as complete', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeLecture._id);
+
+    const points = 0, isComplete = true;
+
+    expect(comp.isComplete).toBe(false);
+
+    const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+    expect(obj.component.isComplete).toBe(true);
+    expect(obj.component.pointsGiven).toBe(0);
+    expect(obj.component.completionDate).not.toBeUndefined();
+  });
+
+  it('marks lecture as complete already', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeLecture._id);
+
+    comp.isComplete = true;
+
+    const points = 0, isComplete = true;
+
+    expect(comp.isComplete).toBe(true);
+
+    const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+    expect(obj.component.isComplete).toBe(true);
+    expect(obj.component.pointsGiven).toBe(0);
+    expect(obj.component.completionDate).not.toBeUndefined();
+  });
+
+  it('marks exercise as complete first attempt', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeExercise._id);
+
+    const points = 10, isComplete = true;
+
+    expect(comp.isComplete).toBe(false);
+    expect(comp.isFirstAttempt).toBe(true);
+    expect(comp.pointsGiven).toBe(0);
+    expect(course.totalPoints).toBe(0);
+    expect(section.totalPoints).toBe(0);
+    expect(fakeStudent.points).toBe(0);
+
+    const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+    expect(obj.component.isComplete).toBe(true);
+    expect(obj.component.pointsGiven).toBe(10);
+    expect(obj.component.isFirstAttempt).toBe(false);
+    expect(obj.component.completionDate).not.toBeUndefined();
+    expect(obj.course.totalPoints).toBe(10);
+    expect(obj.section.totalPoints).toBe(10);
+    expect(obj.student.points).toBe(10);
+  });
+
+  it('marks exercise as complete not first attempt', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeExercise._id);
+
+    const points = 5, isComplete = true;
+
+    comp.isFirstAttempt = false;
+
+    expect(comp.isComplete).toBe(false);
+    expect(comp.isFirstAttempt).toBe(false);
+    expect(comp.pointsGiven).toBe(0);
+    expect(course.totalPoints).toBe(0);
+    expect(section.totalPoints).toBe(0);
+    expect(fakeStudent.points).toBe(0);
+
+    const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+    expect(obj.component.isComplete).toBe(true);
+    expect(obj.component.pointsGiven).toBe(5);
+    expect(obj.component.isFirstAttempt).toBe(false);
+    expect(obj.component.completionDate).not.toBeUndefined();
+    expect(obj.course.totalPoints).toBe(5);
+    expect(obj.section.totalPoints).toBe(5);
+    expect(obj.student.points).toBe(5);
+  });
+
+  it('marks exercise as not complete (answered wrong)', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const comp = completing.findComp(section, fakeExercise._id);
+
+    const points = 0, isComplete = false;
+
+    comp.isFirstAttempt = false;
+
+    expect(comp.isComplete).toBe(false);
+    expect(comp.isFirstAttempt).toBe(false);
+    expect(comp.pointsGiven).toBe(0);
+    expect(course.totalPoints).toBe(0);
+    expect(section.totalPoints).toBe(0);
+    expect(fakeStudent.points).toBe(0);
+
+    const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+    expect(obj.component.isComplete).toBe(false);
+    expect(obj.component.pointsGiven).toBe(0);
+    expect(obj.component.isFirstAttempt).toBe(false);
+    expect(obj.component.completionDate).not.toBeUndefined();
+    expect(obj.course.totalPoints).toBe(0);
+    expect(obj.section.totalPoints).toBe(0);
+    expect(obj.student.points).toBe(0);
+  });
+
+  it('marks section complete when comps are completed', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = true;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(true);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(true);
+
+    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+
+    expect(completedSection.isComplete).toBe(true);
+    expect(completedSection.completionDate).not.toBeUndefined();
+  });
+
+  it('marks section not complete when comps are not completed', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = false;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(false);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(false);
+
+    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+
+    expect(completedSection.isComplete).toBe(false);
+  });
+
+  it('marks course complete when section is completed', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = true;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(true);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(true);
+
+    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+
+    expect(completedSection.isComplete).toBe(true);
+    expect(completedSection.completionDate).not.toBeUndefined();
+
+    const completedCourse = completing.markCourseAsCompleted(course, isComplete);
+
+    expect(completedCourse.isComplete).toBe(true);
+    expect(completedCourse.completionDate).not.toBeUndefined();
+  });
+
+  it('marks course not complete when section is not completed', () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+    const compExercise = completing.findComp(section, fakeExercise._id);
+    const compLecture = completing.findComp(section, fakeLecture._id);
+
+    const isComplete = false;
+
+    expect(compExercise.isComplete).toBe(false);
+    expect(compLecture.isComplete).toBe(false);
+
+    const objExercise = completing.markComponentAsCompleted(course, section, compExercise, fakeStudent, 10, isComplete);
+
+    expect(objExercise.component.isComplete).toBe(false);
+
+    const objLecture = completing.markComponentAsCompleted(course, section, compLecture, fakeStudent, 0, isComplete);
+
+    expect(objLecture.component.isComplete).toBe(false);
+
+    const completedSection = completing.markSectionAsCompleted(section, isComplete);
+
+    expect(completedSection.isComplete).toBe(false);
+
+    const completedCourse = completing.markCourseAsCompleted(course, isComplete);
+
+    expect(completedCourse.isComplete).toBe(false);
+  });
+
+  it('marks as completed in the db', async () => {
+    const course = completing.findCourse(fakeStudent, fakeCourse._id);
+    const section = completing.findSection(course, fakeSection._id);
+
+    fakeStudent.courses[0].totalPoints = 20;
+    fakeStudent.courses[0].sections[0].totalPoints = 10;
+    fakeStudent.points = 95;
+
+    const student = await completing.markAsCompleted(fakeStudent, fakeExercise, 10, true);
+
+    // expect the student 
+    expect(student.courses[0].totalPoints).toBe(30);
+    expect(student.courses[0].sections[0].totalPoints).toBe(20);
+    expect(student.courses[0].sections[0].components[1].pointsGiven).toBe(10);
+    expect(student.courses[0].sections[0].components[1].isComplete).toBe(true);
+    expect(student.points).toBe(105);
+    expect(student.level).toBe(2);
+
+    const updatedStudent = await db.collection('students').findOne({ baseUser: userId });
+
+    // expect the db
+    expect(updatedStudent.courses[0].totalPoints).toBe(30);
+    expect(updatedStudent.courses[0].sections[0].totalPoints).toBe(20);
+    expect(updatedStudent.courses[0].sections[0].components[1].pointsGiven).toBe(10);
+    expect(updatedStudent.courses[0].sections[0].components[1].isComplete).toBe(true);
+    expect(updatedStudent.points).toBe(105);
+    expect(updatedStudent.level).toBe(2);
+  });
+
+  it('level up student', () => {
+    fakeStudent.points = 100;
+
+    expect(fakeStudent.points).toBe(100);
+
+    const student = completing.updateUserLevel(fakeStudent);
+
+    expect(student.level).toBe(2);
+    expect(student.points).toBe(100);
+  })
+
+  it('student doent level up', () => {
+    fakeStudent.points = 50;
+
+    expect(fakeStudent.points).toBe(50);
+
+    const student = completing.updateUserLevel(fakeStudent);
+
+    expect(student.level).toBe(1);
+    expect(student.points).toBe(50);
+  })
+
+  it('route should return 200 with the updated student (exercise)', async () => {
+
     const response = await request(`http://localhost:${PORT}`)
       .patch('/api/students/' + userId + '/completed')
       .set('token', token)
-      .send({ exerciseId: nonExistingExerciseId })
-      .expect(404);
-  
-      expect(response.body.error.code).toBe('E0012');
+      .send({ comp: fakeExercise, isComplete: true, points: 10 })
+      .expect(200);
+
+    const student = response.body
+
+    expect(student.courses[0].totalPoints).toBe(10);
+    expect(student.courses[0].isComplete).toBe(false);
+    expect(student.courses[0].sections[0].totalPoints).toBe(10);
+    expect(student.courses[0].sections[0].isComplete).toBe(false);
+    expect(student.courses[0].sections[0].components[1].pointsGiven).toBe(10);
+    expect(student.courses[0].sections[0].components[1].isComplete).toBe(true);
+    expect(student.points).toBe(10);
+    expect(student.level).toBe(1);
+
+    const updatedStudent = await db.collection('students').findOne({ baseUser: userId });
+
+    expect(updatedStudent.courses[0].totalPoints).toBe(10);
+    expect(updatedStudent.courses[0].isComplete).toBe(false);
+    expect(updatedStudent.courses[0].sections[0].totalPoints).toBe(10);
+    expect(updatedStudent.courses[0].sections[0].isComplete).toBe(false);
+    expect(updatedStudent.courses[0].sections[0].components[1].pointsGiven).toBe(10);
+    expect(updatedStudent.courses[0].sections[0].components[1].isComplete).toBe(true);
+    expect(updatedStudent.points).toBe(10);
+    expect(updatedStudent.level).toBe(1);
   });
-  
-  it('Fails to add exerciseId to completed exercises for non-existing user', async () => {
-    const exerciseId = fakeExercise._id;
-    const nonExistingUserId = new mongoose.Types.ObjectId();
-  
+
+  it('route should return 200 with the updated student (lecture)', async () => {
+
     const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + nonExistingUserId + '/completed')
+      .patch('/api/students/' + userId + '/completed')
       .set('token', token)
-      .send({ exerciseId: exerciseId })
-      .expect(404);
-  
-      expect(response.body.error.code).toBe('E0004');
-  });
-});
+      .send({ comp: fakeLecture, isComplete: true, points: 0 })
+      .expect(200);
 
-describe('PATCH /api/students/:userId', () => {
-  it('Update points succesfully', async () => {
-    const points = 10;
+    const student = response.body
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: points
-      })
-      .expect(200); // Expecting a 200 OK Request response
+    expect(student.courses[0].totalPoints).toBe(0);
+    expect(student.courses[0].isComplete).toBe(false);
+    expect(student.courses[0].sections[0].totalPoints).toBe(0);
+    expect(student.courses[0].sections[0].isComplete).toBe(false);
+    expect(student.courses[0].sections[0].components[0].pointsGiven).toBe(0);
+    expect(student.courses[0].sections[0].components[0].isComplete).toBe(true);
+    expect(student.points).toBe(0);
+    expect(student.level).toBe(1);
 
-    // Verify that the user was updated in the database
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-    expect(updatedUser.points).toBe(points);
-    expect(updatedUser.level).toBe(1);
-  });
+    const updatedStudent = await db.collection('students').findOne({ baseUser: userId });
 
-  it('Update level succesfully', async () => {
-    const points = 120;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: points
-      })
-    
-    expect(response.status).toBe(200); // Expecting a 200 OK Request response
-
-    // Verify that the user was updated in the database
-    const updatedUser = await db.collection('students').findOne({ baseUser: userId });
-    expect(updatedUser.points).toBe(20);
-    expect(updatedUser.level).toBe(2);
+    expect(updatedStudent.courses[0].totalPoints).toBe(0);
+    expect(updatedStudent.courses[0].isComplete).toBe(false);
+    expect(updatedStudent.courses[0].sections[0].totalPoints).toBe(0);
+    expect(updatedStudent.courses[0].sections[0].isComplete).toBe(false);
+    expect(updatedStudent.courses[0].sections[0].components[0].pointsGiven).toBe(0);
+    expect(updatedStudent.courses[0].sections[0].components[0].isComplete).toBe(true);
+    expect(updatedStudent.points).toBe(0);
+    expect(updatedStudent.level).toBe(1);
   });
 
-  it('Handles validation errors for points', async () => {
-    const invalidPoints = 'invalidPoints';
+  it('route should return 200 with the updated student (lecture + exercise)', async () => {
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token)
+      .send({ comp: fakeLecture, isComplete: true, points: 0 })
+      .expect(200);
 
-    expect(response.body.error.code).toBe('E0804');
-  });
+    await request(`http://localhost:${PORT}`)
+      .patch('/api/students/' + userId + '/completed')
+      .set('token', token)
+      .send({ comp: fakeExercise, isComplete: true, points: 10 })
+      .expect(200);
 
-  it('Handles negative value for points', async () => {
-    const invalidPoints = -50;
+    const updatedStudent = await db.collection('students').findOne({ baseUser: userId });
 
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
-
-    expect(response.body.error.code).toBe('E0804');
-  });
-
-  it('Handles 0 value for points', async () => {
-    const invalidPoints = 0;
-
-    const response = await request(`http://localhost:${PORT}`)
-      .patch('/api/students/' + userId)
-      .set('token', token) // Include the token in the request headers
-      .send({
-        points: invalidPoints
-      })
-      .expect(400); // Expecting a 400 Bad Request response
-
-    expect(response.body.error.code).toBe('E0804');
+    expect(updatedStudent.courses[0].totalPoints).toBe(10);
+    expect(updatedStudent.courses[0].isComplete).toBe(true);
+    expect(updatedStudent.courses[0].sections[0].totalPoints).toBe(10);
+    expect(updatedStudent.courses[0].sections[0].isComplete).toBe(true);
+    expect(updatedStudent.courses[0].sections[0].components[0].pointsGiven).toBe(0);
+    expect(updatedStudent.courses[0].sections[0].components[0].isComplete).toBe(true);
+    expect(updatedStudent.courses[0].sections[0].components[1].pointsGiven).toBe(10);
+    expect(updatedStudent.courses[0].sections[0].components[1].isComplete).toBe(true);
+    expect(updatedStudent.points).toBe(10);
+    expect(updatedStudent.level).toBe(1);
   });
 });
 
