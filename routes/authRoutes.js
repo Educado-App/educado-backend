@@ -23,7 +23,6 @@ router.post('/', makeExpressCallback(authEndpointHandler));
 // Login
 router.post('/login', async (req, res) => {
 	let result;
-	let profile = null;
 	if (!req.body.email || !req.body.password) {
 		return res.status(400).json({ error: errorCodes['E0202'] }); //Password or email is missing
 	}
@@ -37,6 +36,7 @@ router.post('/login', async (req, res) => {
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
 
+    // ********** THIS MAKES IT SO THAT U CANT LOG IN WITH STUDENT **********
     /*
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
 		profile = await ContentCreatorModel.findOne({baseUser: user._id});
