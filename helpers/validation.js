@@ -1,6 +1,7 @@
 const { patterns } = require('../helpers/patterns');
 const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
+const {compare} = require('../helpers/password');
 
 async function validateEmail(input) {
   const emailPattern = patterns.email;
@@ -88,21 +89,19 @@ function validatePoints(input) {
   return true;
 }
 
-/* Commented out as it gives linting errors and is not in use.
 function ensureNewValues(newValues, oldValues) {
-	const newEntries = Object.entries(newValues);
+  const newEntries = Object.entries(newValues);
 
-	for (const [fieldName, fieldValue] of newEntries) {
-		if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
-			return false;
-		} else if (fieldValue === oldValues[fieldName]) {
-			return false;
-		}
-	}
+  for (const [fieldName, fieldValue] of newEntries) {
+    if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
+      return false;
+    } else if (fieldValue === oldValues[fieldName]) {
+      return false;
+    }
+  }
 
-	return true;
+  return true;
 }
-*/
 
 module.exports = {
   validateEmail,
@@ -110,5 +109,5 @@ module.exports = {
   validatePoints,
   validatePassword,
   isMissing,
-  //ensureNewValues,
+  ensureNewValues,
 };
