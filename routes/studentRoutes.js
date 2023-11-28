@@ -100,40 +100,43 @@ router.get('/subscriptions', async (req, res) => {
 	}
 });
 
-router.patch('/:id/addCourse', requireLogin, async (req, res) => {
-	const { id } = req.params;
-	const { courseId } = req.body;
+router.patch('/:id/courses/:courseId/add', requireLogin, async (req, res) => {
+  try {
+    const { id, courseId } = req.params;
 
-	const course = await CourseModel.findById(courseId);
+    const course = await CourseModel.findById(courseId);
 
-	if (!course) {
-		return res.status(404).json({ error: errorCodes['E0006'] });
-	}
+    if (!course) {
+      return res.status(404).json({ error: errorCodes['E0006'] });
+    }
 
-	const student = await StudentModel.findOne({ baseUser: id });
+    const student = await StudentModel.findOne({ baseUser: id });
 
-	if (!student) {
-		return res.status(404).json({ error: errorCodes['E0004'] });
-	}
+    if (!student) {
+      return res.status(404).json({ error: errorCodes['E0004'] });
+    }
 
-	if (student.courses.find(course => course.courseId.equals(id))) {
-		return res.status(400).json({ error: errorCodes['E0016'] });
-	}
+    if (student.courses.find(course => course.courseId.equals(id))) {
+      return res.status(400).json({ error: errorCodes['E0016'] });
+    }
 
-	const obj = await addIncompleteCourse(course);
-	student.courses.push(obj);
+    const obj = await addIncompleteCourse(course);
+    student.courses.push(obj);
 
-	await StudentModel.findOneAndUpdate(
-		{ baseUser: id },
-		{
-			$set: {
-				courses: student.courses
-			}
-		}
-	);
+    await StudentModel.findOneAndUpdate(
+      { baseUser: id },
+      {
+        $set: {
+          courses: student.courses
+        }
+      }
+    );
 
-	return res.status(200).send(student);
-});
+    return res.status(200).send(student);
+  } catch (error) {
+    throw error;
+  }
+})
 
 // Mark courses, sections, and exercises as completed for a user
 router.patch('/:id/completed', requireLogin, async (req, res) => {
