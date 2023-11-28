@@ -1,5 +1,5 @@
 // Mongoose model class for User
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const patterns = require('../helpers/patterns');
 
@@ -54,29 +54,29 @@ const userSchema = new Schema({
          * followed by a dot, followed by a sequence of two to four domain 
          * extension letters.
          */
-        return patterns.email.test(email);
-      },
-      message: 'Invalid email'
-    },
-    validate: {
-      validator: async function(input) {
-        let users = await UserModel.find({email: input}, function(err,docs){
+				return patterns.email.test(email);
+			},
+			message: 'Invalid email'
+		},
+		validate: {
+			validator: async function(input) {
+				let users = await UserModel.find({email: input}, function(){
           
-        });
-        if(users.length){
-          return false;
-        }
-        return true;
-      },
-      message: 'User email already exists!'
-    }
-  },
-  password: String,
-  joinedAt: Date,
-  dateUpdated: Date,
-  resetAttempts: [Date],
+				});
+				if(users.length){
+					return false;
+				}
+				return true;
+			},
+			message: 'User email already exists!'
+		}
+	},
+	password: String,
+	joinedAt: Date,
+	dateUpdated: Date,
+	resetAttempts: [Date],
 });
 
 const UserModel = mongoose.model('users', userSchema);
 
-module.exports.UserModel = UserModel
+module.exports.UserModel = UserModel;

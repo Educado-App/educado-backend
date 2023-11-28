@@ -10,7 +10,7 @@ router.get('/require-jwt', requireLogin, (req, res) => {
 });
 
 router.get('/adminOnly', adminOnly, (req, res) => {
-  res.status(200).send(req.body);
-})
+	res.status(200).send(req.body);
+});
 
 module.exports = router;

@@ -1,9 +1,7 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../../routes/testRoutes'); // Import your router file here
-const connectDb = require('../fixtures/db');
+const router = require('../../routes/testRoutes'); 
 const { signAccessToken } = require('../../helpers/token');
-const mongoose = require('mongoose');
 
 const app = express();
 app.use(express.json());
@@ -24,11 +22,9 @@ jest.mock('../../config/keys', () => {
 });
 
 describe('JWT verify', () => {
-	let db;
 
 	beforeAll(done => {
 		done();
-		db = connectDb(); // Connect to the database
 	});
 
 	it('Return an error if no valid JWT is present on private route', async () => {
@@ -45,7 +41,7 @@ describe('JWT verify', () => {
 		const token = signAccessToken({ id: 1 });
 
 		// mock that token is valid
-		const response = await request(`http://localhost:${PORT}`)
+		await request(`http://localhost:${PORT}`)
 			.get('/api/test/require-jwt')
 			.set('token', token)
 			.expect(200);
@@ -53,7 +49,7 @@ describe('JWT verify', () => {
 
 	it('Test for non-algorithm attack', async () => {
 		const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.' + btoa(`{"id":1,"iat":${'' + Date.now()},"exp":999999999999}`) + '.';
-		const response = await request(`http://localhost:${PORT}`)
+		await request(`http://localhost:${PORT}`)
 			.get('/api/test/require-jwt')
 			.set('token', token)
 			.expect(401);
@@ -61,6 +57,5 @@ describe('JWT verify', () => {
 
 	afterAll(async () => {
 		await server.close();
-		await mongoose.connection.close();
 	});
 });
