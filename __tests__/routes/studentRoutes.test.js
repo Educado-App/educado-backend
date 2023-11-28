@@ -656,7 +656,7 @@ describe('PATCH /api/students/:userId/complete', () => {
 	it('route should return 200 with the updated student (exercise)', async () => {
 
 		const response = await request(`http://localhost:${PORT}`)
-			.patch('/api/students/' + userId + '/completed')
+			.patch('/api/students/' + userId + '/complete')
 			.set('token', token)
 			.send({ comp: fakeExercise, isComplete: true, points: 10 })
 			.expect(200);
@@ -687,7 +687,7 @@ describe('PATCH /api/students/:userId/complete', () => {
 	it('route should return 200 with the updated student (lecture)', async () => {
 
 		const response = await request(`http://localhost:${PORT}`)
-			.patch('/api/students/' + userId + '/completed')
+			.patch('/api/students/' + userId + '/complete')
 			.set('token', token)
 			.send({ comp: fakeLecture, isComplete: true, points: 0 })
 			.expect(200);
@@ -718,13 +718,13 @@ describe('PATCH /api/students/:userId/complete', () => {
 	it('route should return 200 with the updated student (lecture + exercise)', async () => {
 
 		await request(`http://localhost:${PORT}`)
-			.patch('/api/students/' + userId + '/completed')
+			.patch('/api/students/' + userId + '/complete')
 			.set('token', token)
 			.send({ comp: fakeLecture, isComplete: true, points: 0 })
 			.expect(200);
 
 		await request(`http://localhost:${PORT}`)
-			.patch('/api/students/' + userId + '/completed')
+			.patch('/api/students/' + userId + '/complete')
 			.set('token', token)
 			.send({ comp: fakeExercise, isComplete: true, points: 10 })
 			.expect(200);

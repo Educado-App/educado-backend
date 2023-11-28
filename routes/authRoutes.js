@@ -36,6 +36,8 @@ router.post('/login', async (req, res) => {
 			// Invalid email (email not found)
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
+
+    /*
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
 		profile = await ContentCreatorModel.findOne({baseUser: user._id});
 
@@ -54,6 +56,9 @@ router.post('/login', async (req, res) => {
 		} else {
 			profile = await StudentModel.findOne({baseUser: user._id});
 		}
+    */
+    const profile = await StudentModel.findOne({baseUser: user._id});
+
 		// If the email is found, and content creator is approved compare the passwords
 		result = compare(req.body.password, user.password);
 		// If the passwords match, return a success message
@@ -69,7 +74,7 @@ router.post('/login', async (req, res) => {
 					firstName: user.firstName,
 					lastName: user.lastName,
 					email: user.email,
-					completedCourses: user.completedCourses,
+					courses: profile.courses,
 					points: profile.points,
 				},
 			});
@@ -79,7 +84,6 @@ router.post('/login', async (req, res) => {
 		}
 	} catch (err) {
 		// If the server could not be reached, return an error message
-		console.log(err);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
