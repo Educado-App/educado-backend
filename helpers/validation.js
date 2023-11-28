@@ -88,6 +88,7 @@ function validatePoints(input) {
 	return true;
 }
 
+/* Commented out as it gives linting errors and is not in use.
 function ensureNewValues(newValues, oldValues) {
 	const newEntries = Object.entries(newValues);
 
@@ -101,6 +102,7 @@ function ensureNewValues(newValues, oldValues) {
 
 	return true;
 }
+*/
 
 module.exports = {
 	validateEmail,
@@ -108,5 +110,5 @@ module.exports = {
 	validatePoints,
 	validatePassword,
 	isMissing,
-	ensureNewValues,
+	//ensureNewValues,
 };

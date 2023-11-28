@@ -6,6 +6,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const path = require('path');
 const fs = require('fs');
 
+/* global __dirname */
 const globalConfigPath = path.join(__dirname, 'globalConfigMongo.json');
 
 const mongod =

@@ -100,85 +100,78 @@ router.get('/subscriptions', async (req, res) => {
 	}
 });
 
-router.patch('/:id/courses/:courseId/add', requireLogin, async (req, res) => {
-  try {
-    const { id, courseId } = req.params;
+router.patch('/:studentId/courses/:courseId/enroll', requireLogin, async (req, res) => {
+	try {
+		const { studentId, courseId } = req.params;
 
-    const course = await CourseModel.findById(courseId);
+		const course = await CourseModel.findById(courseId);
 
-    if (!course) {
-      return res.status(404).json({ error: errorCodes['E0006'] });
-    }
+		if (!course) {
+			return res.status(404).json({ error: errorCodes['E0006'] });
+		}
 
-    const student = await StudentModel.findOne({ baseUser: id });
+		const student = await StudentModel.findOne({ baseUser: studentId });
 
-    if (!student) {
-      return res.status(404).json({ error: errorCodes['E0004'] });
-    }
+		if (!student) {
+			return res.status(404).json({ error: errorCodes['E0004'] });
+		}
 
-    if (student.courses.find(course => course.courseId.equals(id))) {
-      return res.status(400).json({ error: errorCodes['E0016'] });
-    }
+		if (student.courses.find(course => course.courseId.equals(studentId))) {
+			return res.status(400).json({ error: errorCodes['E0016'] });
+		}
 
-    const obj = await addIncompleteCourse(course);
-    student.courses.push(obj);
+		const obj = await addIncompleteCourse(course);
+		student.courses.push(obj);
 
-    await StudentModel.findOneAndUpdate(
-      { baseUser: id },
-      {
-        $set: {
-          courses: student.courses
-        }
-      }
-    );
+		await StudentModel.findOneAndUpdate(
+			{ baseUser: studentId },
+			{
+				$set: {
+					courses: student.courses
+				}
+			}
+		);
 
-    return res.status(200).send(student);
-  } catch (error) {
-    throw error;
-  }
-})
+		return res.status(200).send(student);
+	} catch (error) {
+		// If the server could not be reached, return an error message
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
+});
 
 // Mark courses, sections, and components as completed for a user
 router.patch('/:id/complete', requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    let { comp, isComplete, points } = req.body;
+	try {
+		const { id } = req.params;
+		let { comp, isComplete, points } = req.body;
 
-    let student = await StudentModel.findOne({ baseUser: id });
+		let student = await StudentModel.findOne({ baseUser: id });
 
-    if (!student) {
-      throw errorCodes['E0004'];
-    }
+		if (!student) {
+			return res.status(404).json({ error: errorCodes['E0004'] });
+		}
 
-    const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
+		const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
 
-    res.status(200).send(updatedStudent);
-  } catch (error) {
-    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
-      // Handle "user not found" error response here
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    res.send({
-      error: error
-    });
-  }
+		res.status(200).send(updatedStudent);
+	} catch (error) {
+		// If the server could not be reached, return an error message
+		return res.status(500).json({ 'error': errorCodes['E0003'] });
+	}
 });
 
 // Update the current extra points for a student like daily streaks
-router.patch('/:id/extraPoints/update', requireLogin, async (req, res) => {
+router.put('/:id/extraPoints', requireLogin, async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { extraPoints } = req.body;
 
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			return res.status(400).send({ error: errorCodes['E0014'] });
+			return res.status(400).json({ error: errorCodes['E0014'] });
 		}
 
 		if (isNaN(extraPoints)) {
-			return res.status(400).send({ error: errorCodes['E0804'] });
+			return res.status(400).json({ error: errorCodes['E0804'] });
 		}
 
 		const student = await StudentModel.findOneAndUpdate(
@@ -189,22 +182,18 @@ router.patch('/:id/extraPoints/update', requireLogin, async (req, res) => {
 				}
 			}
 		);
-    
-		res.status(200).send(student);
-	} catch(error) {
-		if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
-			// Handle "user not found" error response here
-			res.status(404);
-		} else {
-			res.status(400);
+
+		if (!student) {
+			return res.status(404).json({ error: errorCodes['E0004'] });
 		}
 
-		res.send({
-			error: error
-		});
+		res.status(200).json(student);
+	} catch (error) {
+		res.status(500).json({ error: errorCodes['E0003'] });
 	}
 });
 
+/* NOT USED YET */
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
 router.get('/leaderboard', async (req, res) => {
 	try {

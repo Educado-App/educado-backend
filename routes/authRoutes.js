@@ -36,8 +36,8 @@ router.post('/login', async (req, res) => {
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
 
-    // ********** THIS MAKES IT SO THAT U CANT LOG IN WITH STUDENT **********
-    /*
+		// ********** THIS MAKES IT SO THAT U CANT LOG IN WITH STUDENT **********
+		/*
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
 		profile = await ContentCreatorModel.findOne({baseUser: user._id});
 
@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
 			profile = await StudentModel.findOne({baseUser: user._id});
 		}
     */
-    const profile = await StudentModel.findOne({baseUser: user._id});
+		const profile = await StudentModel.findOne({baseUser: user._id});
 
 		// If the email is found, and content creator is approved compare the passwords
 		result = compare(req.body.password, user.password);
@@ -89,7 +89,6 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-
 	const form = req.body;
 
 	try {
