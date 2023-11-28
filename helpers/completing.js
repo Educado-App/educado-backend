@@ -60,13 +60,19 @@ function markComponentAsCompleted(course, section, component, student, points, i
 	}
 
 	if (component.compType === COMP_TYPES.EXERCISE) {
-		component.pointsGiven = points;
-		component.isFirstAttempt = false;
 
 		// update the section's, course's and student's points
 		section.totalPoints += points;
 		course.totalPoints += points;
 		student.points += points;
+
+		if (!component.isComplete) {
+			if (isComplete) {
+				component.pointsGiven = points;
+			} else {
+				component.isFirstAttempt = false;
+			}
+		}
 	}
 
 	if (!component.isComplete) {

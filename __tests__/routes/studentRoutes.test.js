@@ -382,7 +382,7 @@ describe('PATCH /api/students/:userId/complete', () => {
 
 		expect(obj.component.isComplete).toBe(true);
 		expect(obj.component.pointsGiven).toBe(10);
-		expect(obj.component.isFirstAttempt).toBe(false);
+		expect(obj.component.isFirstAttempt).toBe(true);
 		expect(obj.component.completionDate).not.toBeUndefined();
 		expect(obj.course.totalPoints).toBe(10);
 		expect(obj.section.totalPoints).toBe(10);
@@ -423,10 +423,8 @@ describe('PATCH /api/students/:userId/complete', () => {
 
 		const points = 0, isComplete = false;
 
-		comp.isFirstAttempt = false;
-
 		expect(comp.isComplete).toBe(false);
-		expect(comp.isFirstAttempt).toBe(false);
+		expect(comp.isFirstAttempt).toBe(true);
 		expect(comp.pointsGiven).toBe(0);
 		expect(course.totalPoints).toBe(0);
 		expect(section.totalPoints).toBe(0);
@@ -442,6 +440,123 @@ describe('PATCH /api/students/:userId/complete', () => {
 		expect(obj.section.totalPoints).toBe(0);
 		expect(obj.student.points).toBe(0);
 	});
+
+	it('Answering an exercise correctly that is already completed 1', () => {
+		// When answering an exercise that has already been completed with first attempt = true and given 10 points
+		const course = completing.findCourse(fakeStudent, fakeCourse._id);
+		const section = completing.findSection(course, fakeSection._id);
+		const comp = completing.findComp(section, fakeExercise._id);
+
+		const points = 0, isComplete = true;
+		comp.isComplete = true;
+		comp.isFirstAttempt = true;
+		comp.pointsGiven = 10;
+
+		expect(comp.isComplete).toBe(true);
+		expect(comp.isFirstAttempt).toBe(true);
+		expect(comp.pointsGiven).toBe(10);
+		expect(course.totalPoints).toBe(0);
+		expect(section.totalPoints).toBe(0);
+		expect(fakeStudent.points).toBe(0);
+
+		const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+		expect(obj.component.isComplete).toBe(true);
+		expect(obj.component.pointsGiven).toBe(10);
+		expect(obj.component.isFirstAttempt).toBe(true);
+		expect(obj.component.completionDate).not.toBeUndefined();
+		expect(obj.course.totalPoints).toBe(0);
+		expect(obj.section.totalPoints).toBe(0);
+		expect(obj.student.points).toBe(0);
+	});
+
+	it('Answering an exercise correctly that is already completed 2', () => {
+		// When answering an exercise that has already been completed with first attempt = false and given 5 points
+		const course = completing.findCourse(fakeStudent, fakeCourse._id);
+		const section = completing.findSection(course, fakeSection._id);
+		const comp = completing.findComp(section, fakeExercise._id);
+
+		const points = 0, isComplete = true;
+		comp.isComplete = true;
+		comp.isFirstAttempt = false;
+		comp.pointsGiven = 5;
+
+		expect(comp.isComplete).toBe(true);
+		expect(comp.isFirstAttempt).toBe(false);
+		expect(comp.pointsGiven).toBe(5);
+		expect(course.totalPoints).toBe(0);
+		expect(section.totalPoints).toBe(0);
+		expect(fakeStudent.points).toBe(0);
+
+		const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+		expect(obj.component.isComplete).toBe(true);
+		expect(obj.component.pointsGiven).toBe(5);
+		expect(obj.component.isFirstAttempt).toBe(false);
+		expect(obj.component.completionDate).not.toBeUndefined();
+		expect(obj.course.totalPoints).toBe(0);
+		expect(obj.section.totalPoints).toBe(0);
+		expect(obj.student.points).toBe(0);
+	});
+
+	it('Answering an exercise wrong that is already completed 1', () => {
+		// When answering an exercise wrong that has already been completed with first attempt = true and given 10 points
+		const course = completing.findCourse(fakeStudent, fakeCourse._id);
+		const section = completing.findSection(course, fakeSection._id);
+		const comp = completing.findComp(section, fakeExercise._id);
+
+		const points = 0, isComplete = false;
+		comp.isComplete = true;
+		comp.isFirstAttempt = true;
+		comp.pointsGiven = 10;
+
+		expect(comp.isComplete).toBe(true);
+		expect(comp.isFirstAttempt).toBe(true);
+		expect(comp.pointsGiven).toBe(10);
+		expect(course.totalPoints).toBe(0);
+		expect(section.totalPoints).toBe(0);
+		expect(fakeStudent.points).toBe(0);
+
+		const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+		expect(obj.component.isComplete).toBe(true);
+		expect(obj.component.pointsGiven).toBe(10);
+		expect(obj.component.isFirstAttempt).toBe(true);
+		expect(obj.component.completionDate).not.toBeUndefined();
+		expect(obj.course.totalPoints).toBe(0);
+		expect(obj.section.totalPoints).toBe(0);
+		expect(obj.student.points).toBe(0);
+	});
+
+	it('Answering an exercise wrong that is already completed 2', () => {
+		// When answering an exercise wrong that has already been completed with first attempt = false and given 5 points
+		const course = completing.findCourse(fakeStudent, fakeCourse._id);
+		const section = completing.findSection(course, fakeSection._id);
+		const comp = completing.findComp(section, fakeExercise._id);
+
+		const points = 0, isComplete = false;
+		comp.isComplete = true;
+		comp.isFirstAttempt = false;
+		comp.pointsGiven = 5;
+
+		expect(comp.isComplete).toBe(true);
+		expect(comp.isFirstAttempt).toBe(false);
+		expect(comp.pointsGiven).toBe(5);
+		expect(course.totalPoints).toBe(0);
+		expect(section.totalPoints).toBe(0);
+		expect(fakeStudent.points).toBe(0);
+
+		const obj = completing.markComponentAsCompleted(course, section, comp, fakeStudent, points, isComplete);
+
+		expect(obj.component.isComplete).toBe(true);
+		expect(obj.component.pointsGiven).toBe(5);
+		expect(obj.component.isFirstAttempt).toBe(false);
+		expect(obj.component.completionDate).not.toBeUndefined();
+		expect(obj.course.totalPoints).toBe(0);
+		expect(obj.section.totalPoints).toBe(0);
+		expect(obj.student.points).toBe(0);
+	});
+
 
 	it('marks section complete when comps are completed', () => {
 		const course = completing.findCourse(fakeStudent, fakeCourse._id);
