@@ -744,6 +744,8 @@ describe('PATCH /api/students/:userId/complete', () => {
 	});
 });
 
+/*  Commented out as the route is not in use
+ *
 describe('Routes for leaderboard', () => {
 	beforeEach(async () => {
 		fakeStudent.completedCourses = [
@@ -844,6 +846,7 @@ describe('Routes for leaderboard', () => {
 		expect(response.body.error.code).toBe('E0015');
 	});
 });
+*/
 
 afterEach(async () => {
 	await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
