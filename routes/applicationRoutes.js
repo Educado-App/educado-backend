@@ -126,23 +126,23 @@ router.post('/newinstitution', async (req, res) => {
     const sharedName = await InstitutionModel.findOne({institutionName: data.institutionName});
     if (sharedName){
       //This Institution already exists
-       return res.status(400).json({'error': errorCodes['E1202'], errorCause: data.institutionName });
-      }
+      return res.status(400).json({'error': errorCodes['E1202'], errorCause: data.institutionName });
+    }
       
     const sharedDomain = await InstitutionModel.findOne({domain: data.domain});
   
     if (sharedDomain){
-          //This Email Domain already exists as part of another Institution
-          return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain}); 
-      }
+      //This Email Domain already exists as part of another Institution
+      return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain}); 
+    }
         
     //Since the secondary domain is optional, forcibly set it to null, as to avoid any type errors
     let sharedSecondaryDomain;
     !(data.secondaryDomain) ? sharedSecondaryDomain = null : sharedSecondaryDomain = await InstitutionModel.findOne({secondaryDomain: data.secondaryDomain});
     
     if (sharedSecondaryDomain){
-        //This Secondary Email Domain already exists as part of another Institution
-        return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain}); 
+      //This Secondary Email Domain already exists as part of another Institution
+      return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain}); 
     }
 
     const institutionData = InstitutionModel(data);
@@ -154,7 +154,7 @@ router.post('/newinstitution', async (req, res) => {
         
   }
   catch (err){
-      return res.status(500).json({ 'error': errorCodes['E1201']}); //Could not upload institution
+    return res.status(500).json({ 'error': errorCodes['E1201']}); //Could not upload institution
   }
 
 });
