@@ -100,9 +100,9 @@ router.get('/subscriptions', async (req, res) => {
 	}
 });
 
-router.patch('/:studentId/courses/:courseId/enroll', requireLogin, async (req, res) => {
+router.patch('/:id/courses/:courseId/enroll', requireLogin, async (req, res) => {
 	try {
-		const { studentId, courseId } = req.params;
+		const { id, courseId } = req.params;
 
 		const course = await CourseModel.findById(courseId);
 
@@ -110,13 +110,13 @@ router.patch('/:studentId/courses/:courseId/enroll', requireLogin, async (req, r
 			return res.status(404).json({ error: errorCodes['E0006'] });
 		}
 
-		const student = await StudentModel.findOne({ baseUser: studentId });
+		const student = await StudentModel.findOne({ baseUser: id });
 
 		if (!student) {
 			return res.status(404).json({ error: errorCodes['E0004'] });
 		}
 
-		if (student.courses.find(course => course.courseId.equals(studentId))) {
+		if (student.courses.find(course => course.courseId.equals(id))) {
 			return res.status(400).json({ error: errorCodes['E0016'] });
 		}
 
@@ -124,7 +124,7 @@ router.patch('/:studentId/courses/:courseId/enroll', requireLogin, async (req, r
 		student.courses.push(obj);
 
 		await StudentModel.findOneAndUpdate(
-			{ baseUser: studentId },
+			{ baseUser: id },
 			{
 				$set: {
 					courses: student.courses
