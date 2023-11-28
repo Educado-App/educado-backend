@@ -18,7 +18,7 @@
     "docker_down": "docker-compose down",
     "docker_build": "docker-compose up -d --build",
     "docker_clean_db": "docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb",
-    "linting": "eslint --ext .js,.jsx,.ts,.tsx . --fix",
+    "lint": "eslint --fix .",
     "typechecking": "tsc --noEmit"
   },
   "author": "",
@@ -36,7 +36,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.5",
-    "eslint": "^8.50.0",
+    "eslint": "^8.54.0",
     "express": "^4.17.1",
     "form-data": "^4.0.0",
     "http-proxy-middleware": "^2.0.3",

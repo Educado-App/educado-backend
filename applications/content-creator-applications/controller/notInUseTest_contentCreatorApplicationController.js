@@ -8,77 +8,77 @@ const mongoose = require('mongoose');
 
 describe('Content Creator Application Controller', () => {
 
-	beforeAll(() => connectDb());
-	afterEach(async () => await contentCreatorApplicationList.remove({}));
+  beforeAll(() => connectDb());
+  afterEach(async () => await contentCreatorApplicationList.remove({}));
 
-	it('successfully posts a content creator application', async () => {
+  it('successfully posts a content creator application', async () => {
 
-		const fakeApplication = makeFakeContentCreatorApplication();
+    const fakeApplication = makeFakeContentCreatorApplication();
 
-		const request = {
-			header: { 'Content-Type': 'application/json' },
-			method: 'POST',
-			body: fakeApplication,
-			params: {},
-			queryParams: {},
-		};
+    const request = {
+      header: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: fakeApplication,
+      params: {},
+      queryParams: {},
+    };
 
-		const response = await handle(request);
+    const response = await handle(request);
 
-		expect(response.status).toBe(201);
-		expect(response.success).toBe(true);
-	});
+    expect(response.status).toBe(201);
+    expect(response.success).toBe(true);
+  });
 
 	
 
-	it('gets a specific content creator application', async () => {
-		const fakeApplication = makeFakeContentCreatorApplication();
+  it('gets a specific content creator application', async () => {
+    const fakeApplication = makeFakeContentCreatorApplication();
 
-		await contentCreatorApplicationList.add(fakeApplication);
+    await contentCreatorApplicationList.add(fakeApplication);
 
-		const request = {
-			header: { 'Content-Type': 'application/json' },
-			method: 'GET',
-			params: { id: fakeApplication.id },
-		};
+    const request = {
+      header: { 'Content-Type': 'application/json' },
+      method: 'GET',
+      params: { id: fakeApplication.id },
+    };
 
-		const expected = {
-			success: true,
-			status: 200,
-			data: fakeApplication
-		};
+    const expected = {
+      success: true,
+      status: 200,
+      data: fakeApplication
+    };
 
-		const actual = await handle(request);
+    const actual = await handle(request);
 
-		expect(actual.status).toBe(expected.status);
-		expect(actual.success).toBe(expected.success);
+    expect(actual.status).toBe(expected.status);
+    expect(actual.success).toBe(expected.success);
 
-	});
+  });
 
-	it('approves a single content creator application', async () => {
-		const fakeApplication = makeFakeContentCreatorApplication();
+  it('approves a single content creator application', async () => {
+    const fakeApplication = makeFakeContentCreatorApplication();
 
-		await contentCreatorApplicationList.add(fakeApplication);
+    await contentCreatorApplicationList.add(fakeApplication);
 
-		const request = {
-			header: { 'Content-Type': 'application/json' },
-			method: 'POST',
-			params: { id: fakeApplication.id },
-			queryParams: { action: 'approve' },
-			body: {}
-		};
+    const request = {
+      header: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      params: { id: fakeApplication.id },
+      queryParams: { action: 'approve' },
+      body: {}
+    };
 
-		const response = await handle(request);
+    const response = await handle(request);
 
-		expect(response.status).toBe(200);
-		expect(response.success).toBe(true);
-		expect(response.data.approved).toBe(true);
+    expect(response.status).toBe(200);
+    expect(response.success).toBe(true);
+    expect(response.data.approved).toBe(true);
 
-	});
-	//xit('declines a single content creator application', async () => { })
+  });
+  //xit('declines a single content creator application', async () => { })
 
-	afterAll(async () => {
-		await mongoose.connection.close();
-	});
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
 
 });

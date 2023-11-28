@@ -12,21 +12,21 @@ const globalConfigPath = path.join(__dirname, 'globalConfigMongo.json');
 const mongod =
 	global.__MONGOD__ ||
 	new MongoMemoryServer({
-		autoStart: false,
-		useUnifiedTopology: true
+	  autoStart: false,
+	  useUnifiedTopology: true
 	});
 
 module.exports = async () => {
-	await mongod.ensureInstance();
-    
-	const mongoConfig = {
-		mongoDBName: 'jest',
-		mongoUri: mongod.getUri()
-	};
+  await mongod.ensureInstance();
 
-	// Write global config to disk because all tests run in different contexts.
-	fs.writeFileSync(globalConfigPath, JSON.stringify(mongoConfig));
+  const mongoConfig = {
+    mongoDBName: 'jest',
+    mongoUri: mongod.getUri()
+  };
 
-	// Set reference to mongod in order to close the server during teardown.
-	global.__MONGOD__ = mongod;
+  // Write global config to disk because all tests run in different contexts.
+  fs.writeFileSync(globalConfigPath, JSON.stringify(mongoConfig));
+
+  // Set reference to mongod in order to close the server during teardown.
+  global.__MONGOD__ = mongod;
 };
