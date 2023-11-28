@@ -138,34 +138,33 @@ router.patch('/:id/courses/:courseId/add', requireLogin, async (req, res) => {
   }
 })
 
-// Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', requireLogin, async (req, res) => {
-	try {
-		const { id } = req.params;
-		let { comp, isComplete, points } = req.body;
+// Mark courses, sections, and components as completed for a user
+router.patch('/:id/complete', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { comp, isComplete, points } = req.body;
 
-		// Retrieve the user by ID MAYBE CHANGE TO STUDENT ID
-		let student = await StudentModel.findOne({ baseUser: id });
+    let student = await StudentModel.findOne({ baseUser: id });
 
-		if (!student) {
-			throw errorCodes['E0004'];
-		}
+    if (!student) {
+      throw errorCodes['E0004'];
+    }
 
-		const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
+    const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
 
-		res.status(200).send(updatedStudent);
-	} catch (error) {
-		if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
-			// Handle "user not found" error response here
-			res.status(404);
-		} else {
-			res.status(400);
-		}
+    res.status(200).send(updatedStudent);
+  } catch (error) {
+    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
+      // Handle "user not found" error response here
+      res.status(404);
+    } else {
+      res.status(400);
+    }
 
-		res.send({
-			error: error
-		});
-	}
+    res.send({
+      error: error
+    });
+  }
 });
 
 // Update the current extra points for a student like daily streaks
