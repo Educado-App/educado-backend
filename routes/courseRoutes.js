@@ -81,7 +81,6 @@ router.get('/:id', async (req, res) => {
 
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
-	console.log('get sections');
 	try {
 		const { id } = req.params;
 
