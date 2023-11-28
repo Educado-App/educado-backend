@@ -114,13 +114,13 @@ router.post('/signup', async (req, res) => {
     
 
     // Get user's email domain to find out whether or not they are a part of an onboarded institution
-    const emailDomain = baseUser.email.substring(baseUser.email.indexOf("@"));
+    const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
     const onboarded = await InstitutionModel.findOne({domain: emailDomain});
     const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
 
 
     const createdBaseUser = await baseUser.save();  // Save user
-    let createdContentCreator = await contentCreatorProfile.save() // Save content creator
+    let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
     const createdStudent = await studentProfile.save(); // Save student
 
     // If the email is under either of the two insttutions' domains, the content creator will automatically be approved
