@@ -1,5 +1,3 @@
-const component = require('../models/Components')
-
 // Mongoose model class for Courses
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
@@ -9,18 +7,18 @@ const { Schema } = mongoose;
 
 // Class description
 const courseSchema = new Schema({
-	title: {
+  title: {
     type: String,
     required: [true, 'Title is required'],
   },
-	description: {
+  description: {
     type: String,
     required: [true, 'Description is required'],
   },
-	dateCreated: Date,
-	dateUpdated: Date,
-	coverImg: String,
-	category: {
+  dateCreated: Date,
+  dateUpdated: Date,
+  coverImg: String,
+  category: {
     type: String,
     enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics'],
   },
@@ -48,10 +46,10 @@ const courseSchema = new Schema({
     default: 0,
   },
   sections: [{ 
-    type: Schema.Types.ObjectId, ref: "sections"
+    type: Schema.Types.ObjectId, ref: 'sections'
   }],
 });
 
-const CourseModel = mongoose.model("courses", courseSchema); // Create new collection called courses, using the courseScema
+const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
 
 module.exports = { CourseModel };

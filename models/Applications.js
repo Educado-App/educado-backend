@@ -1,5 +1,6 @@
 // Mongoose model class for Applications
 const mongoose = require("mongoose");
+
 const { Schema } = mongoose;
 
 // Class description
@@ -22,7 +23,7 @@ const ApplicationSchema = new Schema({
 });
 
 const ApplicationModel = mongoose.model(
-  "applications",
+  'applications',
   ApplicationSchema
 );
 

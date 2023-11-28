@@ -73,20 +73,16 @@ async function sendResetPasswordEmail(user, token) {
   const subject = 'Reset password request for Educado';
   const to = user.email;
   const text = `Hi ${user.firstName},\n\nYou have requested to reset your password. Please enter the following code in the app to reset your password:\n\n${token}`+ 
-    `\n\nThis code will expire in 5 minutes.\n\nIf you did not request to reset your password, please ignore this email. Your password will remain unchanged.` + 
-    `\n\nBest regards,\nThe Educado team`;
+    '\n\nThis code will expire in 5 minutes.\n\nIf you did not request to reset your password, please ignore this email. Your password will remain unchanged.' + 
+    '\n\nBest regards,\nThe Educado team';
   const html = `<p>Hi ${user.firstName},</p>\n`+ 
-    `<p>You have requested to reset your password. Please enter the following code in the app to reset your password:</p>\n` +
+    '<p>You have requested to reset your password. Please enter the following code in the app to reset your password:</p>\n' +
     `<p><strong>${token}</strong></p>\n`+ 
-    `<p>This code will expire in 5 minutes.</p>\n`+
-    `<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>\n`+
-    `<p>Best regards,</p>\n` +
-    `<p>The Educado team</p>`;
+    '<p>This code will expire in 5 minutes.</p>\n'+
+    '<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>\n'+
+    '<p>Best regards,</p>\n' +
+    '<p>The Educado team</p>';
 
-  try {
-    const mail = await sendMail({ subject, to, text, html });
-    return mail;
-  } catch (e) {
-    throw e;
-  }
+  const mail = await sendMail({ subject, to, text, html });
+  return mail;
 }

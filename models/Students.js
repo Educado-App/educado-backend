@@ -1,10 +1,14 @@
 // Mongoose model class for User
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // Class description
 const studentSchema = new Schema({
   points: {
+    type: Number,
+    default: 0
+  },
+  currentExtraPoints: {
     type: Number,
     default: 0
   },
@@ -16,67 +20,74 @@ const studentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Courses'
   }],
-  completedCourses: [
+  courses: [
     {
-        courseId: {
+      courseId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Courses'
+      },
+      totalPoints: {
+        type: Number,
+        default: 0
+      },
+      isComplete: {
+        type: Boolean,
+        default: true
+      },
+      completionDate: {
+        type: Date,
+        default: Date.now
+      },
+      sections: [
+        {
+          sectionId: {
             type: Schema.Types.ObjectId,
-            ref: 'Courses'
-        },
-        totalPoints: {
-          type: Number,
-          default: 0
-        },
-        isComplete: {
+            ref: 'Sections'
+          },
+          totalPoints: {
+            type: Number,
+            default: 0
+          },
+          extraPoints: {
+            type: Number,
+            default: 0
+          },
+          isComplete: {
             type: Boolean,
             default: true
-        },
-        completionDate: {
+          },
+          completionDate: {
             type: Date,
             default: Date.now
-        },
-        completedSections: [
+          },
+          components: [
             {
-                sectionId: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'Sections'
-                },
-                totalPoints: {
-                  type: Number,
-                  default: 0
-                },
-                extraPoints: {
-                  type: Number,
-                  default: 0
-                },
-                isComplete: {
-                  type: Boolean,
-                  default: true
-                },
-                completionDate: {
-                    type: Date,
-                    default: Date.now
-                },
-                completedExercises: [
-                    {
-                        exerciseId: {
-                          type: Schema.Types.ObjectId,
-                          ref: 'Exercises'
-                        },
-                        isComplete: {
-                          type: Boolean,
-                          default: true
-                        },
-                        completionDate: {
-                          type: Date,
-                          default: Date.now
-                        },
-                        pointsGiven: Number
-                    }
-                ]
+              compId: {
+                type: Schema.Types.ObjectId,
+              },
+              compType: {
+                type: String,
+                enum: ['lecture', 'exercise']
+              },
+              isComplete: {
+                type: Boolean,
+                default: true
+              },
+              isFirstAttempt: {
+                type: Boolean,
+                default: true
+              },
+              completionDate: {
+                type: Date,
+                default: Date.now
+              },
+              pointsGiven: Number
             }
-        ]
+          ]
+        }
+      ]
     }
-],
+  ],
   baseUser: {
     type: Schema.Types.ObjectId,
     ref: 'Users'

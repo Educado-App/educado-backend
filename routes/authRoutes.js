@@ -23,7 +23,7 @@ router.post('/', makeExpressCallback(authEndpointHandler));
 
 // Login
 router.post('/login', async (req, res) => {
-
+  let result;
   if (!req.body.email || !req.body.password) {
     return res.status(400).json({ error: errorCodes['E0202'] }); //Password or email is missing
   }
@@ -34,27 +34,34 @@ router.post('/login', async (req, res) => {
     // If email is found, compare the password provided in the request body with the password in the database
     if (!user) {
       // Invalid email (email not found)
-      return res.status(401).json({ 'error': errorCodes['E0004'] });
-    } 
-    // For content creators, a matching content-creator entry will be found to see if they are approved or rejected
-    const contentCreator = await ContentCreatorModel.findOne({baseUser: user._id})
-    //Content creator must not be allowed entry if they are either rejected or not yet approved
-    if(contentCreator.approved == false && contentCreator.rejected == false){
-      // User not approved
-      return res.status(403).json({ 'error': errorCodes['E1001'] });
-    } 
-    
-    if(contentCreator.rejected == true && contentCreator.approved == false){
-      // User is rejected
-      return res.status(403).json({ 'error': errorCodes['E1002'] });
+      return res.status(401).json({'error': errorCodes['E0004']});
     }
-    
-    else {
-      // If the email is found, and content creator is approved compare the passwords
 
-      result = compare(req.body.password, user.password);
-    }
-    const studentProfile = await StudentModel.findOne({ baseUser: user._id });
+    // ********** THIS MAKES IT SO THAT U CANT LOG IN WITH STUDENT **********
+    /*
+		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
+		profile = await ContentCreatorModel.findOne({baseUser: user._id});
+
+		if(profile !== null) {
+			//Content creator must not be allowed entry if they are either rejected or not yet approved
+			if (profile.approved == false && profile.rejected == false) {
+				// User not approved
+				return res.status(403).json({'error': errorCodes['E1001']});
+			}
+
+			if (profile.rejected == true && profile.approved == false) {
+				// User is rejected
+				return res.status(403).json({'error': errorCodes['E1002']});
+			}
+			profile.points = 0;
+		} else {
+			profile = await StudentModel.findOne({baseUser: user._id});
+		}
+    */
+    const profile = await StudentModel.findOne({baseUser: user._id});
+
+    // If the email is found, and content creator is approved compare the passwords
+    result = compare(req.body.password, user.password);
     // If the passwords match, return a success message
     if (result) {
       // Create a token for the user
@@ -68,8 +75,8 @@ router.post('/login', async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          completedCourses: user.completedCourses,
-          points: studentProfile.points,
+          courses: profile.courses,
+          points: profile.points,
         },
       });
     } else {
@@ -78,13 +85,11 @@ router.post('/login', async (req, res) => {
     }
   } catch (err) {
     // If the server could not be reached, return an error message
-    console.log(err);
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
 
 router.post('/signup', async (req, res) => {
-
   const form = req.body;
 
   try {
@@ -159,7 +164,7 @@ router.post('/reset-password-request', async (req, res) => {
     await UserModel.updateOne({ _id: user._id }, user);
   }
   // If there are more than 2 attempts in the last hour, return error E0406
-  if (user.resetAttempts.length > 2) {
+  if (user.resetAttempts.length >= 2) {
     return res.status(400).json({ error: errorCodes['E0406'] });
   }
 
@@ -245,8 +250,8 @@ router.patch('/reset-password', async (req, res) => {
 
 // Logout simulation
 router.post('/logout', (req, res) => {
-	req.logout();
-	res.redirect('/');
+  req.logout();
+  res.redirect('/');
 });
 
 // Show current user simulation

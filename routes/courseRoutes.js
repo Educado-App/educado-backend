@@ -1,19 +1,27 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const adminOnly = require("../middlewares/adminOnly");
 
 // TODO: Update subscriber count to check actual value in DB
 
 // Models
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
-const { ComponentModel } = require('../models/Components');
 const { ExerciseModel } = require('../models/Exercises');
-const { ContentCreatorModel } = require("../models/ContentCreators");
-const requireLogin = require("../middlewares/requireLogin");
-const { IdentityStore } = require("aws-sdk");
+const { LectureModel } = require('../models/Lecture');
+const { ContentCreatorModel } = require('../models/ContentCreators');
+const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { StudentModel } = require('../models/Students');
+
+const COMP_TYPES = {
+  LECTURE: 'lecture',
+  EXERCISE: 'exercise',
+};
+
+const LectureType = {
+  VIDEO: 'video',
+  TEXT: 'text',
+};
 
 /*** COURSE, SECTIONS AND EXERCISE ROUTES ***/
 
@@ -73,7 +81,6 @@ router.get('/:id', async (req, res) => {
 
 // Get all sections from course
 router.get('/:id/sections', async (req, res) => {
-
   try {
     const { id } = req.params;
 
@@ -145,11 +152,54 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
   }
 });
 
+// Get all comps from a section
+router.get('/sections/:id/components', async (req, res) => {
+  const { id } = req.params;
+
+  const section = await SectionModel.findById(id);
+  if (!section) {
+    return res.status(404).json({ error: errorCodes['E0007'] });
+  }
+
+  let obj = {
+    component: null,
+    type: null,
+    lectureType: null,
+  };
+
+  const components = [];
+
+  for (let comp of section.components) {
+    if (comp.compType === COMP_TYPES.LECTURE) {
+      const lecture = await LectureModel.findById(comp.compId);
+      if (!lecture) {
+        return res.status(404).json({ error: errorCodes['E0007'] });
+      }
+      obj = {
+        component: lecture,
+        type: COMP_TYPES.LECTURE,
+        lectureType: lecture.video ? LectureType.VIDEO : LectureType.TEXT,
+      };
+    } else {
+      const exercise = await ExerciseModel.findById(comp.compId);
+      if (!exercise) {
+        return res.status(404).json({ error: errorCodes['E0007'] });
+      }
+      obj = {
+        component: exercise,
+        type: COMP_TYPES.EXERCISE,
+      };
+    }
+    components.push(obj);
+  }
+
+  res.status(200).send(components);
+});
+
 /*** SUBSCRIPTION ROUTES ***/
 
 // Subscribe to course 
 router.post('/:id/subscribe', async (req, res) => {
-
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -180,30 +230,31 @@ router.post('/:id/subscribe', async (req, res) => {
 
     course.numOfSubscriptions++;
     user.subscriptions.push(id);
-
-
+    
     // find user based on id, and add the course's id to the user's subscriptions field
     await StudentModel.findOneAndUpdate(
       { baseUser: studentId },
-      { subscriptions: user.subscriptions });
+      {
+        $set: {
+          subscriptions: user.subscriptions,
+        }
+      }
+    );
 
     await CourseModel.findOneAndUpdate(
       { _id: course._id },
       { numOfSubscriptions: course.numOfSubscriptions }
     );
 
-
     return res.status(200).send(user);
 
   } catch (error) {
     return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
-
 });
 
 // Unsubscribe to course
 router.post('/:id/unsubscribe', async (req, res) => {
-
   try {
     const { id } = req.params;
     const { user_id } = req.body;
@@ -238,14 +289,14 @@ router.post('/:id/unsubscribe', async (req, res) => {
     // find user based on id, and remove the course's id from the user's subscriptions field
     await StudentModel.findOneAndUpdate(
       { baseUser: studentId },
-      { subscriptions: user.subscriptions })
+      { subscriptions: user.subscriptions });
 
     await CourseModel.findOneAndUpdate(
       { _id: course._id },
       { numOfSubscriptions: course.numOfSubscriptions }
     );
 
-    return res.status(200).send(user)
+    return res.status(200).send(user);
 
   } catch (error) {
     return res.status(500).json({ 'error': errorCodes['E0003'] });
@@ -264,8 +315,8 @@ router.get('/:section_id/exercises', async (req, res) => {
 /*** CREATE COURSE ROUTES ***/
 
 //Create course route
-router.put("/", async (req, res) => {
-  const { title, category, difficulty, description, estimatedHours, creator } = req.body;
+router.put('/', async (req, res) => {
+  const { title, category, difficulty, description, creator, status, estimatedHours } = req.body;
 
   const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
@@ -284,10 +335,11 @@ router.put("/", async (req, res) => {
     //_user: req.user.id,
     creator: id,
     published: false,
+    coverImg: '',
     dateCreated: Date.now(),
     dateUpdated: Date.now(),
     sections: [],
-    status: "draft",
+    status: status,
     estimatedHours: estimatedHours,
     rating: 0,
   });
@@ -301,7 +353,7 @@ router.put("/", async (req, res) => {
 });
 
 // Update Course
-router.patch("/:id", /*requireLogin,*/ async (req, res) => {
+router.patch('/:id', /*requireLogin,*/ async (req, res) => {
   const course = req.body;
   const { id } = req.params;
 
@@ -317,7 +369,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
       status: course.status,
       dateUpdated: Date.now()
     },
-    function (err, docs) {
+    function (err) {
       if (err) {
         return res.status(400).send(err);
       }
@@ -335,7 +387,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
  * @param {string} id - course id
  * @returns {string} - Just sends a message to confirm that the deletion is complete
  */
-router.delete("/:id"/*, requireLogin*/, async (req, res) => {
+router.delete('/:id'/*, requireLogin*/, async (req, res) => {
   const { id } = req.params;
 
   // Get the course object
@@ -351,26 +403,9 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
     // Get the section object from the id in sectionIds array
     let section = await SectionModel.findById(section_id);
 
-
-    // Get the lecture array from the section object
-    const lectureIds = section.lectures;
-    const exerciseIds = section.exercises;
-
-    // Loop through all lectures in section
-    lectureIds.map(async (lecture_id) => {
-
-      // Delete the lecture
-      await LectureModel.findByIdAndDelete(lecture_id);
-
-    });
-
-    // Loop through all exercises in section
-    exerciseIds.map(async (exercise_id) => {
-
-      // Delete the exercise
-      await ExerciseModel.findByIdAndDelete(exercise_id);
-
-    });
+    // Delete all lectures and excercises in the section
+    await LectureModel.deleteMany({ parentSection: section._id });
+    await ExerciseModel.deleteMany({ parentSection: section._id });
 
     // Delete the section
     await SectionModel.findByIdAndDelete(section_id);
@@ -381,13 +416,13 @@ router.delete("/:id"/*, requireLogin*/, async (req, res) => {
 
 
   // Send response
-  return res.status(200).send("Course Deleted");
+  return res.status(200).send('Course Deleted');
 
 });
 
 
 // Update course published state
-router.patch("/published", async (req, res) => {
+router.patch('/published', async (req, res) => {
   const { published, course_id } = req.body;
 
   // find object in database and update title to new value
@@ -397,7 +432,7 @@ router.patch("/published", async (req, res) => {
       { published: published }
     )
   ).save;
-  course = await CourseModel.findById(course_id);
+  const course = await CourseModel.findById(course_id);
 
   // Send response
   res.send(course);

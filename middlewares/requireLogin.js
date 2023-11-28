@@ -1,7 +1,5 @@
 const { verify } = require('../helpers/token');
-const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
-const isValidId = require('../helpers/Id');
 
 module.exports = async (req, res, next) => {
 
@@ -19,4 +17,4 @@ module.exports = async (req, res, next) => {
   }
 
   next();
-}
+};

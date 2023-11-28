@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeApplication = require('../fixtures/fakeApplication');
+
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator')
 const makeFakeInstitution = require('../fixtures/fakeInstitution')
 
@@ -22,17 +23,18 @@ const newUser = makeFakeUser();
 
 
 describe('Application Routes', () => {
-  let db; // Store the database connection
+	let db; // Store the database connection
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
-  });
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
+	});
 
-  beforeEach(async () => {
-    await db.collection('users').insertOne(newUser);
-    const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-    newContentCreator = makeFakeContentCreator(user._id, approved = false, rejected = false);
-    await db.collection('content-creators').insertOne(newContentCreator);
+	beforeEach(async () => {
+		await db.collection('users').insertOne(newUser);
+		const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+		let approved = false, rejected = false;
+		const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
+		await db.collection('content-creators').insertOne(newContentCreator);
     
   });
 
@@ -84,16 +86,16 @@ describe('Application Routes', () => {
         .put(`/api/application/${fakeId}reject`)
         .expect(200);
       
-      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-      expect(updatedNewContentCreator.rejected).toBe(true)
-    });
+			const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+			expect(updatedNewContentCreator.rejected).toBe(true);
+		});
 
-    it('Should approve an application', async () => {
-      const fakeId = newUser._id;
+		it('Should approve an application', async () => {
+			const fakeId = newUser._id;
 
-      await request(app)
-        .put(`/api/application/${fakeId}approve`)
-        .expect(200);
+			await request(app)
+				.put(`/api/application/${fakeId}approve`)
+				.expect(200);
 
       const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
       expect(updatedNewContentCreator.approved).toBe(true)
@@ -114,6 +116,6 @@ describe('Application Routes', () => {
 
         expect(response.body).toHaveProperty('institution');
     });
-  })
+  });
 });
  

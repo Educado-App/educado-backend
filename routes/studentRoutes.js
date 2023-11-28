@@ -1,51 +1,20 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
-const { markAsCompleted } = require('../helpers/answerExercises');
+const { markAsCompleted } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { encrypt, compare } = require('../helpers/password');
 const { findTop100Students } = require('../helpers/leaderboard');
-const { updateStudentLevel, giveExtraPointsForSection } = require('../helpers/pointSystem');
-
-const { ExerciseModel } = require('../models/Exercises');
+const { addIncompleteCourse } = require('../helpers/completing');
 const { StudentModel } = require('../models/Students');
-const { SectionModel } = require('../models/Sections');
 const { CourseModel } = require('../models/Courses');
-
-router.patch('/:id', requireLogin, async (req, res) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).send({ error: errorCodes['E0014'] });
-  }
-
-  const id = mongoose.Types.ObjectId(req.params.id);
-
-  const { points, level } = req.body;
-
-  let student = await StudentModel.findOne({ baseUser: id });
-
-  let updatedUser;
-
-  if (points !== null && (points <= 0 || isNaN(points))) {
-    return res.status(400).send({ error: errorCodes['E0804'] });
-  }
-
-  if (points !== null) {
-    try {
-      updatedUser = await updateStudentLevel(id, points + student.points, student.level);
-    } catch (err) {
-      return res.status(400).send({ error: err });
-    }
-  }
-
-  return res.status(200).send(updatedUser);
-});
 
 router.get('/:id/info', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const id = mongoose.Types.ObjectId(req.params.id);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).send({ error: errorCodes['E0014'] });
     }
-    const id = mongoose.Types.ObjectId(req.params.id);
 
     const student = await StudentModel.findOne({ baseUser: id });
 
@@ -119,10 +88,10 @@ router.get('/subscriptions', async (req, res) => {
 
     if (user.subscriptions.includes(course_id)) {
       // User is subscribed to the course
-      res.send("true");
+      res.send('true');
     } else {
       // User is not subscribed to the course
-      res.send("false");
+      res.send('false');
     }
 
   } catch (error) {
@@ -131,91 +100,101 @@ router.get('/subscriptions', async (req, res) => {
   }
 });
 
-// Mark courses, sections, and exercises as completed for a user
-router.patch('/:id/completed', requireLogin, async (req, res) => {
+router.patch('/:id/courses/:courseId/enroll', requireLogin, async (req, res) => {
   try {
-    const { id } = req.params;
-    let { exerciseId, isComplete, points } = req.body;
+    const { id, courseId } = req.params;
 
-    // Sets points to 0 because the exercise was not answered correctly
-    if (!isComplete) {
-      points = 0;
-    }
+    const course = await CourseModel.findById(courseId);
 
-    // Retrieve the user by ID
-    let student = await StudentModel.findOne({ baseUser: id });
-
-    if (!student) {
-      throw errorCodes['E0004'];
-    }
-
-    await markAsCompleted(student, exerciseId, points, isComplete);
-
-    if (!isNaN(points)) {
-      await updateStudentLevel(id, points, student.level);
-    }
-
-    const updatedUser = await StudentModel.findOne({ baseUser: id });
-
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
-      // Handle "user not found" error response here
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    res.send({
-      error: error
-    });
-  }
-});
-
-// Give the student extra points for the completed section
-router.patch('/:id/extraPoints/section', requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { sectionId, points } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(sectionId)) {
-      return res.status(400).send({ error: errorCodes['E0014'] });
+    if (!course) {
+      return res.status(404).json({ error: errorCodes['E0006'] });
     }
 
     const student = await StudentModel.findOne({ baseUser: id });
 
     if (!student) {
-      throw errorCodes['E0004'];
+      return res.status(404).json({ error: errorCodes['E0004'] });
     }
 
-    if (!sectionId || !points) {
-      throw errorCodes['E0016'];
+    if (student.courses.find(course => course.courseId.equals(id))) {
+      return res.status(400).json({ error: errorCodes['E0016'] });
     }
 
-    const section = await SectionModel.findById(sectionId);
+    const obj = await addIncompleteCourse(course);
+    student.courses.push(obj);
 
-    if (!section) {
-      throw errorCodes['E0008'];
-    }
+    await StudentModel.findOneAndUpdate(
+      { baseUser: id },
+      {
+        $set: {
+          courses: student.courses
+        }
+      }
+    );
 
-    const updatedStudent = await giveExtraPointsForSection(section, student, points);
-
-    res.status(200).send(updatedStudent)
-  } catch(error) {
-    if (error === errorCodes['E0004'] || error === errorCodes['E0008'] || error === errorCodes['E0012']) {
-      // Handle "user not found" error response here
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    res.send({
-      error: error
-    });
+    return res.status(200).send(student);
+  } catch (error) {
+    // If the server could not be reached, return an error message
+    return res.status(500).json({ 'error': errorCodes['E0003'] });
   }
 });
 
 
+// Mark courses, sections, and components as completed for a user
+router.patch('/:id/complete', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { comp, isComplete, points } = req.body;
+
+    let student = await StudentModel.findOne({ baseUser: id });
+
+    if (!student) {
+      return res.status(404).json({ error: errorCodes['E0004'] });
+    }
+
+    const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
+
+    res.status(200).send(updatedStudent);
+  } catch (error) {
+    // If the server could not be reached, return an error message
+    return res.status(500).json({ 'error': errorCodes['E0003'] });
+  }
+});
+
+// Update the current extra points for a student like daily streaks
+router.put('/:id/extraPoints', requireLogin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { extraPoints } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: errorCodes['E0014'] });
+    }
+
+    if (isNaN(extraPoints)) {
+      return res.status(400).json({ error: errorCodes['E0804'] });
+    }
+
+    const student = await StudentModel.findOneAndUpdate(
+      { baseUser: id },
+      {
+        $inc: {
+          currentExtraPoints: extraPoints
+        }
+      }
+    );
+
+    if (!student) {
+      return res.status(404).json({ error: errorCodes['E0004'] });
+    }
+
+    res.status(200).json(student);
+  } catch (error) {
+    res.status(500).json({ error: errorCodes['E0003'] });
+  }
+});
+
+/* NOT USED  */
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
 router.get('/leaderboard', async (req, res) => {
   try {

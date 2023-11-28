@@ -7,7 +7,6 @@ const makeFakeSection = require('../fixtures/fakeSection');
 const makeFakeLecture = require('../fixtures/fakeLecture');
 const mongoose = require('mongoose');
 const { signAccessToken } = require('../../helpers/token');
-const errorCodes = require('../../helpers/errorCodes')
 
 const app = express();
 app.use(express.json());
@@ -15,15 +14,15 @@ app.use('/api/lectures', router); // Add your router to the Express app
 
 // Mock Google OAuth2 clientID
 jest.mock('../../config/keys', () => {
-  return {
-    GOOGLE_CLIENT_ID: 'test',
-    TOKEN_SECRET: 'test',
-  };
+	return {
+		GOOGLE_CLIENT_ID: 'test',
+		TOKEN_SECRET: 'test',
+	};
 });
 
 // Start the Express app on a specific port for testing
 const PORT = 5022; // Choose a port for testing
-const server = app.listen(PORT)
+const server = app.listen(PORT);
 
 let fakeUser = makeFakeUser();
 let fakeSection = makeFakeSection();
@@ -32,112 +31,112 @@ let fakeLecture = makeFakeLecture();
 
 describe('PUT /lectures/:lectureId', () => {
 
-  let db; // Store the database connection
+	let db; // Store the database connection
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('sections').insertOne(fakeSection);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('sections').insertOne(fakeSection);
+	});
 
-  it('Creates a lecture for a given course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    const response = await request(app)
-      .put('/api/lectures/' + fakeSection._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test lectures' })
-      .expect(201);
+	it('Creates a lecture for a given course', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		const response = await request(app)
+			.put('/api/lectures/' + fakeSection._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test lectures' })
+			.expect(201);
 
-    expect(response.body.title).toBe('Test lectures');
-  });
+		expect(response.body.title).toBe('Test lectures');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
+	});
 
 });
 
 
 describe('DELETE /lectures/:lectureId', () => {
 
-  let db; // Store the database connection
-  let lectureCreate; // Store the lecture created
+	let db; // Store the database connection
+	let lectureCreate; // Store the lecture created
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('sections').insertOne(fakeSection);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('sections').insertOne(fakeSection);
+	});
 
-  it('Creates a lecture for a given course', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    lectureCreate = await request(app)
-      .put('/api/lectures/' + fakeSection._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test lecture' })
-      .expect(201);
+	it('Creates a lecture for a given course', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		lectureCreate = await request(app)
+			.put('/api/lectures/' + fakeSection._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test lecture' })
+			.expect(201);
 
-    expect(lectureCreate.body.title).toBe('Test lecture');
-  });
+		expect(lectureCreate.body.title).toBe('Test lecture');
+	});
 
-  it('Delete the created lecture', async () => {
-    const token = signAccessToken({id: fakeUser._id});
+	it('Delete the created lecture', async () => {
+		const token = signAccessToken({id: fakeUser._id});
 
-    const response = await request(app)
-      .delete('/api/lectures/' + lectureCreate.body._id)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+		const response = await request(app)
+			.delete('/api/lectures/' + lectureCreate.body._id)
+			.set('Authorization', `Bearer ${token}`)
+			.expect(200);
 
-    expect(response.text).toBe("Lecture Deleted");
-  });
+		expect(response.text).toBe('Lecture Deleted');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
-    await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('sections').deleteMany({}); // Delete all documents in the 'sections' collection
+		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
+	});
 
 });
 
 
 describe('PATCH /lectures/:lectureId', () => {
 
-  let db; // Store the database connection
+	let db; // Store the database connection
 
-  beforeAll(async () => {
-    db = await connectDb(); // Connect to the database
+	beforeAll(async () => {
+		db = await connectDb(); // Connect to the database
 
-    // Insert the fake user into the database
-    await db.collection('users').insertOne(fakeUser);
-    await db.collection('lectures').insertOne(fakeLecture);
-  });
+		// Insert the fake user into the database
+		await db.collection('users').insertOne(fakeUser);
+		await db.collection('lectures').insertOne(fakeLecture);
+	});
 
-  it('Update the fake lecture', async () => {
-    const token = signAccessToken({id: fakeUser._id});
-    const response = await request(app)
-      .patch('/api/lectures/' + fakeLecture._id)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test', description: 'Sewing test' })
-      .expect(200);
+	it('Update the fake lecture', async () => {
+		const token = signAccessToken({id: fakeUser._id});
+		const response = await request(app)
+			.patch('/api/lectures/' + fakeLecture._id)
+			.set('Authorization', `Bearer ${token}`)
+			.send({ title: 'Test', description: 'Sewing test' })
+			.expect(200);
     
-    expect(response.body.title).toBe('Test');
-    expect(response.body.description).toBe('Sewing test');
-  });
+		expect(response.body.title).toBe('Test');
+		expect(response.body.description).toBe('Sewing test');
+	});
 
-  afterAll(async () => {
-    await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
-    await db.collection('lectures').deleteMany({}); // Delete all documents in the 'sections' collection
-  });
+	afterAll(async () => {
+		await db.collection('users').deleteMany({}); // Delete all documents in the 'users' collection
+		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'sections' collection
+	});
 });
 
 
 afterAll(async () => {
-  server.close();
-  await mongoose.connection.close();
+	server.close();
+	await mongoose.connection.close();
 });
