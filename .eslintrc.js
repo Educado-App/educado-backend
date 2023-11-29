@@ -26,7 +26,7 @@ module.exports = {
     '**/*.test.js', '**/*.spec.js', '**/*.config.js', 'jest-setup.js', 'db.js'
   ],
   'rules': {
-    'indent': ['error', 'tab'],
+    'indent': ['error', 2],
     'quotes': ['error', 'single'], // Specify single quotes
     'semi': ['error', 'always'], // Require semicolons
     'no-unsafe-finally': 'off', // Disable no-unsafe-finally rule
