@@ -91,57 +91,6 @@ router.post('/login', async (req, res) => {
 
 router.post('/signup', async (req, res) => {
 
-  const form = req.body;
-
-  try {
-    // Validate user info
-    validateName(form.firstName);
-    validateName(form.lastName);
-    validatePassword(form.password);
-    await validateEmail(form.email);
-
-    // Set dates for creation and modification
-    form.joinedAt = Date.now();
-    form.modifiedAt = Date.now();
-    // Hashing the password for security
-    const hashedPassword = encrypt(form.password);
-    //Overwriting the plain text password with the hashed password 
-    form.password = hashedPassword;
-
-    // Create user with student and content creator profiles
-    const baseUser = UserModel(form);
-    const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
-    const studentProfile = StudentModel({ baseUser: baseUser._id });
-    
-
-    // Get user's email domain to find out whether or not they are a part of an onboarded institution
-    const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
-    const onboarded = await InstitutionModel.findOne({domain: emailDomain});
-    const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
-
-
-    const createdBaseUser = await baseUser.save();  // Save user
-    let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
-    const createdStudent = await studentProfile.save(); // Save student
-
-    // If the email is under either of the two insttutions' domains, the content creator will automatically be approved
-    if (onboarded || onboardedSecondary){
-      await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
-      createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
-      
-    }
-
-    res.status(201).send({
-      baseUser: createdBaseUser,
-      contentCreatorProfile: createdContentCreator,
-      studentProfile: createdStudent,
-      institution: onboarded,
-    });
-
-  } catch (error) {
-    res.status(400).send({ error: error });
-  }
-
 	const form = req.body;
 
 	try {
@@ -163,15 +112,30 @@ router.post('/signup', async (req, res) => {
 		const baseUser = UserModel(form);
 		const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
 		const studentProfile = StudentModel({ baseUser: baseUser._id });
+    
+
+		// Get user's email domain to find out whether or not they are a part of an onboarded institution
+		const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
+		const onboarded = await InstitutionModel.findOne({domain: emailDomain});
+		const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
+
 
 		const createdBaseUser = await baseUser.save();  // Save user
-		const createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
 		const createdStudent = await studentProfile.save(); // Save student
+
+		// If the email is under either of the two insttutions' domains, the content creator will automatically be approved
+		if (onboarded || onboardedSecondary){
+			await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
+			createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
+      
+		}
 
 		res.status(201).send({
 			baseUser: createdBaseUser,
 			contentCreatorProfile: createdContentCreator,
-			studentProfile: createdStudent
+			studentProfile: createdStudent,
+			institution: onboarded,
 		});
 
 	} catch (error) {
