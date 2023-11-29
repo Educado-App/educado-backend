@@ -76,13 +76,13 @@ describe('Users Routes', () => {
 		});
 
 		/*it('handles user not found error for delete', async () => {
-      const nonExistentUserId = new mongoose.Types.ObjectId();
+			const nonExistentUserId = new mongoose.Types.ObjectId();
 
-      await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/${nonExistentUserId}`)
-        .set('token', token) // Include the token in the request headers
-        .expect(204);
-    });*/
+			await request(`http://localhost:${PORT}`)
+				.delete(`/api/users/${nonExistentUserId}`)
+				.set('token', token) // Include the token in the request headers
+				.expect(204);
+		});*/
 
 		it('Updates user email successfully', async () => {
 			const newEmail = 'newemail@example.com';
@@ -112,15 +112,15 @@ describe('Users Routes', () => {
 		});
 
 		/*it('handles user not found error for update-email', async () => {
-      const nonExistentUserId = new mongoose.Types.ObjectId();
-      const newEmail = 'newemail@example.com';
+			const nonExistentUserId = new mongoose.Types.ObjectId();
+			const newEmail = 'newemail@example.com';
 
-      await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + nonExistentUserId)
-        .set('token', token) // Include the token in the request headers
-        .send({ email: newEmail })
-        .expect(204); // Expecting a 204 No Content response for user not found
-    });*/
+			await request(`http://localhost:${PORT}`)
+				.patch('/api/users/' + nonExistentUserId)
+				.set('token', token) // Include the token in the request headers
+				.send({ email: newEmail })
+				.expect(204); // Expecting a 204 No Content response for user not found
+		});*/
 
 		it('Updates user first name successfully', async () => {
 			const newFirstName = 'newFirstName';
@@ -138,14 +138,14 @@ describe('Users Routes', () => {
 		});
 
 		/*it('handles user not found error for update-first-name', async () => {
-      const nonExistentUserId = new mongoose.Types.ObjectId();
+			const nonExistentUserId = new mongoose.Types.ObjectId();
 
-      await request(`http://localhost:${PORT}`)
-        .patch(`/api/users/${nonExistentUserId}`)
-        .set('token', token) // Include the token in the request headers
-        .send({ newFirstName: 'NewFirstName' })
-        .expect(204);
-    });*/
+			await request(`http://localhost:${PORT}`)
+				.patch(`/api/users/${nonExistentUserId}`)
+				.set('token', token) // Include the token in the request headers
+				.send({ newFirstName: 'NewFirstName' })
+				.expect(204);
+		});*/
 
 		it('Updates user last name successfully', async () => {
 			const newLastName = 'newLastName';
@@ -163,14 +163,14 @@ describe('Users Routes', () => {
 		});
 
 		/*it('handles user not found error for update-last-name', async () => {
-      const nonExistentUserId = new mongoose.Types.ObjectId();
+			const nonExistentUserId = new mongoose.Types.ObjectId();
 
-      await request(`http://localhost:${PORT}`)
-        .patch(`/api/users/${nonExistentUserId}`)
-        .set('token', token) // Include the token in the request headers
-        .send({ newLastName: 'NewLastName' })
-        .expect(204);
-    });*/
+			await request(`http://localhost:${PORT}`)
+				.patch(`/api/users/${nonExistentUserId}`)
+				.set('token', token) // Include the token in the request headers
+				.send({ newLastName: 'NewLastName' })
+				.expect(204);
+		});*/
 
 		it('Updates user fields successfully', async () => {
 			const newEmail = 'newemail@example.com';
@@ -192,17 +192,17 @@ describe('Users Routes', () => {
 		});
 
 		/*it('handles user not found error', async () => {
-      const nonExistentUserId = new mongoose.Types.ObjectId();
-      const newEmail = 'newemail@example.com';
+			const nonExistentUserId = new mongoose.Types.ObjectId();
+			const newEmail = 'newemail@example.com';
 
-      await request(`http://localhost:${PORT}`)
-        .patch('/api/users/' + nonExistentUserId)
-        .set('token', token) // Include the token in the request headers
-        .send({
-          email: newEmail
-        })
-        .expect(204); // Expecting a 204 No Content response for user not found
-    });*/
+			await request(`http://localhost:${PORT}`)
+				.patch('/api/users/' + nonExistentUserId)
+				.set('token', token) // Include the token in the request headers
+				.send({
+					email: newEmail
+				})
+				.expect(204); // Expecting a 204 No Content response for user not found
+		});*/
 
 		it('Handles validation errors for email', async () => {
 			const invalidEmail = 'invalidemail'; // Invalid email format
@@ -299,7 +299,7 @@ describe('Users Routes', () => {
 				.expect(200); // Expecting a 200 OK response
 
 			const updatedUser = await db.collection('users').findOne({ _id: user._id });
-			expect(updatedUser.dateUpdated-0).not.toBe(user.dateUpdated-0);
+			expect(updatedUser.dateUpdated - 0).not.toBe(user.dateUpdated - 0);
 		});
 
 		it('Return error if email you try to PATCH is identical', async () => {

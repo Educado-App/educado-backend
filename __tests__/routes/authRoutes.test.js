@@ -105,7 +105,7 @@ describe('POST /auth/login', () => {
 		expect(response.body.error.code).toBe('E0105');
 	});
 
-  // ************ FAILS BC LOGIC IS WRONG ************
+	// ************ FAILS BC LOGIC IS WRONG ************
 
 	// it('Returns error if Content Creator is not approved', async () => {
 	// 	const correctCredentials = {

@@ -12,17 +12,17 @@ const { LectureModel } = require('../models/Lecture');
 //CREATED BY VIDEOSTREAMING TEAM
 //get lecture by id
 router.get('/:id', async (req, res) => {
-	if (!req.params.id) return res.send('Missing query parameters');
+  if (!req.params.id) return res.send('Missing query parameters');
 
-	const lectureId = req.params.id;
+  const lectureId = req.params.id;
 
-	let lecture = await LectureModel.findById(lectureId).catch((err) => {
-		throw err;
-	});
+  let lecture = await LectureModel.findById(lectureId).catch((err) => {
+    throw err;
+  });
 
-	if (lecture === null)
-		return res.send('No section found with id: ' + lectureId);
-	return res.send(lecture);
+  if (lecture === null)
+    return res.send('No section found with id: ' + lectureId);
+  return res.send(lecture);
 });
 
 
@@ -36,33 +36,33 @@ router.get('/:id', async (req, res) => {
  * 
  */
 router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
-	const {title, description, contentType} = req.body; //Handles the data in "data" from the request
-	const section_id = req.params.section_id; //Handles the data in "params" from the request
+  const {title, description, contentType} = req.body; //Handles the data in "data" from the request
+  const section_id = req.params.section_id; //Handles the data in "params" from the request
 
-	const lecture = new LectureModel ({
-		parentSection: section_id,
-		title: title,
-		description: description,
-		contentType: contentType,
-		content: '',
-		dateCreated: Date.now(),
-		dateUpdated: Date.now()
-	});
+  const lecture = new LectureModel ({
+    parentSection: section_id,
+    title: title,
+    description: description,
+    contentType: contentType,
+    content: '',
+    dateCreated: Date.now(),
+    dateUpdated: Date.now()
+  });
 
-	try {
-		const section = await SectionModel.findById(section_id);
+  try {
+    const section = await SectionModel.findById(section_id);
     
-		if(section.components.length >= 10){
-			res.status(400).send({error: errorCodes['E1101']});
-		}
+    if(section.components.length >= 10){
+      res.status(400).send({error: errorCodes['E1101']});
+    }
     
-		await lecture.save();
-		await section.components.push({compId: lecture._id, compType: 'lecture'});
-		await section.save();
-		res.status(201).send(lecture);
-	} catch (err) {
-		res.status(400).send({error: errorCodes['E0000']});
-	}
+    await lecture.save();
+    await section.components.push({compId: lecture._id, compType: 'lecture'});
+    await section.save();
+    res.status(201).send(lecture);
+  } catch (err) {
+    res.status(400).send({error: errorCodes['E0000']});
+  }
 });
 
 
@@ -73,24 +73,24 @@ router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
  * @returns {string} - Just sends a message to confirm that the update is complete
  */
 router.patch('/:id', /*requireLogin,*/ async (req, res) => {
-	const lecture = req.body;
-	const { id } = req.params;
+  const lecture = req.body;
+  const { id } = req.params;
 
-	// Find the lecture object by ID and update it
-	const dbLecture = await LectureModel.findByIdAndUpdate(
-		id,
-		{
-			title: lecture.title,
-			description: lecture.description,
-			dateUpdated: Date.now(),
-		},
-		function (err) {
-			if (err) {
-				res.status(400).send(err);
-			}
-		}
-	);
-	res.status(200).send(dbLecture);
+  // Find the lecture object by ID and update it
+  const dbLecture = await LectureModel.findByIdAndUpdate(
+    id,
+    {
+      title: lecture.title,
+      description: lecture.description,
+      dateUpdated: Date.now(),
+    },
+    function (err) {
+      if (err) {
+        res.status(400).send(err);
+      }
+    }
+  );
+  res.status(200).send(dbLecture);
 });
 
 
@@ -100,10 +100,10 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
  * @returns {object} - lectures
  */
 router.get('/section/:id', async (req, res) => {
-	const id = req.params.id; // destructure params
-	const lecture = await LectureModel.find({parentSection: id});
+  const id = req.params.id; // destructure params
+  const lecture = await LectureModel.find({parentSection: id});
 
-	res.send(lecture);
+  res.send(lecture);
 });
 
 
@@ -115,21 +115,21 @@ router.get('/section/:id', async (req, res) => {
  * @returns {string} - Just sends a message to confirm that the deletion is complete
  */
 router.delete('/:id'/*, requireLogin*/, async (req, res) => {
-	const { id } = req.params; // destructure params
+  const { id } = req.params; // destructure params
 
-	// Get the lecture object
-	const lecture = await LectureModel.findById(id).catch((err) => res.status(204).send(err));
+  // Get the lecture object
+  const lecture = await LectureModel.findById(id).catch((err) => res.status(204).send(err));
 
-	// Remove the lecture from the section lectures array
-	await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {components:{compId: lecture._id}}});
+  // Remove the lecture from the section lectures array
+  await SectionModel.updateOne({_id: lecture.parentSection}, {$pull: {components:{compId: lecture._id}}});
 
-	// Delete the lecture object
-	await LectureModel.findByIdAndDelete(id).catch((err) => {
-		res.status(204).send(err);
-	});
+  // Delete the lecture object
+  await LectureModel.findByIdAndDelete(id).catch((err) => {
+    res.status(204).send(err);
+  });
 
-	// Send response
-	res.status(200).send('Lecture Deleted');
+  // Send response
+  res.status(200).send('Lecture Deleted');
 });
 
 

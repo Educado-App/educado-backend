@@ -1,3 +1,7 @@
+/*
+ * This gives linting error, and since it is not used, it is commented out.
+ *
+ 
 const { StudentModel } = require('../models/Students');
 const errorCodes = require('../helpers/errorCodes');
 
@@ -105,3 +109,5 @@ function getDateFilter(timeInterval) {
 module.exports = {
 	findTop100Students
 };
+
+*/
