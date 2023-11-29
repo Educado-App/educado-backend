@@ -31,46 +31,46 @@ async function giveExtraPointsForSection(section, student, extraPoints) {
 }
 
 async function updateExtraPointsForSection(section, student, extraPoints, completedCourseIndex) {
-    // Updates the extraPoints field for the completedSection and completedCourse
-    await StudentModel.findOneAndUpdate(
-      { baseUser: student.baseUser },
-      {
-        $inc: {
-          [`completedCourses.${completedCourseIndex}.completedSections.$[sectionId].extraPoints`]: extraPoints,
-          [`completedCourses.${completedCourseIndex}.completedSections.$[sectionId].totalPoints`]: extraPoints
-        }
-      },
-      {
-        arrayFilters: [{ 'sectionId.sectionId': section._id }]
+  // Updates the extraPoints field for the completedSection and completedCourse
+  await StudentModel.findOneAndUpdate(
+    { baseUser: student.baseUser },
+    {
+      $inc: {
+        [`completedCourses.${completedCourseIndex}.completedSections.$[sectionId].extraPoints`]: extraPoints,
+        [`completedCourses.${completedCourseIndex}.completedSections.$[sectionId].totalPoints`]: extraPoints
       }
-    )
+    },
+    {
+      arrayFilters: [{ 'sectionId.sectionId': section._id }]
+    }
+  );
 
-    await updateCompletedCoursesTotalPoints(student.baseUser, section.parentCourse, completedCourseIndex);
+  await updateCompletedCoursesTotalPoints(student.baseUser, section.parentCourse, completedCourseIndex);
 }
 
 // Update student points and level based on earned points
 async function updateStudentLevel(userId, points, level) {
-    // Check if user has enough points to level up
-    const pointsToNextLevel = level * 100; // For example, 100 points * level to reach the next level
-    if (points >= pointsToNextLevel) {
+  // Check if user has enough points to level up
+  const pointsToNextLevel = level * 100; // For example, 100 points * level to reach the next level
+  if (points >= pointsToNextLevel) {
     // User has enough points to level up
     points -= pointsToNextLevel; // Deduct points needed for the level up
     level++;
-    }
+  }
 
-    // Update user points and level in the database
-    await StudentModel.findOneAndUpdate(
+  // Update user points and level in the database
+  await StudentModel.findOneAndUpdate(
     { baseUser: userId },
     { $inc: { points: points }, $set: { level: level } },
     { new: true } // Set to true if you want to get the updated document as a result
-    );
+  );
 }
 
 async function updateCompletedSectionsTotalPoints(userId, sectionId, completedCourseIndex) {
   // Calculate the totalPoints for the updated section
   const updatedStudent = await StudentModel.findOne({ baseUser: userId });
   const completedCourse = updatedStudent.completedCourses[completedCourseIndex];
-  const updatedSection = completedCourse.completedSections.find(completedSection => completedSection.sectionId.equals(sectionId))
+  const updatedSection = completedCourse.completedSections.find(completedSection => completedSection.sectionId.equals(sectionId));
 
   updatedSection.totalPoints = updatedSection.completedExercises.reduce((total, exercise) => total + exercise.pointsGiven, 0);
   updatedSection.totalPoints += updatedSection.extraPoints;
@@ -96,22 +96,22 @@ async function updateCompletedCoursesTotalPoints(userId, courseId, completedCour
   const completedCourse = updatedStudent.completedCourses[completedCourseIndex];
 
   const totalPoints = completedCourse.completedSections.reduce((sum, completedSection) => {
-      return sum + completedSection.totalPoints;
+    return sum + completedSection.totalPoints;
   }, 0);
 
   await StudentModel.findOneAndUpdate(
-      { baseUser: userId, 'completedCourses.courseId': courseId },
-      {
-          $set: {
-              'completedCourses.$.totalPoints': totalPoints
-          }
+    { baseUser: userId, 'completedCourses.courseId': courseId },
+    {
+      $set: {
+        'completedCourses.$.totalPoints': totalPoints
       }
+    }
   );
 }
 
 module.exports = {
-    updateStudentLevel,
-    giveExtraPointsForSection,
-    updateCompletedCoursesTotalPoints,
-    updateCompletedSectionsTotalPoints,
+  updateStudentLevel,
+  giveExtraPointsForSection,
+  updateCompletedCoursesTotalPoints,
+  updateCompletedSectionsTotalPoints,
 };

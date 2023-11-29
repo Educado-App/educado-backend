@@ -10,30 +10,30 @@ app.use('/api/utility', router); // Add your router to the Express app
 
 // Mock Google OAuth2 clientID
 jest.mock('../../config/keys', () => {
-    return {
-        GOOGLE_CLIENT_ID: 'test',
-        TOKEN_SECRET: 'test',
-    };
+	return {
+		GOOGLE_CLIENT_ID: 'test',
+		TOKEN_SECRET: 'test',
+	};
 });
 
 // Start the Express app on a specific port for testing
 const PORT = 5021; // Choose a port for testing
-const server = app.listen(PORT)
+const server = app.listen(PORT);
 
 
 describe('GET /utility/online', () => {
 
-    it('Test if online', async () => {
-        const response = await request(`http://localhost:${PORT}`)
-            .get('/api/utility/online')
-            .expect(200);
-        expect(response.body).toBe(true);
+	it('Test if online', async () => {
+		const response = await request(`http://localhost:${PORT}`)
+			.get('/api/utility/online')
+			.expect(200);
+		expect(response.body).toBe(true);
 
-    });
+	});
 
 });
 
 afterAll(async () => {
-    server.close();
-    await mongoose.connection.close();
+	server.close();
+	await mongoose.connection.close();
 });

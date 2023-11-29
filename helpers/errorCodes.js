@@ -1,59 +1,59 @@
 module.exports = {
 
   
-	// E00 - General errors
-	E0000: {
-		code: 'E0000',
-		message: 'Unknown error'
-	},
-	E0001: {
-		code: 'E0001',
-		message: 'Authentication token is invalid or expired.'
-	},
-	E0002: {
-		code: 'E0002',
-		message: 'Users role does not have the necessary permissions for this action'
-	},
-	E0003: {
-		code: 'E0003',
-		message: 'Server could not be reached'
-	},
-	E0004: {
-		code: 'E0004',
-		message: 'User not found'
-	},
-	E0005: {
-		code: 'E0005',
-		message: 'No courses found'
-	},
-	E0006: {
-		code: 'E0006',
-		message: 'Course not found'
-	},
-	E0007: {
-		code: 'E0007',
-		message: 'No sections found'
-	},
-	E0008: {
-		code: 'E0008',
-		message: 'Section not found'
-	},
-	E0009: {
-		code: 'E0009',
-		message: 'Course does not contain sections'
-	},
-	E0010: {
-		code: 'E0010',
-		message: 'Email could not be sent'
-	},
-	E0011: {
-		code: 'E0011',
-		message: 'No exercises found'
-	},
-	E0012: {
-		code: 'E0012',
-		message: 'Exercise not found'
-	},
+  // E00 - General errors
+  E0000: {
+    code: 'E0000',
+    message: 'Unknown error'
+  },
+  E0001: {
+    code: 'E0001',
+    message: 'Authentication token is invalid or expired.'
+  },
+  E0002: {
+    code: 'E0002',
+    message: 'Users role does not have the necessary permissions for this action'
+  },
+  E0003: {
+    code: 'E0003',
+    message: 'Server could not be reached'
+  },
+  E0004: {
+    code: 'E0004',
+    message: 'User not found'
+  },
+  E0005: {
+    code: 'E0005',
+    message: 'No courses found'
+  },
+  E0006: {
+    code: 'E0006',
+    message: 'Course not found'
+  },
+  E0007: {
+    code: 'E0007',
+    message: 'No sections found'
+  },
+  E0008: {
+    code: 'E0008',
+    message: 'Section not found'
+  },
+  E0009: {
+    code: 'E0009',
+    message: 'Course does not contain sections'
+  },
+  E0010: {
+    code: 'E0010',
+    message: 'Email could not be sent'
+  },
+  E0011: {
+    code: 'E0011',
+    message: 'No exercises found'
+  },
+  E0012: {
+    code: 'E0012',
+    message: 'Exercise not found'
+  },
   E0013: {
     code: 'E0013',
     message: 'Content creator not found'
@@ -64,7 +64,7 @@ module.exports = {
   },
   E0015: {
     code: 'E0015',
-    message: "Invalid time interval. Use 'day', 'week', 'month' or 'all'."
+    message: 'Invalid time interval. Use \'day\', \'week\', \'month\' or \'all\'.'
   },
   E0016: {
     code: 'E0016',
@@ -116,7 +116,7 @@ module.exports = {
   },
   E0206: {
     code: 'E0206',
-    message: "Email must contain '@' and '.'"
+    message: 'Email must contain \'@\' and \'.\''
   },
   E0207: {
     code: 'E0207',
@@ -183,37 +183,37 @@ module.exports = {
     message: 'Too many requests. Please try again later.'
   },
   
-	// E05 - Verification errors
-	E0501: {
-		code: 'E0501',
-		message: 'Account is already verified.'
-	},
-	E0502: {
-		code: 'E0502',
-		message: 'Verification link has expired.'
-	},
-	E0503: {
-		code: 'E0503',
-		message: 'Verification link is invalid or has already been used.'
-	},
+  // E05 - Verification errors
+  E0501: {
+    code: 'E0501',
+    message: 'Account is already verified.'
+  },
+  E0502: {
+    code: 'E0502',
+    message: 'Verification link has expired.'
+  },
+  E0503: {
+    code: 'E0503',
+    message: 'Verification link is invalid or has already been used.'
+  },
 
-	// E06 - Subscription errors
-	E0601: {
-		code: 'E0601',
-		message: 'Could not subscribe to course'
-	},
-	E0602: {
-		code: 'E0602',
-		message: 'Could not unsubscribe to course'
-	},
-	E0603: {
-		code: 'E0603',
-		message: 'Could not get users subscriptions'
-	},
-	E0604: {
-		code: 'E0604',
-		message: 'Could not check users subscriptions'
-	},
+  // E06 - Subscription errors
+  E0601: {
+    code: 'E0601',
+    message: 'Could not subscribe to course'
+  },
+  E0602: {
+    code: 'E0602',
+    message: 'Could not unsubscribe to course'
+  },
+  E0603: {
+    code: 'E0603',
+    message: 'Could not get users subscriptions'
+  },
+  E0604: {
+    code: 'E0604',
+    message: 'Could not check users subscriptions'
+  },
   E0605: {
     code: 'E0605',
     message: 'Cannot subscribe to course: User is already subscribed to course.'
@@ -223,33 +223,33 @@ module.exports = {
     message: 'Cannot unsubscribe from course: User is not subscribed to course.'
   },
 
-	// E07 - Point system errors
-	E0701: {
-		code: 'E0701',
-		message: 'Points added is less than or equal to 0.'
-	},
-	E0702: {
-		code: 'E0702',
-		message: 'Points must be of type integer'
-	},
-	E0703: {
-		code: 'E0703',
-		message: 'Points are required.'
-	},
-	E0704: {
-		code: 'E0704',
-		message: 'Max level reached.'
-	},
+  // E07 - Point system errors
+  E0701: {
+    code: 'E0701',
+    message: 'Points added is less than or equal to 0.'
+  },
+  E0702: {
+    code: 'E0702',
+    message: 'Points must be of type integer'
+  },
+  E0703: {
+    code: 'E0703',
+    message: 'Points are required.'
+  },
+  E0704: {
+    code: 'E0704',
+    message: 'Max level reached.'
+  },
 
-	// Model update errors:
-	E0801: {
-		code: 'E0801',
-		message: 'Attempted to update illegal field name'
-	},
-  	E0802: {
-		code: 'E0802',
-		message: 'Field value is identical to the current value.'
-	},
+  // Model update errors:
+  E0801: {
+    code: 'E0801',
+    message: 'Attempted to update illegal field name'
+  },
+  E0802: {
+    code: 'E0802',
+    message: 'Field value is identical to the current value.'
+  },
   E0803: {
     code: 'E0803',
     message: 'Cannot update password directly.'
@@ -267,11 +267,11 @@ module.exports = {
     message: 'Old password is incorrect.'
   },
 
-	// E09 - Answer Exercises Errors
-	E0901: {
-		code: 'E0901',
-		message: 'This exercise is already in completedExercises.'
-	},
+  // E09 - Answer Exercises Errors
+  E0901: {
+    code: 'E0901',
+    message: 'This exercise is already in completedExercises.'
+  },
   E0902: {
     code: 'E0902',
     message: 'This section could not be found in the completedSections array.'
@@ -279,5 +279,64 @@ module.exports = {
   E0903: {
     code: 'E0903',
     message: 'This course could not be found in the completedCourses array.'
+  },
+
+  // E10 - Content Creator Approval Errors
+  E1001: {
+    code: 'E1001',
+    message: 'This Content Creator has not been approved'
+  },
+
+  E1002: {
+    code: 'E1002',
+    message: 'This Content Creator has been rejected'
+  },
+
+  E1003: {
+    code: 'E1003',
+    message: 'Could not approve Content Creator'
+  },
+
+  E1004: {
+    code: 'E1004',
+    message: 'Could not reject Content Creator'
+  },
+
+  E1005: {
+    code: 'E1005',
+    message: 'Could not get Content Creator application'
+  },
+
+  E1006: {
+    code: 'E1006',
+    message: 'Could not upload application'
+
+  },
+
+
+  // E11 - Component Errors
+  E1101: {
+    code: 'E1101',
+    message: 'The component array has reached its maximum size'
+  },
+  E1102: {
+    code: 'E1102',
+    message: 'The component array reached its maximum number of lectures'
+  },
+  E1103: {
+    code: 'E0013',
+    message: 'No exercises found'
+  },
+  E1104: {
+    code: 'E1104',
+    message: 'Exercise not found'
+  },
+  E1105: {
+    code: 'E1105',
+    message: 'No lectures found'
+  },
+  E1106: {
+    code: 'E1106',
+    message: 'Lecture not found'
   },
 };

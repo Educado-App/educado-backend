@@ -9,6 +9,7 @@ const cookieSession = require('cookie-session');
 const router = require('./routes');
 const passport = require('passport');
 
+/* global process */
 const PORT = process.env.PORT || 8888; // Get dynamic port allocation when deployed by Heroku. Otherwise, by default, use port 5000
 
 // Setup connection to database
@@ -24,7 +25,7 @@ const app = express(); // Configuration for listening, communicate to handlers
 
 // Simple logging middleware for testing
 app.use((req, res, next) => {
-  let fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  req.protocol + '://' + req.get('host') + req.originalUrl;
   next();
 });
 app.use(
@@ -48,7 +49,9 @@ if (process.env.NODE_ENV === 'production') {
 
   // Express will serve up the index.html file if it doesn't recognize the route
   const path = require('path');
-  app.get('*', (req, res) => {
+  app.get('*', (req, res) => 
+  {
+    /* global __dirname */
     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }

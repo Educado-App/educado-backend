@@ -1,11 +1,10 @@
 // Mongoose model class for Courses
 const mongoose = require('mongoose');
-const password = require('../helpers/password');
 const { Schema } = mongoose;
 
 // Class description
 const passwordResetTokenSchema = new Schema({
-	userId: {
+  userId: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User',

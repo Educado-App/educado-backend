@@ -15,11 +15,11 @@ const StudentRoutes = require('../routes/studentRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
-    res.send(router.stack)
-})
+  res.send(router.stack);
+});
 
 router.use('/api/courses', CourseRoutes);
-router.use('/api/exercises', ExerciseRoutes)
+router.use('/api/exercises', ExerciseRoutes);
 router.use('/api/sections', SectionRoutes);
 router.use('/api/exercises', ExerciseRoutes);
 router.use('/api/auth', AuthRoutes);
