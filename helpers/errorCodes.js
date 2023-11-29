@@ -313,30 +313,55 @@ module.exports = {
 
 	},
 
-
 	// E11 - Component Errors
 	E1101: {
 		code: 'E1101',
 		message: 'The component array has reached its maximum size'
 	},
+  
 	E1102: {
 		code: 'E1102',
 		message: 'The component array reached its maximum number of lectures'
 	},
+
 	E1103: {
 		code: 'E0013',
 		message: 'No exercises found'
 	},
+
 	E1104: {
 		code: 'E1104',
 		message: 'Exercise not found'
 	},
+
 	E1105: {
 		code: 'E1105',
 		message: 'No lectures found'
 	},
+
 	E1106: {
 		code: 'E1106',
 		message: 'Lecture not found'
+	},
+  
+	// E12 - Institutinal Onboarding Errors
+	E1201: {
+		code: 'E1201',
+		message: 'Could not upload Institution'
+	},
+
+	E1202: {
+		code: 'E1202',
+		message: 'This Institution already exists'
+	},
+
+	E1203: {
+		code: 'E1203',
+		message: 'This Email Domain already exists as part of another Institution'
+	},
+  
+	E1204: {
+		code: 'E1203',
+		message: 'This Secondary Email Domain already exists as part of another Institution'
 	},
 };
