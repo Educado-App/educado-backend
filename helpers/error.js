@@ -1,10 +1,10 @@
 function makeHttpError({ status = 500, message }) {
 
-  return {
-    success: false,
-    status,
-    errors: message
-  };
+	return {
+		success: false,
+		status,
+		errors: message
+	};
 }
 
 /**
@@ -12,10 +12,10 @@ function makeHttpError({ status = 500, message }) {
  */
 class MultipleError extends Error {
 
-  constructor(message = {}) {
-    super();
-    super.message = message;
-  }
+	constructor(message = {}) {
+		super();
+		super.message = message;
+	}
 }
 
 module.exports = { makeHttpError, MultipleError };

@@ -5,17 +5,17 @@ const { Schema } = mongoose;
 
 // Class description
 const lectureSchema = new Schema({
-  parentSection: { type: Schema.Types.ObjectId, ref: 'Section' },
-  title: String,
-  description: String,
-  contentType: {
-    type: String,
-    enum: ['text', 'video'],
-  },
-  content: String,
-  dateCreated: Date,
-  dateUpdated: Date,
-  //components: [{ type: Schema.Types.ObjectId, ref: "Component" }],
+	parentSection: { type: Schema.Types.ObjectId, ref: 'Section' },
+	title: String,
+	description: String,
+	contentType: {
+		type: String,
+		enum: ['text', 'video'],
+	},
+	content: String,
+	dateCreated: Date,
+	dateUpdated: Date,
+	//components: [{ type: Schema.Types.ObjectId, ref: "Component" }],
 });
   
 // Sets LectureModel to lectures in database

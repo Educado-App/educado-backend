@@ -3,8 +3,8 @@ const nodemailer = require('nodemailer');
 const { patterns } = require('./patterns');
 
 module.exports = Object.freeze({
-  sendResetPasswordEmail,
-  sendMail
+	sendResetPasswordEmail,
+	sendMail
 });
 
 /**
@@ -22,40 +22,40 @@ module.exports = Object.freeze({
  * @param {String} mail.html 
  */
 async function sendMail({
-  subject,
-  from = keys.GMAIL_USER,
-  to,
-  text,
-  html
+	subject,
+	from = keys.GMAIL_USER,
+	to,
+	text,
+	html
 }) {
 
-  if (!patterns.email.test(from) || !patterns.email.test(to)) {
-    throw new Error('Invalid email');
-  }
+	if (!patterns.email.test(from) || !patterns.email.test(to)) {
+		throw new Error('Invalid email');
+	}
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail', // Send mail using gmail
-    auth: { // Authenticate the gmail account (sender)
-      type: 'login',
-      user: keys.GMAIL_USER,
-      pass: keys.GMAIL_APP_PASSWORD,
+	const transporter = nodemailer.createTransport({
+		service: 'gmail', // Send mail using gmail
+		auth: { // Authenticate the gmail account (sender)
+			type: 'login',
+			user: keys.GMAIL_USER,
+			pass: keys.GMAIL_APP_PASSWORD,
 
-    },
-    tls: {
-      rejectUnauthorized: false, // Disable TLS/SSL certificate validation
-    }
-  });
+		},
+		tls: {
+			rejectUnauthorized: false, // Disable TLS/SSL certificate validation
+		}
+	});
 
-  const mailOptions = {
-    subject: subject,
-    from: from,
-    to: to,
-    text: text,
-    html: html
-  };
+	const mailOptions = {
+		subject: subject,
+		from: from,
+		to: to,
+		text: text,
+		html: html
+	};
 
-  await transporter.sendMail(mailOptions);
-  return mailOptions;
+	await transporter.sendMail(mailOptions);
+	return mailOptions;
 }
 
 
@@ -70,12 +70,12 @@ async function sendMail({
  * @returns 
  */
 async function sendResetPasswordEmail(user, token) {
-  const subject = 'Reset password request for Educado';
-  const to = user.email;
-  const text = `Hi ${user.firstName},\n\nYou have requested to reset your password. Please enter the following code in the app to reset your password:\n\n${token}`+ 
+	const subject = 'Reset password request for Educado';
+	const to = user.email;
+	const text = `Hi ${user.firstName},\n\nYou have requested to reset your password. Please enter the following code in the app to reset your password:\n\n${token}`+ 
     '\n\nThis code will expire in 5 minutes.\n\nIf you did not request to reset your password, please ignore this email. Your password will remain unchanged.' + 
     '\n\nBest regards,\nThe Educado team';
-  const html = `<p>Hi ${user.firstName},</p>\n`+ 
+	const html = `<p>Hi ${user.firstName},</p>\n`+ 
     '<p>You have requested to reset your password. Please enter the following code in the app to reset your password:</p>\n' +
     `<p><strong>${token}</strong></p>\n`+ 
     '<p>This code will expire in 5 minutes.</p>\n'+
@@ -83,6 +83,6 @@ async function sendResetPasswordEmail(user, token) {
     '<p>Best regards,</p>\n' +
     '<p>The Educado team</p>';
 
-  const mail = await sendMail({ subject, to, text, html });
-  return mail;
+	const mail = await sendMail({ subject, to, text, html });
+	return mail;
 }
