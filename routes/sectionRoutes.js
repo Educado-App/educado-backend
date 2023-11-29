@@ -35,22 +35,7 @@ router.get("/:sectionId", async (req, res) => {
   if (section === null)
     return res.send("No section found with id: " + section_id);
 
-
-  const lectures = await LectureModel.find({
-    parentSection: section_id,
-  }).catch((err) => {
-    throw err;
-  });
-
-
-  // Convert the Mongoose document to a plain JavaScript object
-  let _tempSection = section.toObject();
-
-  // Now you can modify it
-  _tempSection.components = lectures;
-
-
-  return res.send(_tempSection);
+  return res.send(section);
 });
 
 
