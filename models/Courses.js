@@ -7,47 +7,47 @@ const { Schema } = mongoose;
 
 // Class description
 const courseSchema = new Schema({
-  title: {
-    type: String,
-    required: [true, 'Title is required'],
-  },
-  description: {
-    type: String,
-    required: [true, 'Description is required'],
-  },
-  dateCreated: Date,
-  dateUpdated: Date,
-  coverImg: String,
-  category: {
-    type: String,
-    enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics'],
-  },
-  creator: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'content-creators' 
-  },
-  difficulty: {
-    type: Number,
-    min: 1,
-    max: 3
-  },
-  status: {
-    type: String,
-    enum: ['draft', 'published', 'hidden'],
-    default: 'draft',
-  },
-  estimatedHours: Number,
-  rating: {
-    type: Number,
-    default: 0,
-  },
-  numOfSubscriptions:{
-    type: Number,
-    default: 0,
-  },
-  sections: [{ 
-    type: Schema.Types.ObjectId, ref: 'sections'
-  }],
+	title: {
+		type: String,
+		required: [true, 'Title is required'],
+	},
+	description: {
+		type: String,
+		required: [true, 'Description is required'],
+	},
+	dateCreated: Date,
+	dateUpdated: Date,
+	coverImg: String,
+	category: {
+		type: String,
+		enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics'],
+	},
+	creator: { 
+		type: Schema.Types.ObjectId, 
+		ref: 'content-creators' 
+	},
+	difficulty: {
+		type: Number,
+		min: 1,
+		max: 3
+	},
+	status: {
+		type: String,
+		enum: ['draft', 'published', 'hidden'],
+		default: 'draft',
+	},
+	estimatedHours: Number,
+	rating: {
+		type: Number,
+		default: 0,
+	},
+	numOfSubscriptions:{
+		type: Number,
+		default: 0,
+	},
+	sections: [{ 
+		type: Schema.Types.ObjectId, ref: 'sections'
+	}],
 });
 
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema

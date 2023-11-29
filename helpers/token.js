@@ -2,19 +2,19 @@ const config = require('../config/keys');
 const jwt = require('jsonwebtoken');
 
 module.exports = Object.freeze({
-  signAccessToken,
-  signRefreshToken,
-  verify
+	signAccessToken,
+	signRefreshToken,
+	verify
 });
 
 function signAccessToken(payload = {}) {
-  return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: '2h'});
+	return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: '2h'});
 }
 
 function signRefreshToken(payload = {}) {
-  return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: config.REFRESH_TOKEN_MAX_AGE });
+	return jwt.sign(payload, config.TOKEN_SECRET, { expiresIn: config.REFRESH_TOKEN_MAX_AGE });
 }
 
 function verify(token) {
-  return jwt.verify(token, config.TOKEN_SECRET);
+	return jwt.verify(token, config.TOKEN_SECRET);
 }
