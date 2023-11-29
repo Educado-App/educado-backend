@@ -62,7 +62,7 @@ passport.use(
 			let existingUser;
 			let index;
 
-			for (i = 0; i < profile.emails.length; i++) {
+			for (let i = 0; i < profile.emails.length; i++) {
 				const tempUser = await UserModel.findOne({ email: profile.emails[i].value });
 
 				if (tempUser) {
@@ -78,7 +78,7 @@ passport.use(
 					done(null, existingUser);
 				} else {
 					// Else remove user, add new with ID and email
-					const rem = await UserModel.remove({ email: profile.emails[index].value });
+					await UserModel.remove({ email: profile.emails[index].value });
 					const user = await new UserModel({
 						googleID: profile.id,
 						email: profile.emails[index].value,

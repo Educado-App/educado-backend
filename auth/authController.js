@@ -17,7 +17,7 @@ module.exports = function makeAuthEndpointHandler(authHandler) {
 	};
 
 	async function postUser(httpRequest) {
-		user = httpRequest.body;
+		const user = httpRequest.body;
 
 		try {
 			const response = await authHandler.authenticate(user);

@@ -54,134 +54,134 @@ module.exports = {
 		code: 'E0012',
 		message: 'Exercise not found'
 	},
-  E0013: {
-    code: 'E0013',
-    message: 'Content creator not found'
-  },
-  E0014: {
-    code: 'E0014',
-    message: 'Invalid id'
-  },
-  E0015: {
-    code: 'E0015',
-    message: "Invalid time interval. Use 'day', 'week', 'month' or 'all'."
-  },
-  E0016: {
-    code: 'E0016',
-    message: 'Invalid parameters'
-  },
+	E0013: {
+		code: 'E0013',
+		message: 'Content creator not found'
+	},
+	E0014: {
+		code: 'E0014',
+		message: 'Invalid id'
+	},
+	E0015: {
+		code: 'E0015',
+		message: 'Invalid time interval. Use \'day\', \'week\', \'month\' or \'all\'.'
+	},
+	E0016: {
+		code: 'E0016',
+		message: 'Invalid parameters'
+	},
 
-  // E01 - Login errors
-  E0101: {
-    code: 'E0101',
-    message: 'Invalid email'
-  },
-  E0102: {
-    code: 'E0102',
-    message: 'Account is locked due to multiple failed login attempts. Please try again later.'
-  },
-  E0103: {
-    code: 'E0103',
-    message: 'Account is not verified. Please check your email for a verification link.'
-  },
-  E0104: {
-    code: 'E0104',
-    message: 'Account is suspended or blocked by an administrator.'
-  },
-  E0105: {
-    code: 'E0105',
-    message: 'Invalid password'
-  },
+	// E01 - Login errors
+	E0101: {
+		code: 'E0101',
+		message: 'Invalid email'
+	},
+	E0102: {
+		code: 'E0102',
+		message: 'Account is locked due to multiple failed login attempts. Please try again later.'
+	},
+	E0103: {
+		code: 'E0103',
+		message: 'Account is not verified. Please check your email for a verification link.'
+	},
+	E0104: {
+		code: 'E0104',
+		message: 'Account is suspended or blocked by an administrator.'
+	},
+	E0105: {
+		code: 'E0105',
+		message: 'Invalid password'
+	},
 
-  // E02 - Signup errors
-  E0201: {
-    code: 'E0201',
-    message: 'User with the provided email already exists.'
-  },
-  E0202: {
-    code: 'E0202',
-    message: 'Password does not meet the minimum requirements.'
-  },
-  E0203: {
-    code: 'E0203',
-    message: 'Invalid email format.'
-  },
-  E0204: {
-    code: 'E0204',
-    message: 'User registration is currently disabled.'
-  },
-  E0205: {
-    code: 'E0205',
-    message: 'Could not send a verification email. Please try again later.'
-  },
-  E0206: {
-    code: 'E0206',
-    message: "Email must contain '@' and '.'"
-  },
-  E0207: {
-    code: 'E0207',
-    message: 'Email must be at least 6 characters.'
-  },
-  E0208: {
-    code: 'E0208',
-    message: 'Email is required.'
-  },
-  E0209: {
-    code: 'E0209',
-    message: 'First and last name are required.'
-  },
-  E0210: {
-    code: 'E0210',
-    message: 'Names must be between 1 and 50 characters.'
-  },
-  E0211: {
-    code: 'E0211',
-    message: 'Name must only contain letters, spaces, hyphens and apostrophes.'
-  },
-  E0212: {
-    code: 'E0212',
-    message: 'Password is required.'
-  },
-  E0213: {
-    code: 'E0213',
-    message: 'Password must be at least 8 characters.'
-  },
-  E0214: {
-    code: 'E0214',
-    message: 'Password must contain at least one letter.'
-  },
+	// E02 - Signup errors
+	E0201: {
+		code: 'E0201',
+		message: 'User with the provided email already exists.'
+	},
+	E0202: {
+		code: 'E0202',
+		message: 'Password does not meet the minimum requirements.'
+	},
+	E0203: {
+		code: 'E0203',
+		message: 'Invalid email format.'
+	},
+	E0204: {
+		code: 'E0204',
+		message: 'User registration is currently disabled.'
+	},
+	E0205: {
+		code: 'E0205',
+		message: 'Could not send a verification email. Please try again later.'
+	},
+	E0206: {
+		code: 'E0206',
+		message: 'Email must contain \'@\' and \'.\''
+	},
+	E0207: {
+		code: 'E0207',
+		message: 'Email must be at least 6 characters.'
+	},
+	E0208: {
+		code: 'E0208',
+		message: 'Email is required.'
+	},
+	E0209: {
+		code: 'E0209',
+		message: 'First and last name are required.'
+	},
+	E0210: {
+		code: 'E0210',
+		message: 'Names must be between 1 and 50 characters.'
+	},
+	E0211: {
+		code: 'E0211',
+		message: 'Name must only contain letters, spaces, hyphens and apostrophes.'
+	},
+	E0212: {
+		code: 'E0212',
+		message: 'Password is required.'
+	},
+	E0213: {
+		code: 'E0213',
+		message: 'Password must be at least 8 characters.'
+	},
+	E0214: {
+		code: 'E0214',
+		message: 'Password must contain at least one letter.'
+	},
 
-  // E03 - Logout errors
-  E0301: {
-    code: 'E0301',
-    message: 'User is not authenticated. Logout is not possible.'
-  },
+	// E03 - Logout errors
+	E0301: {
+		code: 'E0301',
+		message: 'User is not authenticated. Logout is not possible.'
+	},
 
-  // E04 - Password reset errors
-  E0401: {
-    code: 'E0401',
-    message: 'The provided email is not associated with any account.'
-  },
-  E0402: {
-    code: 'E0402',
-    message: 'Password reset link has expired.'
-  },
-  E0403: {
-    code: 'E0403',
-    message: 'Password reset link is invalid or has already been used.'
-  },
-  E0404: {
-    code: 'E0404',
-    message: 'Password reset code has expired.'
-  },
-  E0405: {
-    code: 'E0405',
-    message: 'Password reset code is invalid or has already been used.'
-  },
-  E0406: {
-    code: 'E0406',
-    message: 'Too many requests. Please try again later.'
-  },
+	// E04 - Password reset errors
+	E0401: {
+		code: 'E0401',
+		message: 'The provided email is not associated with any account.'
+	},
+	E0402: {
+		code: 'E0402',
+		message: 'Password reset link has expired.'
+	},
+	E0403: {
+		code: 'E0403',
+		message: 'Password reset link is invalid or has already been used.'
+	},
+	E0404: {
+		code: 'E0404',
+		message: 'Password reset code has expired.'
+	},
+	E0405: {
+		code: 'E0405',
+		message: 'Password reset code is invalid or has already been used.'
+	},
+	E0406: {
+		code: 'E0406',
+		message: 'Too many requests. Please try again later.'
+	},
   
 	// E05 - Verification errors
 	E0501: {
@@ -214,14 +214,14 @@ module.exports = {
 		code: 'E0604',
 		message: 'Could not check users subscriptions'
 	},
-  E0605: {
-    code: 'E0605',
-    message: 'Cannot subscribe to course: User is already subscribed to course.'
-  },
-  E0606: {
-    code: 'E0606',
-    message: 'Cannot unsubscribe from course: User is not subscribed to course.'
-  },
+	E0605: {
+		code: 'E0605',
+		message: 'Cannot subscribe to course: User is already subscribed to course.'
+	},
+	E0606: {
+		code: 'E0606',
+		message: 'Cannot unsubscribe from course: User is not subscribed to course.'
+	},
 
 	// E07 - Point system errors
 	E0701: {
@@ -246,38 +246,97 @@ module.exports = {
 		code: 'E0801',
 		message: 'Attempted to update illegal field name'
 	},
-  	E0802: {
+	E0802: {
 		code: 'E0802',
 		message: 'Field value is identical to the current value.'
 	},
-  E0803: {
-    code: 'E0803',
-    message: 'Cannot update password directly.'
-  },
-  E0804: {
-    code: 'E0804',
-    message: 'Points must be a positive number.'
-  },
-  E0805: {
-    code: 'E0805',
-    message: 'Old and new password required.'
-  },
-  E0806: {
-    code: 'E0806',
-    message: 'Old password is incorrect.'
-  },
+	E0803: {
+		code: 'E0803',
+		message: 'Cannot update password directly.'
+	},
+	E0804: {
+		code: 'E0804',
+		message: 'Points must be a positive number.'
+	},
+	E0805: {
+		code: 'E0805',
+		message: 'Old and new password required.'
+	},
+	E0806: {
+		code: 'E0806',
+		message: 'Old password is incorrect.'
+	},
 
 	// E09 - Answer Exercises Errors
 	E0901: {
 		code: 'E0901',
 		message: 'This exercise is already in completedExercises.'
 	},
-  E0902: {
-    code: 'E0902',
-    message: 'This section could not be found in the completedSections array.'
-  },
-  E0903: {
-    code: 'E0903',
-    message: 'This course could not be found in the completedCourses array.'
-  },
+	E0902: {
+		code: 'E0902',
+		message: 'This section could not be found in the completedSections array.'
+	},
+	E0903: {
+		code: 'E0903',
+		message: 'This course could not be found in the completedCourses array.'
+	},
+
+	// E10 - Content Creator Approval Errors
+	E1001: {
+		code: 'E1001',
+		message: 'This Content Creator has not been approved'
+	},
+
+	E1002: {
+		code: 'E1002',
+		message: 'This Content Creator has been rejected'
+	},
+
+	E1003: {
+		code: 'E1003',
+		message: 'Could not approve Content Creator'
+	},
+
+	E1004: {
+		code: 'E1004',
+		message: 'Could not reject Content Creator'
+	},
+
+	E1005: {
+		code: 'E1005',
+		message: 'Could not get Content Creator application'
+	},
+
+	E1006: {
+		code: 'E1006',
+		message: 'Could not upload application'
+
+	},
+
+
+	// E11 - Component Errors
+	E1101: {
+		code: 'E1101',
+		message: 'The component array has reached its maximum size'
+	},
+	E1102: {
+		code: 'E1102',
+		message: 'The component array reached its maximum number of lectures'
+	},
+	E1103: {
+		code: 'E0013',
+		message: 'No exercises found'
+	},
+	E1104: {
+		code: 'E1104',
+		message: 'Exercise not found'
+	},
+	E1105: {
+		code: 'E1105',
+		message: 'No lectures found'
+	},
+	E1106: {
+		code: 'E1106',
+		message: 'Lecture not found'
+	},
 };

@@ -1,6 +1,7 @@
 const { patterns } = require('../helpers/patterns');
 const { UserModel } = require('../models/Users');
 const errorCodes = require('../helpers/errorCodes');
+const {compare} = require('../helpers/password');
 
 async function validateEmail(input) {
 	const emailPattern = patterns.email;
@@ -74,32 +75,32 @@ function isMissing(input) {
 
 function validatePoints(input) {
 	if (isMissing(input)) {
-	  throw errorCodes['E0703']; // Points are required
+		throw errorCodes['E0703']; // Points are required
 	}
   
 	if (isNaN(input)) {
-	  throw errorCodes['E0702']; // Invalid points format
+		throw errorCodes['E0702']; // Invalid points format
 	}
   
 	if (input <= 0) {
-	  throw errorCodes['E0701']; // Points added is less than or equal to 0
+		throw errorCodes['E0701']; // Points added is less than or equal to 0
 	}
   
 	return true;
 }
 
 function ensureNewValues(newValues, oldValues) {
-  const newEntries = Object.entries(newValues);
+	const newEntries = Object.entries(newValues);
 
-  for (const [fieldName, fieldValue] of newEntries) {
-    if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
-      return false;
-    } else if (fieldValue === oldValues[fieldName]) {
-      return false;
-    }
-  }
+	for (const [fieldName, fieldValue] of newEntries) {
+		if (fieldName === 'password' && compare(fieldValue, oldValues.password)) {
+			return false;
+		} else if (fieldValue === oldValues[fieldName]) {
+			return false;
+		}
+	}
 
-  return true;
+	return true;
 }
 
 module.exports = {
@@ -108,5 +109,5 @@ module.exports = {
 	validatePoints,
 	validatePassword,
 	isMissing,
-  ensureNewValues,
+	ensureNewValues,
 };

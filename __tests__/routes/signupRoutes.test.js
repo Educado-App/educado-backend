@@ -23,12 +23,12 @@ describe('POST auth/signup', () => {
 
 	let db; // Store the database connection
 
-  const userInput = {
-    firstName: 'test user',
-    lastName: 'test user',
-    email: 'test@email.com',
-    password: 'ABC123456!',
-  };
+	const userInput = {
+		firstName: 'test user',
+		lastName: 'test user',
+		email: 'test@email.com',
+		password: 'ABC123456!',
+	};
 
 	beforeAll(async () => {
 		db = await connectDb(); // Connect to the database
@@ -38,7 +38,7 @@ describe('POST auth/signup', () => {
 	});
 
 	it('Saves the user in the database', async () => {
-		const response = await request(`http://localhost:${PORT}`)
+		await request(`http://localhost:${PORT}`)
 			.post('/api/auth/signup')
 			.send(userInput)
 			.expect(201);
@@ -51,7 +51,7 @@ describe('POST auth/signup', () => {
 
 
 	it('Returns error if email is missing', async () => {
-    userInput.email = '';
+		userInput.email = '';
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/auth/signup')
 			.send(userInput)
@@ -169,9 +169,9 @@ describe('POST auth/signup', () => {
 
 		const response = await request(`http://localhost:${PORT}`)
 			.post('/api/auth/signup')
-			.send(input)
+			.send(input);
       
-    expect(response.status).toBe(201);
+		expect(response.status).toBe(201);
 
 		// Verify that the password is not stored as plain text
 		const user = await db.collection('users').findOne({ email: input.email });

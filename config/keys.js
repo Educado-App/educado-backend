@@ -1,6 +1,8 @@
 const dotenv = require('dotenv');
 
 // Load environment variables based on NODE_ENV
+
+/* global process */
 if (process.env.NODE_ENV === 'production') {
 	dotenv.config({ path: './config/.env.prod' });
 } else {
@@ -15,9 +17,9 @@ const keys = {
 	cookieKey: process.env.COOKIE_KEY,
 	bucketKey: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 	TOKEN_SECRET: process.env.TOKEN_SECRET,
-  GMAIL_USER: process.env.GMAIL_USER,
-  GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
-  GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD,
+	GMAIL_USER: process.env.GMAIL_USER,
+	GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
+	GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD,
 };
 
 module.exports = keys;
