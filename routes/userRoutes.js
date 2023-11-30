@@ -104,7 +104,7 @@ router.put('/addEducation', async (req,res)=>{
 })
 
 //Get second forms
-router.get('/getEducation', async(req,res)=>{
+router.get('/getEducation/:userID', async(req,res)=>{
   const {userID} = req.params;
   //check UserID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -125,11 +125,11 @@ router.get('/getEducation', async(req,res)=>{
 })
 
 //Delete dynamic entries
- router.delete('/deleteEducation', async (req,res)=>{
+ router.delete('/deleteEducation/:_id', async (req,res)=>{
   const  {_id} = req.params;
   try {
     if(!_id){
-      return res.status(404).send('_id is required')
+      return res.status(400).send('_id is required')
     }
 
   const deleteEntry = await ProfileEducationModel.deleteOne({_id:_id});
@@ -158,7 +158,7 @@ router.put('/addExperience', async (req,res)=>{
 })
 
 // Get third forms
-router.get('/getExperience', async(req,res)=>{
+router.get('/getExperience/:userID', async(req,res)=>{
   const {userID} = req.params;
   // Check ID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -169,12 +169,12 @@ router.get('/getExperience', async(req,res)=>{
 })
 
 //Delete dynamic entries
-router.delete('/deleteExperience', async (req, res) => {
+router.delete('/deleteExperience/:_id', async (req, res) => {
   const  {_id} = req.params;
   try {
     
     if(!_id){
-      return res.status(404).send('_id is required')
+      return res.status(400).send('_id is required')
     }
     const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
     res.status(200).send('Entry Deleted')
