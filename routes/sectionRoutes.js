@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 // Models
 const { SectionModel } = require('../models/Sections');
-const { LectureModel } = require('../models/Lecture');
+const { LectureModel } = require('../models/Lectures');
 const { CourseModel } = require('../models/Courses');
 const { ExerciseModel } = require('../models/Exercises');
 

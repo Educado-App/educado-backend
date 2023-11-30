@@ -7,7 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Models
 const { SectionModel } = require('../models/Sections');
-const { LectureModel } = require('../models/Lecture');
+const { LectureModel } = require('../models/Lectures');
 
 //get lecture by id
 router.get('/:id', async (req, res) => {
