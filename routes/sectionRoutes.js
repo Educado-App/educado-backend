@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 // Models
 const { SectionModel } = require('../models/Sections');
-const { LectureModel } = require('../models/Lecture');
+const { LectureModel } = require('../models/Lectures');
 const { CourseModel } = require('../models/Courses');
 const { ExerciseModel } = require('../models/Exercises');
 
@@ -31,8 +31,9 @@ router.get('/:sectionId', async (req, res) => {
 		throw err;
 	});
 
-	if (section === null)
+	if (section === null){
 		return res.send('No section found with id: ' + section_id);
+	}
 
 	return res.send(section);
 });
@@ -128,7 +129,7 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 	for (let comp of components) {
 		if (comp.compType === ComponentType.LECTURE) {
 			await LectureModel.findByIdAndDelete(comp.compId);
-		} else if (comp.type === ComponentType.EXERCISE) {
+		} else if (comp.compType === ComponentType.EXERCISE) {
 			await ExerciseModel.findByIdAndDelete(comp.compId);
 		}
 	}
