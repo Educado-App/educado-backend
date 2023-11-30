@@ -130,7 +130,7 @@ describe('User Routes', () => {
         password: encrypt('testpassword'),  
       };
       await db.collection('users').insertOne(user);
-      let actualUser = await db.collection('users').findOne({ email: user.email })
+      let actualUser = await db.collection('users').findOne({ userID: user.userID })
       const profile = {
         userID: actualUser._id.toString(),
         email: 'test@example.com',
@@ -143,25 +143,6 @@ describe('User Routes', () => {
 
     });
 
-    it('should get user data', async () => {
-      const user = {
-        _id: mongoose.Types.ObjectId(),
-        email: 'test@example.com',
-        password: encrypt('testpassword'),
-      };
-      await db.collection('users').insertOne(user);
-      let actualUser = await db.collection('users').findOne({ email: user.email })
-      const profile = {
-        userID: actualUser._id.toString(),
-        email: 'test@example.com',
-        userName: 'test_user',
-      };
-      await db.collection('Profile').insertOne(profile);
-      const response = await request(`http://localhost:${PORT}`)
-        .get(`/api/users/fetchuser/${profile.email}`);
-      expect(response.status).toBe(200);
-
-    });
   });
 
   describe('Education', () => {
@@ -170,18 +151,20 @@ describe('User Routes', () => {
       const education = {
         userID: mongoose.Types.ObjectId(),
         institution: 'test',
+        startDate: 'test',
+        endDate: 'test',
         course: 'test',
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .post('/api/users/addEducation')
+        .put('/api/users/addEducation')
         .send(education);
-
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
       expect(response.body.institution).toBe(education.institution);
       expect(response.body.course).toBe(education.course);
     });
+
     it('should Get education', async () => {
       const education = {
         userID: mongoose.Types.ObjectId(),
@@ -223,10 +206,13 @@ describe('User Routes', () => {
         userID: mongoose.Types.ObjectId(),
         company: 'test',
         jobTitle: 'test',
+        description: 'test',
+        startDate: 'test',
+        endDate: 'test',
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .post('/api/users/addExperience')
+        .put('/api/users/addExperience')
         .send(experience);
 
       expect(response.status).toBe(200);

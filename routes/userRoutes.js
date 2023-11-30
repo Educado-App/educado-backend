@@ -4,7 +4,6 @@ const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
 const { ContentCreatorModel } = require('../models/ContentCreators');
-const { ContentCreator } = require('../models/ContentCreatorApplication');
 const { ProfileModel } = require('../models/Profile');
 const { ProfileEducationModel } = require('../models/ProfileEducation');
 const { ProfileExperienceModel } = require('../models/ProfileExperience');
@@ -12,7 +11,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-// Define a route for updating user profile data
+// Define a route for updating user static profile data
 router.put('/updateProfile', async (req, res) => {
   const {
     userID,
@@ -22,9 +21,10 @@ router.put('/updateProfile', async (req, res) => {
     userEmail,
     userPhoto
   } = req.body;
-
-  if (!req.body.userEmail || !req.body.userID) {
-    return res.status(400).json({ error: errorCodes['E0202'] }); //Password or email is missing
+  
+  // Require userEmail & userID && email
+  if (!userEmail || !userID || !userName) {
+    return res.status(400).send('All fields are required')
   }
 
   try {
@@ -38,7 +38,6 @@ router.put('/updateProfile', async (req, res) => {
         userName,
         userEmail,
       });
-
       await newProfile.save();
       return res.status(200).json({ message: 'Profile created successfully', user: newProfile });
     }
@@ -66,6 +65,7 @@ router.put('/updateProfile', async (req, res) => {
   } 
 });
 
+//Get static user profile data using userID
 router.get('/fetch/:userID', async (req,res) => {
   const {userID}=req.params; 
   try {
@@ -78,21 +78,22 @@ router.get('/fetch/:userID', async (req,res) => {
       res.status(404).json('user not found');
     }
   } catch (error) {
-    console.log('Errror: ',error);
-    res.status(400).send('User Profile didnot exist!');
+    res.status(400).send('internal server error');
   } 
 })
 
-router.get('/fetchuser/:email', async (req,res) =>{
-  const {email} = req.params; 
-  const user = await ContentCreator.findOne({email});
-  res.status(200).json(user);
-})
 
-// Dynamic form Academic experience CRUD
-
-router.post('/addEducation', async (req,res)=>{
-  const {userID, status, institution, course, educationLevel, startDate, endDate} = req.body;
+// Dynamic form Academic experience CRUD //
+// Update second forms
+router.put('/addEducation', async (req,res)=>{
+  const {userID, institution, course, startDate, endDate} = req.body;
+  //Set fields by default in DB if empty
+  const status = req.body.status === "" ? "Basic": req.body.status;
+  //Require fields to be filled
+  const educationLevel = req.body.educationLevel === "" ? "Progressing": req.body.educationLevel;
+  if (!userID || !institution || !course || !startDate || !endDate) {
+    return res.status(400).send('All fields are required')
+  }
   try {
     const newEntry = await ProfileEducationModel({userID, status, institution, course, educationLevel, startDate, endDate})
     newEntry.save();
@@ -101,17 +102,32 @@ router.post('/addEducation', async (req,res)=>{
     res.status(500).send(err.message)
   }
 })
+
+//Get second forms
 router.get('/getEducation', async(req,res)=>{
   const {userID} = req.query;
-  const data = await ProfileEducationModel.find({userID:userID});
-  res.status(200).json(data)
+  //check UserID
+  if (!mongoose.Types.ObjectId(userID)) {
+    return res.status(500).send('Invalid userID')
+  }
+  try {
+    const data = await ProfileEducationModel.find({userID: userID});
+    if(data) {
+      res.status(200).json(data);
+    }
+    else {
+      res.status(404).send('Education Not found!');
+    }
+  
+  } catch (error) {
+    res.status(400).send('internal server error');
+  }
 })
 
+//Delete dynamic entries
  router.delete('/deleteEducation', async (req,res)=>{
   const  {_id} = req.query;
-  
   try {
-    
     if(!_id){
       return res.status(404).send('_id is required')
     }
@@ -123,10 +139,15 @@ router.get('/getEducation', async(req,res)=>{
   res.status(500).send(err.message)
 } 
  })
-// Dynamic form professional experience CRUD
 
-router.post('/addExperience', async (req,res)=>{
+// Dynamic form professional experience CRUD //
+// Update Third forms
+router.put('/addExperience', async (req,res)=>{
   const {userID, company, jobTitle, checkBool, description, startDate, endDate} = req.body;
+  //Require fields to be filled
+  if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
+    return res.status(400).send('All fields are required')
+  }
   try {
     const newEntry = await ProfileExperienceModel({userID, company, jobTitle, checkBool, description, startDate, endDate})
     newEntry.save();
@@ -136,11 +157,18 @@ router.post('/addExperience', async (req,res)=>{
   }
 })
 
+// Get third forms
 router.get('/getExperience', async(req,res)=>{
   const {userID} = req.query;
+  // Check ID
+  if (!mongoose.Types.ObjectId(userID)) {
+    return res.status(500).send('Invalid userID')
+  }
   const data = await ProfileExperienceModel.find({userID:userID});
   res.status(200).json(data)
 })
+
+//Delete dynamic entries
 router.delete('/deleteExperience', async (req, res) => {
   const  {_id} = req.query;
   try {
@@ -148,7 +176,6 @@ router.delete('/deleteExperience', async (req, res) => {
     if(!_id){
       return res.status(404).send('_id is required')
     }
-
     const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
     res.status(200).send('Entry Deleted')
 
@@ -182,7 +209,6 @@ router.delete('/:id', requireLogin, async (req, res) => {
 
 
   } catch (error) {
-    console.log(error)
     return res.status(500).send({ error: errorCodes['E0003'] });
   }
 });
