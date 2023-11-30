@@ -1,23 +1,22 @@
-const router = require("express").Router();
-const multer = require("multer");
-const axios = require("axios");
+const router = require('express').Router();
+const multer = require('multer');
+const axios = require('axios');
 const FormData = require('form-data');
 const { PassThrough } = require('stream');
 
 const { Storage } = require("@google-cloud/storage");
 const dotenv = require("dotenv");
-
+dotenv.config({ path: "./config/.env" });
 //Get serviceUrl from environment variable
+
+/* global process */
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 //const serviceUrl = "http://localhost:8080/api/v1";
 
-dotenv.config({ path: "./config/.env" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-/* const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
- */const credentials = './config/gcp_service.json'
-// Creates a client
-
-// New GCP Bucket Instance
+const credentials = './config/gcp_service.json'
 const cloudStorage = new Storage({
   projectId: 'credentials.project_id',
   keyFilename: credentials,
@@ -35,8 +34,53 @@ const uploadImg = multer({
   },
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+// Get list of all files in bucket
+router.get('/', (req, res) => {
+	//Forward to service api
+	axios.get(serviceUrl + '/bucket/').then((response) => {
+		res.send(response.data);
+	}).catch((error) => {
+		if (error.response && error.response.data) {
+			// Forward the status code from the Axios error if available
+			res.status(error.response.status || 500).send(error.response.data);
+		} else {
+			// Handle cases where the error does not have a response part (like network errors)
+			res.status(500).send({ message: 'An error occurred during fecthing.' });
+		}
+	});
+});
+
+// Get file from bucket
+router.get('/:filename', (req, res) => {
+	//Forward to service api
+	axios.get(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
+		res.send(response.data);
+	}).catch((error) => {
+		if (error.response && error.response.data) {
+			// Forward the status code from the Axios error if available
+			res.status(error.response.status || 500).send(error.response.data);
+		} else {
+			// Handle cases where the error does not have a response part (like network errors)
+			res.status(500).send({ message: 'An error occurred during fetching.' });
+		}
+	});
+});
+
+// Delete file from bucket
+router.delete('/:filename', (req, res) => {
+	//Forward to service api
+	axios.delete(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
+		res.send(response.data);
+	}).catch((error) => {
+		if (error.response && error.response.data) {
+			// Forward the status code from the Axios error if available
+			res.status(error.response.status || 500).send(error.response.data);
+		} else {
+			// Handle cases where the error does not have a response part (like network errors)
+			res.status(500).send({ message: 'An error occurred during deletion.' });
+		}
+	});
+});
 
 function sanitizeFileName(fileName) {
   return fileName.replace(/\.\./g, '').replace(/[^a-zA-Z0-9_.-]/g, '_');
@@ -88,54 +132,6 @@ router.post("/upload", uploadImg.single("file"), async (req, res) => {
     }
   });
   
-
-// Get list of all files in bucket
-router.get('/', (req, res) => {
-	//Forward to service api
-	axios.get(serviceUrl + '/bucket/').then((response) => {
-		res.send(response.data);
-	}).catch((error) => {
-		if (error.response && error.response.data) {
-			// Forward the status code from the Axios error if available
-			res.status(error.response.status || 500).send(error.response.data);
-		} else {
-			// Handle cases where the error does not have a response part (like network errors)
-			res.status(500).send({ message: 'An error occurred during fecthing.' });
-		}
-	});
-});
-
-// Get file from bucket
-router.get('/:filename', (req, res) => {
-	//Forward to service api
-	axios.get(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
-		res.send(response.data);
-	}).catch((error) => {
-		if (error.response && error.response.data) {
-			// Forward the status code from the Axios error if available
-			res.status(error.response.status || 500).send(error.response.data);
-		} else {
-			// Handle cases where the error does not have a response part (like network errors)
-			res.status(500).send({ message: 'An error occurred during fetching.' });
-		}
-	});
-});
-
-// Delete file from bucket
-router.delete('/:filename', (req, res) => {
-	//Forward to service api
-	axios.delete(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
-		res.send(response.data);
-	}).catch((error) => {
-		if (error.response && error.response.data) {
-			// Forward the status code from the Axios error if available
-			res.status(error.response.status || 500).send(error.response.data);
-		} else {
-			// Handle cases where the error does not have a response part (like network errors)
-			res.status(500).send({ message: 'An error occurred during deletion.' });
-		}
-	});
-});
 
 // Upload file to bucket
 router.post('/', upload.single('file'), (req, res) => {
