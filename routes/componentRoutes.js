@@ -39,17 +39,20 @@ router.get('/:type/:id', async (req, res) => {
  */
 router.patch("/:sectionId", async (req, res) => {
     const { sectionId } = req.params;
-    const {components}  = req.body;
-    components.forEach(comp => {
+    const { components } = req.body;
+
+    for (let i = 0; i < components.length; i++) {
+        const comp = components[i];
+        
         comp._id = mongoose.Types.ObjectId(comp._id);
         comp.compId = mongoose.Types.ObjectId(comp.compId);
         comp.compType = comp.compType;
-        components.push(comp);
-        components.shift();
-    });
+    }
+ 
     console.log("data", components);  
     const section = await SectionModel.findById(sectionId);
-    console.log("section comp", section.components);
+    console.log("section comp", section);
+
     section.components = components;
     await section.save();
     res.send(section);
