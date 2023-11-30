@@ -105,7 +105,7 @@ router.put('/addEducation', async (req,res)=>{
 
 //Get second forms
 router.get('/getEducation', async(req,res)=>{
-  const {userID} = req.query;
+  const {userID} = req.params;
   //check UserID
   if (!mongoose.Types.ObjectId(userID)) {
     return res.status(500).send('Invalid userID')
@@ -126,7 +126,7 @@ router.get('/getEducation', async(req,res)=>{
 
 //Delete dynamic entries
  router.delete('/deleteEducation', async (req,res)=>{
-  const  {_id} = req.query;
+  const  {_id} = req.params;
   try {
     if(!_id){
       return res.status(404).send('_id is required')
@@ -159,7 +159,7 @@ router.put('/addExperience', async (req,res)=>{
 
 // Get third forms
 router.get('/getExperience', async(req,res)=>{
-  const {userID} = req.query;
+  const {userID} = req.params;
   // Check ID
   if (!mongoose.Types.ObjectId(userID)) {
     return res.status(500).send('Invalid userID')
@@ -170,7 +170,7 @@ router.get('/getExperience', async(req,res)=>{
 
 //Delete dynamic entries
 router.delete('/deleteExperience', async (req, res) => {
-  const  {_id} = req.query;
+  const  {_id} = req.params;
   try {
     
     if(!_id){
