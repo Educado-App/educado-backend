@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const mongoose = require("mongoose");
 
 
 // Models
@@ -38,9 +39,17 @@ router.get('/:type/:id', async (req, res) => {
  */
 router.patch("/:sectionId", async (req, res) => {
     const { sectionId } = req.params;
-    const { components } = req.body;
-
+    const {components}  = req.body;
+    components.forEach(comp => {
+        comp._id = mongoose.Types.ObjectId(comp._id);
+        comp.compId = mongoose.Types.ObjectId(comp.compId);
+        comp.compType = comp.compType;
+        components.push(comp);
+        components.shift();
+    });
+    console.log("data", components);  
     const section = await SectionModel.findById(sectionId);
+    console.log("section comp", section.components);
     section.components = components;
     await section.save();
     res.send(section);
