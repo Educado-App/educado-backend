@@ -57,14 +57,13 @@ afterAll(async () => {
 
 
 describe('User Routes', () => {
-  describe('PUT /updateProfile', () => {
+  describe('PUT /update-personal', () => {
     it('should update user profile', async () => {
       // Insert a user for testing
       const user = {
         _id: mongoose.Types.ObjectId(),
         email: 'test@example.com',
         password: encrypt('testpassword'),
-        // Add other user fields as needed
       };
       await db.collection('users').insertOne(user);
 
@@ -78,14 +77,13 @@ describe('User Routes', () => {
       };
 
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/users/updateProfile')
+        .put('/api/users/update-personal')
         .send(updatedData);
 
       expect(response.status).toBe(200);
       expect(response.body.user).toBeInstanceOf(Object);
       expect(response.body.user.userName).toBe(updatedData.userName);
       expect(response.body.user.userEmail).toBe(updatedData.userEmail);
-      // Add more assertions based on your data structure
     });
 
     it('should create a new profile if user does not exist', async () => {
@@ -98,7 +96,7 @@ describe('User Routes', () => {
         userPhoto: 'new-photo-url',
       };
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/users/updateProfile')
+        .put('/api/users/update-personal')
         .send(newData);
       expect(response.status).toBe(200);
       expect(response.body.user).toBeInstanceOf(Object);
@@ -157,7 +155,7 @@ describe('User Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/users/addEducation')
+        .put('/api/users/add-education')
         .send(education);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
@@ -173,7 +171,7 @@ describe('User Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .get(`/api/users/getEducation/${education.userID}`)
+        .get(`/api/users/get-education/${education.userID}`)
       expect(response.status).toBe(200);
     });
     it('should Delete education', async () => {
@@ -185,7 +183,7 @@ describe('User Routes', () => {
       console.log(education)
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/deleteEducation/${education._id}`)
+        .delete(`/api/users/delete-education/${education._id}`)
       expect(response.status).toBe(200);
     });
     it('should not Delete education', async () => {
@@ -196,7 +194,7 @@ describe('User Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/deleteEducation`)
+        .delete(`/api/users/delete-education`)
       expect(response.status).toBe(400);
     });
   });
@@ -212,7 +210,7 @@ describe('User Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/users/addExperience')
+        .put('/api/users/add-experience')
         .send(experience);
 
       expect(response.status).toBe(200);
@@ -228,7 +226,7 @@ describe('User Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .get(`/api/users/getExperience/${experience.userID}`)
+        .get(`/api/users/get-experience/${experience.userID}`)
       expect(response.status).toBe(200);
     });
     it('should Delete Experience', async () => {
@@ -239,7 +237,7 @@ describe('User Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/deleteExperience/${experience._id}`)
+        .delete(`/api/users/delete-experience/${experience._id}`)
       expect(response.status).toBe(200);
     });
     it('should not Delete Experience', async () => {
@@ -250,7 +248,7 @@ describe('User Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/users/deleteExperience`)
+        .delete(`/api/users/delete-experience`)
       expect(response.status).toBe(400);
     });
   });

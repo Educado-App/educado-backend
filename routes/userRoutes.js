@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
 // Define a route for updating user static profile data
-router.put('/updateProfile', async (req, res) => {
+router.put('/update-personal', async (req, res) => {
   const {
     userID,
     userBio,
@@ -29,6 +29,7 @@ router.put('/updateProfile', async (req, res) => {
 
   try {
     const user = await ProfileModel.findOne({ userID });
+    // if user is not there then create new profile else update user profile
     if (!user) {
       const newProfile = new ProfileModel({
         userID,
@@ -41,6 +42,8 @@ router.put('/updateProfile', async (req, res) => {
       await newProfile.save();
       return res.status(200).json({ message: 'Profile created successfully', user: newProfile });
     }
+
+    //Update profile
     const updatedData = {
       userID,
       userPhoto: userPhoto, // Use the existing photo if not provided in the request
@@ -50,12 +53,14 @@ router.put('/updateProfile', async (req, res) => {
       userEmail,
     };
 
+    //if userid then update
     const updatedProfile = await ProfileModel.findOneAndUpdate(
       { userID },
       updatedData,
       { new: true }
     );
 
+    // if there is not user display error
     if (!updatedProfile) {
       return res.status(404).json({ message: 'User profile not found' });
     }
@@ -85,7 +90,7 @@ router.get('/fetch/:userID', async (req,res) => {
 
 // Dynamic form Academic experience CRUD //
 // Update second forms
-router.put('/addEducation', async (req,res)=>{
+router.put('/add-education', async (req,res)=>{
   const {userID, institution, course, startDate, endDate} = req.body;
   //Set fields by default in DB if empty
   const status = req.body.status === "" ? "Basic": req.body.status;
@@ -104,7 +109,7 @@ router.put('/addEducation', async (req,res)=>{
 })
 
 //Get second forms
-router.get('/getEducation/:userID', async(req,res)=>{
+router.get('/get-education/:userID', async(req,res)=>{
   const {userID} = req.params;
   //check UserID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -125,7 +130,7 @@ router.get('/getEducation/:userID', async(req,res)=>{
 })
 
 //Delete dynamic entries
- router.delete('/deleteEducation/:_id', async (req,res)=>{
+ router.delete('/delete-education/:_id', async (req,res)=>{
   const  {_id} = req.params;
   try {
     if(!_id){
@@ -142,7 +147,7 @@ router.get('/getEducation/:userID', async(req,res)=>{
 
 // Dynamic form professional experience CRUD //
 // Update Third forms
-router.put('/addExperience', async (req,res)=>{
+router.put('/add-experience', async (req,res)=>{
   const {userID, company, jobTitle, checkBool, description, startDate, endDate} = req.body;
   //Require fields to be filled
   if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
@@ -158,7 +163,7 @@ router.put('/addExperience', async (req,res)=>{
 })
 
 // Get third forms
-router.get('/getExperience/:userID', async(req,res)=>{
+router.get('/get-experience/:userID', async(req,res)=>{
   const {userID} = req.params;
   // Check ID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -169,7 +174,7 @@ router.get('/getExperience/:userID', async(req,res)=>{
 })
 
 //Delete dynamic entries
-router.delete('/deleteExperience/:_id', async (req, res) => {
+router.delete('/delete-experience/:_id', async (req, res) => {
   const  {_id} = req.params;
   try {
     
