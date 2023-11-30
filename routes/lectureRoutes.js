@@ -42,13 +42,19 @@ router.get("/:id", async (req, res) => {
 router.put("/:section_id", /*requireLogin,*/ async (req, res) => {
   const {title, description, contentType} = req.body; //Handles the data in "data" from the request
   const section_id = req.params.section_id; //Handles the data in "params" from the request
+  let {content} = req.body;
+
+  //Video upload not fully implmented yet, therefore if its video we set it to empty string
+  if (content === null || content === undefined){
+    content = "";
+  }
 
   const lecture = new LectureModel ({
     parentSection: section_id,
     title: title,
     description: description,
     contentType: contentType,
-    content: "",
+    content: content,
     dateCreated: Date.now(),
     dateUpdated: Date.now()
   });
@@ -86,6 +92,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     {
       title: lecture.title,
       description: lecture.description,
+      content: lecture.content,
       dateUpdated: Date.now(),
     },
     function (err, docs) {
