@@ -12,6 +12,7 @@ const BucketRoutes = require('./bucketRoutesGCP');
 const LectureRoutes = require('./lectureRoutes');
 const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
+const ComponentRoutes = require('../routes/componentRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -30,6 +31,7 @@ router.use('/api/bucket', BucketRoutes);
 router.use('/api/lectures', LectureRoutes);
 router.use('/api/utility', UtilityRoutes);
 router.use('/api/students', StudentRoutes);
+router.use('/api/components', ComponentRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

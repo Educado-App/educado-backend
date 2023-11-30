@@ -31,10 +31,11 @@ router.get('/:sectionId', async (req, res) => {
 		throw err;
 	});
 
-	if (section === null)
-		return res.send('No section found with id: ' + section_id);
+  if (section === null){
+    return res.send("No section found with id: " + section_id);
+	}
 
-	return res.send(section);
+  return res.send(section);
 });
 
 

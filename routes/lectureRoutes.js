@@ -29,19 +29,25 @@ router.get('/:id', async (req, res) => {
  * @returns {object} course NOT SURE
  * 
  */
-router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
-	const {title, description, contentType} = req.body; //Handles the data in "data" from the request
-	const section_id = req.params.section_id; //Handles the data in "params" from the request
+router.put("/:section_id", /*requireLogin,*/ async (req, res) => {
+  const {title, description, contentType} = req.body; //Handles the data in "data" from the request
+  const section_id = req.params.section_id; //Handles the data in "params" from the request
+  let {content} = req.body;
 
-	const lecture = new LectureModel ({
-		parentSection: section_id,
-		title: title,
-		description: description,
-		contentType: contentType,
-		content: '',
-		dateCreated: Date.now(),
-		dateUpdated: Date.now()
-	});
+  //Video upload not fully implmented yet, therefore if its video we set it to empty string
+  if (content === null || content === undefined){
+    content = "";
+  }
+
+  const lecture = new LectureModel ({
+    parentSection: section_id,
+    title: title,
+    description: description,
+    contentType: contentType,
+    content: content,
+    dateCreated: Date.now(),
+    dateUpdated: Date.now()
+  });
 
 	try {
 		const section = await SectionModel.findById(section_id);
@@ -63,24 +69,27 @@ router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
  * @param {string} id - lecture id
  * @returns {string} - Just sends a message to confirm that the update is complete
  */
-router.patch('/:id', /*requireLogin,*/ async (req, res) => {
-	const lecture = req.body;
-	const { id } = req.params;
-	// Find the lecture object by ID and update it
-	const dbLecture = await LectureModel.findByIdAndUpdate(
-		id,
-		{
-			title: lecture.title,
-			description: lecture.description,
-			dateUpdated: Date.now(),
-		},
-		function (err) {
-			if (err) {
-				res.status(400).send(err);
-			}
-		}
-	);
-	res.status(200).send(dbLecture);
+router.patch("/:id", /*requireLogin,*/ async (req, res) => {
+  const lecture = req.body;
+  const { id } = req.params;
+
+  // Find the lecture object by ID and update it
+  const dbLecture = await LectureModel.findByIdAndUpdate(
+    id,
+    {
+      title: lecture.title,
+      description: lecture.description,
+      contentType: lecture.contentType,
+      content: lecture.content,
+      dateUpdated: Date.now(),
+    },
+    function (err, docs) {
+      if (err) {
+        res.status(400).send(err);
+      }
+    }
+  );
+  res.status(200).send(dbLecture);
 });
 /**
  * Get all lectures from a specific section id
