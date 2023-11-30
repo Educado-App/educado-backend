@@ -4,9 +4,6 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { PassThrough } = require('stream');
 
-const { Storage } = require("@google-cloud/storage");
-const dotenv = require("dotenv");
-dotenv.config({ path: "./config/.env" });
 //Get serviceUrl from environment variable
 
 /* global process */
@@ -15,24 +12,6 @@ const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-const credentials = './config/gcp_service.json'
-const cloudStorage = new Storage({
-  projectId: 'credentials.project_id',
-  keyFilename: credentials,
-});
-
-// Constant variables
-const bucketName = "educado-bucket";
-const dir = "./_temp_bucketFiles";
-
-
-const uploadImg = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // no larger than 5mb
-  },
-});
 
 // Get list of all files in bucket
 router.get('/', (req, res) => {
@@ -81,57 +60,6 @@ router.delete('/:filename', (req, res) => {
 		}
 	});
 });
-
-function sanitizeFileName(fileName) {
-  return fileName.replace(/\.\./g, '').replace(/[^a-zA-Z0-9_.-]/g, '_');
-}
-
-
-// Upload file to GCP bucket
-router.post("/upload", uploadImg.single("file"), async (req, res) => {
-    const multerFile = req.file;
-    const fileName = sanitizeFileName(req.body.fileName);
-    
-    if (!multerFile) {
-      res.status(400).send("No file uploaded.");
-      return;
-    }
-    
-    // Validate MIME type
-    const validImageMimeTypes = [
-      "image/jpeg", "image/png", "video/mp4", 
-    ];
-    if (!validImageMimeTypes.includes(multerFile.mimetype)) {
-      res.status(400).send("Invalid file type. Please upload an image.");
-      return;
-    }
-    
-    const buffer = req.file.buffer;
-    
-    //upload to bucket
-    uploadFile().catch(console.error);
-    
-    
-    async function uploadFile() {
-      try {
-        await cloudStorage
-        .bucket(bucketName)
-        .file(fileName)
-        .save(buffer, {
-          metadata: {
-            contentType: multerFile.mimetype,
-          },
-        });
-          console.log(req.file)
-        res.status(200).send(fileName);
-      } 
-      catch (err) {
-        console.error(err);
-        res.status(500).send(`Error: ${err.message}`);
-      }
-    }
-  });
-  
 
 // Upload file to bucket
 router.post('/', upload.single('file'), (req, res) => {
