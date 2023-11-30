@@ -32,4 +32,18 @@ router.get('/:type/:id', async (req, res) => {
     
 });
 
+/**
+ * route to patch the components in a section
+ * @param {string} sectionId
+ */
+router.patch("/:sectionId", async (req, res) => {
+    const { sectionId } = req.params;
+    const { components } = req.body;
+
+    const section = await SectionModel.findById(sectionId);
+    section.components = components;
+    await section.save();
+    res.send(section);
+});
+
 module.exports = router;
