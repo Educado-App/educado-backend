@@ -48,13 +48,23 @@ router.patch("/:sectionId", async (req, res) => {
         comp.compId = mongoose.Types.ObjectId(comp.compId);
         comp.compType = comp.compType;
     }
- 
-    console.log("data", components);  
-    const section = await SectionModel.findById(sectionId);
-    console.log("section comp", section);
 
-    section.components = components;
-    await section.save();
+    const section = await SectionModel.findById(sectionId);
+
+    section.updateOne(
+        { $set:
+           {
+            components : components
+           }
+        }
+     ).then(result => {
+        console.log("section comp", section);
+     }).catch(err => {
+         console.log(err);
+     });
+
+    // section.components = components;
+    // await section.save();
     res.send(section);
 });
 

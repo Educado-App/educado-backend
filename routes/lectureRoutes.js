@@ -92,6 +92,7 @@ router.patch("/:id", /*requireLogin,*/ async (req, res) => {
     {
       title: lecture.title,
       description: lecture.description,
+      contentType: lecture.contentType,
       content: lecture.content,
       dateUpdated: Date.now(),
     },
