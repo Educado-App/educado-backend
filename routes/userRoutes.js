@@ -162,7 +162,7 @@ router.put('/add-experience', async (req,res)=>{
   }
 })
 
-// Get third forms
+// Get professional experience formdata
 router.get('/get-experience/:userID', async(req,res)=>{
   const {userID} = req.params;
   // Check ID
@@ -213,9 +213,27 @@ router.delete('/:id', requireLogin, async (req, res) => {
     });
 
 
-  } catch (error) {
-    return res.status(500).send({ error: errorCodes['E0003'] });
-  }
+	} catch (error) {
+		console.log(error);
+		return res.status(500).send({ error: errorCodes['E0003'] });
+	}
+});
+
+// GET User by ID
+router.get('/:id', requireLogin, async (req, res) => {
+	try {
+		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+			return res.status(400).send({ error: errorCodes['E0014'] });
+		}
+		const id = mongoose.Types.ObjectId(req.params.id);
+
+		const user = await UserModel.findById(id);
+
+		return res.status(200).send(user);
+
+	} catch (error) {
+		return res.status(500).send({ error: errorCodes['E0003'] });
+	}
 });
 
 // Update User with dynamic fields
