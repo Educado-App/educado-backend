@@ -129,7 +129,7 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 	for (let comp of components) {
 		if (comp.compType === ComponentType.LECTURE) {
 			await LectureModel.findByIdAndDelete(comp.compId);
-		} else if (comp.type === ComponentType.EXERCISE) {
+		} else if (comp.compType === ComponentType.EXERCISE) {
 			await ExerciseModel.findByIdAndDelete(comp.compId);
 		}
 	}
