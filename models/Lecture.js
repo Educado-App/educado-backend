@@ -13,7 +13,7 @@ const lectureSchema = new Schema({
 	// components: [{ type: Schema.Types.ObjectId, ref: "lectureComponents" }]
 }, { timestamps: true });
   
-const LectureModel = mongoose.model('lectures', lectureSchema);
-module.exports = { LectureModel };
+const OldLectureModel = mongoose.model('lecture', lectureSchema);
+module.exports = { OldLectureModel };
   
 

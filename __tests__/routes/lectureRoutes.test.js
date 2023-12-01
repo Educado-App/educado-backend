@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = express();
 const mongoose = require('mongoose');
 const lectureRoutes = require('../../routes/lectureRoutes');
-const { LectureModel } = require('../../models/Lecture');
+const { LectureModel } = require('../../models/Lectures');
 const connectDb = require('../../__tests__/fixtures/db');
 
 
@@ -21,8 +21,8 @@ describe('Lecture Routes', () => {
 			title: 'Test Lecture',
 			description: 'Test Description',
 			parentSection: '6529091fddfe5294668541e2',
-			image: 'q',
-			video: 'q',
+			contentType: "text",
+			content: "content",
 			completed: false,
 		});
 
