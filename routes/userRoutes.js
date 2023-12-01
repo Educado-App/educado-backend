@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateEmail, validateName, validatePoints, validatePassword, ensureNewValues } = require('../helpers/validation');
+const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
@@ -10,6 +10,7 @@ const { ProfileExperienceModel } = require('../models/ProfileExperience');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
+
 
 // Define a route for updating user static profile data
 router.put('/update-personal', async (req, res) => {
