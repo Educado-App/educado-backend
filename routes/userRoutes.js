@@ -202,8 +202,6 @@ router.delete('/:id', requireLogin, async (req, res) => {
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
 
-		const deletedUser = await UserModel.findByIdAndDelete(id);
-
 		if (!deletedUser) {
 			return res.status(204).send(); // User not found
 		}
