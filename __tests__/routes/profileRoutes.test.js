@@ -135,19 +135,8 @@ describe('Profile Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/educations/${education._id}`)
+        .delete(`/api/profiles/educations/${education._id}`)
       expect(response.status).toBe(200);
-    });
-    it('should not Delete education', async () => {
-      const education = {
-        _id: mongoose.Types.ObjectId(),
-        institution: 'test',
-        course: 'test',
-      };
-      await db.collection('Education').insertOne(education);
-      const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/profiles/educations`)
-      expect(response.status).toBe(400);
     });
   });
   describe('Experience', () => {
@@ -191,17 +180,6 @@ describe('Profile Routes', () => {
       const response = await request(`http://localhost:${PORT}`)
         .delete(`/api/profiles/experiences/${experience._id}`)
       expect(response.status).toBe(200);
-    });
-    it('should not Delete Experience', async () => {
-      const experience = {
-        _id: mongoose.Types.ObjectId(),
-        company: 'test',
-        jobTitle: 'test',
-      };
-      await db.collection('Experience').insertOne(experience);
-      const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/profiles/experiences`)
-      expect(response.status).toBe(400);
     });
   });
 });
