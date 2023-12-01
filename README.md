@@ -1,31 +1,27 @@
 # Educado backend
 
-Backend for both the Educado webpage (content creator page) and the Educado mobile application (student page).
+Backend for both the Educado webpage (content creator page) and the Educado mobile application (student page). 
 It mainly serves the webpage and application with data from the database.
 
 Main dependencies:
-
 - Nodejs
 - Express
 - MongoDB/Mongoose
 - Axios
 
 ## Step-by-step guide to run Educado development setup
-
 Below is a short guide explaining how to set up and run the educado backend in development mode.
 
 ### Setting up Node environment
-
 - Ensure that local version of Node.js is latest stable version (v20.9.0, at the time of writing this)
-  - run `node --version`
-  - if version == v20.9.0, then all is good :)
-  - if version is NOT vv20.9.0 then do the following
-    - Ensure that you have npm installed
-    - run `npm install -g n` to install node version manager
-    - when installed, run `n stable`, to install latest stable version of node
+    - run `node --version`
+    - if version == v20.9.0, then all is good :)
+    - if version is NOT vv20.9.0 then do the following
+        - Ensure that you have npm installed
+        - run `npm install -g n` to install node version manager 
+        - when installed, run `n stable`, to install latest stable version of node 
 
 ### Setting up local repository
-
 - Download [MongoDB Compass (GUI)](https://www.mongodb.com/try/download/compass)
 - Download [Docker](https://www.docker.com/)
 - Go to GitHub page and clone (with ssh or GitHub Desktop) the repository
@@ -44,7 +40,7 @@ Below is a short guide explaining how to set up and run the educado backend in d
 8. GMAIL_USER
 9. GMAIL_APP_PASSWORD
 
-### The gcp_service.json file should contain the following fields:
+### The gcp_service.json file should contain the following fields: 
 
 1. type
 2. project_id
@@ -60,30 +56,24 @@ Below is a short guide explaining how to set up and run the educado backend in d
 
 Remember, these secrets are exactly that... **Secrets**... So make extra sure they are git-ignored (or someone will be very mad)
 
-### Installing node dependencies
-
+### Installing node dependencies 
 - In root folder of the repo run `npm install`
 - Run `npm install` again
 
 ### Run app in development mode
-
-- Run `npm run dev` to start application
+- Run `npm run dev` to start application 
 - Rest api runs on ://localhost:8888
 
 ## Docker Commands
-
 - `npm run docker`
-
   - **Description:** Starts the Docker containers in the background.
   - **Command:** `docker-compose up -d`
 
 - `npm run docker_down`
-
   - **Description:** Stops and removes the Docker containers defined in the Docker Compose configuration.
   - **Command:** `docker-compose down`
 
 - `npm run docker_build`
-
   - **Description:** Builds and starts the Docker containers in the background. This command will rebuild the containers even if there are cached layers available.
   - **Command:** `docker-compose up -d --build`
 
@@ -92,7 +82,7 @@ Remember, these secrets are exactly that... **Secrets**... So make extra sure th
   - **Command:** `docker-compose down && docker volume rm educado-backend_mongodb_data && docker-compose up -d --build mongodb`
 
 ## Notes
-
 - It’s important to use the appropriate command depending on whether you are in a development or production environment.
 - The Docker commands are intended to be run in an environment where Docker is installed and configured.
 - Ensure that no other services are running on the ports that are configured in `docker-compose.yml` to avoid port conflicts.
+
