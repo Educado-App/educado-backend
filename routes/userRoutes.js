@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateEmail, validateName, validatePoints, validatePassword, ensureNewValues } = require('../helpers/validation');
+const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
@@ -24,7 +24,7 @@ router.put('/update-personal', async (req, res) => {
   
   // Require userEmail & userID && email
   if (!userEmail || !userID || !userName) {
-    return res.status(400).send('All fields are required')
+    return res.status(400).send('All fields are required');
   }
 
   try {
@@ -93,18 +93,18 @@ router.get('/fetch/:userID', async (req,res) => {
 router.put('/add-education', async (req,res)=>{
   const {userID, institution, course, startDate, endDate} = req.body;
   //Set fields by default in DB if empty
-  const status = req.body.status === "" ? "Basic": req.body.status;
+  const status = req.body.status === '' ? 'Basic': req.body.status;
   //Require fields to be filled
-  const educationLevel = req.body.educationLevel === "" ? "Progressing": req.body.educationLevel;
+  const educationLevel = req.body.educationLevel === '' ? 'Progressing': req.body.educationLevel;
   if (!userID || !institution || !course || !startDate || !endDate) {
-    return res.status(400).send('All fields are required')
+    return res.status(400).send('All fields are required');
   }
   try {
-    const newEntry = await ProfileEducationModel({userID, status, institution, course, educationLevel, startDate, endDate})
+    const newEntry = await ProfileEducationModel({userID, status, institution, course, educationLevel, startDate, endDate});
     newEntry.save();
-    res.status(200).json(newEntry)
+    res.status(200).json(newEntry);
   } catch (err) {
-    res.status(500).send(err.message)
+    res.status(500).send(err.message);
   }
 })
 
@@ -113,7 +113,7 @@ router.get('/get-education/:userID', async(req,res)=>{
   const {userID} = req.params;
   //check UserID
   if (!mongoose.Types.ObjectId(userID)) {
-    return res.status(500).send('Invalid userID')
+    return res.status(500).send('Invalid userID');
   }
   try {
     const data = await ProfileEducationModel.find({userID: userID});
@@ -134,14 +134,15 @@ router.get('/get-education/:userID', async(req,res)=>{
   const  {_id} = req.params;
   try {
     if(!_id){
-      return res.status(400).send('_id is required')
+      return res.status(400).send('_id is required');
     }
 
   const deleteEntry = await ProfileEducationModel.deleteOne({_id:_id});
-  res.status(200).send('Entry Deleted')
-
+  if (deleteEntry) {
+  res.status(200).send('Entry Deleted');
+  }
 } catch (err) {
-  res.status(500).send(err.message)
+  res.status(500).send(err.message);
 } 
  })
 
@@ -151,14 +152,14 @@ router.put('/add-experience', async (req,res)=>{
   const {userID, company, jobTitle, checkBool, description, startDate, endDate} = req.body;
   //Require fields to be filled
   if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
-    return res.status(400).send('All fields are required')
+    return res.status(400).send('All fields are required');
   }
   try {
     const newEntry = await ProfileExperienceModel({userID, company, jobTitle, checkBool, description, startDate, endDate})
     newEntry.save();
-    res.status(200).json(newEntry)
+    res.status(200).json(newEntry);
   } catch (err) {
-    res.status(500).send(err.message)
+    res.status(500).send(err.message);
   }
 })
 
@@ -167,10 +168,10 @@ router.get('/get-experience/:userID', async(req,res)=>{
   const {userID} = req.params;
   // Check ID
   if (!mongoose.Types.ObjectId(userID)) {
-    return res.status(500).send('Invalid userID')
+    return res.status(500).send('Invalid userID');
   }
   const data = await ProfileExperienceModel.find({userID:userID});
-  res.status(200).json(data)
+  res.status(200).json(data);
 })
 
 //Delete dynamic entries
@@ -179,13 +180,15 @@ router.delete('/delete-experience/:_id', async (req, res) => {
   try {
     
     if(!_id){
-      return res.status(400).send('_id is required')
+      return res.status(400).send('_id is required');
     }
     const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
-    res.status(200).send('Entry Deleted')
+    if(deleteEntry){
+    res.status(200).send('Entry Deleted');
+    }
 
   } catch (err) {
-    res.status(500).send(err.message)
+    res.status(500).send(err.message);
   } 
 });
 
@@ -243,7 +246,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
     const updateFields = req.body; // Fields to be updated dynamically
 
     if (updateFields.password) {
-      return res.status(400).send({ error: errorCodes['E0803']})
+      return res.status(400).send({ error: errorCodes['E0803']});
     }
 
     const validFields = await validateFields(updateFields);
@@ -255,7 +258,7 @@ router.patch('/:id', requireLogin, async (req, res) => {
     }
 
     if (!ensureNewValues(updateFields, user)) {
-      return res.status(400).send({ error: errorCodes['E0802'] })
+      return res.status(400).send({ error: errorCodes['E0802'] });
     }
 
     
