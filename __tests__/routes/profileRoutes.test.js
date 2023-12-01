@@ -2,7 +2,6 @@ const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/profileRoutes');
 const connectDb = require('../fixtures/db');
-const makeFakeCourse = require('../fixtures/fakeCourse');
 const { encrypt } = require('../../helpers/password');
 const mongoose = require('mongoose');
 const app = express();
@@ -109,7 +108,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/profiles/education')
+        .put('/api/profiles/educations')
         .send(education);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(Object);
@@ -125,7 +124,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .get(`/api/profiles/education/${education.userID}`)
+        .get(`/api/profiles/educations/${education.userID}`)
       expect(response.status).toBe(200);
     });
     it('should Delete education', async () => {
@@ -134,10 +133,9 @@ describe('Profile Routes', () => {
         institution: 'test',
         course: 'test',
       };
-      console.log(education)
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/education/${education._id}`)
+        .delete(`/api/educations/${education._id}`)
       expect(response.status).toBe(200);
     });
     it('should not Delete education', async () => {
@@ -148,7 +146,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/profiles/education`)
+        .delete(`/api/profiles/educations`)
       expect(response.status).toBe(400);
     });
   });
@@ -164,7 +162,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .put('/api/profiles/experience')
+        .put('/api/profiles/experiences')
         .send(experience);
 
       expect(response.status).toBe(200);
@@ -180,7 +178,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .get(`/api/profiles/experience/${experience.userID}`)
+        .get(`/api/profiles/experiences/${experience.userID}`)
       expect(response.status).toBe(200);
     });
     it('should Delete Experience', async () => {
@@ -191,7 +189,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/profiles/experience/${experience._id}`)
+        .delete(`/api/profiles/experiences/${experience._id}`)
       expect(response.status).toBe(200);
     });
     it('should not Delete Experience', async () => {
@@ -202,7 +200,7 @@ describe('Profile Routes', () => {
       };
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
-        .delete(`/api/profiles/experience`)
+        .delete(`/api/profiles/experiences`)
       expect(response.status).toBe(400);
     });
   });

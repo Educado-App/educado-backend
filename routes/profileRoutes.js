@@ -84,7 +84,7 @@ router.get('/:userID', async (req, res) => {
 
 // Dynamic form Academic experience CRUD //
 // Update second forms
-router.put('/education', async (req, res) => {
+router.put('/educations', async (req, res) => {
   const { userID, institution, course, startDate, endDate } = req.body;
   //Set fields by default in DB if empty
   const status = req.body.status === '' ? 'Basic' : req.body.status;
@@ -103,7 +103,7 @@ router.put('/education', async (req, res) => {
 });
 
 //Get second forms
-router.get('/education/:userID', async (req, res) => {
+router.get('/educations/:userID', async (req, res) => {
   const { userID } = req.params;
   //check UserID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -124,7 +124,7 @@ router.get('/education/:userID', async (req, res) => {
 });
 
 //Delete dynamic entries
-router.delete('/education/:_id', async (req, res) => {
+router.delete('/educations/:_id', async (req, res) => {
   const { _id } = req.params;
   try {
     if (!_id) {
@@ -142,7 +142,7 @@ router.delete('/education/:_id', async (req, res) => {
 
 // Dynamic form professional experience CRUD //
 // Update Third forms
-router.put('/experience', async (req, res) => {
+router.put('/experiences', async (req, res) => {
   const { userID, company, jobTitle, checkBool, description, startDate, endDate } = req.body;
   //Require fields to be filled
   if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
@@ -158,7 +158,7 @@ router.put('/experience', async (req, res) => {
 });
 
 // Get professional experience formdata
-router.get('/experience/:userID', async (req, res) => {
+router.get('/experiences/:userID', async (req, res) => {
   const { userID } = req.params;
   // Check ID
   if (!mongoose.Types.ObjectId(userID)) {
@@ -169,7 +169,7 @@ router.get('/experience/:userID', async (req, res) => {
 });
 
 //Delete dynamic entries
-router.delete('/experience/:_id', async (req, res) => {
+router.delete('/experiences/:_id', async (req, res) => {
   const { _id } = req.params;
   try {
 
