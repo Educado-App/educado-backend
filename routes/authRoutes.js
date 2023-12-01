@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { UserModel } = require('../models/Users'); // Import User model
 const { ContentCreatorModel } = require('../models/ContentCreators'); // Import Content Creator model
+const { InstitutionModel } = require('../models/Institutions'); //Import Institution model 
 const { StudentModel } = require('../models/Students'); // Import Student model
 
 const { makeExpressCallback } = require('../helpers/express');
@@ -23,6 +24,7 @@ router.post('/', makeExpressCallback(authEndpointHandler));
 // Login
 router.post('/login', async (req, res) => {
 	let result;
+	let profile;
 	if (!req.body.email || !req.body.password) {
 		return res.status(400).json({ error: errorCodes['E0202'] }); //Password or email is missing
 	}
@@ -35,13 +37,10 @@ router.post('/login', async (req, res) => {
 			// Invalid email (email not found)
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
-
-		// ********** THIS MAKES IT SO THAT U CANT LOG IN WITH STUDENT **********
-		/*
+	
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
-		profile = await ContentCreatorModel.findOne({baseUser: user._id});
-
-		if(profile !== null) {
+		if(req.body.isContentCreator == true) {
+			profile = await ContentCreatorModel.findOne({baseUser: user._id});
 			//Content creator must not be allowed entry if they are either rejected or not yet approved
 			if (profile.approved == false && profile.rejected == false) {
 				// User not approved
@@ -52,12 +51,11 @@ router.post('/login', async (req, res) => {
 				// User is rejected
 				return res.status(403).json({'error': errorCodes['E1002']});
 			}
-			profile.points = 0;
+
 		} else {
 			profile = await StudentModel.findOne({baseUser: user._id});
 		}
-    */
-		const profile = await StudentModel.findOne({baseUser: user._id});
+
 
 		// If the email is found, and content creator is approved compare the passwords
 		result = compare(req.body.password, user.password);
@@ -89,6 +87,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
+
 	const form = req.body;
 
 	try {
@@ -110,15 +109,30 @@ router.post('/signup', async (req, res) => {
 		const baseUser = UserModel(form);
 		const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
 		const studentProfile = StudentModel({ baseUser: baseUser._id });
+    
+
+		// Get user's email domain to find out whether or not they are a part of an onboarded institution
+		const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
+		const onboarded = await InstitutionModel.findOne({domain: emailDomain});
+		const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
+
 
 		const createdBaseUser = await baseUser.save();  // Save user
-		const createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
 		const createdStudent = await studentProfile.save(); // Save student
+
+		// If the email is under either of the two insttutions' domains, the content creator will automatically be approved
+		if (onboarded || onboardedSecondary){
+			await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
+			createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
+      
+		}
 
 		res.status(201).send({
 			baseUser: createdBaseUser,
 			contentCreatorProfile: createdContentCreator,
-			studentProfile: createdStudent
+			studentProfile: createdStudent,
+			institution: onboarded,
 		});
 
 	} catch (error) {

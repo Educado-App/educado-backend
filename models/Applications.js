@@ -1,5 +1,6 @@
-// Mongoose model class for User
+// Mongoose model class for Applications
 const mongoose = require('mongoose');
+
 const { Schema } = mongoose;
 
 // Class description

@@ -7,11 +7,14 @@ const errorCodes = require('../helpers/errorCodes');
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises');
-const { LectureModel } = require('../models/Lecture');
+const { LectureModel } = require('../models/Lectures');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
 const { StudentModel } = require('../models/Students');
+
+// This one is deprecated, but it is used on mobile so we can't delete it yet
+const { OldLectureModel } = require('../models/Lecture');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -152,6 +155,12 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	}
 });
 
+
+/**
+ * This route is deprecated, but it might be used on mobile so we can't delete it yet
+ * instead of the old lecture model, we should use the new one
+ * Which instead of having a video/image field, it has a contentType and content field
+ */
 // Get all comps from a section
 router.get('/sections/:id/components', async (req, res) => {
 	const { id } = req.params;
@@ -171,7 +180,7 @@ router.get('/sections/:id/components', async (req, res) => {
 
 	for (let comp of section.components) {
 		if (comp.compType === COMP_TYPES.LECTURE) {
-			const lecture = await LectureModel.findById(comp.compId);
+			const lecture = await OldLectureModel.findById(comp.compId);
 			if (!lecture) {
 				return res.status(404).json({ error: errorCodes['E0007'] });
 			}
