@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
 			profile.points = 0;
 		} else {
 			profile = await StudentModel.findOne({baseUser: user._id});
-		}
+		} fix this aha
     */
 		const profile = await StudentModel.findOne({baseUser: user._id});
 
