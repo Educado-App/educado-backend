@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
+const { validateEmail, validateName, validatePoints, validatePassword, ensureNewValues } = require('../helpers/validation');
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
@@ -24,7 +24,7 @@ router.put('/update-personal', async (req, res) => {
   
   // Require userEmail & userID && email
   if (!userEmail || !userID || !userName) {
-    return res.status(400).send('All fields are required')
+    return res.status(400).send('All fields are required');
   }
 
   try {
@@ -184,7 +184,6 @@ router.delete('/delete-experience/:_id', async (req, res) => {
       return res.status(400).send('_id is required');
     }
     const deleteEntry = await ProfileExperienceModel.deleteOne({_id:_id});
-    
     if(deleteEntry){
     res.status(200).send('Entry Deleted');
   }
