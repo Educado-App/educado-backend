@@ -6,10 +6,12 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
 const makeFakeStudent = require('../fixtures/fakeStudent');
 const { signAccessToken } = require('../../helpers/token');
+const { encrypt } = require('../../helpers/password');
 const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 app.use('/api/users', router); // Mount the router under '/api' path
+
 
 // Start the Express app on a specific port for testing
 const PORT = 5023; // Choose a port for testing
@@ -33,6 +35,221 @@ jest.mock('../../config/keys', () => {
 		TOKEN_SECRET: TOKEN_SECRET,
 	};
 });
+
+
+let db;
+
+beforeAll(async () => {
+  db = await connectDb();
+});
+
+afterEach(async () => {
+  await db.collection('users').deleteMany({});
+});
+
+afterAll(async () => {
+  await server.close();
+  await mongoose.connection.close();
+});
+
+describe('User Routes', () => {
+  describe('PUT /update-personal', () => {
+    it('should update user profile', async () => {
+      // Insert a user for testing
+      const user = {
+        _id: mongoose.Types.ObjectId(),
+        email: 'test@example.com',
+        password: encrypt('testpassword'),
+      };
+      await db.collection('users').insertOne(user);
+
+      const updatedData = {
+        userID: user._id.toString(),
+        userBio: 'Updated bio',
+        userLinkedInLink: 'https://www.linkedin.com/testuser',
+        userName: 'UpdatedUserName',
+        userEmail: 'updated.email@example.com',
+        userPhoto: 'updated-photo-url',
+      };
+
+      const response = await request(`http://localhost:${PORT}`)
+        .put('/api/users/update-personal')
+        .send(updatedData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.user).toBeInstanceOf(Object);
+      expect(response.body.user.userName).toBe(updatedData.userName);
+      expect(response.body.user.userEmail).toBe(updatedData.userEmail);
+    });
+
+    it('should create a new profile if user does not exist', async () => {
+      const newData = {
+        userID: mongoose.Types.ObjectId().toString(),
+        userBio: 'New bio',
+        userLinkedInLink: 'https://www.linkedin.com/newuser',
+        userName: 'NewUserName',
+        userEmail: 'new.email@example.com',
+        userPhoto: 'new-photo-url',
+      };
+      const response = await request(`http://localhost:${PORT}`)
+        .put('/api/users/update-personal')
+        .send(newData);
+      expect(response.status).toBe(200);
+      expect(response.body.user).toBeInstanceOf(Object);
+      expect(response.body.user.userName).toBe(newData.userName);
+      expect(response.body.user.userEmail).toBe(newData.userEmail);
+    });
+
+    it('Should Delete profile', async () => {
+      const newData = {
+        userID: mongoose.Types.ObjectId().toString(),
+        userBio: 'New bio',
+        userLinkedInLink: 'https://www.linkedin.com/newuser',
+        userName: 'NewUserName',
+        userEmail: 'new.email@example.com',
+        userPhoto: 'new-photo-url',
+      };
+      await db.collection('users').insertOne(newData);
+
+      const response = await request(`http://localhost:${PORT}`)
+        .delete(`/api/users/${newData.userID.toString()}`);
+      expect(response.status).toBe(204);
+
+    });
+
+    it('should get user data', async () => {
+      const user = {
+        _id: mongoose.Types.ObjectId(),
+        email: 'test@example.com',
+        password: encrypt('testpassword'),  
+      };
+      await db.collection('users').insertOne(user);
+      let actualUser = await db.collection('users').findOne({ userID: user.userID })
+      const profile = {
+        userID: actualUser._id.toString(),
+        email: 'test@example.com',
+        userName: 'test_user',
+      };
+      await db.collection('Profile').insertOne(profile);
+      const response = await request(`http://localhost:${PORT}`)
+        .get(`/api/users/fetch/${user._id}`);
+      expect(response.status).toBe(404);
+
+    });
+
+  });
+
+  describe('Education', () => {
+    it('should add education', async () => {
+      // Insert a user for testing
+      const education = {
+        userID: mongoose.Types.ObjectId(),
+        institution: 'test',
+        startDate: 'test',
+        endDate: 'test',
+        course: 'test',
+      };
+      await db.collection('Education').insertOne(education);
+      const response = await request(`http://localhost:${PORT}`)
+        .put('/api/users/add-education')
+        .send(education);
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body.institution).toBe(education.institution);
+      expect(response.body.course).toBe(education.course);
+    });
+
+    it('should Get education', async () => {
+      const education = {
+        userID: mongoose.Types.ObjectId(),
+        institution: 'test',
+        course: 'test',
+      };
+      await db.collection('Education').insertOne(education);
+      const response = await request(`http://localhost:${PORT}`)
+        .get(`/api/users/get-education/${education.userID}`)
+      expect(response.status).toBe(200);
+    });
+    it('should Delete education', async () => {
+      const education = {
+        _id: mongoose.Types.ObjectId(),
+        institution: 'test',
+        course: 'test',
+      };
+      console.log(education)
+      await db.collection('Education').insertOne(education);
+      const response = await request(`http://localhost:${PORT}`)
+        .delete(`/api/users/delete-education/${education._id}`)
+      expect(response.status).toBe(200);
+    });
+    it('should not Delete education', async () => {
+      const education = {
+        _id: mongoose.Types.ObjectId(),
+        institution: 'test',
+        course: 'test',
+      };
+      await db.collection('Education').insertOne(education);
+      const response = await request(`http://localhost:${PORT}`)
+        .delete(`/api/users/delete-education`)
+      expect(response.status).toBe(400);
+    });
+  });
+  describe('Experience', () => {
+    it('should add Experience', async () => {
+      const experience = {
+        userID: mongoose.Types.ObjectId(),
+        company: 'test',
+        jobTitle: 'test',
+        description: 'test',
+        startDate: 'test',
+        endDate: 'test',
+      };
+      await db.collection('Experience').insertOne(experience);
+      const response = await request(`http://localhost:${PORT}`)
+        .put('/api/users/add-experience')
+        .send(experience);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Object);
+      expect(response.body.company).toBe(experience.company);
+      expect(response.body.jobTitle).toBe(experience.jobTitle);
+    });
+    it('should Get Experience', async () => {
+      const experience = {
+        userID: mongoose.Types.ObjectId(),
+        company: 'test',
+        jobTitle: 'test',
+      };
+      await db.collection('Experience').insertOne(experience);
+      const response = await request(`http://localhost:${PORT}`)
+        .get(`/api/users/get-experience/${experience.userID}`)
+      expect(response.status).toBe(200);
+    });
+    it('should Delete Experience', async () => {
+      const experience = {
+        _id: mongoose.Types.ObjectId(),
+        company: 'test',
+        jobTitle: 'test',
+      };
+      await db.collection('Experience').insertOne(experience);
+      const response = await request(`http://localhost:${PORT}`)
+        .delete(`/api/users/delete-experience/${experience._id}`)
+      expect(response.status).toBe(200);
+    });
+    it('should not Delete Experience', async () => {
+      const experience = {
+        _id: mongoose.Types.ObjectId(),
+        company: 'test',
+        jobTitle: 'test',
+      };
+      await db.collection('Experience').insertOne(experience);
+      const response = await request(`http://localhost:${PORT}`)
+        .delete(`/api/users/delete-experience`)
+      expect(response.status).toBe(400);
+    });
+  });
+});
+
 
 describe('Users Routes', () => {
 	let token, fakeUser, db, actualUser, fakeStudent;
