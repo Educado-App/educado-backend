@@ -22,10 +22,10 @@ router.put('/update-personal', async (req, res) => {
 		userPhoto
 	} = req.body;
   
-  // Require userEmail & userID && email
-  if (!userEmail || !userID || !userName) {
-    return res.status(400).json({ error: errorCodes['E0202'] });
-  }
+	// Require userEmail & userID && email
+	if (!userEmail || !userID || !userName) {
+		return res.status(400).json({ error: errorCodes['E0202'] });
+	}
 
 	try {
 		const user = await ProfileModel.findOne({ userID });
