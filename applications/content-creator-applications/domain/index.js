@@ -1,6 +1,6 @@
-const Id = require('../../../helpers/Id')
+const Id = require('../../../helpers/Id');
 
-const buildMakeContentCreatorApplication = require('./contentCreatorApplication')
-const makeContentCreatorApplication = buildMakeContentCreatorApplication({ Id })
+const buildMakeContentCreatorApplication = require('./contentCreatorApplication');
+const makeContentCreatorApplication = buildMakeContentCreatorApplication({ Id });
 
-module.exports = { makeContentCreatorApplication }
+module.exports = { makeContentCreatorApplication };
