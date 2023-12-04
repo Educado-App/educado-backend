@@ -1,13 +1,13 @@
-const Token = require('../helpers/Token')
-const Password = require('../helpers/Password')
-const { userList } = require('../users')
+const Password = require('../helpers/password');
+const { userList } = require('../users');
+const Token = require('../helpers/token');
 
-const buildMakeAuthHandler = require('./authHandler')
-const makeAuthEndpointHandler = require('./authController')
+const buildMakeAuthHandler = require('./authHandler');
+const makeAuthEndpointHandler = require('./authController');
 
-const makeAuthHandler = buildMakeAuthHandler({ Password, Token })
+const makeAuthHandler = buildMakeAuthHandler({ Password, Token });
 
-const authHandler = makeAuthHandler(userList)
-const authEndpointHandler = makeAuthEndpointHandler(authHandler)
+const authHandler = makeAuthHandler(userList);
+const authEndpointHandler = makeAuthEndpointHandler(authHandler);
 
-module.exports = { authHandler, authEndpointHandler }
+module.exports = { authHandler, authEndpointHandler };

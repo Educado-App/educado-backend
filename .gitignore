@@ -1,9 +1,18 @@
 node_modules
 config/dev.js
+config/educado-*.json
+config/gcp_service.json
+
 *.DS_Store
-package-lock.json
 dev.js
+config/.env
+*.idea
+.idea
 
 # enviroment
 .env
 .env.*
+config/educado-*.json
+config/gcp_service.json
+__tests__/setup/globalConfigMongo.json
+_temp_bucketFiles
