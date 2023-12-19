@@ -72,7 +72,6 @@ router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
 router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 	const lecture = req.body;
 	const { id } = req.params;
-
 	// Find the lecture object by ID and update it
 	const dbLecture = await LectureModel.findByIdAndUpdate(
 		id,

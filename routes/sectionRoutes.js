@@ -17,7 +17,6 @@ const ComponentType = {
 	EXERCISE: 'exercise'
 };
 
-//CREATED BY VIDEOSTREAMING TEAM
 //get section by id
 router.get('/:sectionId', async (req, res) => {
 	if (!req.params.sectionId)

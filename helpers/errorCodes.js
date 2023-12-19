@@ -328,17 +328,14 @@ module.exports = {
 		code: 'E0013',
 		message: 'No exercises found'
 	},
-
 	E1104: {
 		code: 'E1104',
 		message: 'Exercise not found'
 	},
-
 	E1105: {
 		code: 'E1105',
 		message: 'No lectures found'
 	},
-
 	E1106: {
 		code: 'E1106',
 		message: 'Lecture not found'
