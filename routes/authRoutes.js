@@ -12,6 +12,8 @@ const errorCodes = require('../helpers/errorCodes');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
 const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
+const { sendVerificationEmail } = require('../helpers/email');
+
 
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
 const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5; //1000 * 60 * 60;
@@ -89,7 +91,7 @@ router.post('/login', async (req, res) => {
 router.post('/signup', async (req, res) => {
 
 	const form = req.body;
-
+	
 	try {
 		// Validate user info
 		validateName(form.firstName);
@@ -109,13 +111,13 @@ router.post('/signup', async (req, res) => {
 		const baseUser = UserModel(form);
 		const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
 		const studentProfile = StudentModel({ baseUser: baseUser._id });
-    
+		
 
 		// Get user's email domain to find out whether or not they are a part of an onboarded institution
 		const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
 		const onboarded = await InstitutionModel.findOne({domain: emailDomain});
 		const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
-
+f
 
 		const createdBaseUser = await baseUser.save();  // Save user
 		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
@@ -128,6 +130,7 @@ router.post('/signup', async (req, res) => {
       
 		}
 
+
 		res.status(201).send({
 			baseUser: createdBaseUser,
 			contentCreatorProfile: createdContentCreator,
@@ -135,8 +138,22 @@ router.post('/signup', async (req, res) => {
 			institution: onboarded,
 		});
 
+		const user = {
+			firstName: form.firstName,
+			email: form.email,
+		}
+		// Send email with reset token
+		const success = await sendVerificationEmail(user);
+
+		// Return success if email is sent, else return error code E0004
+		if (success) {
+			return res.status(200).json({ status: 'success' });
+		} else {
+			return res.status(500).json({ error: errorCodes['E0004'] });
+		}
 	} catch (error) {
 		res.status(400).send({ error: error });
+		res.status(500).send({ error: error });
 	}
 });
 

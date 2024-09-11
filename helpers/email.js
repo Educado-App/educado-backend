@@ -4,6 +4,7 @@ const { patterns } = require('./patterns');
 
 module.exports = Object.freeze({
 	sendResetPasswordEmail,
+	sendVerificationEmail,
 	sendMail
 });
 
