@@ -22,11 +22,11 @@ module.exports = Object.freeze({
  * @param {String} mail.html 
  */
 async function sendMail({
-	subject,
+	subject = "hello",
 	from = keys.GMAIL_USER,
-	to,
-	text,
-	html
+	to = "nuggi.lunoe@gmail.com",
+	text = "hello",
+	html = "<b>Hello world?</b>"
 }) {
 
 	if (!patterns.email.test(from) || !patterns.email.test(to)) {
