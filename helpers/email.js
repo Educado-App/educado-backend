@@ -22,11 +22,11 @@ module.exports = Object.freeze({
  * @param {String} mail.html 
  */
 async function sendMail({
-	subject = "hello",
+	subject,
 	from = keys.GMAIL_USER,
-	to = "nuggi.lunoe@gmail.com",
-	text = "hello",
-	html = "<b>Hello world?</b>"
+	to,
+	text,
+	html,
 }) {
 
 	if (!patterns.email.test(from) || !patterns.email.test(to)) {
@@ -82,6 +82,26 @@ async function sendResetPasswordEmail(user, token) {
     '<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>\n'+
     '<p>Best regards,</p>\n' +
     '<p>The Educado team</p>';
+
+	const mail = await sendMail({ subject, to, text, html });
+	return mail;
+}
+
+
+/**
+ * 
+ * @param {Object} user - containing the following properties:
+ * - firstName: the first name of the user
+ * - email: the email of the user
+ * @param {String} user.firstName
+ * @param {String} user.email
+ * @returns 
+ */
+async function sendVerificationEmail(user) {
+	const subject = 'Verify your email';
+	const to = user.email;
+	const text = `Hi ${user.firstName},\n\nClick the following link to verify your email:`+ 'luka is a bitch';
+	const html = '<p>Hi ${user.firstName},\n\nClick the following link to verify your email: </p>'; 
 
 	const mail = await sendMail({ subject, to, text, html });
 	return mail;
