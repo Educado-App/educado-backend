@@ -386,7 +386,7 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 	);
 	return res.status(200).send(dbCourse);
 });
-
+// Update section order of a course 
 router.patch('/:id/sections', async (req, res) => {
     try {
         const { id } = req.params;
