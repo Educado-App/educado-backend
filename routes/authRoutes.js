@@ -17,7 +17,7 @@ const { sendVerificationEmail } = require('../helpers/email');
 
 
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
-const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5; //1000 * 60 * 60;
+const ATTEMPT_EXPIRATION_TIME = 1; //1000 * 60 * 60;
 
 // Services
 //require("../services/passport");
@@ -98,6 +98,7 @@ router.post('/signup', async (req, res) => {
         // Validate user info (only name and email)
         validateName(form.firstName);
         validateName(form.lastName);
+		validatePassword(form.password)
         await validateEmail(form.email);
 
         // Generate a verification token
