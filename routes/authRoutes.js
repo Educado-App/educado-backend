@@ -89,107 +89,101 @@ router.post('/login', async (req, res) => {
 	}
 });
 
+// Signup route
 router.post('/signup', async (req, res) => {
-    const form = req.body;
-	
+    const { firstName, lastName, email, password } = req.body;
 
-	
     try {
-        // Validate user info (only name and email)
-        validateName(form.firstName);
-        validateName(form.lastName);
-		validatePassword(form.password)
-        await validateEmail(form.email);
+        // Validate user input
+        validateName(firstName);
+        validateName(lastName);
+        validatePassword(password);
+        await validateEmail(email);
 
-        // Generate a verification token
+        // Generate and hash the verification token
         const verificationToken = generateVerificationToken();
         const hashedToken = await encrypt(verificationToken);
 
-        // Save the verification token with the email
+        // Save the token and email in the database
         await new EmailVerificationToken({
-            userEmail: form.email, // Save email here since the user is not created yet
+            userEmail: email,
             token: hashedToken,
-            expiresAt: Date.now() + TOKEN_EXPIRATION_TIME // Token expires in 5 minutes
+            expiresAt: Date.now() + TOKEN_EXPIRATION_TIME,
         }).save();
 
-        // Send the token to the user's email
-        const user = {
-            firstName: form.firstName,
-            email: form.email,
-        };
+        // Send verification email
+        await sendVerificationEmail({ firstName, email }, verificationToken);
 
-        await sendVerificationEmail(user, verificationToken); // Send token in the email
-
-        // Inform the client that the token has been sent
+        // Respond to client
         res.status(200).json({
-            message: 'A verification token has been sent to your email. Please verify to complete registration.',
+            message: 'Verification email sent. Please verify to complete registration.',
         });
-
     } catch (error) {
-        console.error(error);
         res.status(400).json({ error: error.message });
     }
 });
 
-
+// Email verification route
 router.post('/verify-email', async (req, res) => {
-    const { token, email, password } = req.body; // Now include password for user creation
+	const { token, email, password, firstName, lastName } = req.body;  // Destructure the token and user data
+  
+	try {
+	  // Find the verification token by email
+	  const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
+  
+	  if (!emailVerificationToken) {
+		return res.status(400).json({ error: 'Invalid or expired token.' });
+	  }
+  
+	  // Check if the token matches
+	  const isValid = await compare(token, emailVerificationToken.token); // Assuming compare is asynchronous
+  
+	  if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
+		return res.status(400).json({ error: 'Invalid or expired token.' });
+	  }
+  
+	  // Token is valid, proceed to user creation
+	  validatePassword(password);  // Validate password during user creation
+  
+	  const hashedPassword = await encrypt(password);  // Hash the password
+  
+	  // Create the user object
+	  const newUser = new UserModel({
+		firstName: firstName, // Use firstName from the request body
+		lastName: lastName,
+		email: email,
+		password: hashedPassword,
+		joinedAt: Date.now(),
+		modifiedAt: Date.now()
+	  });
+  
+	  // Save the user to the database
+	  const createdUser = await newUser.save();
+  
+	  // Create content creator and student profiles linked to the user
+	  const contentCreatorProfile = new ContentCreatorModel({ baseUser: createdUser._id });
+	  const studentProfile = new StudentModel({ baseUser: createdUser._id });
+  
+	  // Save the profiles
+	  await contentCreatorProfile.save();
+	  await studentProfile.save();
+  
+	  // Delete the verification token since it's no longer needed
+	  await EmailVerificationToken.deleteOne({ userEmail: email });
+  
+	  // Respond with the created user data
+	  res.status(201).json({
+		message: 'Email verified and user created successfully!',
+		user: createdUser
+	  });
+  
+	} catch (error) {
+	  console.error(error);
+	  res.status(500).json({ error: 'Internal server error' });
+	}
+  });
+  
 
-    try {
-        // Find the verification token by email
-        const emailVerificationToken = await EmailVerificationToken.findOne({ email });
-
-        if (!emailVerificationToken) {
-            return res.status(400).json({ error: 'Invalid or expired token.' });
-        }
-
-        // Check if the token matches
-        const isValid = compare(token, emailVerificationToken.token);
-
-        if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
-            return res.status(400).json({ error: 'Invalid or expired token.' });
-        }
-
-        // Token is valid, proceed to user creation
-        validatePassword(password);  // Validate password during user creation
-
-        // Now create the user and associated profiles
-        const hashedPassword = encrypt(password);
-
-        // Create user object
-        const newUser = new UserModel({
-            firstName: form.firstName, // Use the name from the earlier request
-            lastName: form.lastName,
-            email: form.email,
-            password: hashedPassword,
-            joinedAt: Date.now(),
-            modifiedAt: Date.now()
-        });
-
-        const createdUser = await newUser.save();
-
-        // Create content creator and student profiles
-        const contentCreatorProfile = ContentCreatorModel({ baseUser: createdUser._id });
-        const studentProfile = StudentModel({ baseUser: createdUser._id });
-
-        await contentCreatorProfile.save();
-        await studentProfile.save();
-
-        // Delete the verification token as it is no longer needed
-		let token = await emailVerificationToken.findOne({ userEmail: form.email });
-		if (token) await token.deleteOne();
-
-        // Respond with the created user data
-        res.status(201).json({
-            message: 'Email verified and user created successfully!',
-            user: createdUser
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
 
 router.post('/reset-password-request', async (req, res) => {
