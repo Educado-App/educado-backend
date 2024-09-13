@@ -325,7 +325,7 @@ function generatePasswordResetToken() {
 }
 // Generate a random 4 digit code for Email Verification
 function generateVerificationToken() {
-    const length = 6;  // Make it 6 characters long (can be customized)
+    const length = 4;  // Make it 6 characters long (can be customized)
     let retVal = '';
     for (let i = 0; i < length; i++) {
         retVal += getRandomNumber(0, 9);
