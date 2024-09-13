@@ -96,14 +96,14 @@ async function sendResetPasswordEmail(user, token) {
  * - email: the email of the user
  * @param {String} user.firstName
  * @param {String} user.email
+   @param {EmailVerificationToken} token 
  * @returns 
  */
-async function sendVerificationEmail(user) {
+async function sendVerificationEmail(user,token) {
 	const subject = 'Verify your email';
 	const to = user.email;
-	const text = `Hi ${user.firstName},\n\nClick the following link to verify your email:`+ 'luka is a bitch';
-	const html = '<p>Hi ${user.firstName},\n\nClick the following link to verify your email: </p>'; 
+	const html = `<p>Hi ${user.firstName}, ${token}</p>`; 
 
-	const mail = await sendMail({ subject, to, text, html });
+	const mail = await sendMail({ subject, to, html });
 	return mail;
 }

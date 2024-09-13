@@ -11,6 +11,7 @@ const { compare, encrypt } = require('../helpers/password');
 const errorCodes = require('../helpers/errorCodes');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
+const { EmailVerificationToken } = require('../models/EmailVerificationToken');
 const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
 
@@ -89,73 +90,106 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-
-	const form = req.body;
+    const form = req.body;
 	
-	try {
-		// Validate user info
-		validateName(form.firstName);
-		validateName(form.lastName);
-		validatePassword(form.password);
-		await validateEmail(form.email);
 
-		// Set dates for creation and modification
-		form.joinedAt = Date.now();
-		form.modifiedAt = Date.now();
-		// Hashing the password for security
-		const hashedPassword = encrypt(form.password);
-		//Overwriting the plain text password with the hashed password 
-		form.password = hashedPassword;
+	
+    try {
+        // Validate user info (only name and email)
+        validateName(form.firstName);
+        validateName(form.lastName);
+        await validateEmail(form.email);
 
-		// Create user with student and content creator profiles
-		const baseUser = UserModel(form);
-		const contentCreatorProfile = ContentCreatorModel({ baseUser: baseUser._id });
-		const studentProfile = StudentModel({ baseUser: baseUser._id });
-		
+        // Generate a verification token
+        const verificationToken = generateVerificationToken();
+        const hashedToken = await encrypt(verificationToken);
 
-		// Get user's email domain to find out whether or not they are a part of an onboarded institution
-		const emailDomain = baseUser.email.substring(baseUser.email.indexOf('@'));
-		const onboarded = await InstitutionModel.findOne({domain: emailDomain});
-		const onboardedSecondary = await InstitutionModel.findOne({secondaryDomain: emailDomain});
-f
+        // Save the verification token with the email
+        await new EmailVerificationToken({
+            userEmail: form.email, // Save email here since the user is not created yet
+            token: hashedToken,
+            expiresAt: Date.now() + TOKEN_EXPIRATION_TIME // Token expires in 5 minutes
+        }).save();
 
-		const createdBaseUser = await baseUser.save();  // Save user
-		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
-		const createdStudent = await studentProfile.save(); // Save student
+        // Send the token to the user's email
+        const user = {
+            firstName: form.firstName,
+            email: form.email,
+        };
 
-		// If the email is under either of the two insttutions' domains, the content creator will automatically be approved
-		if (onboarded || onboardedSecondary){
-			await ContentCreatorModel.findOneAndUpdate({baseUser: baseUser._id},{approved: true});
-			createdContentCreator = await ContentCreatorModel.findOne({baseUser: baseUser._id});
-      
-		}
+        await sendVerificationEmail(user, verificationToken); // Send token in the email
 
+        // Inform the client that the token has been sent
+        res.status(200).json({
+            message: 'A verification token has been sent to your email. Please verify to complete registration.',
+        });
 
-		res.status(201).send({
-			baseUser: createdBaseUser,
-			contentCreatorProfile: createdContentCreator,
-			studentProfile: createdStudent,
-			institution: onboarded,
-		});
-
-		const user = {
-			firstName: form.firstName,
-			email: form.email,
-		}
-		// Send email with reset token
-		const success = await sendVerificationEmail(user);
-
-		// Return success if email is sent, else return error code E0004
-		if (success) {
-			return res.status(200).json({ status: 'success' });
-		} else {
-			return res.status(500).json({ error: errorCodes['E0004'] });
-		}
-	} catch (error) {
-		res.status(400).send({ error: error });
-		res.status(500).send({ error: error });
-	}
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ error: error.message });
+    }
 });
+
+
+router.post('/verify-email', async (req, res) => {
+    const { token, email, password } = req.body; // Now include password for user creation
+
+    try {
+        // Find the verification token by email
+        const emailVerificationToken = await EmailVerificationToken.findOne({ email });
+
+        if (!emailVerificationToken) {
+            return res.status(400).json({ error: 'Invalid or expired token.' });
+        }
+
+        // Check if the token matches
+        const isValid = compare(token, emailVerificationToken.token);
+
+        if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
+            return res.status(400).json({ error: 'Invalid or expired token.' });
+        }
+
+        // Token is valid, proceed to user creation
+        validatePassword(password);  // Validate password during user creation
+
+        // Now create the user and associated profiles
+        const hashedPassword = encrypt(password);
+
+        // Create user object
+        const newUser = new UserModel({
+            firstName: form.firstName, // Use the name from the earlier request
+            lastName: form.lastName,
+            email: form.email,
+            password: hashedPassword,
+            joinedAt: Date.now(),
+            modifiedAt: Date.now()
+        });
+
+        const createdUser = await newUser.save();
+
+        // Create content creator and student profiles
+        const contentCreatorProfile = ContentCreatorModel({ baseUser: createdUser._id });
+        const studentProfile = StudentModel({ baseUser: createdUser._id });
+
+        await contentCreatorProfile.save();
+        await studentProfile.save();
+
+        // Delete the verification token as it is no longer needed
+		let token = await emailVerificationToken.findOne({ userEmail: form.email });
+		if (token) await token.deleteOne();
+
+        // Respond with the created user data
+        res.status(201).json({
+            message: 'Email verified and user created successfully!',
+            user: createdUser
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 router.post('/reset-password-request', async (req, res) => {
 	const { email } = req.body;
@@ -287,6 +321,15 @@ function generatePasswordResetToken() {
 		retVal += getRandomNumber(0, 9);
 	}
 	return retVal;
+}
+// Generate a random 4 digit code for Email Verification
+function generateVerificationToken() {
+    const length = 6;  // Make it 6 characters long (can be customized)
+    let retVal = '';
+    for (let i = 0; i < length; i++) {
+        retVal += getRandomNumber(0, 9);
+    }
+    return retVal;
 }
 
 /**
