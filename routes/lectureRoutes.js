@@ -58,7 +58,8 @@ router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
 		await lecture.save();
 		await section.components.push({compId: lecture._id, compType: 'lecture'});
 		await section.save();
-		res.status(201).send(lecture);
+		const newComponent = section.components[section.components.length - 1]; 
+		res.status(201).send(newComponent);
 	} catch (err) {
 		res.status(400).send({error: errorCodes['E0000']});
 	}

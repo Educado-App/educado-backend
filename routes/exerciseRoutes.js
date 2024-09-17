@@ -64,7 +64,8 @@ router.put('/:section_id', async (req, res) => {
 			compType: COMP_TYPES.EXERCISE,
 		});
 		await section.save();
-		res.status(201).send(exercise);
+		const newComponent = section.components[section.components.length - 1];
+		res.status(201).send(newComponent);
 	} catch (err) {
 		res.status(400).send(err);
 	}
