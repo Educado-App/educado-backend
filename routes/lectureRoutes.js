@@ -9,6 +9,9 @@ app.use(express.urlencoded({ extended: true }));
 const { SectionModel } = require('../models/Sections');
 const { LectureModel } = require('../models/Lectures');
 
+//helpers
+const { getLatestComponentFromSection } = require('../helpers/sectionHelpers');
+
 //get lecture by id
 router.get('/:id', async (req, res) => {
 	if (!req.params.id) return res.send('Missing query parameters');
@@ -55,11 +58,14 @@ router.put('/:section_id', /*requireLogin,*/ async (req, res) => {
 		if(section.components.length >= 10){
 			res.status(400).send({error: errorCodes['E1101']});
 		}
+
 		await lecture.save();
 		await section.components.push({compId: lecture._id, compType: 'lecture'});
 		await section.save();
-		const newComponent = section.components[section.components.length - 1]; 
+		const newComponent = getLatestComponentFromSection(section); 
+
 		res.status(201).send(newComponent);
+		
 	} catch (err) {
 		res.status(400).send({error: errorCodes['E0000']});
 	}

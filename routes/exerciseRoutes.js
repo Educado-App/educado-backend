@@ -9,6 +9,9 @@ const { SectionModel } = require('../models/Sections');
   } = require("../models/ContentCreatorApplication");*/ /* Not implemented yet for now */
 //const requireLogin = require("../middlewares/requireLogin"); /* Not implemented yet for now */
 
+//helpers
+const { getLatestComponentFromSection } = require('../helpers/sectionHelpers');
+
 const COMP_TYPES = {
 	LECTURE: 'lecture',
 	EXERCISE: 'exercise',
@@ -64,8 +67,10 @@ router.put('/:section_id', async (req, res) => {
 			compType: COMP_TYPES.EXERCISE,
 		});
 		await section.save();
-		const newComponent = section.components[section.components.length - 1];
+		const newComponent = getLatestComponentFromSection(section);
+
 		res.status(201).send(newComponent);
+		
 	} catch (err) {
 		res.status(400).send(err);
 	}
