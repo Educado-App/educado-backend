@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
-const keys = require('../config/keys');
+const process = require('process');
 
 const serviceUrl = process.env.TRANSCODE_SERVICE_URL;
 
@@ -159,10 +159,10 @@ router.put('/photo/:userID', upload.single('file'), async (req, res) => {
 
 		// If user has photo, then delete it from the bucket
 		if (user.userPhoto) {
-			// TODO: Delete the photo from the bucket
 			try {
 				await deleteImageFromBucket(user.userPhoto);
 			} catch {
+				console.log('Error deleting file from bucket');
 			}
 		}
 
@@ -178,7 +178,7 @@ router.put('/photo/:userID', upload.single('file'), async (req, res) => {
 			{ userID},
 			{ userPhoto: photoName },
 			{ new: true }
-		)
+		);
 
 		return res.status(200).json(updatedProfile);
 	} catch (error) {
@@ -199,8 +199,6 @@ const uploadImageToBucket = async (file) => {
 		contentType: file.mimetype
 	});
 	form.append('fileName', file.filename);
-
-	console.log("form: ", form);
 
 	// Forward to service api
 	await axios.post(serviceUrl + '/bucket/', form, { headers: form.getHeaders() })
