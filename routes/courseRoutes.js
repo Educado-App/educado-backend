@@ -391,7 +391,6 @@ router.patch('/:id/sections', async (req, res) => {
     try {
         const { id } = req.params;
         const { sections } = req.body;
-		console.log("backend: " + sections);
 
         // Validate course ID
         if (!mongoose.Types.ObjectId.isValid(id)) {
