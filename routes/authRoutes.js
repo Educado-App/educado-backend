@@ -16,6 +16,7 @@ const { validateEmail, validateName, validatePassword } = require('../helpers/va
 const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
+const { userList } = require('../users');
 // Utility function to encrypt the token or password
 
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
@@ -97,6 +98,7 @@ router.post('/login', async (req, res) => {
 // Signup route
 router.post('/signup', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
+	const user = await UserModel.findOne({ email: email });
 
     try {
         // Validate user input
@@ -104,6 +106,10 @@ router.post('/signup', async (req, res) => {
         validateName(lastName);
         validatePassword(password);
         await validateEmail(email);
+		// If email is not provided or user is not found, return error E0201
+		if (user) {
+		return res.status(400).json({ error: errorCodes['E0201'] });
+	} else {
 
         // Generate and hash the verification token
         const verificationToken = generateVerificationToken();
@@ -123,61 +129,84 @@ router.post('/signup', async (req, res) => {
         res.status(200).json({
             message: 'Verification email sent. Please verify to complete registration.',
         });
-    } catch (error) {
+    } 
+	}catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
 // Email verification route
 router.post('/verify-email', async (req, res) => {
-    const { token, email, password, firstName, lastName } = req.body;  // Destructure the token and user data
+    const { firstName, lastName, email, password, token } = req.body;  // Destructure the token and user data
 
     try {
         // Find the verification token by email
         const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
 
         if (!emailVerificationToken) {
-            return res.status(400).json({ error: 'Invalid or expired token.' });
+            return res.status(400).json({ error: 'Invalid or expired token.1' });
         }
 
         // Check if the token matches
         const isValid = await compareTokens(token, emailVerificationToken.token); // Compare raw token with hashed token
 
         if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
-            return res.status(400).json({ error: 'Invalid or expired token.' });
+            return res.status(400).json({ error: 'Invalid or expired token.1' });
         }
 
-        // Token is valid, proceed to user creation
-        validatePassword(password);  // Validate password during user creation
+        // Token is valid, proceed with additional user validation
+        validateName(firstName);  // Validate first name
+        validateName(lastName);   // Validate last name
+        validatePassword(password);  // Validate password
+        await validateEmail(email);   // Validate email format
 
+        // Set dates for creation and modification
+        const joinedAt = Date.now();
+        const modifiedAt = Date.now();
+
+        // Hash the password for security
         const hashedPassword = await encrypt(password);  // Encrypt the password
 
         // Create user object
         const newUser = new UserModel({
-            firstName: firstName, // Using firstName from the request body
-            lastName: lastName,
-            email: email,
-            password: hashedPassword,  // Save hashed password
-            joinedAt: Date.now(),
-            modifiedAt: Date.now()
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            joinedAt,
+            modifiedAt
         });
 
-        const createdUser = await newUser.save();
-
         // Create content creator and student profiles
-        const contentCreatorProfile = new ContentCreatorModel({ baseUser: createdUser._id });
-        const studentProfile = new StudentModel({ baseUser: createdUser._id });
+        const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
+        const studentProfile = new StudentModel({ baseUser: newUser._id });
 
-        await contentCreatorProfile.save();
-        await studentProfile.save();
+        // Get the user's email domain to determine if they are part of an onboarded institution
+        const emailDomain = email.substring(email.indexOf('@'));
+        const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
+        const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
+
+        // Save the user and profiles
+        const createdUser = await newUser.save();  // Save user
+        let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+        const createdStudent = await studentProfile.save(); // Save student
+
+        // If the email is under either of the onboarded institutions' domains, approve the content creator automatically
+        if (onboardedInstitution || onboardedSecondaryInstitution) {
+            await ContentCreatorModel.findOneAndUpdate({ baseUser: newUser._id }, { approved: true });
+            createdContentCreator = await ContentCreatorModel.findOne({ baseUser: newUser._id });  // Refresh content creator profile
+        }
 
         // Delete the verification token as it is no longer needed
         await EmailVerificationToken.deleteOne({ userEmail: email });
 
-        // Respond with the created user data
+        // Respond with the created user and institution data
         res.status(201).json({
             message: 'Email verified and user created successfully!',
-            user: createdUser
+            baseUser: createdUser,
+            contentCreatorProfile: createdContentCreator,
+            studentProfile: createdStudent,
+            institution: onboardedInstitution || onboardedSecondaryInstitution,  // Respond with the institution if found
         });
 
     } catch (error) {
@@ -185,6 +214,7 @@ router.post('/verify-email', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 
 
