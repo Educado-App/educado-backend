@@ -15,12 +15,18 @@ const { EmailVerificationToken } = require('../models/EmailVerificationToken');
 const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
 
+const bcrypt = require('bcrypt');
+// Utility function to encrypt the token or password
 
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
 const ATTEMPT_EXPIRATION_TIME = 1; //1000 * 60 * 60;
 
 // Services
 //require("../services/passport");
+// Utility function to compare raw token with hashed token
+const compareTokens = async (rawToken, hashedToken) => {
+    return await bcrypt.compare(rawToken, hashedToken);
+};
 
 router.post('/', makeExpressCallback(authEndpointHandler));
 
@@ -88,7 +94,6 @@ router.post('/login', async (req, res) => {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
-
 // Signup route
 router.post('/signup', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -102,16 +107,16 @@ router.post('/signup', async (req, res) => {
 
         // Generate and hash the verification token
         const verificationToken = generateVerificationToken();
-        const hashedToken = await encrypt(verificationToken);
+        const hashedToken = await encrypt(verificationToken); // Hash the token
 
         // Save the token and email in the database
         await new EmailVerificationToken({
             userEmail: email,
-            token: hashedToken,
+            token: hashedToken,  // Store the hashed token
             expiresAt: Date.now() + TOKEN_EXPIRATION_TIME,
         }).save();
 
-        // Send verification email
+        // Send verification email with the raw token (not hashed)
         await sendVerificationEmail({ firstName, email }, verificationToken);
 
         // Respond to client
@@ -125,64 +130,61 @@ router.post('/signup', async (req, res) => {
 
 // Email verification route
 router.post('/verify-email', async (req, res) => {
-	const { token, email, password, firstName, lastName } = req.body;  // Destructure the token and user data
-  
-	try {
-	  // Find the verification token by email
-	  const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
-  
-	  if (!emailVerificationToken) {
-		return res.status(400).json({ error: 'Invalid or expired token.' });
-	  }
-  
-	  // Check if the token matches
-	  const isValid = await compare(token, emailVerificationToken.token); // Assuming compare is asynchronous
-  
-	  if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
-		return res.status(400).json({ error: 'Invalid or expired token.' });
-	  }
-  
-	  // Token is valid, proceed to user creation
-	  validatePassword(password);  // Validate password during user creation
-  
-	  const hashedPassword = await encrypt(password);  // Hash the password
-  
-	  // Create the user object
-	  const newUser = new UserModel({
-		firstName: firstName, // Use firstName from the request body
-		lastName: lastName,
-		email: email,
-		password: hashedPassword,
-		joinedAt: Date.now(),
-		modifiedAt: Date.now()
-	  });
-  
-	  // Save the user to the database
-	  const createdUser = await newUser.save();
-  
-	  // Create content creator and student profiles linked to the user
-	  const contentCreatorProfile = new ContentCreatorModel({ baseUser: createdUser._id });
-	  const studentProfile = new StudentModel({ baseUser: createdUser._id });
-  
-	  // Save the profiles
-	  await contentCreatorProfile.save();
-	  await studentProfile.save();
-  
-	  // Delete the verification token since it's no longer needed
-	  await EmailVerificationToken.deleteOne({ userEmail: email });
-  
-	  // Respond with the created user data
-	  res.status(201).json({
-		message: 'Email verified and user created successfully!',
-		user: createdUser
-	  });
-  
-	} catch (error) {
-	  console.error(error);
-	  res.status(500).json({ error: 'Internal server error' });
-	}
-  });
-  
+    const { token, email, password, firstName, lastName } = req.body;  // Destructure the token and user data
+
+    try {
+        // Find the verification token by email
+        const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
+
+        if (!emailVerificationToken) {
+            return res.status(400).json({ error: 'Invalid or expired token.' });
+        }
+
+        // Check if the token matches
+        const isValid = await compareTokens(token, emailVerificationToken.token); // Compare raw token with hashed token
+
+        if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
+            return res.status(400).json({ error: 'Invalid or expired token.' });
+        }
+
+        // Token is valid, proceed to user creation
+        validatePassword(password);  // Validate password during user creation
+
+        const hashedPassword = await encrypt(password);  // Encrypt the password
+
+        // Create user object
+        const newUser = new UserModel({
+            firstName: firstName, // Using firstName from the request body
+            lastName: lastName,
+            email: email,
+            password: hashedPassword,  // Save hashed password
+            joinedAt: Date.now(),
+            modifiedAt: Date.now()
+        });
+
+        const createdUser = await newUser.save();
+
+        // Create content creator and student profiles
+        const contentCreatorProfile = new ContentCreatorModel({ baseUser: createdUser._id });
+        const studentProfile = new StudentModel({ baseUser: createdUser._id });
+
+        await contentCreatorProfile.save();
+        await studentProfile.save();
+
+        // Delete the verification token as it is no longer needed
+        await EmailVerificationToken.deleteOne({ userEmail: email });
+
+        // Respond with the created user data
+        res.status(201).json({
+            message: 'Email verified and user created successfully!',
+            user: createdUser
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 
