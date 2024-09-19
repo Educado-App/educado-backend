@@ -88,17 +88,15 @@ router.post('/login', async (req, res) => {
 			});
 		} else {
 			// If the passwords do not match, return an error message
-			return res.status(401).json({ 'error': errorCodes['E0105'] });
+			return res.status(401).send({ 'error': errorCodes['E0105'] });
 		}
 	} catch (err) {
 		// If the server could not be reached, return an error message
-		return res.status(500).json({ 'error': errorCodes['E0003'] });
+		return res.status(500).send({ 'error': errorCodes['E0003'] });
 	}
 });
-// Signup route
 router.post('/signup', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-	const user = await UserModel.findOne({ email: email });
 
     try {
         // Validate user input
@@ -106,10 +104,14 @@ router.post('/signup', async (req, res) => {
         validateName(lastName);
         validatePassword(password);
         await validateEmail(email);
-		// If email is not provided or user is not found, return error E0201
-		if (user) {
-		return res.status(400).json({ error: errorCodes['E0201'] });
-	} else {
+
+        // Check if the user already exists
+        const user = await UserModel.findOne({ email: email });
+        
+        // If user already exists, return error E0201
+        if (user) {
+			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
+        } else {
 
         // Generate and hash the verification token
         const verificationToken = generateVerificationToken();
@@ -126,14 +128,16 @@ router.post('/signup', async (req, res) => {
         await sendVerificationEmail({ firstName, email }, verificationToken);
 
         // Respond to client
-        res.status(200).json({
+        res.status(200).send({
             message: 'Verification email sent. Please verify to complete registration.',
         });
-    } 
-	}catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+	}
+
+    } catch (error) {
+		res.status(400).send({ error: error });
+	}
 });
+
 
 // Email verification route
 router.post('/verify-email', async (req, res) => {
