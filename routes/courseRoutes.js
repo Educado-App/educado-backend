@@ -423,7 +423,7 @@ router.patch('/:id/sections', async (req, res) => {
 
 	} catch (error) {
 		return res.status(500).json({ error: errorCodes['E0003'] });
-}
+	}
 });
 
 
