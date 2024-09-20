@@ -388,42 +388,42 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 });
 // Update section order of a course 
 router.patch('/:id/sections', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { sections } = req.body;
+	try {
+		const { id } = req.params;
+		const { sections } = req.body;
 
-        // Validate course ID
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
-        }
+		// Validate course ID
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+		}
 
-        // Validate section IDs
-        for (const sectionId of sections) {
-            if (!mongoose.Types.ObjectId.isValid(sectionId)) {
-                return res.status(400).send({ error: errorCodes['E0014'] }); // If section id is not valid, return error
-            }
-        }
+		// Validate section IDs
+		for (const sectionId of sections) {
+			if (!mongoose.Types.ObjectId.isValid(sectionId)) {
+				return res.status(400).send({ error: errorCodes['E0014'] }); // If section id is not valid, return error
+			}
+		}
 
-        // Find the course
-        const course = await CourseModel.findById(id);
+		// Find the course
+		const course = await CourseModel.findById(id);
 
-        // Check if course exists
+		// Check if course exists
 		if (!course) {
-            return res.status(404).json({ error: errorCodes['E0006'] }); // If course not found, return error
-        }
+			return res.status(404).json({ error: errorCodes['E0006'] }); // If course not found, return error
+		}
 
-        // Update the sections order
-        course.sections = sections;
+		// Update the sections order
+		course.sections = sections;
 
-        // Save the updated course
-        await course.save();
+		// Save the updated course
+		await course.save();
 
-        // Send response
-        return res.status(200).send(course);
+		// Send response
+		return res.status(200).send(course);
 
-    } catch (error) {
-        return res.status(500).json({ error: errorCodes['E0003'] });
-    }
+	} catch (error) {
+		return res.status(500).json({ error: errorCodes['E0003'] });
+}
 });
 
 
