@@ -36,31 +36,32 @@ router.get('/:type/:id', async (req, res) => {
  * @param {string} sectionId
  */
 router.patch('/:sectionId', async (req, res) => {
-	const { sectionId } = req.params;
-	const { components } = req.body;
+	// const { sectionId } = req.params;
+	// const { components } = req.body;
 
-	for (let i = 0; i < components.length; i++) {
-		const comp = components[i];
+	// for (let i = 0; i < components.length; i++) {
+	// 	const comp = components[i];
         
-		comp._id = mongoose.Types.ObjectId(comp._id);
-		comp.compId = mongoose.Types.ObjectId(comp.compId);
-	}
+	// 	comp._id = mongoose.Types.ObjectId(comp._id);
+	// 	comp.compId = mongoose.Types.ObjectId(comp.compId);
+	// }
 
-	const section = await SectionModel.findById(sectionId);
+	// const section = await SectionModel.findById(sectionId);
 
-	section.updateOne(
-		{ $set:
-			{
-				components : components
-			}
-		}
-	).catch(err => {
-		console.log(err);
-	});
+	// section.updateOne(
+	// 	{ $set:
+	// 		{
+	// 			components : components
+	// 		}
+	// 	}
+	// ).catch(err => {
+	// 	console.log(err);
+	// });
 
-	// section.components = components;
-	// await section.save();
-	res.send(section);
+	// // section.components = components;
+	// // await section.save();
+	// res.send(section);
+	res.send(200);
 });
 
 module.exports = router;
