@@ -18,7 +18,3 @@ config/gcp_service.json
 __tests__/setup/globalConfigMongo.json
 _temp_bucketFiles
 gcp_service.json
-<<<<<<< HEAD
-
-=======
->>>>>>> f860c15aaa880fbc351015ddf9dbb66f4027ddf8
