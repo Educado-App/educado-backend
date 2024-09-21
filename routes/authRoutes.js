@@ -4,7 +4,6 @@ const { ContentCreatorModel } = require('../models/ContentCreators'); // Import 
 const { InstitutionModel } = require('../models/Institutions'); //Import Institution model 
 const { StudentModel } = require('../models/Students'); // Import Student model
 const { ApplicationModel } = require('../models/Applications'); // Import Applications model
-
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
 const { signAccessToken } = require('../helpers/token');
@@ -19,7 +18,6 @@ const { sendVerificationEmail } = require('../helpers/email');
 const bcrypt = require('bcrypt');
 const { userList } = require('../users');
 // Utility function to encrypt the token or password
-
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
 const ATTEMPT_EXPIRATION_TIME = 1; //1000 * 60 * 60;
 
@@ -107,7 +105,10 @@ router.post('/login', async (req, res) => {
 });
 router.post('/signup', async (req, res) => {
 	const { firstName, lastName, email, password } = req.body;
-
+	// Get the user's email domain to determine if they are part of an onboarded institution
+	const emailDomain = email.substring(email.indexOf('@'));
+	const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
+	const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 	try {
 		// Validate user input
 		validateName(firstName);
@@ -121,8 +122,9 @@ router.post('/signup', async (req, res) => {
 		// If user already exists, return error E0201
 		if (user) {
 			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
-		} else {
-
+		} 
+		
+		if(onboardedInstitution || onboardedSecondaryInstitution){
 			// Generate and hash the verification token
 			const verificationToken = generateVerificationToken();
 			const hashedToken = await encrypt(verificationToken); // Hash the token
@@ -141,7 +143,47 @@ router.post('/signup', async (req, res) => {
 			res.status(200).send({
 				message: 'Verification email sent. Please verify to complete registration.',
 			});
+		} else {
+			// Set dates for creation and modification
+			const joinedAt = Date.now();
+			const modifiedAt = Date.now();
+
+			// Hash the password for security
+			const hashedPassword = await encrypt(password);  // Encrypt the password
+
+			// Create user object
+			const newUser = new UserModel({
+			firstName,
+			lastName,
+			email,
+			password: hashedPassword,
+			joinedAt,
+			modifiedAt
+		});
+
+			// Create content creator and student profiles
+			const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
+			const studentProfile = new StudentModel({ baseUser: newUser._id });
+
+			// Get the user's email domain to determine if they are part of an onboarded institution
+			const emailDomain = email.substring(email.indexOf('@'));
+			const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
+			const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
+
+			// Save the user and profiles
+			const createdUser = await newUser.save();  // Save user
+			let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+			const createdStudent = await studentProfile.save(); // Save student
+
+			// Respond with the created user and institution data
+			res.status(201).json({
+			message: 'Email verified and user created successfully!',
+			baseUser: createdUser,
+			contentCreatorProfile: createdContentCreator,
+			studentProfile: createdStudent,
+		});
 		}
+		
 
 	} catch (error) {
 		res.status(400).send({ error: error });

@@ -72,10 +72,6 @@ const userSchema = new Schema({
 			message: 'User email already exists!'
 		}]
 	},
-	isVerified: {
-		type: Boolean,
-		default: false
-	},
 	password: String,
 	joinedAt: Date,
 	dateUpdated: Date,
