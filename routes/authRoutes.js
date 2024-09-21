@@ -16,10 +16,10 @@ const { validateEmail, validateName, validatePassword } = require('../helpers/va
 const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
-const { userList } = require('../users');
+/* const { userList } = require('../users'); */
 // Utility function to encrypt the token or password
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
-const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5//1000 * 60 * 60;
+const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5;//1000 * 60 * 60;
 
 // Services
 //require("../services/passport");
@@ -153,22 +153,18 @@ router.post('/signup', async (req, res) => {
 
 			// Create user object
 			const newUser = new UserModel({
-			firstName,
-			lastName,
-			email,
-			password: hashedPassword,
-			joinedAt,
-			modifiedAt
-		});
+				firstName,
+				lastName,
+				email,
+				password: hashedPassword,
+				joinedAt,
+				modifiedAt
+			});
 
 			// Create content creator and student profiles
 			const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
 			const studentProfile = new StudentModel({ baseUser: newUser._id });
 
-			// Get the user's email domain to determine if they are part of an onboarded institution
-			const emailDomain = email.substring(email.indexOf('@'));
-			const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
-			const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 
 			// Save the user and profiles
 			const createdUser = await newUser.save();  // Save user
@@ -177,11 +173,11 @@ router.post('/signup', async (req, res) => {
 
 			// Respond with the created user and institution data
 			res.status(201).json({
-			message: 'Email verified and user created successfully!',
-			baseUser: createdUser,
-			contentCreatorProfile: createdContentCreator,
-			studentProfile: createdStudent,
-		});
+				message: 'Email verified and user created successfully!',
+				baseUser: createdUser,
+				contentCreatorProfile: createdContentCreator,
+				studentProfile: createdStudent,
+			});
 		}
 		
 

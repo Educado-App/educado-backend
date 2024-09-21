@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const emailVerificationTokenSchema = new Schema({
 	userEmail: {
 		type: String,
-        required: true
+		required: true
 	},
 	token: {
 		type: String,
