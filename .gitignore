@@ -18,4 +18,4 @@ config/gcp_service.json
 __tests__/setup/globalConfigMongo.json
 _temp_bucketFiles
 gcp_service.json
-eslint.config.mjs
+
