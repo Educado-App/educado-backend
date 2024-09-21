@@ -3,6 +3,7 @@ const { UserModel } = require('../models/Users'); // Import User model
 const { ContentCreatorModel } = require('../models/ContentCreators'); // Import Content Creator model
 const { InstitutionModel } = require('../models/Institutions'); //Import Institution model 
 const { StudentModel } = require('../models/Students'); // Import Student model
+const { ApplicationModel } = require('../models/Applications'); // Import Applications model
 
 const { makeExpressCallback } = require('../helpers/express');
 const { authEndpointHandler } = require('../auth');
@@ -42,11 +43,17 @@ router.post('/login', async (req, res) => {
 	try {
 		// Searching for a single user in the database, with the email provided in the request body. 
 		const user = await UserModel.findOne({ email: { $regex: req.body.email, $options: 'i' } });
+		// Find Application 
+		const application = await ApplicationModel.findOne({baseUser: user._id});
+		console.log(application);
 		// If email is found, compare the password provided in the request body with the password in the database
+		console.log(user);
 		if (!user) {
 			// Invalid email (email not found)
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
+
+
 	
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
 		if(req.body.isContentCreator == true) {
