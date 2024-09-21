@@ -19,7 +19,7 @@ const bcrypt = require('bcrypt');
 const { userList } = require('../users');
 // Utility function to encrypt the token or password
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
-const ATTEMPT_EXPIRATION_TIME = 1; //1000 * 60 * 60;
+const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5//1000 * 60 * 60;
 
 // Services
 //require("../services/passport");
