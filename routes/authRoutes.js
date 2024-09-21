@@ -44,7 +44,6 @@ router.post('/login', async (req, res) => {
 		const user = await UserModel.findOne({ email: { $regex: req.body.email, $options: 'i' } });
 		
 		// If email is found, compare the password provided in the request body with the password in the database
-		console.log(user);
 		if (!user) {
 			// Invalid email (email not found)
 			return res.status(401).json({'error': errorCodes['E0004']});
