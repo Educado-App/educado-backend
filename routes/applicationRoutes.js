@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
 //Import all relevant models
@@ -98,22 +99,29 @@ router.put('/:id?reject', async (req, res) => {
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
+		// Find Application 
+		const application = await ApplicationModel.findOne({baseUser:req.body.baseUser});
 	try {
+		if(!application){
 		//Define the new application based on the data from the request body
-		const data = req.body;
-		const applicator = await UserModel.findOne({_id: req.body.baseUser});
+			const data = req.body;
+			const applicator = await UserModel.findOne({_id: req.body.baseUser});
 
-		//Save the data as part of the MongoDB ApplicationModel 
-		const application = ApplicationModel(data);
-		const createdApplication = await application.save({baseUser: applicator._id});
+			//Save the data as part of the MongoDB ApplicationModel 
+			const application = ApplicationModel(data);
+			const createdApplication = await application.save({baseUser: applicator._id});
         
         
-		//Return successful response
-		return res.status(201).json({application: createdApplication});
+			//Return successful response
+			return res.status(201).json({application: createdApplication});
+		} else {
+			return res.status(400).json({ 'error': errorCodes['E1006'] }); //Could not upload application
+		}
 	} catch (error) {
         
 		return res.status(400).json({ 'error': errorCodes['E1006'] }); //Could not upload application
 	}
+	
 });
 
 //This is the only route currently required for the Institutional Onboarding, so it will be placed here for now

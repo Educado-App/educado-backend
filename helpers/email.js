@@ -4,6 +4,7 @@ const { patterns } = require('./patterns');
 
 module.exports = Object.freeze({
 	sendResetPasswordEmail,
+	sendVerificationEmail,
 	sendMail
 });
 
@@ -26,7 +27,7 @@ async function sendMail({
 	from = keys.GMAIL_USER,
 	to,
 	text,
-	html
+	html,
 }) {
 
 	if (!patterns.email.test(from) || !patterns.email.test(to)) {
@@ -84,5 +85,25 @@ async function sendResetPasswordEmail(user, token) {
     '<p>The Educado team</p>';
 
 	const mail = await sendMail({ subject, to, text, html });
+	return mail;
+}
+
+
+/**
+ * 
+ * @param {Object} user - containing the following properties:
+ * - firstName: the first name of the user
+ * - email: the email of the user
+ * @param {String} user.firstName
+ * @param {String} user.email
+   @param {EmailVerificationToken} token 
+ * @returns 
+ */
+async function sendVerificationEmail(user,token) {
+	const subject = 'Verify your email';
+	const to = user.email;
+	const html = `<p>Hi ${user.firstName}, ${token}</p>`; 
+
+	const mail = await sendMail({ subject, to, html });
 	return mail;
 }
