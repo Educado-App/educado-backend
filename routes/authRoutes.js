@@ -27,9 +27,8 @@ const ATTEMPT_EXPIRATION_TIME = 1; //1000 * 60 * 60;
 //require("../services/passport");
 // Utility function to compare raw token with hashed token
 const compareTokens = async (rawToken, hashedToken) => {
-    return await bcrypt.compare(rawToken, hashedToken);
+	return await bcrypt.compare(rawToken, hashedToken);
 };
-
 router.post('/', makeExpressCallback(authEndpointHandler));
 
 // Login
@@ -43,21 +42,27 @@ router.post('/login', async (req, res) => {
 	try {
 		// Searching for a single user in the database, with the email provided in the request body. 
 		const user = await UserModel.findOne({ email: { $regex: req.body.email, $options: 'i' } });
-		// Find Application 
-		const application = await ApplicationModel.findOne({baseUser: user._id});
-		console.log(application);
+		
 		// If email is found, compare the password provided in the request body with the password in the database
 		console.log(user);
 		if (!user) {
 			// Invalid email (email not found)
 			return res.status(401).json({'error': errorCodes['E0004']});
 		}
-
-
+		// Find Application 
+		const application = await ApplicationModel.findOne({baseUser: user._id});
+		// If the email is found, and content creator is approved compare the passwords
+		result = compare(req.body.password, user.password);
 	
 		// For content creators, a matching content-creator entry will be found to see if they are approved or rejected
-		if(req.body.isContentCreator == true) {
+		if(req.body.isContentCreator == true && result) {
 			profile = await ContentCreatorModel.findOne({baseUser: user._id});
+			//If user hasnt filled the application yet
+			if(profile.approved == false && profile.rejected == false && !application){
+				return res.status(200).json({
+					baseUser: user.id
+				});
+			}
 			//Content creator must not be allowed entry if they are either rejected or not yet approved
 			if (profile.approved == false && profile.rejected == false) {
 				// User not approved
@@ -74,8 +79,7 @@ router.post('/login', async (req, res) => {
 		}
 
 
-		// If the email is found, and content creator is approved compare the passwords
-		result = compare(req.body.password, user.password);
+
 		// If the passwords match, return a success message
 		if (result) {
 			// Create a token for the user
@@ -103,44 +107,44 @@ router.post('/login', async (req, res) => {
 	}
 });
 router.post('/signup', async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
+	const { firstName, lastName, email, password } = req.body;
 
-    try {
-        // Validate user input
-        validateName(firstName);
-        validateName(lastName);
-        validatePassword(password);
-        await validateEmail(email);
+	try {
+		// Validate user input
+		validateName(firstName);
+		validateName(lastName);
+		validatePassword(password);
+		await validateEmail(email);
 
-        // Check if the user already exists
-        const user = await UserModel.findOne({ email: email });
+		// Check if the user already exists
+		const user = await UserModel.findOne({ email: email });
         
-        // If user already exists, return error E0201
-        if (user) {
+		// If user already exists, return error E0201
+		if (user) {
 			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
-        } else {
+		} else {
 
-        // Generate and hash the verification token
-        const verificationToken = generateVerificationToken();
-        const hashedToken = await encrypt(verificationToken); // Hash the token
+			// Generate and hash the verification token
+			const verificationToken = generateVerificationToken();
+			const hashedToken = await encrypt(verificationToken); // Hash the token
 
-        // Save the token and email in the database
-        await new EmailVerificationToken({
-            userEmail: email,
-            token: hashedToken,  // Store the hashed token
-            expiresAt: Date.now() + TOKEN_EXPIRATION_TIME,
-        }).save();
+			// Save the token and email in the database
+			await new EmailVerificationToken({
+				userEmail: email,
+				token: hashedToken,  // Store the hashed token
+				expiresAt: Date.now() + TOKEN_EXPIRATION_TIME,
+			}).save();
 
-        // Send verification email with the raw token (not hashed)
-        await sendVerificationEmail({ firstName, email }, verificationToken);
+			// Send verification email with the raw token (not hashed)
+			await sendVerificationEmail({ firstName, email }, verificationToken);
 
-        // Respond to client
-        res.status(200).send({
-            message: 'Verification email sent. Please verify to complete registration.',
-        });
-	}
+			// Respond to client
+			res.status(200).send({
+				message: 'Verification email sent. Please verify to complete registration.',
+			});
+		}
 
-    } catch (error) {
+	} catch (error) {
 		res.status(400).send({ error: error });
 	}
 });
@@ -148,82 +152,82 @@ router.post('/signup', async (req, res) => {
 
 // Email verification route
 router.post('/verify-email', async (req, res) => {
-    const { firstName, lastName, email, password, token } = req.body;  // Destructure the token and user data
+	const { firstName, lastName, email, password, token } = req.body;  // Destructure the token and user data
 
-    try {
-        // Find the verification token by email
-        const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
+	try {
+		// Find the verification token by email
+		const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
 
-        if (!emailVerificationToken) {
-            return res.status(400).json({ error: 'Invalid or expired token.1' });
-        }
+		if (!emailVerificationToken) {
+			return res.status(400).json({ error: 'Invalid or expired token.1' });
+		}
 
-        // Check if the token matches
-        const isValid = await compareTokens(token, emailVerificationToken.token); // Compare raw token with hashed token
+		// Check if the token matches
+		const isValid = await compareTokens(token, emailVerificationToken.token); // Compare raw token with hashed token
 
-        if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
-            return res.status(400).json({ error: 'Invalid or expired token.1' });
-        }
+		if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
+			return res.status(400).json({ error: 'Invalid or expired token.1' });
+		}
 
-        // Token is valid, proceed with additional user validation
-        validateName(firstName);  // Validate first name
-        validateName(lastName);   // Validate last name
-        validatePassword(password);  // Validate password
-        await validateEmail(email);   // Validate email format
+		// Token is valid, proceed with additional user validation
+		validateName(firstName);  // Validate first name
+		validateName(lastName);   // Validate last name
+		validatePassword(password);  // Validate password
+		await validateEmail(email);   // Validate email format
 
-        // Set dates for creation and modification
-        const joinedAt = Date.now();
-        const modifiedAt = Date.now();
+		// Set dates for creation and modification
+		const joinedAt = Date.now();
+		const modifiedAt = Date.now();
 
-        // Hash the password for security
-        const hashedPassword = await encrypt(password);  // Encrypt the password
+		// Hash the password for security
+		const hashedPassword = await encrypt(password);  // Encrypt the password
 
-        // Create user object
-        const newUser = new UserModel({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-            joinedAt,
-            modifiedAt
-        });
+		// Create user object
+		const newUser = new UserModel({
+			firstName,
+			lastName,
+			email,
+			password: hashedPassword,
+			joinedAt,
+			modifiedAt
+		});
 
-        // Create content creator and student profiles
-        const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
-        const studentProfile = new StudentModel({ baseUser: newUser._id });
+		// Create content creator and student profiles
+		const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
+		const studentProfile = new StudentModel({ baseUser: newUser._id });
 
-        // Get the user's email domain to determine if they are part of an onboarded institution
-        const emailDomain = email.substring(email.indexOf('@'));
-        const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
-        const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
+		// Get the user's email domain to determine if they are part of an onboarded institution
+		const emailDomain = email.substring(email.indexOf('@'));
+		const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
+		const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 
-        // Save the user and profiles
-        const createdUser = await newUser.save();  // Save user
-        let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
-        const createdStudent = await studentProfile.save(); // Save student
+		// Save the user and profiles
+		const createdUser = await newUser.save();  // Save user
+		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
+		const createdStudent = await studentProfile.save(); // Save student
 
-        // If the email is under either of the onboarded institutions' domains, approve the content creator automatically
-        if (onboardedInstitution || onboardedSecondaryInstitution) {
-            await ContentCreatorModel.findOneAndUpdate({ baseUser: newUser._id }, { approved: true });
-            createdContentCreator = await ContentCreatorModel.findOne({ baseUser: newUser._id });  // Refresh content creator profile
-        }
+		// If the email is under either of the onboarded institutions' domains, approve the content creator automatically
+		if (onboardedInstitution || onboardedSecondaryInstitution) {
+			await ContentCreatorModel.findOneAndUpdate({ baseUser: newUser._id }, { approved: true });
+			createdContentCreator = await ContentCreatorModel.findOne({ baseUser: newUser._id });  // Refresh content creator profile
+		}
 
-        // Delete the verification token as it is no longer needed
-        await EmailVerificationToken.deleteOne({ userEmail: email });
+		// Delete the verification token as it is no longer needed
+		await EmailVerificationToken.deleteOne({ userEmail: email });
 
-        // Respond with the created user and institution data
-        res.status(201).json({
-            message: 'Email verified and user created successfully!',
-            baseUser: createdUser,
-            contentCreatorProfile: createdContentCreator,
-            studentProfile: createdStudent,
-            institution: onboardedInstitution || onboardedSecondaryInstitution,  // Respond with the institution if found
-        });
+		// Respond with the created user and institution data
+		res.status(201).json({
+			message: 'Email verified and user created successfully!',
+			baseUser: createdUser,
+			contentCreatorProfile: createdContentCreator,
+			studentProfile: createdStudent,
+			institution: onboardedInstitution || onboardedSecondaryInstitution,  // Respond with the institution if found
+		});
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Internal server error' });
+	}
 });
 
 
@@ -362,12 +366,12 @@ function generatePasswordResetToken() {
 }
 // Generate a random 4 digit code for Email Verification
 function generateVerificationToken() {
-    const length = 4;  // Make it 6 characters long (can be customized)
-    let retVal = '';
-    for (let i = 0; i < length; i++) {
-        retVal += getRandomNumber(0, 9);
-    }
-    return retVal;
+	const length = 4;  // Make it 6 characters long (can be customized)
+	let retVal = '';
+	for (let i = 0; i < length; i++) {
+		retVal += getRandomNumber(0, 9);
+	}
+	return retVal;
 }
 
 /**
