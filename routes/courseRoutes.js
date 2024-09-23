@@ -394,13 +394,13 @@ router.patch('/:id/sections', async (req, res) => {
 
 		// Validate course ID
 		if (!mongoose.Types.ObjectId.isValid(id)) {
-			return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+			return res.status(400).send({ error: errorCodes['E0014'], msg: "Invalid courseID" + id }); // If id is not valid, return error
 		}
 
 		// Validate section IDs
 		for (const sectionId of sections) {
 			if (!mongoose.Types.ObjectId.isValid(sectionId)) {
-				return res.status(400).send({ error: errorCodes['E0014'] }); // If section id is not valid, return error
+				return res.status(400).send({ error: errorCodes['E0014'], msg: "invalid sectionID" + sectionId }); // If section id is not valid, return error
 			}
 		}
 
