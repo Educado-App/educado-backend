@@ -473,7 +473,7 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 // Update course published status 
 // Status is enum: "published", "draft", "hidden"
 router.patch('/updateStatus', async (req, res) => {
-	const { status, course_id } = req.body;
+	const {course_id, status } = req.body;
 
 	// find object in database and update title to new value
 	(
