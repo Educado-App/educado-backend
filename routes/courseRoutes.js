@@ -470,21 +470,16 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 });
 
 
-// Update course published state
+// Update course published status 
+// Status is enum: "published", "draft", "hidden"
 router.patch('/updateStatus', async (req, res) => {
-	const { published, course_id } = req.body;
+	const { status, course_id } = req.body;
 
 	// find object in database and update title to new value
-	// (
-	// 	await CourseModel.findOneAndUpdate(
-	// 		{ _id: course_id },
-	// 		{ published: published }
-	// 	)
-	// ).save;
 	(
 		await CourseModel.findOneAndUpdate(
 			{ _id: course_id },
-			{ status: published }
+			{ status: status }
 		)
 	).save;
 	const course = await CourseModel.findById(course_id);
