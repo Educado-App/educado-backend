@@ -811,5 +811,27 @@ describe('Course Routes', () => {
 			expect(response.body.estimatedHours).toBe(2);
 		});
 	});
+
+	describe('PATCH /courses/:courseId/updateStatus', () => {
+		it('Update status of the fake course to published', async () => {
+
+			const course = await db.collection('courses').findOne({ title: 'test course' });
+			const courseId = course._id;
+
+			expect(course.status).toBe('draft');
+
+			const response = await request(app)
+				.patch('api/courses/' + courseId + '/updateStatus')
+				.set('Authorization', `Bearer ${token}`)
+				.send({ status : "published"})
+				.expect(200);
+			
+			
+			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
+			expect(response.status).toBe(200);
+
+			expect(updatedCourse.status).toBe('published')
+		});
+	});
 });
 
