@@ -99,12 +99,14 @@ router.put('/:id?reject', async (req, res) => {
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
-		// Find Application 
-		const application = await ApplicationModel.findOne({baseUser:req.body.baseUser});
+	const data = req.body;
+
+	// Find Application 
+	const application = await ApplicationModel.findOne({baseUser:data.baseUser});
+	
 	try {
 		if(!application){
 		//Define the new application based on the data from the request body
-			const data = req.body;
 			const applicator = await UserModel.findOne({_id: data.baseUser});
 
 			//Save the data as part of the MongoDB ApplicationModel 
