@@ -105,7 +105,7 @@ router.post('/newapplication', async (req, res) => {
 		if(!application){
 		//Define the new application based on the data from the request body
 			const data = req.body;
-			const applicator = await UserModel.findOne({_id: req.body.baseUser});
+			const applicator = await UserModel.findOne({_id: data.baseUser});
 
 			//Save the data as part of the MongoDB ApplicationModel 
 			const application = ApplicationModel(data);
