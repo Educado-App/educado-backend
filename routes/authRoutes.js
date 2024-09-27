@@ -12,7 +12,7 @@ const errorCodes = require('../helpers/errorCodes');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
 const { EmailVerificationToken } = require('../models/EmailVerificationToken');
-const { validateEmail, validateName, validatePassword, validateUserInfo } = require('../helpers/validation');
+const { validateUserInfo } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
@@ -212,10 +212,7 @@ router.post('/verify-email', async (req, res) => {
 		}
 
 		// Token is valid, proceed with additional user validation
-		validateName(firstName);  // Validate first name
-		validateName(lastName);   // Validate last name
-		validatePassword(password);  // Validate password
-		await validateEmail(email);   // Validate email format
+		await validateUserInfo(firstName, lastName, password, email);
 
 		// Set dates for creation and modification
 		const joinedAt = Date.now();
