@@ -12,7 +12,7 @@ const errorCodes = require('../helpers/errorCodes');
 const { sendResetPasswordEmail } = require('../helpers/email');
 const { PasswordResetToken } = require('../models/PasswordResetToken');
 const { EmailVerificationToken } = require('../models/EmailVerificationToken');
-const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
+const { validateEmail, validateName, validatePassword, validateUserInfo } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
@@ -111,10 +111,7 @@ router.post('/signup', async (req, res) => {
 	const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 	try {
 		// Validate user input
-		validateName(firstName);
-		validateName(lastName);
-		validatePassword(password);
-		await validateEmail(email);
+		await validateUserInfo(firstName, lastName, password, email);
 
 		// Check if the user already exists
 		const user = await UserModel.findOne({ email: email });
