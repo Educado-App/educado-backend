@@ -29,6 +29,8 @@ router.get('/', (req, res) => {
 	});
 });
 
+
+
 // Get file from bucket
 router.get('/:filename', (req, res) => {
 	//Forward to service api
@@ -44,6 +46,8 @@ router.get('/:filename', (req, res) => {
 		}
 	});
 });
+
+
 
 // Delete file from bucket
 router.delete('/:filename', (req, res) => {
