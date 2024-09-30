@@ -6,7 +6,7 @@ const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
-const { helloPrint, approve } = require('../applications/content-creator-applications/controller/applicationController');
+const { helloPrint, approve, reject } = require('../applications/content-creator-applications/controller/applicationController');
 
 //Route for when getting all applications
 router.get('/', async (req, res) => {
@@ -72,18 +72,10 @@ router.put('/:id?approve', async (req, res) => {
 //Route for rejecting content creator application
 router.put('/:id?reject', async (req, res) => {
 	try  {
-		//Get id from the request parameters
-		const { id } = req.params;
-        
-		//Find the content creator whose "baseUser" id matches the above id, and update their "rejected" field to "true"
-		await ContentCreatorModel.findOneAndUpdate(
-			{ baseUser: id },
-			{ rejected: true }
-		);
-
-		//Return successful response
-		return res.status(200).json();
-
+		const id = req.param('id');
+		if(await reject(id)) {
+			return res.status(200).json({ message: 'Content Creator rejected successfully' });
+		}
 	} catch(error) {
 		//If anything unexpected happens, throw error
 		return res.status(400).json({ 'error': errorCodes['E1004'] }); //Could not reject Content Creator
