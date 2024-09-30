@@ -35,9 +35,7 @@ router.get('/:filename', (req, res) => {
 	axios.get(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
 		res.send(response.data);
 	}).catch((error) => {
-
 		if (error.response && error.response.data) {
-			
 			// Forward the status code from the Axios error if available
 			res.status(error.response.status || 500).send(error.response.data);
 		} else {
