@@ -6,6 +6,7 @@ const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
+const { helloPrint, approve } = require('../applications/content-creator-applications/controller/hello');
 
 //Route for when getting all applications
 router.get('/', async (req, res) => {
@@ -29,6 +30,10 @@ router.get('/', async (req, res) => {
 		return res.status(404).json({ 'error': errorCodes['E0004'] }); //User not found
 	}
 });
+
+router.get('/daller', async (req, res) => {
+	helloPrint();
+})
 
 //Route for getting specific content creator, and their application
 router.get('/:id', async (req, res) => {
@@ -56,20 +61,9 @@ router.get('/:id', async (req, res) => {
 });
 
 //Route for approving content creator application
-router.put('/:id?approve', async (req, res) => {
+router.put('/approve', async (req, res) => {
 	try  {
-		//Get id from the request parameters
-		const { id } = req.params;
-        
-		//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
-		await ContentCreatorModel.findOneAndUpdate(
-			{ baseUser: id },
-			{ approved: true }
-		);
-        
-		//Return successful response
-		return res.status(200).json();
-
+		return await approve(req.body);
 	} catch(error) {
 		//If anything unexpected happens, throw error
 		return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
