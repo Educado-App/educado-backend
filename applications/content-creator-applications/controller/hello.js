@@ -1,20 +1,23 @@
-
-const helloPrint = () => {
-    console.log('oihasdog;ihjasdgliuasdfgiuhdfgisdf');
-}
+const { ContentCreatorModel } = require("../../../models/ContentCreators");
 
 const approve = async (body) => {
     //Get id from the request parameters
-		const { id } = body.id;
+		const id = body.id;
+        console.log(id);
         
 		//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
-		await ContentCreatorModel.findOneAndUpdate(
+		const returnDoc = await ContentCreatorModel.findOneAndUpdate(
 			{ baseUser: id },
-			{ approved: true }
+			{ $set: { approved: true, rejected: false }},
+            { returnDocument: 'after' } // 'after' returns the updated document
 		);
-        
-		//Return successful response
-		return res.status(200).json();
+
+        if(returnDoc.approved) {
+            //Return successful response
+            return true;
+        } else {
+            return false;
+        }
 }
 
-module.exports = { helloPrint, approve };
+module.exports = { approve };

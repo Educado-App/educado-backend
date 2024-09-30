@@ -31,10 +31,6 @@ router.get('/', async (req, res) => {
 	}
 });
 
-router.get('/daller', async (req, res) => {
-	helloPrint();
-})
-
 //Route for getting specific content creator, and their application
 router.get('/:id', async (req, res) => {
 	try {
@@ -63,7 +59,9 @@ router.get('/:id', async (req, res) => {
 //Route for approving content creator application
 router.put('/approve', async (req, res) => {
 	try  {
-		return await approve(req.body);
+		if(await approve(req.body)) {
+			return res.status(200).json()
+		}
 	} catch(error) {
 		//If anything unexpected happens, throw error
 		return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
