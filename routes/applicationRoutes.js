@@ -57,10 +57,11 @@ router.get('/:id', async (req, res) => {
 });
 
 //Route for approving content creator application
-router.put('/approve', async (req, res) => {
+router.put('/:id?approve', async (req, res) => {
 	try  {
-		if(await approve(req.body)) {
-			return res.status(200).json()
+		const id = req.param('id');
+		if(await approve(id)) {
+			return res.status(200).json({ message: 'Content Creator approved successfully' });
 		}
 	} catch(error) {
 		//If anything unexpected happens, throw error
