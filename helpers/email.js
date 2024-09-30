@@ -100,10 +100,12 @@ async function sendResetPasswordEmail(user, token) {
  * @returns 
  */
 async function sendVerificationEmail(user,token) {
-	const subject = 'Verify your email';
+	const subject = 'Educado verifique seu e-mail';
 	const to = user.email;
-	const html = `<p>Hi ${user.firstName}, ${token}</p>`; 
+	const text = `Olá ${user.firstName},\n\nVerifique seu e-mail com o seguinte código:\n\n${token}`;
+	const html = `<p>Olá ${user.firstName},\n\nVerifique seu e-mail com o seguinte código:\n\n</p>`
+	+ `<p><strong>${token}</strong></p>\n`; 
 
-	const mail = await sendMail({ subject, to, html });
+	const mail = await sendMail({ subject, to, text, html });
 	return mail;
-}
+}	
