@@ -103,15 +103,6 @@ function ensureNewValues(newValues, oldValues) {
 	return true;
 }
 
-async function validateUserInfo(firstName, lastName, password, email) {
-	const validateFirstName = validateName(firstName);
-	const validateLastName = validateName(lastName);
-	const validatePassword = validatePassword(password);
-	const validateEmail = await validateEmail(email);
-
-	return (validateFirstName && validateLastName && validatePassword && validateEmail);
-}
-
 module.exports = {
 	validateEmail,
 	validateName,
@@ -119,5 +110,4 @@ module.exports = {
 	validatePassword,
 	isMissing,
 	ensureNewValues,
-	validateUserInfo,
 };
