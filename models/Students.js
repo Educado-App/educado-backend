@@ -20,6 +20,9 @@ const studentSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'Courses'
 	}],
+	profilePhoto: {
+		type: String,
+	},
 	courses: [
 		{
 			courseId: {
