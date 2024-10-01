@@ -61,7 +61,7 @@ router.put('/:id?approve', async (req, res) => {
 	try  {
 		const id = req.param('id');
 		if(await approve(id)) {
-			return res.status(200).json({ message: 'Content Creator approved successfully' });
+			return res.status(200).json({ message: 'Criador de conteúdo aprovado com sucesso' });
 		}
 	} catch(error) {
 		//If anything unexpected happens, throw error
@@ -69,18 +69,27 @@ router.put('/:id?approve', async (req, res) => {
 	}
 });
 
-//Route for rejecting content creator application
-router.put('/:id?reject', async (req, res) => {
-	try  {
-		const id = req.param('id');
-		if(await reject(id)) {
-			return res.status(200).json({ message: 'Content Creator rejected successfully' });
-		}
-	} catch(error) {
-		//If anything unexpected happens, throw error
-		return res.status(400).json({ 'error': errorCodes['E1004'] }); //Could not reject Content Creator
-	}
+router.put('/:id/reject', async (req, res) => {
+    try {
+        const { id } = req.params;  // Extract the ID from the route parameters
+        const { reason } = req.body; // Extract the reason from the request body
+		console.log(`Rejecting content creator with ID: ${id}, Reason: ${reason}`);
+
+
+        if (await reject(id, reason)) {
+			console.log('Content Creator rejected successfully');
+            return res.status(200).json({ message: 'Criador de conteúdo rejeitado com sucesso' });
+        } else {
+			console.log('Failed to reject Content Creator');
+            return res.status(400).json({ 'error': 'Failed to reject Content Creator' });
+        }
+    } catch (error) {
+		console.log('Error rejecting Content Creator '+ error);
+        return res.status(400).json({ 'error': 'Error rejecting Content Creator' });
+    }
 });
+
+
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
