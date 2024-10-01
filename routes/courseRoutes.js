@@ -354,6 +354,7 @@ router.put('/', async (req, res) => {
 
 	try {
 		const result = await course.save({ new: true })
+			//As id is generated at save, we need to .then() and then save
 			.then(savedCourse => {
 				const generatedId = savedCourse._id;
 				savedCourse.coverImg = generatedId + "_c";
