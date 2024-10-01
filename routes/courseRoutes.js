@@ -325,7 +325,7 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 //Create course route
 router.put('/', async (req, res) => {
-	const { title, category, difficulty, description, creator, status, estimatedHours, coverImg } = req.body;
+	const { title, category, difficulty, description, creator, status, estimatedHours } = req.body;
 
 	const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
@@ -344,7 +344,6 @@ router.put('/', async (req, res) => {
 		//_user: req.user.id,
 		creator: id,
 		published: false,
-		coverImg: coverImg,
 		dateCreated: Date.now(),
 		dateUpdated: Date.now(),
 		sections: [],
@@ -354,7 +353,13 @@ router.put('/', async (req, res) => {
 	});
 
 	try {
-		const result = await course.save({ new: true });
+		const result = await course.save({ new: true })
+			.then(savedCourse => {
+				const generatedId = savedCourse._id;
+				savedCourse.coverImg = generatedId + "_c";
+
+				return savedCourse.save();
+			});
 		return res.status(201).send(result);
 	} catch (err) {
 		return res.status(400).send(err);
@@ -376,7 +381,8 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 			estimatedHours: course.estimatedHours,
 			published: course.published,
 			status: course.status,
-			dateUpdated: Date.now()
+			dateUpdated: Date.now(),
+			coverImg: course.coverImg
 		},
 		function (err) {
 			if (err) {
