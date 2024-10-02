@@ -32,8 +32,12 @@ router.get('/', (req, res) => {
 // Get file from bucket
 router.get('/:filename', (req, res) => {
 	//Forward to service api
-	axios.get(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
-		res.send(response.data);
+	axios.get(serviceUrl + '/bucket/' + req.params.filename, {
+		responseType: 'arraybuffer'  // Ensure binary data handling
+	}).then((response) => {
+		res.set(response.headers);
+		// Send the image data back to the client
+   		res.status(response.status).send(Buffer.from(response.data, 'binary'));
 	}).catch((error) => {
 		if (error.response && error.response.data) {
 			// Forward the status code from the Axios error if available
