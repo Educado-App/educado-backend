@@ -6,7 +6,7 @@ const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
-const { helloPrint, approve, reject } = require('../applications/content-creator-applications/controller/applicationController');
+const { approve, reject } = require('../applications/content-creator-applications/controller/applicationController');
 
 //Route for when getting all applications
 router.get('/', async (req, res) => {
