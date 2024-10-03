@@ -24,8 +24,7 @@ const approve = async (id) => {
 		
 		const to = contentCreator.email;
 		const subject = 'Aplicação de Criador de Conteúdo Aprovada';
-		const html = '<p>Parabéns! Sua aplicação para se tornar um Criador de Conteúdo foi aprovada!</p> <p>' + kindRegardsPT + '</p>';
-
+        const html = '<p>Parabéns! Sua aplicação para se tornar um Criador de Conteúdo foi aprovada!</p> <p><a href="https://app-staging.educado.io/welcome">faça login aqui</a>.</p> <p>' + kindRegardsPT + '</p>';
 		//Send an email to the content creator to let them know that they have been approved
 		await mail.sendMail({ to, subject, html });
 		
@@ -47,8 +46,7 @@ const reject = async (id, reason) => {
     // Prepare the rejection email
     const to = contentCreator.email;
     const subject = 'Aplicação de Criador de Conteúdo Rejeitada';
-    const html = '<p>Infelizmente, sua aplicação para se tornar um Criador de Conteúdo foi rejeitada.</p><p> Motivo:' + reason + '</p> <p>' + kindRegardsPT + '</p>';
-    
+    const html = '<p>Infelizmente, sua aplicação para se tornar um Criador de Conteúdo foi rejeitada.</p><p> Motivo:' + reason + '</p><p>Para tentar novamente, <a href="https://app-staging.educado.io/welcome">tente novamente aqui</a>.</p><p>' + kindRegardsPT + '</p>';    
     console.log(id);
 
     // Send an email to the content creator to inform them of the rejection
