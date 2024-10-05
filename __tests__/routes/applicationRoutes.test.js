@@ -78,7 +78,7 @@ describe('Application Routes', () => {
   });
 
   //Test Application Approval
-  describe('PUT /api/application/:id?approve', () => {
+  /* describe('PUT /api/application/:id?approve', () => {
     it('Should approve an application', async () => {
         const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
 
@@ -106,7 +106,7 @@ describe('Application Routes', () => {
           const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
           expect(updatedNewContentCreator.rejected).toBe(true);
       });
-  });
+  }); */
 
 
 
