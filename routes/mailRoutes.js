@@ -17,6 +17,48 @@ router.get('/send_mail', async (req, res) => {
 	}, 1500);
 });
 
+// Send email to content creator to let them know that they have been approved
+router.get('/send_mail/contentCreatorApprovalMail', async (req, res) => {
+	setTimeout(async () => {
+		try {
+			const to = req.param('email');
+			const subject = req.param('subject');
+			const html = req.param('text');
+
+			console.log({ to, subject, html });
+			await mail.sendMail({ to, subject, html });
+
+			res.status(200);
+			res.send('Mail successfully sent!');
+		} catch (error) {
+      
+			res.status(400);
+			res.send(error.message);
+		}
+	}, 1500);
+});
+
+// Send email to content creator to let them know that they have been rejected
+router.get('/send_mail/contentCreatorRejectionMail', async (req, res) => {
+	setTimeout(async () => {
+		try {
+			const to = req.param('email');
+			const subject = req.param('subject');
+			const html = req.param('text');
+
+			console.log({ to, subject, html });
+			await mail.sendMail({ to, subject, html });
+
+			res.status(200);
+			res.send('Mail successfully sent!');
+		} catch (error) {
+      
+			res.status(400);
+			res.send(error.message);
+		}
+	}, 1500);
+});
+
 //send mail that tells the user that the application has been received
 router.get('/send_mail/awaiting_approval', async (req, res) => {
 	setTimeout(async () => {
