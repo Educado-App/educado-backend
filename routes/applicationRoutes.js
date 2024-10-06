@@ -159,4 +159,33 @@ router.post('/newinstitution', async (req, res) => {
 
 });
 
+router.delete('/:id', async (req, res) => {
+	try {
+	  // Log the request to check if it reaches the backend
+	  console.log(`DELETE request received for ID: ${req.params.id}`);
+	  
+	  // Get id from the request parameters
+	  const { id } = req.params;
+	  
+	  // Log the ID being used for the query
+	  console.log(`Attempting to delete application with ID: ${id}`);
+	  
+	  // Find and delete the application by application ID
+	  const deletedApplication = await ApplicationModel.findByIdAndDelete(id);
+	  
+	  if (!deletedApplication) {
+		console.log(`Application not found for ID: ${id}`);
+		return res.status(404).json({ 'error': errorCodes['E0004'] }); // Application not found
+	  }
+  
+	  // Return successful response
+	  console.log(`Application deleted successfully for ID: ${id}`);
+	  return res.status(200).json({ message: 'Application deleted successfully' });
+	} catch (error) {
+	  // If anything unexpected happens, throw error
+	  console.error(`Error deleting application for ID: ${id}`, error);
+	  return res.status(500).json({ 'error': errorCodes['E1007'] }); // Could not delete application
+	}
+  });
+
 module.exports = router;
