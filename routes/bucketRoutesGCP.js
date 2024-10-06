@@ -65,31 +65,43 @@ router.delete('/:filename', (req, res) => {
 	});
 });
 
+
+const fs = require('fs');
+const path = require('path');
 // Upload file to bucket
 router.post('/', upload.single('file'), (req, res) => {
 	const form = new FormData();
+	const uploadPath = path.join(__dirname, 'uploads', req.file.originalname); // Local path to save the file
 
-	// Add file and filename to form
-	form.append('file', req.file.buffer, {
-		filename: req.file.originalname,
-		contentType: req.file.mimetype
-	});
-	form.append('fileName', req.body.fileName);
+	// Save file locally
+	fs.writeFile(uploadPath, req.file.buffer, (err) => {
+		console.log("Hallo");
+		if (err) {
+			return res.status(500).send({ message: 'Error saving the file locally.' });
+		}
 
-	// Forward to service api
-	axios.post(serviceUrl + '/bucket/', form, { headers: form.getHeaders() })
-		.then(response => {
-			res.send(response.data);
-		})
-		.catch(error => {
-			if (error.response && error.response.data) {
-				// Forward the status code from the Axios error if available
-				res.status(error.response.status || 500).send(error.response.data);
-			} else {
-				// Handle cases where the error does not have a response part (like network errors)
-				res.status(500).send({ message: 'An error occurred during upload.' });
-			}
+		// Add file and filename to form
+		form.append('file', req.file.buffer, {
+			filename: req.file.originalname,
+			contentType: req.file.mimetype
 		});
+		form.append('fileName', req.body.fileName);
+
+		// Forward to service API
+		axios.post(serviceUrl + '/bucket/', form, { headers: form.getHeaders() })
+			.then(response => {
+				res.send(response.data);
+			})
+			.catch(error => {
+				if (error.response && error.response.data) {
+					// Forward the status code from the Axios error if available
+					res.status(error.response.status || 500).send(error.response.data);
+				} else {
+					// Handle cases where the error does not have a response part (like network errors)
+					res.status(500).send({ message: 'An error occurred during upload.' });
+				}
+			});
+	});
 });
 
 
