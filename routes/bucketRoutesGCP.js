@@ -3,7 +3,6 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const { PassThrough } = require('stream');
-const Buffer = require('buffer').Buffer;
 
 //Get serviceUrl from environment variable
 
@@ -33,12 +32,8 @@ router.get('/', (req, res) => {
 // Get file from bucket
 router.get('/:filename', (req, res) => {
 	//Forward to service api
-	axios.get(serviceUrl + '/bucket/' + req.params.filename, {
-		responseType: 'arraybuffer'  // Ensure binary data handling
-	}).then((response) => {
-		res.set(response.headers);
-		// Send the image data back to the client
-		res.status(response.status).send(Buffer.from(response.data, 'binary'));
+	axios.get(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
+		res.send(response.data);
 	}).catch((error) => {
 		if (error.response && error.response.data) {
 			// Forward the status code from the Axios error if available

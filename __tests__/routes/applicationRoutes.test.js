@@ -77,38 +77,30 @@ describe('Application Routes', () => {
     });
   });
 
-  //Test Application Approval
-  /* describe('PUT /api/application/:id?approve', () => {
-    it('Should approve an application', async () => {
-        const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
+  //Test PUT requests
+  describe('PUT /api/application/newapplication', () => {
+    it('Should reject an application', async () => {
+      const fakeId = newUser._id;
 
-        await request(app)
-            .put(`/api/application/${fakeId}approve`)  // Updated the route
-            .expect(200);  // Expect a successful approval
+      await request(app)
+        .put(`/api/application/${fakeId}reject`)
+        .expect(200);
+      
+			const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+			expect(updatedNewContentCreator.rejected).toBe(true);
+		});
 
-        const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-        console.log(updatedNewContentCreator);
-        expect(updatedNewContentCreator.approved).toBe(true);
+		it('Should approve an application', async () => {
+			const fakeId = newUser._id;
+
+			await request(app)
+				.put(`/api/application/${fakeId}approve`)
+				.expect(200);
+
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      expect(updatedNewContentCreator.approved).toBe(true)
     });
   });
-
-    //Test Application Rejection
-    describe('PUT /api/application/:id/reject', () => {
-      it('Should reject an application with a reason', async () => {
-          const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
-          const reason = 'Not meeting the criteria';
-
-          await request(app)
-              .put(`/api/application/${fakeId}/reject`)  // Updated the route
-              .send({ reason })  // Sending the reason in the request body
-              .expect(200);  // Expect a successful rejection
-
-          const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-          expect(updatedNewContentCreator.rejected).toBe(true);
-      });
-  }); */
-
-
 
   //Institution Tests
   describe('POST /api/application/newinstitution', () => {

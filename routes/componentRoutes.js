@@ -33,7 +33,6 @@ router.get('/:type/:id', async (req, res) => {
  * route to patch the components in a section
  * @param {string} sectionId
  */
-//this function was deleting components unintentionally, for now it's deprecated. 
 router.patch('/:sectionId', async (req, res) => {
 	// const { sectionId } = req.params;
 	// const { components } = req.body;
@@ -60,7 +59,7 @@ router.patch('/:sectionId', async (req, res) => {
 	// // section.components = components;
 	// // await section.save();
 	// res.send(section);
-	res.send('OK');
+	res.send(200);
 });
 
 module.exports = router;

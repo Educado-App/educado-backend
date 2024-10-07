@@ -6,7 +6,7 @@ module.exports = function makeFakeCourse() {
 		dateCreated: Date.now(),
 		dateUpdated: Date.now(),
 		category: 'sewing',
-		status: 'draft',
+		published: false,
 		sections: [],
 		difficulty: 1,
 		estimatedHours: 1,
@@ -14,4 +14,3 @@ module.exports = function makeFakeCourse() {
 		numOfSubscriptions: 0,
 	};
 };
-
