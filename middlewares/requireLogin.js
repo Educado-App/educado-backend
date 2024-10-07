@@ -32,5 +32,5 @@ module.exports = async (req, res, next) => {
         }
     }
 
-    next();
+    next(); // Delete if not needed
 };
