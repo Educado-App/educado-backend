@@ -6,10 +6,13 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
 const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeResetPasswordToken = require('../fixtures/fakeResetPasswordToken');
+const makeFakeEmailVerificationToken = require('../fixtures/fakeEmailVerificationToken');
+const { EmailVerificationToken } = require('../..//models/EmailVerificationToken');
+const compareTokens = require('../../routes/authRoutes');
 
 const mongoose = require('mongoose');
 const { encrypt } = require('../../helpers/password');
-const { sendResetPasswordEmail } = require('../../helpers/email');
+const { sendResetPasswordEmail, sendVerificationEmail } = require('../../helpers/email');
 
 const app = express();
 app.use(express.json());
@@ -38,6 +41,49 @@ const fakeStudent = makeFakeStudent(fakeUser._id);
 let db; // Store the database connection
 beforeAll(async () => {
 	db = await connectDb(); // Connect to the database
+});
+
+
+
+describe('POST /api/auth/verify-email', () => {
+    let fakeUser, fakeToken, fakeInstitution;
+    
+    beforeEach(() => {
+        fakeUser = makeFakeUser();
+        
+        fakeToken = makeFakeEmailVerificationToken(fakeUser.token);
+
+        fakeInstitution = { domain: '@domain.com' };
+    });
+
+    it('should return 400 if the verification token is not found', async () => {
+        EmailVerificationToken.findOne(null); // No token found
+        
+        const res = await request(`http://localhost:${PORT}`)
+            .post('/api/auth/verify-email')
+            .send(fakeUser);
+        
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Invalid or expired token.1');
+    });
+
+    it('should return 400 if the token is invalid or expired', async () => {
+        fakeToken.expiresAt = Date.now() - 10000; // Expired token
+        EmailVerificationToken.findOne(fakeToken);
+        
+        const res = await request(`http://localhost:${PORT}`)
+            .post('/api/auth/verify-email')
+            .send(fakeUser);
+        
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Invalid or expired token.1');
+    });
+
+	afterAll(async () => {
+		await db.collection('users').deleteMany({});// Delete all documents in the 'users' collection
+		await db.collection('content-creators').deleteMany({});// Delete all documents in the 'content-creators' collection
+	});
+	
 });
 
 describe('POST /auth/login', () => {
@@ -185,6 +231,7 @@ describe('POST /auth/login', () => {
 		await db.collection('content-creators').deleteMany({});// Delete all documents in the 'content-creators' collection
 	});
 });
+
 
 describe('POST /auth/reset-password-request', () => {
 
