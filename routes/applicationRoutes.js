@@ -94,9 +94,8 @@ router.put('/:id/reject', async (req, res) => {
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
 		// Find Application 
-
-	try {
 		const application = await ApplicationModel.findOne({baseUser:req.body.baseUser});
+	try {
 		if(!application){
 		//Define the new application based on the data from the request body
 			const data = req.body;
