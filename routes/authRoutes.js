@@ -104,6 +104,8 @@ router.post('/signup', async (req, res) => {
 		const hashedPassword = encrypt(form.password);
 		//Overwriting the plain text password with the hashed password 
 		form.password = hashedPassword;
+		//Setting role of user
+		form.role = 'user';
 
 		// Create user with student and content creator profiles
 		const baseUser = UserModel(form);
