@@ -8,6 +8,7 @@ const ContentCreatorSchema = new Schema({
 	rejected: { type: Boolean, default: false },
 	rejectionReason: { type: String, required: false },
 	baseUser: { type: Schema.Types.ObjectId, ref: 'Users' },
+	adminPrivilege: { type: Boolean, default: false },
 });
 
 const ContentCreatorModel = mongoose.model(
