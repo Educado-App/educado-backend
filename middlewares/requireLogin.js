@@ -3,6 +3,7 @@ const errorCodes = require('../helpers/errorCodes');
 
 module.exports = async (req, res, next) => {
     let claims;
+
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,7 +20,7 @@ module.exports = async (req, res, next) => {
     }
 
     // Check if the user is an admin
-    if (claims.email === 'Admin@Educado.com') {
+    if (claims.role === 'admin') {
         console.log('Admin access granted');
         return next();
     }
