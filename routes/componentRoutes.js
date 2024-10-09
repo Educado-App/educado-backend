@@ -33,7 +33,8 @@ router.get('/:type/:id', async (req, res) => {
  * route to patch the components in a section
  * @param {string} sectionId
  */
-//this function was deleting components unintentionally, for now it's deprecated. 
+//temporarily disabled functionality as this function was unintentionally deleting database entries.
+//The database handling is done dynamically in react for now 
 router.patch('/:sectionId', async (req, res) => {
 	// const { sectionId } = req.params;
 	// const { components } = req.body;

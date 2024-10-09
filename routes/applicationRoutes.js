@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
 //Import all relevant models
