@@ -33,8 +33,8 @@ router.get('/:type/:id', async (req, res) => {
  * route to patch the components in a section
  * @param {string} sectionId
  */
-//temporarily disabled functionality as this function was unintentionally deleting database entries.
-//The database handling is done dynamically in react for now 
+//This endpoint is temporarily disabled because of a bug which was unintenionally deleting components from courses
+//when moving them around or saving the course as draft/publish.
 router.patch('/:sectionId', async (req, res) => {
 	// const { sectionId } = req.params;
 	// const { components } = req.body;
