@@ -4,6 +4,7 @@ const router = require('express').Router();
 // Models
 const { LectureModel } = require('../models/Lectures');
 const { ExerciseModel } = require('../models/Exercises');
+const errorCodes = require('../helpers/errorCodes');
 
 // Get all exercises
 router.get('/:type/:id', async (req, res) => {
@@ -61,7 +62,7 @@ router.patch('/:sectionId', async (req, res) => {
 	// // section.components = components;
 	// // await section.save();
 	// res.send(section);
-	res.send('OK');
+	res.status(503).send({error: errorCodes['E0017']});
 });
 
 module.exports = router;
