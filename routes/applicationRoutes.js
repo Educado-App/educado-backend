@@ -69,31 +69,31 @@ router.put('/:id?approve', async (req, res) => {
 });
 
 router.put('/:id/reject', async (req, res) => {
-    try {
-        const { id } = req.params;  // Extract the ID from the route parameters
-        const { reason } = req.body; // Extract the reason from the request body
+	try {
+		const { id } = req.params;  // Extract the ID from the route parameters
+		const { reason } = req.body; // Extract the reason from the request body
 		console.log(`Rejecting content creator with ID: ${id}, Reason: ${reason}`);
 
 
-        if (await reject(id, reason)) {
+		if (await reject(id, reason)) {
 			console.log('Content Creator rejected successfully');
-            return res.status(200).json({ message: 'Criador de conteúdo rejeitado com sucesso' });
-        } else {
+			return res.status(200).json({ message: 'Criador de conteúdo rejeitado com sucesso' });
+		} else {
 			console.log('Failed to reject Content Creator');
-            return res.status(400).json({ 'error': 'Failed to reject Content Creator' });
-        }
-    } catch (error) {
+			return res.status(400).json({ 'error': 'Failed to reject Content Creator' });
+		}
+	} catch (error) {
 		console.log('Error rejecting Content Creator '+ error);
-        return res.status(400).json({ 'error': 'Error rejecting Content Creator' });
-    }
+		return res.status(400).json({ 'error': 'Error rejecting Content Creator' });
+	}
 });
 
 
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
-		// Find Application 
-		const application = await ApplicationModel.findOne({baseUser:req.body.baseUser});
+	// Find Application 
+	const application = await ApplicationModel.findOne({baseUser:req.body.baseUser});
 	try {
 		if(!application){
 		//Define the new application based on the data from the request body
