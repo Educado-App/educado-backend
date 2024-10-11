@@ -121,7 +121,15 @@ router.post('/signup', async (req, res) => {
 			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
 		} 
 		
+		
 		if(onboardedInstitution || onboardedSecondaryInstitution){
+
+			// Delete any existing token
+			let existing_token = await EmailVerificationToken.findOne({ userEmail: email });
+			if (existing_token) console.log('Token found');
+			if (existing_token) await existing_token.deleteOne();
+
+			
 			// Generate and hash the verification token
 			const verificationToken = generateVerificationToken();
 			const hashedToken = await encrypt(verificationToken); // Hash the token

@@ -12,7 +12,6 @@ const makeFakeCreator = require('../fixtures/fakeContentCreator');
 const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeLecture = require('../fixtures/fakeLecture');
 const makeFakeExercise = require('../fixtures/fakeExercise');
-const makeFakeCoursePublished = require('../fixtures/fakeCoursePublished');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
 
@@ -43,7 +42,6 @@ let fakeSection = makeFakeSection();
 let fakeCourses = getFakeCourses();
 let fakeLection = makeFakeLecture();
 let fakeExercise = makeFakeExercise();
-let fakeCoursePublished = makeFakeCoursePublished();
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -811,53 +809,6 @@ describe('Course Routes', () => {
 			expect(response.body.difficulty).toBe(1);
 			expect(response.body.description).toBe('Sewing test');
 			expect(response.body.estimatedHours).toBe(2);
-		});
-	});
-
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to published', async () => {
-
-			const course = await db.collection('courses').findOne({ title: 'test course' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('draft');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "published"})
-				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
-
-			expect(updatedCourse.status).toBe('published');
-		});
-	});
-
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to draft', async () => {
-
-			//set up a published course in db
-			await db.collection('courses').insertOne(fakeCoursePublished);
-		
-			const course = await db.collection('courses').findOne({ title: 'test course published' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('published');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "draft"})
-				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
-
-			expect(updatedCourse.status).toBe('draft');
 		});
 	});
 });

@@ -75,8 +75,7 @@ router.put('/:id/reject', async (req, res) => {
 		const { id } = req.params;  // Extract the ID from the route parameters
 		const { reason } = req.body; // Extract the reason from the request body
 		console.log(`Rejecting content creator with ID: ${id}, Reason: ${reason}`);
-
-
+		
 		if (await reject(id, reason)) {
 			console.log('Content Creator rejected successfully');
 			return res.status(200).json({ message: 'Criador de conteúdo rejeitado com sucesso' });
@@ -89,8 +88,6 @@ router.put('/:id/reject', async (req, res) => {
 		return res.status(400).json({ 'error': 'Error rejecting Content Creator' });
 	}
 });
-
-
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
