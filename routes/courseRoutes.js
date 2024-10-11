@@ -386,6 +386,46 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 	);
 	return res.status(200).send(dbCourse);
 });
+// Update section order of a course 
+router.patch('/:id/sections', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { sections } = req.body;
+
+		// Validate course ID
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error
+		}
+
+		// Validate section IDs
+		for (const sectionId of sections) {
+			if (!mongoose.Types.ObjectId.isValid(sectionId)) {
+				return res.status(400).send({ error: errorCodes['E0014'] }); // If section id is not valid, return error
+			}
+		}
+
+		// Find the course
+		const course = await CourseModel.findById(id);
+
+		// Check if course exists
+		if (!course) {
+			return res.status(404).json({ error: errorCodes['E0006'] }); // If course not found, return error
+		}
+
+		// Update the sections order
+		course.sections = sections;
+
+		// Save the updated course
+		await course.save();
+
+		// Send response
+		return res.status(200).send(course);
+
+	} catch (error) {
+		return res.status(500).json({ error: errorCodes['E0003'] });
+	}
+});
+
 
 
 /**
@@ -430,18 +470,20 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 });
 
 
-// Update course published state
-router.patch('/published', async (req, res) => {
-	const { published, course_id } = req.body;
+// Update course published status 
+// Status is enum: "published", "draft", "hidden"
+router.patch('/:id/updateStatus', async (req, res) => {
+	const { status } = req.body;
+	const { id } = req.params;
 
 	// find object in database and update title to new value
 	(
 		await CourseModel.findOneAndUpdate(
-			{ _id: course_id },
-			{ published: published }
+			{ _id: id },
+			{ status: status }
 		)
 	).save;
-	const course = await CourseModel.findById(course_id);
+	const course = await CourseModel.findById(id);
 
 	// Send response
 	res.send(course);
