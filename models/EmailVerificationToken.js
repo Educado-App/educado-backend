@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
-// Class description
 const emailVerificationTokenSchema = new Schema({
 	userEmail: {
 		type: String,
