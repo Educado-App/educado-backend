@@ -174,9 +174,9 @@ router.patch('/:id/role', requireLogin, async (req, res) => {
 		return res.status(400).send({ error: errorCodes['E0014'] });
 	}
 	const id = mongoose.Types.ObjectId(req.params.id);
-	console.log("Request body: ", req.body);
+	
 	const { newRole } = req.body;
-	console.log("New role is: ", newRole);
+	
 	try {
         // Update the user directly
         const updatedUser = await UserModel.findByIdAndUpdate(
