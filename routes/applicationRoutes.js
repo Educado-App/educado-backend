@@ -89,6 +89,8 @@ router.put('/:id/reject', async (req, res) => {
 	}
 });
 
+
+
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
 	// Find Application 
