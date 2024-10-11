@@ -88,8 +88,8 @@ describe('sendVerificationEmail', () => {
 			subject: 'Educado verifique seu e-mail',
 			from: 'educadotest4@gmail.com',
 			to: user.email,
-			text: `Olá ${user.firstName},\n\nNós recebemos uma solicitação para criar conta no Educado.\n\nUse esse código para validar: ${token}\n\nEsse código é válido por 5 minutos.\n\nEquipe Educado.`,
-			html: `<p>Olá ${user.firstName},</p>\n<p>Nós recebemos uma solicitação para criar conta no Educado.</p>\n<p>Use esse código para validar: <strong>${token}</strong></p>\n<p>Esse código é válido por 5 minutos.</p>\n<p>Equipe Educado.</p>`
+			text: `Olá ${user.firstName},\n\nNós recebemos uma solicitação para criar conta no Educado.\n\nUse esse código para validar: ${token}\n\nEsse código é válido por 5 minutos.\n\nEquipe Educado. `,
+			html: `<p>Olá ${user.firstName},</p>\n<p>Nós recebemos uma solicitação para criar conta no Educado.</p>\n<p>Use esse código para validar: <strong>${token}</strong></p>\n<p>Esse código é válido por 5 minutos.</p>\n<p>Equipe Educado.</p>`,
 		};
 
 		const result = await emailHelper.sendVerificationEmail(user, token);
