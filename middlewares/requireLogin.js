@@ -13,7 +13,6 @@ module.exports = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
         claims = verify(token);
-        console.log('Token claims:', claims); // Log the claims to verify them
     } catch (error) {
         console.error('Token verification failed:', error);
         return res.status(401).send({ error: errorCodes['E0001'] });
@@ -21,7 +20,6 @@ module.exports = async (req, res, next) => {
 
     // Check if the user is an admin
     if (claims.role === 'admin') {
-        console.log('Admin access granted');
         return next();
     }
 
