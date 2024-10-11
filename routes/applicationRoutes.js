@@ -63,7 +63,7 @@ router.put('/:id?approve', async (req, res) => {
 		//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
 		await ContentCreatorModel.findOneAndUpdate(
 			{ baseUser: id },
-			{ approved: true }
+			{ approved: true, rejected: false }
 		);
         
 		//Return successful response
@@ -84,7 +84,7 @@ router.put('/:id?reject', async (req, res) => {
 		//Find the content creator whose "baseUser" id matches the above id, and update their "rejected" field to "true"
 		await ContentCreatorModel.findOneAndUpdate(
 			{ baseUser: id },
-			{ rejected: true }
+			{ rejected: true, approved: false }
 		);
 
 		//Return successful response
