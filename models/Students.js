@@ -35,7 +35,7 @@ const studentSchema = new Schema({
 			},
 			isComplete: {
 				type: Boolean,
-				default: true
+				default: false
 			},
 			completionDate: {
 				type: Date,
@@ -57,7 +57,7 @@ const studentSchema = new Schema({
 					},
 					isComplete: {
 						type: Boolean,
-						default: true
+						default: false
 					},
 					completionDate: {
 						type: Date,
@@ -74,7 +74,7 @@ const studentSchema = new Schema({
 							},
 							isComplete: {
 								type: Boolean,
-								default: true
+								default: false
 							},
 							isFirstAttempt: {
 								type: Boolean,
