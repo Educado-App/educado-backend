@@ -76,6 +76,7 @@ router.get('/:id', async (req, res) => {
 			// Handle "course not found" error response here
 			return res.status(404).json({ 'error': errorCodes['E0006'] });
 		}
+		console.log(course);
 		res.send(course);
 	} catch (error) {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
