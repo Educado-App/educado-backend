@@ -17,13 +17,19 @@ router.get('/', async (req, res) => {
         // Find all users specified by array above
         const applicators = await UserModel.find({ _id: { $in: baseUserArray } });
 
+        // Find all applications specified by array above
+        const applications = await ApplicationModel.find({ baseUser: { $in: baseUserArray } });
+
         // Merge contentCreators data with applicators data
         const mergedData = applicators.map(applicator => {
             const contentCreator = contentCreators.find(cc => cc.baseUser.toString() === applicator._id.toString());
+            const application = applications.find(app => app.baseUser.toString() === applicator._id.toString());
+            console.log('application:', application); // Log application
             return {
                 ...applicator.toObject(),
                 approved: contentCreator ? contentCreator.approved : undefined,
                 rejected: contentCreator ? contentCreator.rejected : undefined,
+                application: application ? application.toObject() : undefined,
             };
         });
 
