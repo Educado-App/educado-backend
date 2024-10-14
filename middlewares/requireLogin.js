@@ -12,24 +12,15 @@ module.exports = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        claims = verify(token);
+        if (!token) {
+            console.error('Token missing');
+            return res.status(401).send({ error: errorCodes['E0001'] });
+        }
+
+        // If token is present, proceed to the next middleware
+        return next();
     } catch (error) {
         console.error('Token verification failed:', error);
         return res.status(401).send({ error: errorCodes['E0001'] });
     }
-
-    // Check if the user is an admin
-    if (claims.role === 'admin') {
-        return next();
-    }
-
-    if (req.params.id) {
-        console.log('Request params ID:', req.params.id); // Log the request params ID
-        if (claims.id !== req.params.id || !claims.id) {
-            console.error('Claims ID does not match request ID or ID is missing');
-            return res.status(401).send({ error: errorCodes['E0002'] });
-        }
-    }
-
-    next(); // Delete if not needed
 };

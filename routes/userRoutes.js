@@ -9,7 +9,7 @@ const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-router.delete('/:id', requireLogin, async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).send({ error: errorCodes['E0014'] });
