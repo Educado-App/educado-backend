@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const InstitutionSchema = new Schema({
-	institutionName: String,
-	domain: String,
-	secondaryDomain: {type: String, default: null}
+	institutionName: { type: String, requried: true, unique: true },
+	domain: { type: String, requried: true, unique: true },
+	secondaryDomain: { type: String, default: null, unique: true }
 
 });
 
