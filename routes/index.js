@@ -14,6 +14,7 @@ const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
+const UserInfoRoutes = require('../routes/userInfoRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -34,6 +35,7 @@ router.use('/api/utility', UtilityRoutes);
 router.use('/api/students', StudentRoutes);
 router.use('/api/components', ComponentRoutes);
 router.use('/api/profiles', ProfileRoutes);
+router.use('/api/user-info', UserInfoRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);
