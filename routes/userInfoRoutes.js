@@ -4,6 +4,7 @@ const errorCodes = require('../helpers/errorCodes');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const { UserModel } = require('../models/Users'); 
 
+//Route for when getting all applications
 router.get('/', async (req, res) => {
     try {
         // Find all content creators
@@ -34,6 +35,26 @@ router.get('/', async (req, res) => {
     } catch (error) {
         // If anything unexpected happens, throw error
         return res.status(404).json({ 'error': errorCodes['E0004'] }); // User not found
+    }
+});
+
+//  Route for getting specific content creator
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find the content creator by ID
+        const contentCreator = await ContentCreatorModel.findOne({ baseUser: id });
+
+        if (!contentCreator) {
+            return res.status(404).json({ 'error': errorCodes['E0004'] }); // User not found
+        }
+
+        return res.status(200).send(contentCreator);
+            
+    } catch (error) {
+        // If anything unexpected happens, throw error
+        return res.status(500).json({ 'error': error.message });
     }
 });
 
