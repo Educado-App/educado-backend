@@ -95,7 +95,7 @@ router.put('/:id?reject', async (req, res) => {
 		//Find the content creator whose "baseUser" id matches the above id, and update their "rejected" field to "true"
 		await ContentCreatorModel.findOneAndUpdate(
 			{ baseUser: id },
-			{ rejected: true, approved: false }
+			{ rejected: true, approved: false, rejectionReason: req.body.rejectionReason }
 		);
 
 		//Return successful response
