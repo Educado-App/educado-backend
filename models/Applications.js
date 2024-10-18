@@ -8,18 +8,18 @@ const ApplicationSchema = new Schema({
 	baseUser: { type: Schema.Types.ObjectId, ref: 'Users' },
 	motivation: String,
 
-	academicLevel: String,
-	academicStatus: String,
-	major: String,
-	institution: String,
-	educationStartDate: String,
-	educationEndDate: String,
+	academicLevel: [String],
+	academicStatus: [String],
+	major: [String],
+	institution: [String],
+	educationStartDate: [String],
+	educationEndDate: [String],
 
-	company: String,
-	position: String,
-	workStartDate: String,
-	workEndDate: String,
-	workActivities: String,
+	company: [String],
+	position: [String],
+	workStartDate: [String],
+	workEndDate: [String],
+	workActivities: [String],
 });
 
 const ApplicationModel = mongoose.model(
