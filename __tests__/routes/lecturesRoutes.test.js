@@ -49,7 +49,7 @@ describe('PUT /lectures/:lectureId', () => {
 			.send({ title: 'Test lectures' })
 			.expect(201);
 
-		expect(response.body.title).toBe('Test lectures');
+		expect(response.body.compType).toBe('lecture');
 	});
 
 	afterAll(async () => {
@@ -82,14 +82,14 @@ describe('DELETE /lectures/:lectureId', () => {
 			.send({ title: 'Test lecture' })
 			.expect(201);
 
-		expect(lectureCreate.body.title).toBe('Test lecture');
+		expect(lectureCreate.body.compType).toBe('lecture');
 	});
 
 	it('Delete the created lecture', async () => {
 		const token = signAccessToken({id: fakeUser._id});
 
 		const response = await request(app)
-			.delete('/api/lectures/' + lectureCreate.body._id)
+			.delete('/api/lectures/' + lectureCreate.body.compId)
 			.set('Authorization', `Bearer ${token}`)
 			.expect(200);
 
