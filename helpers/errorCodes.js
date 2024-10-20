@@ -70,6 +70,10 @@ module.exports = {
 		code: 'E0016',
 		message: 'Invalid parameters'
 	},
+	E0017: {
+		code: 'E0017',
+		message: 'Service Unavailable'
+	},
 
 	// E01 - Login errors
 	E0101: {

@@ -49,7 +49,7 @@ describe('PUT /api/exercises/:sectionId', () => {
 			.send({ title: 'Test exercise', question: 'Test question', answers: {text: 'test', correct: false, feedback: 'test'} })
 			.expect(201);
 
-		expect(response.body.title).toBe('Test exercise');
+		expect(response.body.compType).toBe('exercise');
 	});
 
 	afterAll(async () => {
@@ -113,7 +113,7 @@ describe('DELETE /exercises/:sectionId', () => {
 			.send({ title: 'Test exercise', question: 'Test question', answers: {text: 'test', correct: false, feedback: 'test'} })
 			.expect(201);
 
-		expect(exerciseCreate.body.title).toBe('Test exercise');
+		expect(exerciseCreate.body.compType).toBe('exercise');
 	});
 
   
@@ -121,7 +121,7 @@ describe('DELETE /exercises/:sectionId', () => {
 		const token = signAccessToken({id: fakeUser._id});
 
 		const response = await request(app)
-			.delete('/api/exercises/' + exerciseCreate.body._id)
+			.delete('/api/exercises/' + exerciseCreate.body.compId)
 			.set('Authorization', `Bearer ${token}`)
 			.expect(200);
 
