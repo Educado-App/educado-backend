@@ -168,7 +168,7 @@ async function validateFields(fields) {
 }
 
 //Update user role
-router.patch('/:id/role', requireLogin, async (req, res) => {
+router.patch('/:id/role', adminOnly, async (req, res) => {
 	console.log("hello");
 	if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 		return res.status(400).send({ error: errorCodes['E0014'] });

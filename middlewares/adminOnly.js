@@ -1,8 +1,6 @@
 const errorCodes = require('../helpers/errorCodes');
 const { verify } = require('../helpers/token');
 
-//const ADMIN_ID = 'srdfet784y2uioejqr';
-
 module.exports = (req, res, next) => {
 		let claims;
 
