@@ -344,7 +344,6 @@ router.put('/', async (req, res) => {
 		//_user: req.user.id,
 		creator: id,
 		published: false,
-		coverImg: '',
 		dateCreated: Date.now(),
 		dateUpdated: Date.now(),
 		sections: [],
@@ -354,7 +353,14 @@ router.put('/', async (req, res) => {
 	});
 
 	try {
-		const result = await course.save({ new: true });
+		const result = await course.save({ new: true })
+			//As id is generated at save, we need to .then() and then save
+			.then(savedCourse => {
+				const generatedId = savedCourse._id;
+				savedCourse.coverImg = generatedId + '_c';
+
+				return savedCourse.save();
+			});
 		return res.status(201).send(result);
 	} catch (err) {
 		return res.status(400).send(err);
@@ -376,7 +382,8 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 			estimatedHours: course.estimatedHours,
 			published: course.published,
 			status: course.status,
-			dateUpdated: Date.now()
+			dateUpdated: Date.now(),
+			coverImg: course.coverImg
 		},
 		function (err) {
 			if (err) {
