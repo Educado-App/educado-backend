@@ -5,10 +5,11 @@ const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
+const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-router.delete('/:id', requireLogin, async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).send({ error: errorCodes['E0014'] });
@@ -165,5 +166,36 @@ async function validateFields(fields) {
 	}
 	return true;
 }
+
+//Update user role
+router.patch('/:id/role', adminOnly, async (req, res) => {
+	console.log("hello");
+	if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+		return res.status(400).send({ error: errorCodes['E0014'] });
+	}
+	const id = mongoose.Types.ObjectId(req.params.id);
+	
+	const { newRole } = req.body;
+	
+	try {
+        // Update the user directly
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            id,
+            { role: newRole },
+            { new: true }
+        );
+
+        // Check if user was found and updated
+        if (!updatedUser) {
+            return res.status(404).send({ error: errorCodes['E0004'] }); // User not found
+        }
+
+        // Respond with the updated user
+        return res.status(200).send(updatedUser);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: errorCodes['E0003'] }); // Handle server error
+    }
+});
 
 module.exports = router;
