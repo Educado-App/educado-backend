@@ -4,6 +4,7 @@ const router = require('express').Router();
 // Models
 const { LectureModel } = require('../models/Lectures');
 const { ExerciseModel } = require('../models/Exercises');
+const errorCodes = require('../helpers/errorCodes');
 
 // Get all exercises
 router.get('/:type/:id', async (req, res) => {
@@ -33,6 +34,8 @@ router.get('/:type/:id', async (req, res) => {
  * route to patch the components in a section
  * @param {string} sectionId
  */
+//This endpoint is temporarily disabled because of a bug which was unintenionally deleting components from courses
+//when moving them around or saving the course as draft/publish.
 router.patch('/:sectionId', async (req, res) => {
 	// const { sectionId } = req.params;
 	// const { components } = req.body;
@@ -59,7 +62,7 @@ router.patch('/:sectionId', async (req, res) => {
 	// // section.components = components;
 	// // await section.save();
 	// res.send(section);
-	res.send(200);
+	res.status(503).send({error: errorCodes['E0017']});
 });
 
 module.exports = router;

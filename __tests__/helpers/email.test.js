@@ -74,3 +74,25 @@ describe('sendMail', () => {
 		await expect(emailHelper.sendMail(mailOptions)).rejects.toThrow('Invalid email');
 	});
 });
+
+describe('sendVerificationEmail', () => {
+
+	it('should return email if email is sent', async () => {
+		const user = {
+			firstName: 'John',
+			email: 'test@email.com',
+		};
+		const token = '1234';
+
+		const expectedMailOptions = {
+			subject: 'Educado verifique seu e-mail',
+			from: 'educadotest4@gmail.com',
+			to: user.email,
+			text: `Olá ${user.firstName},\n\nNós recebemos uma solicitação para criar conta no Educado.\n\nUse esse código para validar: ${token}\n\nEsse código é válido por 5 minutos.\n\nEquipe Educado. `,
+			html: `<p>Olá ${user.firstName},</p>\n<p>Nós recebemos uma solicitação para criar conta no Educado.</p>\n<p>Use esse código para validar: <strong>${token}</strong></p>\n<p>Esse código é válido por 5 minutos.</p>\n<p>Equipe Educado.</p>`,
+		};
+
+		const result = await emailHelper.sendVerificationEmail(user, token);
+		expect(result).toMatchObject(expectedMailOptions);
+	});
+});
