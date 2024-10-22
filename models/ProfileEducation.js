@@ -4,24 +4,12 @@ const { Schema } = mongoose;
 
 const profileSchema = new Schema({
 	userID: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
-	status: {
-		type: String,
-	},
-	institution: {
-		type: String,
-	},
-	course: {
-		type: String,
-	},
-	educationLevel: {
-		type: String,
-	},
-	startDate: {
-		type: String,
-	},
-	endDate: {
-		type: String,
-	},
+	educationLevel: [String],
+	status: [String],
+	course: [String],
+	institution: [String],
+	startDate: [String],
+	endDate: [String]
 });
 
 const ProfileEducationModel = mongoose.model('Education', profileSchema);
