@@ -155,7 +155,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	}
 });
 
-
 /**
  * This route is deprecated, but it might be used on mobile so we can't delete it yet
  * instead of the old lecture model, we should use the new one
@@ -204,6 +203,20 @@ router.get('/sections/:id/components', async (req, res) => {
 
 	res.status(200).send(components);
 });
+
+router.post(':courseId/feedback', async (req, res) => {
+	const { courseId } = req.params;
+	const { userId, rating, feedbackString, feedbackOptions } = req.body;
+
+	//save feedback to feedback schema
+	//add rating to average of course
+	//update course feedback option counts with provided values.
+
+	res.send('OK');
+
+
+});
+
 
 /*** SUBSCRIPTION ROUTES ***/
 
@@ -433,8 +446,6 @@ router.patch('/:id/sections', async (req, res) => {
 	}
 });
 
-
-
 /**
  * Delete course by id
  * Delete all sections in course
@@ -495,6 +506,7 @@ router.patch('/:id/updateStatus', async (req, res) => {
 	// Send response
 	res.send(course);
 });
+
 
 
 module.exports = router;

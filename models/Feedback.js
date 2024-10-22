@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 require('mongoose-long')(mongoose);
 const { Schema } = mongoose;
 
+//Schema for providing feedback after finishing a course.
 const feedbackSchema = new Schema({
     courseId: {
         type: Schema.Types.ObjectId, ref: 'courses' 
