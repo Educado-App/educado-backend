@@ -19,10 +19,16 @@ const feedbackSchema = new Schema({
         type : String
     },
     feedbackOptions: [{
-        type: String//maybe change to type: Schema.Types.ObjectId, ref: 'feedback options'
-    }]
+        type: Schema.Types.ObjectId, ref: 'feedbackOptions'
+    }],
+    dateCreated: {
+        type: Date
+    },
+    dateUpdated: {
+        type: Date
+    }
 });
 
 const FeedbackModel = mongoose.model('feedback', feedbackSchema);
 
-module.exports = {FeedbackModel };
+module.exports = { FeedbackModel };

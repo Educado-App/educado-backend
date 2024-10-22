@@ -8,6 +8,8 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises');
 const { LectureModel } = require('../models/Lectures');
+const { FeedbackModel } = require('../models/Feedback');
+const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
@@ -15,6 +17,10 @@ const { StudentModel } = require('../models/Students');
 
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
+
+// import { saveFeedback, updateFeedback } from ('../helpers/feedbackHelpers.js');
+import { saveFeedback } from ('../helpers/feedbackHelpers.js');
+
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -204,19 +210,47 @@ router.get('/sections/:id/components', async (req, res) => {
 	res.status(200).send(components);
 });
 
-router.post(':courseId/feedback', async (req, res) => {
+router.post('/:courseId/feedback', async (req, res) => {
 	const { courseId } = req.params;
-	const { userId, rating, feedbackString, feedbackOptions } = req.body;
+	const { studentId, rating, feedbackString, feedbackOptions } = req.body;
+
 
 	//save feedback to feedback schema
 	//add rating to average of course
 	//update course feedback option counts with provided values.
 
 	res.send('OK');
-
-
 });
 
+//getFeedback
+router.get('/:courseId/feedback', async (req, res) => {
+	const {courseId, studentId} = req.params;
+
+	//validate course and student id
+	if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(studentId)) {
+		return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error invalid id
+	}
+
+	try{
+		const feedback = await FeedbackModel.find({
+			course: courseId,
+			student: studentId
+		});
+		if (!feedback) {
+			return res.status(404).json({ 'error': errorCodes['E0018'] }); //feedback not found
+		}
+		res.status(200).send(feedback);
+	}
+	catch (error) {
+		return res.status(500).json({ 'error': errorCodes['E0003'] }); //could not reach server
+	}
+});
+
+//getFeedbackOptions
+router.get('/feedbackOptions', async (req, res) => {
+	const feedbackOptions =  FeedbackOptionsModel.find();
+	res.send(feedbackOptions);
+});
 
 /*** SUBSCRIPTION ROUTES ***/
 
