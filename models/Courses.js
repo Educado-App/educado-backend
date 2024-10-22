@@ -1,5 +1,6 @@
 // Mongoose model class for Courses
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+require('mongoose-long')(mongoose);
 const { Schema } = mongoose;
 
 // Routes are sorted into COURSE - SECTION - COMPONENT each with ASCII art, within each functions are in order of CRUD
@@ -38,7 +39,7 @@ const courseSchema = new Schema({
 	},
 	estimatedHours: Number,
 	rating: {
-		type: Number,
+		type: Long,
 		default: 0,
 	},
 	numOfSubscriptions:{
