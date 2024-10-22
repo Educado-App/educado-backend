@@ -20,7 +20,8 @@ const feedbackSchema = new Schema({
     feedbackOptions: [{
         type: String//maybe change to type: Schema.Types.ObjectId, ref: 'feedback options'
     }]
+});
 
-    
+const FeedbackModel = mongoose.model('feedback', feedbackSchema);
 
-})
+module.exports = {FeedbackModel };
