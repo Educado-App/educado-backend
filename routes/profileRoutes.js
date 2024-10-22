@@ -143,13 +143,13 @@ router.delete('/educations/:_id', async (req, res) => {
 // Dynamic form professional experience CRUD //
 // Update Third forms
 router.put('/experiences', async (req, res) => {
-	const { userID, company, jobTitle, checkBool, description, startDate, endDate } = req.body;
-	//Require fields to be filled
-	if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
+	const { userID, company, jobTitle, isCurrentJob, description, startDate, endDate } = req.body;
+	// Require fields to be filled, but ensure that either endDate or isCurrentJob is provided (not both, though)
+	if (!userID || !company || !jobTitle || !description || !startDate || (!endDate && !isCurrentJob) || (endDate && isCurrentJob)) {
 		return res.status(400).send('All fields are required');
 	}
 	try {
-		const newEntry = await ProfileExperienceModel({ userID, company, jobTitle, checkBool, description, startDate, endDate });
+		const newEntry = await ProfileExperienceModel({ userID, company, jobTitle, isCurrentJob, description, startDate, endDate });
 		newEntry.save();
 		res.status(200).json(newEntry);
 	} catch (err) {

@@ -8,7 +8,7 @@ const profileSchema = new Schema({
 	jobTitle: [String],
 	startDate: [String],
 	endDate: [String],
-	checkBool: [Boolean],
+	isCurrentJob: [Boolean],
 	description: [String]
 });
 

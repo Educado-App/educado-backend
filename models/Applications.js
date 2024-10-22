@@ -19,6 +19,7 @@ const ApplicationSchema = new Schema({
 	position: [String],
 	workStartDate: [String],
 	workEndDate: [String],
+	isCurrentJob: [Boolean],
 	workActivities: [String],
 });
 
