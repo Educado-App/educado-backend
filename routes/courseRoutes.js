@@ -19,7 +19,7 @@ const { StudentModel } = require('../models/Students');
 const { OldLectureModel } = require('../models/Lecture');
 
 // import { saveFeedback, updateFeedback } from ('../helpers/feedbackHelpers.js');
-import { saveFeedback } from ('../helpers/feedbackHelpers.js');
+const { saveFeedback } = require('../helpers/feedbackHelpers.js');
 
 
 const COMP_TYPES = {
@@ -214,37 +214,39 @@ router.post('/:courseId/feedback', async (req, res) => {
 	const { courseId } = req.params;
 	const { studentId, rating, feedbackString, feedbackOptions } = req.body;
 
-
-	//save feedback to feedback schema
-	//add rating to average of course
-	//update course feedback option counts with provided values.
-
-	res.send('OK');
-});
-
-//getFeedback
-router.get('/:courseId/feedback', async (req, res) => {
-	const {courseId, studentId} = req.params;
-
-	//validate course and student id
-	if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(studentId)) {
-		return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error invalid id
-	}
-
-	try{
-		const feedback = await FeedbackModel.find({
-			course: courseId,
-			student: studentId
-		});
-		if (!feedback) {
-			return res.status(404).json({ 'error': errorCodes['E0018'] }); //feedback not found
-		}
-		res.status(200).send(feedback);
-	}
-	catch (error) {
-		return res.status(500).json({ 'error': errorCodes['E0003'] }); //could not reach server
+	try {
+		await saveFeedback(courseId, rating);
+		
+		res.send('OK');
+	} catch {
+		// return res.status(400).json({error: errorCodes['E0019']});
+		return res.status(400);
 	}
 });
+
+// //get feedback for a course from a student
+// router.get('/:courseId/feedback', async (req, res) => {
+// 	const {courseId, studentId} = req.params;
+
+// 	//validate course and student id
+// 	if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(studentId)) {
+// 		return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error invalid id
+// 	}
+
+// 	try{
+// 		const feedback = await FeedbackModel.find({
+// 			course: courseId,
+// 			student: studentId
+// 		});
+// 		if (!feedback) {
+// 			return res.status(404).json({ 'error': errorCodes['E0018'] }); //feedback not found
+// 		}
+// 		res.status(200).send(feedback);
+// 	}
+// 	catch (error) {
+// 		return res.status(500).json({ 'error': errorCodes['E0003'] }); //could not reach server
+// 	}
+// });
 
 //getFeedbackOptions
 router.get('/feedbackOptions', async (req, res) => {

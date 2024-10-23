@@ -78,6 +78,10 @@ module.exports = {
 		code: 'E0018',
 		message: 'No Feedback found'
 	},
+	E0019: {
+		code: 'E0019',
+		message: 'Feedback could not be saved'
+	},
 
 	// E01 - Login errors
 	E0101: {

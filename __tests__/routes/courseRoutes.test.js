@@ -860,5 +860,69 @@ describe('Course Routes', () => {
 			expect(updatedCourse.status).toBe('draft');
 		});
 	});
+
+	describe('POST /courses/:courseId/feedback', () => {
+		it('Send feedback about a course', async () => {
+
+			const course = await db.collection('courses').findOne({ title: 'test course' });
+			const courseId = course._id;
+		
+			const response = await request(`http://localhost:${PORT}`)
+			.post('/api/courses/' + courseId + '/feedback')
+			.set('token', signAccessToken({ id: fakeUser._id}))
+			.send({ studentId: fakeUser._id, rating: 5, feedbackString: "Hello, world", feedbackOptions: [] })
+			.expect(200);
+		
+			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
+			console.log(updatedCourse);
+			expect(response.status).toBe(200);
+
+			expect(updatedCourse.rating).toBe(5);
+
+		});
+	});
+	
+
+	// describe('GET /courses/:courseId/feedback', () => {	
+	// 	it('Get feedback for a course from student ID', async () => {
+	// 		const courseId = fakeCourse._id;
+	// 		const studentId = fakeUser._id;
+			
+	// 		//mock feedback data
+	// 		const feedbackData = {
+	// 			courseId: courseId,
+	// 			studentId: studentId,
+	// 			rating: 5,
+	// 			feedbackString: "Test feedback",
+	// 			feedbackOptions: []
+	// 		};
+	// 		//insert feedback data into db
+	// 		await db.collection('feedback').insertOne(feedbackData);
+
+	// 		const response = await request(`http://localhost:${PORT}`)
+	// 			.get('/api/courses/' + courseId + '/feedback')
+	// 			.set('token', signAccessToken({ id: fakeUser._id }))
+	// 			.expect(200);
+			
+	// 		expect(response.status).toBe(200);
+	// 		expect(response.body).toEqual(expect.arrayContaining([expect.objectContaining(feedbackData)]));
+	// 	})
+	// });
+
+	// get all feedback options
+	describe('GET /feedbackOptions', () => {
+		it('Get all feedback options', async () => {
+			const response = await request(`http://localhost:${PORT}`)
+				.get('/api/feedbackOptions')
+				.expect(200);
+			
+			expect(response.status).toBe(200);
+			expect(response.body).toBeInstanceOf(Array);
+		});
+	});
+
+	
 });
+
+
 

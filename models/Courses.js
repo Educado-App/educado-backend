@@ -10,7 +10,8 @@ const feedbackOptionsSubSchema = new Schema ({
 		type: Schema.Types.ObjectId, ref: 'feedbackOptions'
 	},
 	count: {
-		type: Number
+		type: Number,
+		default: 0
 	}
 });
 

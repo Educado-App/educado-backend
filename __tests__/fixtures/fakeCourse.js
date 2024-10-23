@@ -1,5 +1,7 @@
-module.exports = function makeFakeCourse() {
+const makeFakeFeedbackOptions = require('./fakeFeedbackOptions');
 
+module.exports = function makeFakeCourse() {
+	const fakeFeedbackOptions = makeFakeFeedbackOptions();
 	return {
 		title: 'test course',
 		description: 'test course description',
@@ -12,6 +14,7 @@ module.exports = function makeFakeCourse() {
 		estimatedHours: 1,
 		rating: 5,
 		numOfSubscriptions: 0,
+		feedbackOpions: fakeFeedbackOptions,
 	};
 };
 
