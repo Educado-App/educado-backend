@@ -33,37 +33,34 @@ def generatePrompt2():
         Answer in bullet points if possible
         
         Routes:
-        1. **Home Page (/)**
-            The Home page is the central hub of the app with three main options:
+        1. **Home Page / my courses (/)**
+            On the home page the user can see their courses if they are enrolled in any.
+            On the home page the user can click on any course they are enrolled in to access that specific course. 
 
-            - My Courses
+            When clicking on the details of a specific course, the user can see the contents of the course and also cancel their enrollment.
+
+            From the home page the user can navigate to the following options in the menu on the bottom of the screen:
             - Explore
             - Profile
         
-        2. My Courses (/my-courses)
-            From the Home page, clicking My Courses takes the user to their list of enrolled courses.
+        2. Explore (/explore)
+        Clicking Explore from the Home page takes the user to a list of available courses.
 
-            - A Specific Course: Clicking on a course from the list takes the user to the details of that course.
-                - Cancel Enrollment: The user can cancel their enrollment in the selected course.
+            - List of Courses: The user can view all available courses, including ones that they are already enrolled in.
+                - Activate One/More Filters: The user can filter the list of courses by activating certain predefined labels.
+                - A Specific Course: After clicking on a course from the list that the user is not enrolled in, the course expands and the user gets the option of enrolling in the course.
+                - Already enrolled: If the user clicks on a course from the list that they are already enrolled in, they will be taken to the page for that specific course, where they can view the content of the specific course and where they have the option to cancel their enrollment from that specific course.
         
-        3. Explore (/explore)
-        Clicking Explore on the Home page takes the user to a list of available courses.
+        3. Profile (/profile)
+            Clicking Profile from the Home page leads the user to their profile page. 
+            From the profile page, the user can log out or click edit profile, which will take the user to the edit profile page. 
 
-            - List of Courses: The user can view all available courses.
-                - Activate One/More Filters: The user can filter the courses by certain criteria.
-                - A Specific Course: After selecting a course, the user can see its details.
-                    - Enroll Now: The user can enroll in the course.
-        
-        4. Profile (/profile)
-            Clicking Profile on the Home page leads the user to their profile page.
-
-            - Edit Profile: The user can make changes to their profile.
+            - Edit Profile: Here the user can make changes to their profile.
                 - Remove Image: Remove the profile picture.
                 - Change Image: Change the profile picture.
                 - Change Password: The user can change their password.
                 - Delete My Account: The user can delete their account.
                 - Edit Info --> Save: The user can edit their personal information and save the changes.
-            - Logout: The user can log out of their account.
         
     """
     return prompt
