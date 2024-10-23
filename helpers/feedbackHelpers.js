@@ -58,7 +58,7 @@ function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions,
 		rating: rating,
 		feedbackText: feedbackString,
 		feedbackOptions: feedbackOptions,
-		dateCreated: new Date()
+		dateCreated: Date.now()
 	};
 }
 
