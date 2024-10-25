@@ -215,7 +215,7 @@ router.post('/:courseId/feedback', async (req, res) => {
 	const { studentId, rating, feedbackString, feedbackOptions } = req.body;
 
 	try {
-		await saveFeedback(courseId, rating);
+		await saveFeedback(courseId, rating, feedbackString, feedbackOptions);
 		
 		res.send('OK');
 	} catch {

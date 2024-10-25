@@ -27,16 +27,11 @@ async function calculateAverageRating(courseId, newRating) {
 }
 
 function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
-	console.log("we are inside the function");
-	console.log(typeof(newFeedbackOptions));
 	newFeedbackOptions.forEach((option) => {
-		console.log("before id");
 		const optionId = option._id;
-		console.log(optionId);
 		let isNew = true;
 
 		for (let i = 0; i < feedbackOptions.length; i++) {
-			console.log("we are in the for loop");
 			if (feedbackOptions[i]._id == optionId) {
 				feedbackOptions[i].count += 1;
 				isNew = false;
@@ -44,13 +39,13 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 			}
 		}
 		if(isNew) {
-			feedbackOptions.append({
+			feedbackOptions.push({
 				_id: optionId,
 				count: 1
 			})
 		}
 	});
-	console.log('Made it past feedback');
+
 	return feedbackOptions;
 }
 
@@ -67,17 +62,17 @@ function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions,
 }
 
 
-// export async function saveFeedback(courseId, rating, feedbackString, feedbackOptions ) {
-async function saveFeedback(courseId, rating, feedbackOptions) {
+async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	const course = await CourseModel.findById(courseId);
 	assert(course, errorCodes.E0000);
 	
 	const oldFeedbackOptions = course.feedbackOptions;
-	console.log(oldFeedbackOptions);
 
 	const updatedRating = await calculateAverageRating(courseId, rating);
 	const updatedFeedbackOptions = compareFeedbackOptions(oldFeedbackOptions, feedbackOptions);
-	
+
+	console.log(feedbackString);
+
 	const update = {
 		rating: updatedRating,
 		feedbackOptions: updatedFeedbackOptions

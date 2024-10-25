@@ -85,6 +85,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+		await db.collection('feedbackOptions').deleteMany({}); 
 	});
 
 	afterAll(async () => {
@@ -880,7 +881,7 @@ describe('Course Routes', () => {
 			.expect(200);
 		
 			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			console.log(updatedCourse);
+
 			expect(response.status).toBe(200);
 
 			const newFeedbackCount = {
@@ -889,7 +890,7 @@ describe('Course Routes', () => {
 			}
 
 			expect(updatedCourse.rating).toBe(5);
-			expect(updateCourse.feedbackOptions).toContain(newFeedbackCount);
+			expect(updatedCourse.feedbackOptions).toContainEqual(newFeedbackCount);
 			
 
 			//expect feedback to be stored in feedback schema....
