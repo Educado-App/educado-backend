@@ -1,10 +1,12 @@
+#!/usr/local/bin/python3
 import sys
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import prompt
 
-load_dotenv("config\.env")
+load_dotenv("../config/.env")
+
 print(os.getenv('OPENAI_API_KEY'))
 
 # Set up your API key
