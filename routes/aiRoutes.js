@@ -25,16 +25,16 @@ const { spawn } = require('child_process');
 
 });*/
 
-const userInput = "How are you today?"
-const currentPage = " "
-const chatbot = spawn('python3', ['Ai/Openai.py', userInput, currentPage]);
+const userInput = 'How are you today?';
+const currentPage = '';
+const chatbot = spawn('python3', ['./Ai/Openai.py', userInput, currentPage]);
 
 chatbot.stdout.on('data', (data) => {
-    const response = data.toString();
-    console.log(response)	
+	const response = data.toString();
+	console.log(response);
 });
 
-console.log(chatbot)
+console.log(chatbot.response);
 
 
 

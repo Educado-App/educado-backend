@@ -23,10 +23,11 @@ def chatbot(userInput, currentPage):
     )
     return response.choices[0].message.content 
 
-
+print("hej")
 # Check if the script is being executed directly
 if __name__ == "__main__":
     # Get userInput and currentPage from the command-line arguments
+    
     if len(sys.argv) < 3:
         print("Error: Not enough arguments provided.")
         sys.exit(1)
