@@ -95,7 +95,3 @@ module.exports = {
 	saveFeedback
 };
 
-// export function updateFeedback() {
-//     return 0;
-// }
-
