@@ -4,7 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import prompt
 
-
+load_dotenv("config\.env")
 print(os.getenv('OPENAI_API_KEY'))
 
 # Set up your API key
