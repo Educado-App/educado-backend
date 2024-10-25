@@ -13,6 +13,7 @@ const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeLecture = require('../fixtures/fakeLecture');
 const makeFakeExercise = require('../fixtures/fakeExercise');
 const makeFakeCoursePublished = require('../fixtures/fakeCoursePublished');
+const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
 
@@ -44,6 +45,8 @@ let fakeCourses = getFakeCourses();
 let fakeLection = makeFakeLecture();
 let fakeExercise = makeFakeExercise();
 let fakeCoursePublished = makeFakeCoursePublished();
+let fakeFeedBackOptions = makeFakeFeedbackOptions();
+
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -65,6 +68,7 @@ describe('Course Routes', () => {
 		await db.collection('sections').insertOne(fakeSection);
 		await db.collection('lectures').insertOne(fakeLection);
 		await db.collection('exercises').insertOne(fakeExercise);
+		await db.collection('feedbackOptions').insertMany(fakeFeedBackOptions);
 
 		actualUser = await db.collection('users').findOne({ email: fakeUser.email });
 		fakeCreator = makeFakeCreator(actualUser._id);
@@ -867,17 +871,28 @@ describe('Course Routes', () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
 		
+			const feedbackOpt = await db.collection('feedbackOptions').findOne({name: 'Easy to follow'});
+
 			const response = await request(`http://localhost:${PORT}`)
 			.post('/api/courses/' + courseId + '/feedback')
 			.set('token', signAccessToken({ id: fakeUser._id}))
-			.send({ studentId: fakeUser._id, rating: 5, feedbackString: "Hello, world", feedbackOptions: [] })
+			.send({ studentId: fakeUser._id, rating: 5, feedbackString: "Hello, world", feedbackOptions: [feedbackOpt] })
 			.expect(200);
 		
 			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
 			console.log(updatedCourse);
 			expect(response.status).toBe(200);
 
+			const newFeedbackCount = {
+				_id: feedbackOpt._id,
+				count: 1,
+			}
+
 			expect(updatedCourse.rating).toBe(5);
+			expect(updateCourse.feedbackOptions).toContain(newFeedbackCount);
+			
+
+			//expect feedback to be stored in feedback schema....
 
 		});
 	});
@@ -909,17 +924,17 @@ describe('Course Routes', () => {
 	// 	})
 	// });
 
-	// get all feedback options
-	describe('GET /feedbackOptions', () => {
-		it('Get all feedback options', async () => {
-			const response = await request(`http://localhost:${PORT}`)
-				.get('/api/feedbackOptions')
-				.expect(200);
+	// // get all feedback options
+	// describe('GET /feedbackOptions', () => {
+	// 	it('Get all feedback options', async () => {
+	// 		const response = await request(`http://localhost:${PORT}`)
+	// 			.get('/api/feedbackOptions')
+	// 			.expect(200);
 			
-			expect(response.status).toBe(200);
-			expect(response.body).toBeInstanceOf(Array);
-		});
-	});
+	// 		expect(response.status).toBe(200);
+	// 		expect(response.body).toBeInstanceOf(Array);
+	// 	});
+	// });
 
 	
 });

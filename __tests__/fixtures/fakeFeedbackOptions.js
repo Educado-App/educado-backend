@@ -1,9 +1,20 @@
-const mongoose = require('mongoose');
-
 module.exports = function makeFakeFeedbackOptions() {
-	const id = mongoose.Types.ObjectId();
-	return [ {
-		_id: id,
-		count: 10
-	}];
+    return ([
+        {
+            name: 'Easy to follow',
+            color: 'green',
+        },
+        {
+            name: 'Very in depth',
+            color: 'purple',
+        },
+        {
+            name: 'Hard to follow',
+            color: 'red',
+        },
+        {
+            name: 'Hard to understand',
+            color: 'red',
+        }
+    ])
 };

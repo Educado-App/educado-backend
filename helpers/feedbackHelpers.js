@@ -3,7 +3,6 @@ const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('../helpers/errorCodes');
 
-
 function assert(condition, errorcode) {
 	if (!condition) {
 		console.log(errorcode.message);
@@ -27,29 +26,34 @@ async function calculateAverageRating(courseId, newRating) {
 	return newRating;
 }
 
-function compareAndUpdateFeedbackOptions(oldFeedbackOptions, newFeedbackOptions) {
-	console.log(oldFeedbackOptions[0].optionId);
+function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
+	console.log("we are inside the function");
+	console.log(typeof(newFeedbackOptions));
+	newFeedbackOptions.forEach((option) => {
+		console.log("before id");
+		const optionId = option._id;
+		console.log(optionId);
+		let isNew = true;
+
+		for (let i = 0; i < feedbackOptions.length; i++) {
+			console.log("we are in the for loop");
+			if (feedbackOptions[i]._id == optionId) {
+				feedbackOptions[i].count += 1;
+				isNew = false;
+				break;
+			}
+		}
+		if(isNew) {
+			feedbackOptions.append({
+				_id: optionId,
+				count: 1
+			})
+		}
+	});
+	console.log('Made it past feedback');
+	return feedbackOptions;
 }
 
-
-// //feedback options = array of ids for feedback options
-// async function updateFeedbackOptions( courseId, feedbackOptions ) {
-// 	//get old counts of feedback options and +1 for all relevant feedbacks
-// 	//what to do hvis vi fjerner feedback fra et kursus?
-	
-// 	try {
-// 		const course = await CourseModel.findById(courseId);
-// 		const courseFeedbackOptions = course.feedbackOptions;
-
-// 		const updatedFeedbackOptions = compareAndUpdateFeedbackOptions(courseId, feedbackOptions);
-
-// 	}
-// 	catch(e) {
-// 		throw new Error(e.msg);
-// 	}
-
-// 	return 0;
-// }
 
 function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions, rating){
 	return {
@@ -64,15 +68,19 @@ function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions,
 
 
 // export async function saveFeedback(courseId, rating, feedbackString, feedbackOptions ) {
-async function saveFeedback(courseId, rating) {
+async function saveFeedback(courseId, rating, feedbackOptions) {
 	const course = await CourseModel.findById(courseId);
-	assert(course, errorCodes.E0000);    
+	assert(course, errorCodes.E0000);
+	
+	const oldFeedbackOptions = course.feedbackOptions;
+	console.log(oldFeedbackOptions);
 
 	const updatedRating = await calculateAverageRating(courseId, rating);
-	
+	const updatedFeedbackOptions = compareFeedbackOptions(oldFeedbackOptions, feedbackOptions);
 	
 	const update = {
-		rating: updatedRating
+		rating: updatedRating,
+		feedbackOptions: updatedFeedbackOptions
 	};
 
 	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, update, {
