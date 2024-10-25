@@ -9,21 +9,19 @@ function assert(condition, errorcode) {
 	}
 }
 
-function calculateAverageRating(courseId, newRating) {
+async function calculateAverageRating(courseId, newRating) {
 
-	// const course = await CourseModel.findById(courseId);
-	// assert(course, errorCodes.E0006);
+	const course = await CourseModel.findById(courseId);
+	assert(course, errorCodes.E0006);
 
-	// const amountOfRatings = await FeedbackModel.find({courseId: courseId}).countDocuments();
-	// assert(amountOfRatings, errorCodes.E0018);
+	const amountOfRatings = await FeedbackModel.find({courseId: courseId}).countDocuments();
+	assert(amountOfRatings, errorCodes.E0018);
 
-	// const rating = course.rating;
+	const rating = course.rating;
 
-	// const updatedRating = ((rating * amountOfRatings) + newRating)/(amountOfRatings+1);
+	const updatedRating = ((rating * amountOfRatings) + newRating)/(amountOfRatings+1);
 
-	// return updatedRating;
-
-	return newRating;
+	return updatedRating;
 }
 
 //If feedback option has been given to course previously, increment by 1
