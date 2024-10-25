@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import prompt
 
 
+print(os.getenv('OPENAI_API_KEY'))
+
 # Set up your API key
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
  
@@ -24,6 +26,7 @@ def chatbot(userInput, currentPage):
     return response.choices[0].message.content 
 
 print("hej")
+"""
 # Check if the script is being executed directly
 if __name__ == "__main__":
     # Get userInput and currentPage from the command-line arguments
@@ -52,4 +55,3 @@ while True:
         break
     bot_response = chatbot(user_input, ", im on the homepage")
     print(f"Bot: {bot_response}")   
-"""
