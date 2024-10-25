@@ -86,6 +86,7 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	});
 
 	assert(updatedCourse.rating === updatedRating, errorCodes.E0000);
+	assert(updatedCourse.feedbackOptions === updatedFeedbackOptions, errorCodes.E000);
 
 	return updatedCourse;
 }

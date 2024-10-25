@@ -8,7 +8,6 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises');
 const { LectureModel } = require('../models/Lectures');
-const { FeedbackModel } = require('../models/Feedback');
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
@@ -20,7 +19,6 @@ const { OldLectureModel } = require('../models/Lecture');
 
 // import { saveFeedback, updateFeedback } from ('../helpers/feedbackHelpers.js');
 const { saveFeedback } = require('../helpers/feedbackHelpers.js');
-
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -208,53 +206,6 @@ router.get('/sections/:id/components', async (req, res) => {
 	}
 
 	res.status(200).send(components);
-});
-
-router.post('/:courseId/feedback', async (req, res) => {
-	const { courseId } = req.params;
-	console.log("params", req.params)
-	console.log("body", req.body)
-	const { rating, feedbackText, feedbackOptions } = req.body;
-
-	try {
-		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
-		console.log("Feedback saved")
-		res.send('OK');
-	} catch (e) {
-		console.log(e);
-		// return res.status(400).json({error: errorCodes['E0019']});
-		return res.status(400);
-	}
-});
-
-// //get feedback for a course from a student
-// router.get('/:courseId/feedback', async (req, res) => {
-// 	const {courseId, studentId} = req.params;
-
-// 	//validate course and student id
-// 	if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(studentId)) {
-// 		return res.status(400).send({ error: errorCodes['E0014'] }); // If id is not valid, return error invalid id
-// 	}
-
-// 	try{
-// 		const feedback = await FeedbackModel.find({
-// 			course: courseId,
-// 			student: studentId
-// 		});
-// 		if (!feedback) {
-// 			return res.status(404).json({ 'error': errorCodes['E0018'] }); //feedback not found
-// 		}
-// 		res.status(200).send(feedback);
-// 	}
-// 	catch (error) {
-// 		return res.status(500).json({ 'error': errorCodes['E0003'] }); //could not reach server
-// 	}
-// });
-
-//getFeedbackOptions
-router.get('/feedbackOptions', async (req, res) => {
-	const feedbackOptions = FeedbackOptionsModel.find();
-	res.send(feedbackOptions);
 });
 
 /*** SUBSCRIPTION ROUTES ***/
