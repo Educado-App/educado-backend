@@ -9,7 +9,7 @@ function assert(condition, errorcode) {
 	}
 }
 
-async function calculateAverageRating(courseId, newRating) {
+function calculateAverageRating(courseId, newRating) {
 
 	// const course = await CourseModel.findById(courseId);
 	// assert(course, errorCodes.E0006);
@@ -26,6 +26,8 @@ async function calculateAverageRating(courseId, newRating) {
 	return newRating;
 }
 
+//If feedback option has been given to course previously, increment by 1
+//otherwise add it to the history of feedbackoptions given.
 function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 	newFeedbackOptions.forEach((option) => {
 		const optionId = option._id;
@@ -42,7 +44,7 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 			feedbackOptions.push({
 				_id: optionId,
 				count: 1
-			})
+			});
 		}
 	});
 
@@ -50,10 +52,9 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 }
 
 
-function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions, rating){
+function createNewFeedback(courseId, rating, feedbackString, feedbackOptions){
 	return {
 		courseId: courseId,
-		studentId: studentId,
 		rating: rating,
 		feedbackText: feedbackString,
 		feedbackOptions: feedbackOptions,
@@ -63,15 +64,20 @@ function createNewFeedback(courseId, studentId, feedbackString, feedbackOptions,
 
 
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
+	assert(feedbackOptions instanceof Array, errorCodes.E0000);
+	
 	const course = await CourseModel.findById(courseId);
 	assert(course, errorCodes.E0000);
 	
+	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
+
+	const feedback = await FeedbackModel.insertOne(feedBackEntry);
+	assert(feedback, errorCodes.E0000);
+
 	const oldFeedbackOptions = course.feedbackOptions;
 
 	const updatedRating = await calculateAverageRating(courseId, rating);
 	const updatedFeedbackOptions = compareFeedbackOptions(oldFeedbackOptions, feedbackOptions);
-
-	console.log(feedbackString);
 
 	const update = {
 		rating: updatedRating,

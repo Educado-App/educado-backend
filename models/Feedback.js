@@ -7,9 +7,6 @@ const feedbackSchema = new Schema({
 	courseId: {
 		type: Schema.Types.ObjectId, ref: 'courses' 
 	},
-	studentId: {
-		type: Schema.Types.ObjectId, ref: 'users'
-	},
 	rating: {
 		type: Number,
 		required: [true, 'rating is required']

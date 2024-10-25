@@ -212,7 +212,7 @@ router.get('/sections/:id/components', async (req, res) => {
 
 router.post('/:courseId/feedback', async (req, res) => {
 	const { courseId } = req.params;
-	const { studentId, rating, feedbackString, feedbackOptions } = req.body;
+	const {rating, feedbackString, feedbackOptions } = req.body;
 
 	try {
 		await saveFeedback(courseId, rating, feedbackString, feedbackOptions);
