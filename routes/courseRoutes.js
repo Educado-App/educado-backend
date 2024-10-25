@@ -212,13 +212,16 @@ router.get('/sections/:id/components', async (req, res) => {
 
 router.post('/:courseId/feedback', async (req, res) => {
 	const { courseId } = req.params;
-	const {rating, feedbackString, feedbackOptions } = req.body;
+	console.log("params", req.params)
+	console.log("body", req.body)
+	const { rating, feedbackText, feedbackOptions } = req.body;
 
 	try {
-		await saveFeedback(courseId, rating, feedbackString, feedbackOptions);
-		
+		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
+		console.log("Feedback saved")
 		res.send('OK');
-	} catch {
+	} catch (e) {
+		console.log(e);
 		// return res.status(400).json({error: errorCodes['E0019']});
 		return res.status(400);
 	}
@@ -250,7 +253,7 @@ router.post('/:courseId/feedback', async (req, res) => {
 
 //getFeedbackOptions
 router.get('/feedbackOptions', async (req, res) => {
-	const feedbackOptions =  FeedbackOptionsModel.find();
+	const feedbackOptions = FeedbackOptionsModel.find();
 	res.send(feedbackOptions);
 });
 
@@ -288,7 +291,7 @@ router.post('/:id/subscribe', async (req, res) => {
 
 		course.numOfSubscriptions++;
 		user.subscriptions.push(id);
-    
+
 		// find user based on id, and add the course's id to the user's subscriptions field
 		await StudentModel.findOneAndUpdate(
 			{ baseUser: studentId },

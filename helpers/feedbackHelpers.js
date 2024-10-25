@@ -16,7 +16,7 @@ function calculateAverageRating(courseId, newRating) {
 
 	// const amountOfRatings = await FeedbackModel.find({courseId: courseId}).countDocuments();
 	// assert(amountOfRatings, errorCodes.E0018);
-   
+
 	// const rating = course.rating;
 
 	// const updatedRating = ((rating * amountOfRatings) + newRating)/(amountOfRatings+1);
@@ -40,7 +40,7 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 				break;
 			}
 		}
-		if(isNew) {
+		if (isNew) {
 			feedbackOptions.push({
 				_id: optionId,
 				count: 1
@@ -52,27 +52,26 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 }
 
 
-function createNewFeedback(courseId, rating, feedbackString, feedbackOptions){
-	return {
+function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
+	return new FeedbackModel({
 		courseId: courseId,
 		rating: rating,
 		feedbackText: feedbackString,
 		feedbackOptions: feedbackOptions,
 		dateCreated: Date.now()
-	};
+	});
 }
 
 
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	assert(feedbackOptions instanceof Array, errorCodes.E0000);
-	
+
 	const course = await CourseModel.findById(courseId);
 	assert(course, errorCodes.E0000);
-	
-	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
 
-	const feedback = await FeedbackModel.insertOne(feedBackEntry);
-	assert(feedback, errorCodes.E0000);
+	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
+	const feedbackResult = feedBackEntry.save({ new: true });
+	assert(feedbackResult, errorCodes.E0000);
 
 	const oldFeedbackOptions = course.feedbackOptions;
 
