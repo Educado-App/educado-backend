@@ -7,8 +7,6 @@ import prompt
 
 load_dotenv("../config/.env")
 
-print(os.getenv('OPENAI_API_KEY'))
-
 # Set up your API key
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
  
@@ -27,7 +25,6 @@ def chatbot(userInput, currentPage):
     )
     return response.choices[0].message.content 
 
-print("hej")
 """
 # Check if the script is being executed directly
 if __name__ == "__main__":
