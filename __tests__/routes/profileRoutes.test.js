@@ -98,22 +98,26 @@ describe('Profile Routes', () => {
 
   describe('Education', () => {
     it('should add education', async () => {
-      // Insert a user for testing
       const education = {
         userID: mongoose.Types.ObjectId(),
-        institution: 'test',
-        startDate: 'test',
-        endDate: 'test',
-        course: 'test',
+        educationLevel: ['test'],
+        status: ['test'],
+        course: ['test'],
+        institution: ['test'],
+        startDate: ['test'],
+        endDate: ['test'],
       };
+      
       await db.collection('Education').insertOne(education);
       const response = await request(`http://localhost:${PORT}`)
         .put('/api/profiles/educations')
         .send(education);
+
       expect(response.status).toBe(200);
-      expect(response.body).toBeInstanceOf(Object);
-      expect(response.body.institution).toBe(education.institution);
-      expect(response.body.course).toBe(education.course);
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].institution).toBe(education.institution[0]);
+      expect(response.body[0].course).toBe(education.course[0]);
     });
 
     it('should Get education', async () => {
@@ -139,26 +143,31 @@ describe('Profile Routes', () => {
       expect(response.status).toBe(200);
     });
   });
+  
   describe('Experience', () => {
     it('should add Experience', async () => {
       const experience = {
         userID: mongoose.Types.ObjectId(),
-        company: 'test',
-        jobTitle: 'test',
-        description: 'test',
-        startDate: 'test',
-        endDate: 'test',
+        company: ['test'],
+        jobTitle: ['test'],
+        startDate: ['test'],
+        endDate: ['test'],
+        isCurrentJob: [false],
+        description: ['test'],
       };
+
       await db.collection('Experience').insertOne(experience);
       const response = await request(`http://localhost:${PORT}`)
         .put('/api/profiles/experiences')
         .send(experience);
 
       expect(response.status).toBe(200);
-      expect(response.body).toBeInstanceOf(Object);
-      expect(response.body.company).toBe(experience.company);
-      expect(response.body.jobTitle).toBe(experience.jobTitle);
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].company).toBe(experience.company[0]);
+      expect(response.body[0].jobTitle).toBe(experience.jobTitle[0]);
     });
+
     it('should Get Experience', async () => {
       const experience = {
         userID: mongoose.Types.ObjectId(),
@@ -181,5 +190,7 @@ describe('Profile Routes', () => {
         .delete(`/api/profiles/experiences/${experience._id}`)
       expect(response.status).toBe(200);
     });
+
+
   });
 });
