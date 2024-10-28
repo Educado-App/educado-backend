@@ -9,17 +9,13 @@ const { saveFeedback } = require('../helpers/feedbackHelpers.js');
 
 router.post('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
-	console.log("params", req.params)
-	console.log("body", req.body)
 	const { rating, feedbackText, feedbackOptions } = req.body;
 
 	try {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
-		console.log("Feedback saved")
 		res.send('OK');
-	} catch (e) {
-		// return res.status(400).json({error: errorCodes['E0019']});
-		return res.status(400);
+	} catch {
+		return res.status(400).send({error: errorCodes['E0019']}); //Feedback could not be saved
 	}
 });
 
@@ -29,7 +25,7 @@ router.get('/options', async (req, res) => {
 		const feedbackOptions = await FeedbackOptionsModel.find();
 		return res.status(200).send(feedbackOptions);
 	} catch {
-		return res.status(400);
+		return res.status(400).send({errorCodes: 'E0018'}); //no feedback options found
 	}
 });
 

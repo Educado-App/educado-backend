@@ -2,10 +2,11 @@ const { CourseModel } = require('../models/Courses');
 const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('../helpers/errorCodes');
+const { error } = require('ajv/dist/vocabularies/applicator/dependencies');
 
 function assert(condition, errorcode) {
 	if (!condition) {
-		console.log(errorcode.message);
+		throw new Error(errorcode.message);
 	}
 }
 
@@ -15,7 +16,6 @@ async function calculateAverageRating(courseId, newRating) {
 	assert(course, errorCodes.E0006);
 
 	const amountOfRatings = await FeedbackModel.find({courseId: courseId}).countDocuments();
-	assert(amountOfRatings, errorCodes.E0018);
 
 	const rating = course.rating;
 
@@ -62,6 +62,7 @@ function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
 
 
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
+	assert(typeof(rating) === Number, errorCodes.E0020);
 	assert(feedbackOptions instanceof Array, errorCodes.E0000);
 
 	const course = await CourseModel.findById(courseId);
@@ -86,7 +87,9 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	});
 
 	assert(updatedCourse.rating === updatedRating, errorCodes.E0000);
-	assert(updatedCourse.feedbackOptions === updatedFeedbackOptions, errorCodes.E000);
+	// console.log(updatedCourse.feedbackOptions);
+	// console.log(updatedFeedbackOptions);
+	// assert(updatedCourse.feedbackOptions === updatedFeedbackOptions, errorCodes.E0001);
 
 	return updatedCourse;
 }
