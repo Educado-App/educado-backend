@@ -1,41 +1,52 @@
-//const router = express.Router();
+const express = require('express');
 const { spawn } = require('child_process');
+const router = express.Router();
 
 
-/*router.post('/ai/', async (req, res) => {
-	const { userInput, currentPage } = req.body;
-
-	if (!userInput || !currentPage){
-		return res.status(400).json({error: 'Prompt is required' })
-	}
-
-    const chatbot = spawn('python3', ['Ai/Openai.py', userInput, currentPage]);
-
-
-    chatbot.stdout.on('data', (data) => {
-        const response = data.toString();
-        res.json({message: response})	
-    });
-
-    chatbot.stderr.on('data', (data) => {
-        res.status(500).json({ error: 'Error running Python script'})
-
-    });
-    
-
-});*/
-
-const userInput = 'How are you today?';
-const currentPage = '';
-const chatbot = spawn('python3', ['./Ai/Openai.py', userInput, currentPage]);
-
-chatbot.stdout.on('data', (data) => {
-	const response = data.toString();
-	console.log(response);
+router.get('/', (req, res) => {
+    console.log("GET request received at /api/ai");
+    res.send("AI Route is working!!!???!");
 });
 
-console.log(chatbot.response);
+router.post('/', async (req, res) => {
+    req.setTimeout(30000);
+    const { userInput, currentPage } = req.body;
 
+    res.json({ message: userInput });
 
+    if (!userInput || !currentPage) {
+        return res.status(400).json({ error: 'userInput and currentPage are required' });
+    }
 
-//module.exports = router;
+    try {
+        res.json({ message: userInput });
+        /*
+        console.log("Starting Python script...");
+        const python = spawn('C:/Python311/python.exe', ['./Ai/Openai.py', userInput, currentPage]);
+        let output = '';
+    
+        python.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+    
+        python.stderr.on('data', (data) => {
+            console.error('Python Error:', data.toString());
+        });*/
+    
+        /*python.on('close', (code) => {
+            if (code === 0) {
+                res.json({ message: output });
+            } else {
+                res.status(500).json({ error: `Python process exited with code ${code}` });
+            }
+        });*/
+
+        res.json({ message: output });
+    } catch (error) {
+        console.error("Server Error:", error.message);
+        res.status(500).json({ error: 'Error running Python script' });
+    }
+    
+});
+
+module.exports = router;

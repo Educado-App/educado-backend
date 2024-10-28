@@ -5,7 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import prompt
 
-load_dotenv("../config/.env")
+load_dotenv("config/.env")
 
 # Set up your API key
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -25,11 +25,11 @@ def chatbot(userInput, currentPage):
     )
     return response.choices[0].message.content 
 
-"""
+
 # Check if the script is being executed directly
 if __name__ == "__main__":
     # Get userInput and currentPage from the command-line arguments
-    
+    print("Test")
     if len(sys.argv) < 3:
         print("Error: Not enough arguments provided.")
         sys.exit(1)
@@ -48,9 +48,12 @@ if __name__ == "__main__":
 
 # Main loop for backend testing
 """
+
+print("hej")
 while True:
     user_input = input("You: ")
     if user_input.lower() == "exit": 
         break
     bot_response = chatbot(user_input, ", im on the homepage")
     print(f"Bot: {bot_response}")   
+"""
