@@ -61,31 +61,40 @@ router.get('/:id', async (req, res) => {
 router.put('/:id?approve', async (req, res) => {
 	try {
 		const { id } = req.params;
-		if (await approve(id)) {
-			return res.status(200).json({ message: 'Criador de conteúdo aprovado com sucesso' });
-		}
-	} catch (error) {
+        
+		//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
+		await ContentCreatorModel.findOneAndUpdate(
+			{ baseUser: id },
+			{ approved: true, rejected: false }
+		);
+        
+		//Return successful response
+		return res.status(200).json();
+
+	} catch(error) {
 		//If anything unexpected happens, throw error
 		return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
 	}
 });
 
-router.put('/:id/reject', async (req, res) => {
-	try {
-		const { id } = req.params;  // Extract the ID from the route parameters
-		const { reason } = req.body; // Extract the reason from the request body
-		console.log(`Rejecting content creator with ID: ${id}, Reason: ${reason}`);
-		
-		if (await reject(id, reason)) {
-			console.log('Content Creator rejected successfully');
-			return res.status(200).json({ message: 'Criador de conteúdo rejeitado com sucesso' });
-		} else {
-			console.log('Failed to reject Content Creator');
-			return res.status(400).json({ 'error': 'Failed to reject Content Creator' });
-		}
-	} catch (error) {
-		console.log('Error rejecting Content Creator ' + error);
-		return res.status(400).json({ 'error': 'Error rejecting Content Creator' });
+//Route for rejecting content creator application
+router.put('/:id?reject', async (req, res) => {
+	try  {
+		//Get id from the request parameters
+		const { id } = req.params;
+        
+		//Find the content creator whose "baseUser" id matches the above id, and update their "rejected" field to "true"
+		await ContentCreatorModel.findOneAndUpdate(
+			{ baseUser: id },
+			{ rejected: true, approved: false, rejectionReason: req.body.rejectionReason }
+		);
+
+		//Return successful response
+		return res.status(200).json();
+
+	} catch(error) {
+		//If anything unexpected happens, throw error
+		return res.status(400).json({ 'error': errorCodes['E1004'] }); //Could not reject Content Creator
 	}
 });
 
