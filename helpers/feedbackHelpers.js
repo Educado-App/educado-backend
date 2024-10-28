@@ -2,7 +2,7 @@ const { CourseModel } = require('../models/Courses');
 const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('../helpers/errorCodes');
-const { error } = require('ajv/dist/vocabularies/applicator/dependencies');
+
 
 function assert(condition, errorcode) {
 	if (!condition) {
@@ -85,12 +85,7 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, update, {
 		new: true
 	});
-
-	assert(updatedCourse.rating === updatedRating, errorCodes.E0000);
-	// console.log(updatedCourse.feedbackOptions);
-	// console.log(updatedFeedbackOptions);
-	// assert(updatedCourse.feedbackOptions === updatedFeedbackOptions, errorCodes.E0001);
-
+	
 	return updatedCourse;
 }
 

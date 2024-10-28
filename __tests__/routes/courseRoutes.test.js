@@ -45,7 +45,7 @@ let fakeCourses = getFakeCourses();
 let fakeLection = makeFakeLecture();
 let fakeExercise = makeFakeExercise();
 let fakeCoursePublished = makeFakeCoursePublished();
-let fakeFeedBackOptions = makeFakeFeedbackOptions();
+let fakeFeedbackOptions = makeFakeFeedbackOptions();
 
 
 const COMP_TYPES = {
@@ -68,7 +68,7 @@ describe('Course Routes', () => {
 		await db.collection('sections').insertOne(fakeSection);
 		await db.collection('lectures').insertOne(fakeLection);
 		await db.collection('exercises').insertOne(fakeExercise);
-		await db.collection('feedbackOptions').insertMany(fakeFeedBackOptions);
+		await db.collection('feedbackoptions').insertMany(fakeFeedbackOptions);
 
 		actualUser = await db.collection('users').findOne({ email: fakeUser.email });
 		fakeCreator = makeFakeCreator(actualUser._id);
@@ -85,7 +85,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-		await db.collection('feedbackOptions').deleteMany({}); 
+		await db.collection('feedbackoptions').deleteMany({}); 
 	});
 
 	afterAll(async () => {

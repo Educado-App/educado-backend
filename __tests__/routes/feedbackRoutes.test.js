@@ -7,7 +7,6 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
 const errorCodes = require('../../helpers/errorCodes');
 const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
-const { CourseModel } = require('../../models/Courses');
 
 
 const app = express();
@@ -30,7 +29,7 @@ const server = app.listen(PORT, () => {
 // Create a fake user, course and section
 let fakeUser = makeFakeUser();
 let fakeCourse = makeFakeCourse();
-let fakeFeedBackOptions = makeFakeFeedbackOptions();
+let fakeFeedbackOptions = makeFakeFeedbackOptions();
 
 
 describe('Course Routes', () => {
@@ -44,7 +43,7 @@ describe('Course Routes', () => {
 	beforeEach(async () => {
 		await db.collection('users').insertOne(fakeUser);
 		await db.collection('courses').insertOne(fakeCourse);
-		await db.collection('feedbackOptions').insertMany(fakeFeedBackOptions);
+		await db.collection('feedbackoptions').insertMany(fakeFeedbackOptions);
 
 		actualUser = await db.collection('users').findOne({ email: fakeUser.email });
 	});
@@ -52,7 +51,7 @@ describe('Course Routes', () => {
 	afterEach(async () => {
 		await db.collection('users').deleteMany({});
 		await db.collection('courses').deleteMany({});
-		await db.collection('feedbackOptions').deleteMany({}); 
+		await db.collection('feedbackoptions').deleteMany({}); 
 		await db.collection('feedbacks').deleteMany({});
 	});
 
@@ -247,12 +246,20 @@ describe('Course Routes', () => {
 		});
 	});
 
-	// describe('GET the available feedback options from the database',() => {
-	// 	it('Send the feedback options to the frontend', () => {
-	// 		//something something here. :)
+	describe('GET the available feedback options from the database',() => {
+		it('Send the feedback options to the frontend', async () => {
 			
+			const response = await request(`http://localhost:${PORT}`)
+			.get('/api/feedback/options')
+			.expect(200);
+			
+			//for now just assumes no error in fetching the options :)
+			// const receivedOptions = response.body;
 
-			
-	// 	});
-	// });
+			// fakeFeedbackOptions.forEach(option => {
+			// 	expect(receivedOptions).toContainEqual(option);
+			// });
+	
+		});
+	});
 });
