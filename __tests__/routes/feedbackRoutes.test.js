@@ -67,7 +67,7 @@ describe('Course Routes', () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
 			
-			const feedbackOpt = await db.collection('feedbackOptions').findOne({name: 'Easy to follow'});
+			const feedbackOpt = await db.collection('feedbackoptions').findOne({name: 'Easy to follow'});
 			
 			const rating = 5;
 			const feedbackText = "Hello, world";
@@ -147,7 +147,7 @@ describe('Course Routes', () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
 			
-			const feedbackOpt = await db.collection('feedbackOptions').findOne({name: 'Easy to follow'});
+			const feedbackOpt = await db.collection('feedbackoptions').findOne({name: 'Easy to follow'});
 			
 			const rating = 5;
 			const feedbackText = "";
@@ -226,7 +226,7 @@ describe('Course Routes', () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
 						
-			const feedbackOpt = await db.collection('feedbackOptions').findOne({name: 'Easy to follow'});
+			const feedbackOpt = await db.collection('feedbackoptions').findOne({name: 'Easy to follow'});
 
 			const rating = null;
 			const feedbackText = "Hello, world";
