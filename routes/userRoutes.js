@@ -9,12 +9,16 @@ const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
 const { encrypt, compare } = require('../helpers/password');
 
-router.delete('/:id', adminOnly, async (req, res) => {
+router.delete('/:id', requireLogin, async (req, res) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).send({ error: errorCodes['E0014'] });
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
+
+		// if (req?.tokenClaims?.id !== id && req?.tokenClaims?.role !== 'admin') {
+		// 	return res.status(401).send({ error: errorCodes['E0002'] });
+		// }
 
 		const deletedUser = await UserModel.findByIdAndDelete(id);
 
