@@ -35,7 +35,7 @@ module.exports = async (req, res, next) => {
             }
         }
         
-        // If token is present, proceed to the next middleware.
+        // If token is present, proceed to the next middleware
         return next();
     } catch (error) {
         console.error('Token verification failed:', error);
