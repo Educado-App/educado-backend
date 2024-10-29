@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
 		// If the passwords match, return a success message
 		if (result) {
 			// Create a token for the user
-			const token = signAccessToken({ id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email });
+			const token = signAccessToken({ id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role });
 			// Return the token
 			return res.status(202).json({
 				status: 'login successful',
@@ -89,6 +89,7 @@ router.post('/login', async (req, res) => {
 					email: user.email,
 					courses: profile.courses,
 					points: profile.points,
+					role: user.role,
 				},
 			});
 		} else {
