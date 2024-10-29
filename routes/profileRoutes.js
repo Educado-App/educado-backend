@@ -88,7 +88,7 @@ router.put('/educations', async (req, res) => {
 	// Check if all arrays have the same length
 	const arrayLength = institution.length;
 
-    // Validate that userID is present and all required fields are arrays of the same number of elements
+	// Validate that userID is present and all required fields are arrays of the same number of elements
 	if (!userID ||
 		[educationLevel, status, course, institution, startDate, endDate].some(
 			(arr) => !Array.isArray(arr) || arr.length !== arrayLength)) 
