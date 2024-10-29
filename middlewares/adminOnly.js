@@ -2,17 +2,17 @@ const errorCodes = require('../helpers/errorCodes');
 const { verify } = require('../helpers/token');
 
 module.exports = (req, res, next) => {
-		let claims;
+	let claims;
 
-    try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.error('Authorization header missing or invalid');
-            return res.status(401).send({ error: errorCodes['E0001'] });
-        }
+	try {
+		const authHeader = req.headers.authorization;
+		if (!authHeader || !authHeader.startsWith('Bearer ')) {
+			console.error('Authorization header missing or invalid');
+			return res.status(401).send({ error: errorCodes['E0001'] });
+		}
 
-        const token = authHeader.split(' ')[1];
-        claims = verify(token);
+		const token = authHeader.split(' ')[1];
+		claims = verify(token);
 		console.log(token);
 		if (claims.role === 'admin') {
 			console.log('Admin access granted');

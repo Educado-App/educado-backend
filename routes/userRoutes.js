@@ -173,7 +173,7 @@ async function validateFields(fields) {
 
 //Update user role
 router.patch('/:id/role', adminOnly, async (req, res) => {
-	console.log("hello");
+	console.log('hello');
 	if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 		return res.status(400).send({ error: errorCodes['E0014'] });
 	}
@@ -182,24 +182,24 @@ router.patch('/:id/role', adminOnly, async (req, res) => {
 	const { newRole } = req.body;
 	
 	try {
-        // Update the user directly
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            id,
-            { role: newRole },
-            { new: true }
-        );
+		// Update the user directly
+		const updatedUser = await UserModel.findByIdAndUpdate(
+			id,
+			{ role: newRole },
+			{ new: true }
+		);
 
-        // Check if user was found and updated
-        if (!updatedUser) {
-            return res.status(404).send({ error: errorCodes['E0004'] }); // User not found
-        }
+		// Check if user was found and updated
+		if (!updatedUser) {
+			return res.status(404).send({ error: errorCodes['E0004'] }); // User not found
+		}
 
-        // Respond with the updated user
-        return res.status(200).send(updatedUser);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send({ error: errorCodes['E0003'] }); // Handle server error
-    }
+		// Respond with the updated user
+		return res.status(200).send(updatedUser);
+	} catch (error) {
+		console.error(error);
+		return res.status(500).send({ error: errorCodes['E0003'] }); // Handle server error
+	}
 });
 
 module.exports = router;
