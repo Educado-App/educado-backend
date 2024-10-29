@@ -2,7 +2,6 @@ const { verify } = require('../helpers/token');
 const errorCodes = require('../helpers/errorCodes');
 
 module.exports = async (req, res, next) => {
-    let claims;
 
     try {
         const authHeader = req.headers.authorization;

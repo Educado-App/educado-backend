@@ -6,8 +6,7 @@ module.exports = function buildMakeUser({ Email, Password }) {
 		joinedAt = new Date(),
 		dateUpdated = new Date(),
 		firstName = 'Fake first name',
-		lastName = 'Fake last name',
-		role = 'user',
+		lastName = 'Fake last name'
 	} = {}) {
 
 		if (!Email.isValid(email)) throw new Error('User must have a valid email');
@@ -24,8 +23,7 @@ module.exports = function buildMakeUser({ Email, Password }) {
 			joinedAt: joinedAt,
 			dateUpdated: dateUpdated,
 			firstName: firstName,
-			lastName: lastName,
-			role: role,
+			lastName: lastName
 		});
 
 	};
