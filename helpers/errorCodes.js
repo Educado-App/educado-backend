@@ -86,6 +86,14 @@ module.exports = {
 		code: 'E0020',
 		message: 'Feedback must contain a rating'
 	},
+	E0021: {
+		code: 'E0021',
+		message: 'Feedback options must be an array'
+	},
+	E0022: {
+		code: 'E0022',
+		message: 'Could not save feedback entry'
+	}
 
 	// E01 - Login errors
 	E0101: {
