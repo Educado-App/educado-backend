@@ -19,13 +19,15 @@ router.post('/', async (req, res) => {
         console.log("Starting Python script...");
         const python = spawn('python3', ['./Ai/Openai.py', userInput, currentPage]);
         let output = '';
+        let errorOutput = '';
 
         python.stdout.on('data', (data) => {
             output += data.toString();
         });
 
         python.stderr.on('data', (data) => {
-            console.error('Python Error:', data.toString());
+            errorOutput += data.toString();
+            console.error('Python Error:', errorOutput);
         });
 
         python.on('error', (err) => {
@@ -36,12 +38,14 @@ router.post('/', async (req, res) => {
         python.on('close', (code) => {
             if (code === 0) {
                 if (output) {
+                    console.log("returning" + output);
                     res.json({ message: output });
                 } else {
                     res.status(500).json({ error: 'Python script returned no output' });
                 }
             } else {
-                res.status(500).json({ error: `Python process exited with code ${code}` });
+                const errorMsg = errorOutput || `Python process exited with code ${code}`;
+                res.status(500).json({ error: errorMsg });
             }
         });
     } catch (error) {
@@ -49,6 +53,7 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: 'Error running Python script' });
     }
 });
+
 
 
 module.exports = router;
