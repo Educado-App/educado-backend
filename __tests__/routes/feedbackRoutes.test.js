@@ -252,15 +252,7 @@ describe('Course Routes', () => {
 			
 			const response = await request(`http://localhost:${PORT}`)
 			.get('/api/feedback/options')
-			.expect(200);
-			
-			//for now just assumes no error in fetching the options :)
-			// const receivedOptions = response.body;
-
-			// fakeFeedbackOptions.forEach(option => {
-			// 	expect(receivedOptions).toContainEqual(option);
-			// });
-	
+			.expect(200);	
 		});
 	});
 });
