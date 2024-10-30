@@ -93,7 +93,7 @@ module.exports = {
 	E0022: {
 		code: 'E0022',
 		message: 'Could not save feedback entry'
-	}
+	},
 
 	// E01 - Login errors
 	E0101: {

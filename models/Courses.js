@@ -51,6 +51,10 @@ const courseSchema = new Schema({
 		type: Number,
 		default: 0,
 	},
+	numOfRatings: {
+		type: Number,
+		default: 0
+	},
 	numOfSubscriptions:{
 		type: Number,
 		default: 0,

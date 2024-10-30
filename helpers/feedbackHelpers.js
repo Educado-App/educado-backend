@@ -10,16 +10,9 @@ function assert(condition, errorcode) {
 	}
 }
 
-async function calculateAverageRating(courseId, newRating) {
+function calculateAverageRating(numOfRatings, oldRating, newRating) {
 
-	const course = await CourseModel.findById(courseId);
-	assert(course, errorCodes.E0006);
-
-	const amountOfRatings = await FeedbackModel.find({courseId: courseId}).countDocuments();
-
-	const rating = course.rating;
-
-	const updatedRating = ((rating * amountOfRatings) + newRating)/(amountOfRatings+1);
+	const updatedRating = ((oldRating * numOfRatings) + newRating)/(numOfRatings + 1);
 
 	return updatedRating;
 }
@@ -73,13 +66,18 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	assert(feedbackResult, errorCodes.E0022);
 
 	const oldFeedbackOptions = course.feedbackOptions;
+	const numOfRatings = course.numOfRatings ? course.numOfRatings : 0;
+	const oldRating = course.rating;
 
-	const updatedRating = await calculateAverageRating(courseId, rating);
+	const updatedRating = calculateAverageRating(numOfRatings, oldRating, rating);
 	const updatedFeedbackOptions = compareFeedbackOptions(oldFeedbackOptions, feedbackOptions);
+
+	const newNumOfRatings = numOfRatings + 1;
 
 	const update = {
 		rating: updatedRating,
-		feedbackOptions: updatedFeedbackOptions
+		feedbackOptions: updatedFeedbackOptions,
+		numOfRatings: newNumOfRatings
 	};
 
 	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, update, {
