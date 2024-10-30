@@ -15,6 +15,7 @@ const courses = [
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
 		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
@@ -29,6 +30,7 @@ const courses = [
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
 		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
@@ -43,6 +45,7 @@ const courses = [
 		'difficulty': 2,
 		'estimatedHours': 3,
 		'rating': 5,
+		'numOfRatings': 0,
 		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
@@ -57,6 +60,7 @@ const courses = [
 		'difficulty': 6,
 		'estimatedHours': 2,
 		'rating': 3,
+		'numOfRatings': 0,
 		'feedbackOpions': fakeCourseFeedbackOptions,
 	}
 ];
