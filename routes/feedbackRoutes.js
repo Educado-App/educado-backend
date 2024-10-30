@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
@@ -14,8 +13,8 @@ router.post('/:courseId', async (req, res) => {
 	try {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
-	} catch {
-		return res.status(400).send({error: errorCodes['E0019']}); //Feedback could not be saved
+	} catch (e){
+		return res.status(400).json({ 'error': e.message }); //Feedback could not be saved
 	}
 });
 

@@ -8,7 +8,6 @@ const makeFakeCourse = require('../fixtures/fakeCourse');
 const errorCodes = require('../../helpers/errorCodes');
 const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 
-
 const app = express();
 app.use(express.json());
 app.use('/api/feedback', router); // Mount the router under '/api' path
@@ -240,9 +239,11 @@ describe('Course Routes', () => {
 
 			const response = await request(`http://localhost:${PORT}`)
 			.post('/api/feedback/' + courseId)
-			.send(body);
+			.send(body)
+			.expect(400);
+			
+			expect(response.body.error).toEqual(errorCodes.E0020.message);
 
-			expect
 		});
 	});
 

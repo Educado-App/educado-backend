@@ -8,7 +8,6 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises');
 const { LectureModel } = require('../models/Lectures');
-const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');

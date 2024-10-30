@@ -1,7 +1,7 @@
 const { CourseModel } = require('../models/Courses');
 const { FeedbackModel } = require('../models/Feedback');
 
-const errorCodes = require('../helpers/errorCodes');
+const errorCodes = require('./errorCodes');
 
 
 function assert(condition, errorcode) {
@@ -63,14 +63,14 @@ function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
 
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	assert(typeof(rating) === 'number', errorCodes.E0020);
-	assert(feedbackOptions instanceof Array, errorCodes.E0000);
+	assert(feedbackOptions instanceof Array, errorCodes.E0021);
 
 	const course = await CourseModel.findById(courseId);
-	assert(course, errorCodes.E0000);
+	assert(course, errorCodes.E0006);
 
 	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
 	const feedbackResult = feedBackEntry.save({ new: true });
-	assert(feedbackResult, errorCodes.E0000);
+	assert(feedbackResult, errorCodes.E0022);
 
 	const oldFeedbackOptions = course.feedbackOptions;
 
