@@ -114,7 +114,6 @@ describe('Application Routes', () => {
   });
 
 
-
   //Institution Tests
   describe('POST /api/application/newinstitution', () => {
 
