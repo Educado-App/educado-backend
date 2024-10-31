@@ -21,21 +21,26 @@ const server = app.listen(PORT, () => {
 //mock user
 const newUser = makeFakeUser();
 
+// Mock the sendMail function
+jest.mock('../../helpers/email.js', () => ({
+  sendMail: jest.fn().mockResolvedValue(true),  // Mock implementation
+}));
+
 
 describe('Application Routes', () => {
-	let db; // Store the database connection
+  let db; // Store the database connection
 
-	beforeAll(async () => {
-		db = await connectDb(); // Connect to the database
-	});
+  beforeAll(async () => {
+    db = await connectDb(); // Connect to the database
+  });
 
-	beforeEach(async () => {
-		await db.collection('users').insertOne(newUser);
-		const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
-		let approved = false, rejected = false;
-		const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
-		await db.collection('content-creators').insertOne(newContentCreator);
-    
+  beforeEach(async () => {
+    await db.collection('users').insertOne(newUser);
+    const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+    let approved = false, rejected = false;
+    const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
+    await db.collection('content-creators').insertOne(newContentCreator);
+
   });
 
   afterEach(async () => {
@@ -53,13 +58,13 @@ describe('Application Routes', () => {
   // Test GET request
   describe('GET /api/application/:id', () => {
     it('Should get user data by ID', async () => {
-        const fakeId = newUser._id;
-        const response = await request(app)
-            .get(`/api/application/${fakeId}`)
-            .expect('Content-Type', /json/)
-            .expect(200);
+      const fakeId = newUser._id;
+      const response = await request(app)
+        .get(`/api/application/${fakeId}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
 
-        expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('success', true);
     });
   });
 
@@ -73,41 +78,40 @@ describe('Application Routes', () => {
         .send(newApplication)
         .expect(201);
 
-        expect(response.body).toHaveProperty('application');
+      expect(response.body).toHaveProperty('application');
     });
   });
 
   //Test Application Approval
-  /* describe('PUT /api/application/:id?approve', () => {
+  describe('PUT /api/application/:idapprove', () => {
     it('Should approve an application', async () => {
-        const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
+      const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
 
-        await request(app)
-            .put(`/api/application/${fakeId}approve`)  // Updated the route
-            .expect(200);  // Expect a successful approval
+      await request(app)
+        .put(`/api/application/${fakeId}approve`)  // Updated the route
+        .expect(200);  // Expect a successful approval
 
-        const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-        console.log(updatedNewContentCreator);
-        expect(updatedNewContentCreator.approved).toBe(true);
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      console.log(updatedNewContentCreator);
+      expect(updatedNewContentCreator.approved).toBe(true);
     });
   });
 
-    //Test Application Rejection
-    describe('PUT /api/application/:id/reject', () => {
-      it('Should reject an application with a reason', async () => {
-          const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
-          const reason = 'Not meeting the criteria';
+  //Test Application Rejection
+  describe('PUT /api/application/:id/reject', () => {
+    it('Should reject an application with a reason', async () => {
+      const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
+      const reason = 'Not meeting the criteria';
 
-          await request(app)
-              .put(`/api/application/${fakeId}/reject`)  // Updated the route
-              .send({ reason })  // Sending the reason in the request body
-              .expect(200);  // Expect a successful rejection
+      await request(app)
+        .put(`/api/application/${fakeId}/reject`)  // Updated the route
+        .send({ reason })  // Sending the reason in the request body
+        .expect(200);  // Expect a successful rejection
 
-          const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-          expect(updatedNewContentCreator.rejected).toBe(true);
-      });
-  }); */
-
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      expect(updatedNewContentCreator.rejected).toBe(true);
+    });
+  });
 
 
   //Institution Tests
@@ -122,8 +126,7 @@ describe('Application Routes', () => {
         .send(newInstitution)
         .expect(201);
 
-        expect(response.body).toHaveProperty('institution');
+      expect(response.body).toHaveProperty('institution');
     });
   });
 });
- 

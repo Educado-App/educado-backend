@@ -16,13 +16,10 @@ const { validateEmail, validateName, validatePassword } = require('../helpers/va
 const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
-/* const { userList } = require('../users'); */
 // Utility function to encrypt the token or password
 const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
-const ATTEMPT_EXPIRATION_TIME = 1000 * 60 * 5;//1000 * 60 * 60;
 
-// Services
-//require("../services/passport");
+
 // Utility function to compare raw token with hashed token
 const compareTokens = async (rawToken, hashedToken) => {
 	return await bcrypt.compare(rawToken, hashedToken);
@@ -124,7 +121,15 @@ router.post('/signup', async (req, res) => {
 			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
 		} 
 		
+		
 		if(onboardedInstitution || onboardedSecondaryInstitution){
+
+			// Delete any existing token
+			let existing_token = await EmailVerificationToken.findOne({ userEmail: email });
+			if (existing_token) console.log('Token found');
+			if (existing_token) await existing_token.deleteOne();
+
+			
 			// Generate and hash the verification token
 			const verificationToken = generateVerificationToken();
 			const hashedToken = await encrypt(verificationToken); // Hash the token
@@ -282,7 +287,7 @@ router.post('/reset-password-request', async (req, res) => {
 	// Delete any attempts older than 1 hour
 	if (user.resetAttempts != null) {
 		user.resetAttempts.forEach(async (attempt) => {
-			if (attempt === null || attempt < (Date.now() - ATTEMPT_EXPIRATION_TIME)) {
+			if (attempt === null || attempt < (Date.now() - TOKEN_EXPIRATION_TIME)) {
 				user.resetAttempts.remove(attempt);
 				await UserModel.updateOne({ _id: user._id }, user);
 			}
