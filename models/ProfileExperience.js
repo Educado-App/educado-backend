@@ -4,24 +4,12 @@ const { Schema } = mongoose;
 
 const profileSchema = new Schema({
 	userID: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
-	company: {
-		type: String,
-	},
-	jobTitle: {
-		type: String,
-	},
-	startDate:{
-		type: String,
-	},
-	endDate: {
-		type: String,
-	},
-	checkBool: {
-		type: Boolean,
-	},
-	description: {
-		type: String,
-	},
+	company: String,
+	jobTitle: String,
+	startDate: String,
+	endDate: String,
+	isCurrentJob: Boolean,
+	description: String
 });
 
 const ProfileExperienceModel = mongoose.model('Experience', profileSchema);
