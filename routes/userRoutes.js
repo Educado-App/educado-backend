@@ -16,9 +16,9 @@ router.delete('/:id', requireLogin, async (req, res) => {
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
 
-		// if (req?.tokenClaims?.id !== id && req?.tokenClaims?.role !== 'admin') {
-		// 	return res.status(401).send({ error: errorCodes['E0002'] });
-		// }
+		if (req?.tokenClaims?.id !== id && req?.tokenClaims?.role !== 'admin') {
+			return res.status(401).send({ error: errorCodes['E0002'] });
+		}
 
 		const deletedUser = await UserModel.findByIdAndDelete(id);
 

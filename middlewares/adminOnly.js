@@ -15,7 +15,6 @@ module.exports = (req, res, next) => {
 		claims = verify(token);
 		console.log(token);
 		if (claims.role === 'admin') {
-			console.log('Admin access granted');
 			return next();
 		} else {
 			return res.status(401).send({ error: errorCodes['E0001'] });
