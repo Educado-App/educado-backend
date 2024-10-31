@@ -13,7 +13,6 @@ module.exports = (req, res, next) => {
 
 		const token = authHeader.split(' ')[1];
 		claims = verify(token);
-		console.log(token);
 		if (claims.role === 'admin') {
 			return next();
 		} else {
