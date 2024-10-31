@@ -31,7 +31,7 @@ describe('Admin token verify', () => {
 		const token = 'ImAnInvalidToken';
 		const response = await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
-			.set('token', token);
+			.set('Authorization', "Bearer " + token);
 
 		expect(response.body.error).toBeDefined();
 	});
