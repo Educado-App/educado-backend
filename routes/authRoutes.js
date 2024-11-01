@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
 			//If user hasnt filled the application yet
 			if(profile.approved == false && profile.rejected == false && !application){
 				return res.status(200).json({
-					baseUser: user.id
+					baseUser: user._id
 				});
 			}
 			//Content creator must not be allowed entry if they are either rejected or not yet approved
@@ -77,13 +77,13 @@ router.post('/login', async (req, res) => {
 		// If the passwords match, return a success message
 		if (result) {
 			// Create a token for the user
-			const token = signAccessToken({ id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role });
+			const token = signAccessToken({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role });
 			// Return the token
 			return res.status(202).json({
 				status: 'login successful',
 				accessToken: token,
 				userInfo: {
-					id: user.id,
+					id: user._id,
 					firstName: user.firstName,
 					lastName: user.lastName,
 					email: user.email,
