@@ -43,12 +43,12 @@ router.get('/options', async (req, res) => {
 
 // Populate feedback options
 router.post('/populate/new', async (req, res) => {
-    try {
-        await populate();
-        res.send('Feedback options populated successfully');
-    } catch (e) {
-        return res.status(400).json({ 'error': e.message }); // Feedback options could not be populated
-    }
+	try {
+		await populate();
+		res.send('Feedback options populated successfully');
+	} catch (e) {
+		return res.status(400).json({ 'error': e.message }); // Feedback options could not be populated
+	}
 });
 
 module.exports = router;
