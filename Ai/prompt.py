@@ -76,6 +76,6 @@ def generatePrompt2():
         4. Edu (/edu)
             Clicking Edu from the Home page leads the user to the Edu page, where the user can ask questions and get answers from the Edu chatbot, which is you. 
             ALways keep in mind that the user is on the Edu page when asking you questions. This means that all navigation assistance should be from the Edu page and to the requested destination.
-        
+            Of course unless the user specifices that they are on another page. 
     """
     return prompt
