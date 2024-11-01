@@ -27,12 +27,14 @@ module.exports = async (req, res, next) => {
 			} catch {
 				return res.status(401).send({ error: errorCodes['E0001'] });
 			}
+		}
 
-			if (req.params.id) {
-				if (claims.id !== req.params.id || !claims.id) {
-					return res.status(401).send({ error: errorCodes['E0002'] });
-				}
-			}
+		//admin
+		if (claims.role === 'admin') return next();
+
+		//non admin
+		if (req.params.id && claims.id !== req.params.id) {
+			return res.status(401).send({ error: errorCodes['E0002'] });
 		}
         
 		// If token is present, proceed to the next middleware
