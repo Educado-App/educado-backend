@@ -4,6 +4,7 @@ const router = require('express').Router();
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 
 const { saveFeedback } = require('../helpers/feedbackHelpers.js');
+const { populate } = require('../helpers/populateFeedbackOptions');
 
 
 router.post('/:courseId', async (req, res) => {
@@ -26,6 +27,16 @@ router.get('/options', async (req, res) => {
 	} catch {
 		return res.status(400).send({errorCodes: 'E0018'}); //no feedback options found
 	}
+});
+
+// Populate feedback options
+router.post('/populate/new', async (req, res) => {
+    try {
+        await populate();
+        res.send('Feedback options populated successfully');
+    } catch (e) {
+        return res.status(400).json({ 'error': e.message }); // Feedback options could not be populated
+    }
 });
 
 module.exports = router;
