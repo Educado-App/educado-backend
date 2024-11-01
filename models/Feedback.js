@@ -7,14 +7,15 @@ const feedbackSchema = new Schema({
 	courseId: {
 		type: Schema.Types.ObjectId, ref: 'courses',
 		required: [true, 'course id is required']
-		
 	},
 	rating: {
 		type: Number,
-		required: [true, 'rating is required']
+		required: [true, 'rating is required'],
+		min: 1,
+		max: 5
 	},
 	feedbackText: {
-		type : String
+		type: String
 	},
 	feedbackOptions: [{
 		type: Schema.Types.ObjectId, ref: 'feedbackOptions'
