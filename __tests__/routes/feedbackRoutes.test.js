@@ -242,7 +242,7 @@ describe('Course Routes', () => {
 			.send(body)
 			.expect(400);
 			
-			expect(response.body.error).toEqual(errorCodes.E0020.message);
+			expect(response.body.error).toEqual(errorCodes.E1303.message);
 
 		});
 	});

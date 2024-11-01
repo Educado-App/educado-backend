@@ -19,7 +19,7 @@ async function populate() {
 		});
 		await FeedbackOptionsModel.insertMany(optionsToInsert);
 	} catch {
-		throw new Error(errorCodes.E0023.message);
+		throw new Error(errorCodes.E1306.message);
 	}
 }
 

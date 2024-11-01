@@ -74,30 +74,7 @@ module.exports = {
 		code: 'E0017',
 		message: 'Service Unavailable'
 	},
-	E0018: {
-		code: 'E0018',
-		message: 'No Feedbackoptions found'
-	},
-	E0019: {
-		code: 'E0019',
-		message: 'Feedback could not be saved'
-	},
-	E0020: {
-		code: 'E0020',
-		message: 'Feedback must contain a rating'
-	},
-	E0021: {
-		code: 'E0021',
-		message: 'Feedback options must be an array'
-	},
-	E0022: {
-		code: 'E0022',
-		message: 'Could not save feedback entry'
-	},
-	E0023: {
-		code: 'E0023',
-		message: 'Could not save feedback options when populating database'
-	},
+
 	// E01 - Login errors
 	E0101: {
 		code: 'E0101',
@@ -387,5 +364,31 @@ module.exports = {
 	E1204: {
 		code: 'E1203',
 		message: 'This Secondary Email Domain already exists as part of another Institution'
+	},
+
+	// E13 - Feedback Errors
+	E1301: {
+		code: 'E1301',
+		message: 'No Feedbackoptions found'
+	},
+	E1302: {
+		code: 'E1302',
+		message: 'Feedback could not be saved'
+	},
+	E1303: {
+		code: 'E1303',
+		message: 'Feedback must contain a rating'
+	},
+	E1304: {
+		code: 'E1304',
+		message: 'Feedback options must be an array'
+	},
+	E1305: {
+		code: 'E1305',
+		message: 'Could not save feedback entry'
+	},
+	E1306: {
+		code: 'E1306',
+		message: 'Could not save feedback options when populating database'
 	},
 };
