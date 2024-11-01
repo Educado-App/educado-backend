@@ -5,7 +5,9 @@ const { Schema } = mongoose;
 //Schema for providing feedback after finishing a course.
 const feedbackSchema = new Schema({
 	courseId: {
-		type: Schema.Types.ObjectId, ref: 'courses' 
+		type: Schema.Types.ObjectId, ref: 'courses',
+		required: [true, 'course id is required']
+		
 	},
 	rating: {
 		type: Number,
