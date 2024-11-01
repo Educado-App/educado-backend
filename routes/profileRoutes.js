@@ -81,22 +81,39 @@ router.get('/:userID', async (req, res) => {
 	}
 });
 
-
-// Dynamic form Academic experience CRUD //
-// Update second forms
+// Route to update academic experience forms on /profile and /application endpoints
 router.put('/educations', async (req, res) => {
-	const { userID, institution, course, startDate, endDate } = req.body;
-	//Set fields by default in DB if empty
-	const status = req.body.status === '' ? 'Basic' : req.body.status;
-	//Require fields to be filled
-	const educationLevel = req.body.educationLevel === '' ? 'Progressing' : req.body.educationLevel;
-	if (!userID || !institution || !course || !startDate || !endDate) {
-		return res.status(400).send('All fields are required');
+	const { userID, educationLevel, status, course, institution, startDate, endDate } = req.body;
+
+	// Check if all arrays have the same length
+	const arrayLength = institution.length;
+
+	// Validate that userID is present and all required fields are arrays of the same number of elements
+	if (!userID ||
+		[educationLevel, status, course, institution, startDate, endDate].some(
+			(arr) => !Array.isArray(arr) || arr.length !== arrayLength)) 
+	{
+		return res.status(400).send('All fields are required, and arrays must have the same length!');
 	}
+
 	try {
-		const newEntry = await ProfileEducationModel({ userID, status, institution, course, educationLevel, startDate, endDate });
-		newEntry.save();
-		res.status(200).json(newEntry);
+		// Create a new ProfileEducationModel for each form
+		const newEntries = [];
+		for (let i = 0; i < arrayLength; i++) {
+			const newEntry = new ProfileEducationModel({
+				userID,
+				educationLevel: educationLevel[i],
+				status: status[i],
+				course: course[i],
+				institution: institution[i],
+				startDate: startDate[i],
+				endDate: endDate[i]
+			});
+			await newEntry.save();
+			newEntries.push(newEntry);
+		}
+		res.status(200).json(newEntries);
+
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
@@ -140,18 +157,38 @@ router.delete('/educations/:_id', async (req, res) => {
 	}
 });
 
-// Dynamic form professional experience CRUD //
-// Update Third forms
+// Route to update professional experience forms on /profile and /application endpoints
 router.put('/experiences', async (req, res) => {
-	const { userID, company, jobTitle, checkBool, description, startDate, endDate } = req.body;
-	//Require fields to be filled
-	if (!userID || !company || !jobTitle || !description || !startDate || !endDate) {
-		return res.status(400).send('All fields are required');
+	const { userID, company, jobTitle, startDate, endDate, isCurrentJob, description } = req.body;
+
+	// Check if all arrays have the same length
+	const arrayLength = company.length;
+
+	// Validate that userID is present and all required fields are arrays of the same number of elements
+	if (!userID ||
+		[company, jobTitle, startDate, endDate, isCurrentJob, description].some(
+			(arr) => !Array.isArray(arr) || arr.length !== arrayLength)) 
+	{
+		return res.status(400).send('All fields are required, and arrays must have the same length!');
 	}
+	
 	try {
-		const newEntry = await ProfileExperienceModel({ userID, company, jobTitle, checkBool, description, startDate, endDate });
-		newEntry.save();
-		res.status(200).json(newEntry);
+		const newEntries = [];
+		for (let i = 0; i < arrayLength; i++) {
+			const newEntry = new ProfileExperienceModel({
+				userID,
+				company: company[i],
+				jobTitle: jobTitle[i],
+				startDate: startDate[i],
+				endDate: endDate[i],
+				isCurrentJob: isCurrentJob[i],
+				description: description[i]
+			});
+			await newEntry.save();
+			newEntries.push(newEntry);
+		}
+		res.status(200).json(newEntries);
+
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
