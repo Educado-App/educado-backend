@@ -7,7 +7,7 @@ const { Schema } = mongoose;
 
 const feedbackOptionsSubSchema = new Schema ({
 	optionId: {
-		type: Schema.Types.ObjectId, ref: 'feedbackOptions'
+		type: Schema.Types.ObjectId, ref: 'feedbackoptions'
 	},
 	count: {
 		type: Number,
