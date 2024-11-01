@@ -94,7 +94,10 @@ module.exports = {
 		code: 'E0022',
 		message: 'Could not save feedback entry'
 	},
-
+	E0023: {
+		code: 'E0023',
+		message: 'Could not save feedback options when populating database'
+	},
 	// E01 - Login errors
 	E0101: {
 		code: 'E0101',

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
+const errorCodes = require('../helpers/errorCodes');
 
+//default feedback options
 const feedbackOptionsList = [
 	{'name': 'Aulas interessantes'},
 	{'name': 'Profissionais didáticos'},
@@ -17,11 +19,9 @@ async function populate() {
 			return !existingOptions.some(existingOption => existingOption.name === option.name);
 		})
         await FeedbackOptionsModel.insertMany(optionsToInsert);
-        console.log('Feedback options saved successfully');
-    } catch (error) {
-        console.error('Error saving feedback options', error);
-    }
+    } catch {
+		throw new Error(errorCodes.E0023.message);
+	}
 }
 
 module.exports = { populate }
-

@@ -16,9 +16,6 @@ const { StudentModel } = require('../models/Students');
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
 
-// import { saveFeedback, updateFeedback } from ('../helpers/feedbackHelpers.js');
-const { saveFeedback } = require('../helpers/feedbackHelpers.js');
-
 const COMP_TYPES = {
 	LECTURE: 'lecture',
 	EXERCISE: 'exercise',

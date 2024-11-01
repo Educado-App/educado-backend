@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
@@ -19,13 +20,17 @@ router.post('/:courseId', async (req, res) => {
 	}
 });
 
-//getFeedbackOptions
+//Get all feedback options stored in DB
 router.get('/options', async (req, res) => {
 	try {
-		const feedbackOptions = await FeedbackOptionsModel.find();
+		let feedbackOptions = await FeedbackOptionsModel.find();
+		if (feedbackOptions.length === 0) {
+			await populate();
+			feedbackOptions = await FeedbackOptionsModel.find();
+		}
 		return res.status(200).send(feedbackOptions);
 	} catch {
-		return res.status(400).send({errorCodes: 'E0018'}); //no feedback options found
+		return res.status(400).send({ error: errorCodes['E0018'] }); //no feedback options found
 	}
 });
 
