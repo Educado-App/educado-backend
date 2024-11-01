@@ -22,11 +22,6 @@ const TOKEN_SECRET = 'test';
 // make fake course
 let fakeCourse = makeFakeCourse();
 
-jest.mock('../../middlewares/requireLogin', () => {
-	return (req, res, next) => {
-		next();
-	};
-});
 
 // Mock token secret
 jest.mock('../../config/keys', () => {
@@ -36,7 +31,7 @@ jest.mock('../../config/keys', () => {
 });
 
 describe('Users Routes', () => {
-	let token, fakeUser, db, actualUser, fakeStudent;
+	let token, adminToken, fakeUser, db, actualUser, fakeStudent;
 
 	beforeAll(async () => {
 		db = await connectDb(); // Connect to the database
@@ -54,7 +49,10 @@ describe('Users Routes', () => {
 		await db.collection('students').insertOne(fakeStudent);
 
 		await db.collection('students').findOne({ baseUser: actualUser._id });
-		token = signAccessToken({ id: actualUser._id });
+		token = signAccessToken({ id: actualUser._id, role: "user" });
+
+		const fakeAdminId = new mongoose.Types.ObjectId()
+		adminToken = signAccessToken({ id: fakeAdminId, role: "admin" });
 	});
 
 	afterEach(async () => {
@@ -63,12 +61,12 @@ describe('Users Routes', () => {
 	});
 
 	describe('DELETE /users/:userId', () => {
+		it('Owning user deletes user successfully', async () => {
 
-		it('Deletes a user successfully', async () => {
 			// Delete the user using the API
 			await request(`http://localhost:${PORT}`)
 				.delete(`/api/users/${actualUser._id}`)
-				.set('token', token) // Include the token in the request headers
+				.set('Authorization', `Bearer ${token}`) // Include the token in the request headers
 				.expect(200);
 
 			// Verify that the user was deleted from the database
@@ -76,14 +74,26 @@ describe('Users Routes', () => {
 			expect(user).toBeNull();
 		});
 
-		/*it('handles user not found error for delete', async () => {
+		it('Admin deletes user successfully', async () => {
+			// Delete the user using the API
+			await request(`http://localhost:${PORT}`)
+				.delete(`/api/users/${actualUser._id}`)
+				.set('Authorization', `Bearer ${adminToken}`) // Include the token in the request headers
+				.expect(200);
+
+			// Verify that the user was deleted from the database
+			const user = await db.collection('users').findOne({ _id: actualUser._id });
+			expect(user).toBeNull();
+		});
+
+		it('handles user not found error for delete', async () => {
 			const nonExistentUserId = new mongoose.Types.ObjectId();
 
 			await request(`http://localhost:${PORT}`)
 				.delete(`/api/users/${nonExistentUserId}`)
-				.set('token', token) // Include the token in the request headers
+				.set('token', adminToken) // Include the token in the request headers
 				.expect(204);
-		});*/
+		});
 
 		it('Updates user email successfully', async () => {
 			const newEmail = 'newemail@example.com';
@@ -370,25 +380,16 @@ describe('Users Routes', () => {
 			expect(res.body.error.code).toBe('E0805');
 		});
 
-		it('Should return error if id is invalid', async () => {
+		it('Should return error if user is not owner', async () => {
 			const res = await request(`http://localhost:${PORT}`)
 				.patch('/api/users/invalidId/password')
 				.set('token', token) // Include the token in the request headers
 				.send({ oldPassword: 'ABC123456!', newPassword: 'newPassword' });
 
-			expect(res.status).toBe(400);
-			expect(res.body.error.code).toBe('E0014');
+			expect(res.status).toBe(401);
+			expect(res.body.error.code).toBe('E0002');
 		});
 
-		it('Should return error if no user is found with the id', async () => {
-			const res = await request(`http://localhost:${PORT}`)
-				.patch('/api/users/' + new mongoose.Types.ObjectId() + '/password')
-				.set('token', token) // Include the token in the request headers
-				.send({ oldPassword: 'ABC123456!', newPassword: 'newPassword' });
-
-			expect(res.status).toBe(400);
-			expect(res.body.error.code).toBe('E0004');
-		});
 	});
 
 	describe('GET /api/users/:userId', () => {
@@ -409,13 +410,13 @@ describe('Users Routes', () => {
 			});
 		});
 
-		it('Should return error if id is invalid', async () => {
+		it('Should return error if user is not owner', async () => {
 			const res = await request(`http://localhost:${PORT}`)
 				.get('/api/users/invalidId')
 				.set('token', token) // Include the token in the request headers
-				.expect(400);
+				.expect(401);
 
-			expect(res.body.error.code).toBe('E0014');
+			expect(res.body.error.code).toBe('E0002');
 		});
 
 	});
