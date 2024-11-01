@@ -88,4 +88,3 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 module.exports = {
 	saveFeedback
 };
-
