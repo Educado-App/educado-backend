@@ -37,12 +37,12 @@ describe('Admin token verify', () => {
 	});
 
 	it('Return success if an admin token is valid on a private route', async () => {
-		const token = signAccessToken({ id: 'srdfet784y2uioejqr' });
+		const token = signAccessToken({ id: 'srdfet784y2uioejqr', role: 'admin' });
 
 		// mock that token is valid
 		await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
-			.set('token', token)
+			.set('Authorization', "Bearer " + token)
 			.expect(200);
 	});
 
@@ -50,7 +50,7 @@ describe('Admin token verify', () => {
 		const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.' + btoa(`{"id":1,"iat":${'' + Date.now()},"exp":999999999999}`) + '.';
 		await request(`http://localhost:${PORT}`)
 			.get('/api/test/adminOnly')
-			.set('token', token)
+			.set('Authorization', "Bearer " + token)
 			.expect(401);
 	});
 
