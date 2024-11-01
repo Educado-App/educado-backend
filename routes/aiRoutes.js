@@ -9,15 +9,15 @@ router.get('/', (req, res) => {
 
 router.post('/', async (req, res) => {
     req.setTimeout(30000);
-    const { userInput, currentPage } = req.body;
+    const { userInput } = req.body;
 
-    if (!userInput || !currentPage) {
-        return res.status(400).json({ error: 'userInput and currentPage are required' });
+    if (!userInput) {
+        return res.status(400).json({ error: 'userInput are required' });
     }
 
     try {
         console.log("Starting Python script...");
-        const python = spawn('python3', ['./Ai/Openai.py', userInput, currentPage]);
+        const python = spawn('python3', ['./Ai/Openai.py', userInput]);
         let output = '';
         let errorOutput = '';
 
