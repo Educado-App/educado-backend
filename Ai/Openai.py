@@ -11,14 +11,14 @@ client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
  
 
 # Function to generate a chatbot response
-def chatbot(userInput, currentPage):
+def chatbot(userInput):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
         {"role": "system", "content": prompt.generatePrompt2()},
         {
             "role": "user",
-            "content": (userInput + currentPage)
+            "content": (userInput)
         }
     ]
     )
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     # Call the chatbot function and print the result
     try:
-        result = chatbot(userInput, currentPage)
+        result = chatbot(userInput)
         print(result)
     except Exception as e:
         print(f"Error occurred: {str(e)}")
