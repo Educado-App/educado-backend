@@ -15,11 +15,6 @@ router.delete('/:id', requireLogin, async (req, res) => {
 			return res.status(400).send({ error: errorCodes['E0014'] });
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
-
-		if (req?.tokenClaims?.id !== id && req?.tokenClaims?.role !== 'admin') {
-			return res.status(401).send({ error: errorCodes['E0002'] });
-		}
-
 		const deletedUser = await UserModel.findByIdAndDelete(id);
 
 		if (!deletedUser) {
@@ -37,7 +32,7 @@ router.delete('/:id', requireLogin, async (req, res) => {
 
 
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		return res.status(500).send({ error: errorCodes['E0003'] });
 	}
 });
@@ -178,9 +173,9 @@ router.patch('/:id/role', adminOnly, async (req, res) => {
 		return res.status(400).send({ error: errorCodes['E0014'] });
 	}
 	const id = mongoose.Types.ObjectId(req.params.id);
-	
+
 	const { newRole } = req.body;
-	
+
 	try {
 		// Update the user directly
 		const updatedUser = await UserModel.findByIdAndUpdate(
