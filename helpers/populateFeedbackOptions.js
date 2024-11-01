@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 
-
-
 const feedbackOptionsList = [
 	{'name': 'Aulas interessantes'},
 	{'name': 'Profissionais didáticos'},
