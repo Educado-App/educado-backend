@@ -8,6 +8,13 @@ const { saveFeedback } = require('../helpers/feedbackHelpers.js');
 const { populate } = require('../helpers/populateFeedbackOptions');
 
 
+/**
+ * Extracts rating, feedbackText, and feedbackOptions from the request body.
+ * @param {number} req.params - Id for the course you want to save feedback for.
+ * @param {number} req.body.rating - The rating provided in the feedback.
+ * @param {string} req.body.feedbackText - The text of the feedback.
+ * @param {Array} req.body.feedbackOptions - Additional options provided in the feedback.
+ */
 router.post('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 	const { rating, feedbackText, feedbackOptions } = req.body;
