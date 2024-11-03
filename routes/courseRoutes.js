@@ -49,13 +49,8 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 
 
 const topFeedbackOptionForCourses = async (courses) => {
-	// Collect all feedback option IDs
-	const feedbackOptionIds = courses.flatMap(course => 
-		course.feedbackOptions ? course.feedbackOptions.map(option => option._id) : []
-	);
-
 	// Fetch all feedback options in a single query
-	const feedbackOptions = await FeedbackOptionsModel.find({ _id: { $in: feedbackOptionIds } }).lean();
+	const feedbackOptions = await FeedbackOptionsModel.find().lean();
 
 	// Create a map of feedback options by ID for quick lookup
 	const feedbackOptionsMap = feedbackOptions.reduce((map, option) => {
