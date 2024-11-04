@@ -247,6 +247,62 @@ describe('Course Routes', () => {
 		});
 	});
 
+	describe('POST /feedback/:courseId', () => {
+		it('Send a feedback about a course with a negative rating', async () => {
+
+			const course = await db.collection('courses').findOne({ title: 'test course' });
+			const courseId = course._id;
+						
+			const feedbackOpt = await db.collection('feedbackoptions').findOne({name: 'Easy to follow'});
+
+			const rating = -5;
+			const feedbackText = "Hello, world";
+			const feedbackOptionsBody = [feedbackOpt]
+
+			const body = {
+				rating: rating,
+				feedbackText: feedbackText,
+				feedbackOptions: feedbackOptionsBody
+			}
+
+			const response = await request(`http://localhost:${PORT}`)
+			.post('/api/feedback/' + courseId)
+			.send(body)
+			.expect(400);
+			
+			expect(response.body.error).toEqual(errorCodes.E1306.message);
+
+		});
+	});
+
+	describe('POST /feedback/:courseId', () => {
+		it('Send feedback about a course with too high rating', async () => {
+
+			const course = await db.collection('courses').findOne({ title: 'test course' });
+			const courseId = course._id;
+						
+			const feedbackOpt = await db.collection('feedbackoptions').findOne({name: 'Easy to follow'});
+
+			const rating = 100;
+			const feedbackText = "Hello, world";
+			const feedbackOptionsBody = [feedbackOpt]
+
+			const body = {
+				rating: rating,
+				feedbackText: feedbackText,
+				feedbackOptions: feedbackOptionsBody
+			}
+
+			const response = await request(`http://localhost:${PORT}`)
+			.post('/api/feedback/' + courseId)
+			.send(body)
+			.expect(400);
+			
+			expect(response.body.error).toEqual(errorCodes.E1306.message);
+
+		});
+	});
+
 	describe('GET the available feedback options from the database',() => {
 		it('Send the feedback options to the frontend', async () => {
 			
