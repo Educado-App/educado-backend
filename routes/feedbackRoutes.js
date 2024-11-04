@@ -23,6 +23,7 @@ router.post('/:courseId', async (req, res) => {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
 	} catch (e){
+		//handle what http request to return based on error code
 		switch (e.code) {
 		case 'E006':
 			return res.status(404).json({ 'error': e.message });
