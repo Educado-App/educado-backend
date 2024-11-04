@@ -42,7 +42,7 @@ function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
 	return feedbackOptions;
 }
 
-
+//Creates a new feedback object
 function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	return new FeedbackModel({
 		courseId: courseId,
@@ -54,10 +54,20 @@ function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
 }
 
 
+/**
+ * Saves feedback for a course.
+ *
+ * @param {string} courseId - The ID of the course.
+ * @param {number} rating - The rating given to the course.
+ * @param {string} feedbackString - The feedback text.
+ * @param {Array} feedbackOptions - The feedback options selected.
+ * @returns {Promise<Object>} The updated course document.
+ * @throws {Error} If any assertion fails or if saving feedback fails.
+ */
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	assert(typeof(rating) === 'number', errorCodes.E0020);
 	assert(feedbackOptions instanceof Array, errorCodes.E0021);
-
+	
 	const course = await CourseModel.findById(courseId);
 	assert(course, errorCodes.E0006);
 
@@ -68,12 +78,12 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	const oldFeedbackOptions = course.feedbackOptions;
 	const numOfRatings = course.numOfRatings ? course.numOfRatings : 0;
 	const oldRating = course.rating;
-
+	
 	const updatedRating = calculateAverageRating(numOfRatings, oldRating, rating);
 	const updatedFeedbackOptions = compareFeedbackOptions(oldFeedbackOptions, feedbackOptions);
-
+	
 	const newNumOfRatings = numOfRatings + 1;
-
+	
 	const update = {
 		rating: updatedRating,
 		feedbackOptions: updatedFeedbackOptions,
