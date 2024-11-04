@@ -43,7 +43,9 @@ router.get('/options', async (req, res) => {
 		}
 		return res.status(200).send(feedbackOptions);
 	} catch {
-		return res.status(400).send({ error: errorCodes['E1301'] }); //no feedback options found
+		const e = errorCodes.E1301;
+
+		return res.status(400).send({ 'error': e.message });
 	}
 });
 
