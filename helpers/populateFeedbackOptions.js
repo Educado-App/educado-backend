@@ -1,5 +1,6 @@
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
-const errorCodes = require('../helpers/errorCodes');
+const errorCodes = require('./errorCodes');
+const { CustomError } = require('./error');
 
 //default feedback options
 const feedbackOptionsList = [
@@ -19,7 +20,7 @@ async function populate() {
 		});
 		await FeedbackOptionsModel.insertMany(optionsToInsert);
 	} catch {
-		throw new Error(errorCodes.E1305.message);
+		throw new CustomError(errorCodes.E1305);
 	}
 }
 
