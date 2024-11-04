@@ -373,7 +373,7 @@ module.exports = {
 	},
 	E1302: {
 		code: 'E1302',
-		message: 'Feedback could not be saved'
+		message: 'Could not save feedback entry'
 	},
 	E1303: {
 		code: 'E1303',
@@ -383,12 +383,8 @@ module.exports = {
 		code: 'E1304',
 		message: 'Feedback options must be an array'
 	},
-	E1305: {
-		code: 'E1305',
-		message: 'Could not save feedback entry'
-	},
 	E1306: {
-		code: 'E1306',
+		code: 'E1305',
 		message: 'Could not save feedback options when populating database'
 	},
 };

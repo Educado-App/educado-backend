@@ -3,10 +3,18 @@ const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('./errorCodes');
 
+class CustomError extends Error {
+	constructor(errorCode) {
+		super(errorCode.message);
+		this.name = this.constructor.name;
+		this.code = errorCode.code;
+	}
+}
+
 
 function assert(condition, errorcode) {
 	if (!condition) {
-		throw new Error(errorcode.message);
+		throw new CustomError(errorcode);
 	}
 }
 
@@ -61,7 +69,7 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 
 	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
 	const feedbackResult = feedBackEntry.save({ new: true });
-	assert(feedbackResult, errorCodes.E1305);
+	assert(feedbackResult, errorCodes.E1302);
 
 	const oldFeedbackOptions = course.feedbackOptions;
 	const numOfRatings = course.numOfRatings ? course.numOfRatings : 0;

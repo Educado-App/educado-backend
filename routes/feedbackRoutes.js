@@ -23,6 +23,7 @@ router.post('/:courseId', async (req, res) => {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
 	} catch (e){
+		console.log(e.code);
 		return res.status(400).json({ 'error': e.message }); //Feedback could not be saved
 	}
 });
