@@ -7,7 +7,7 @@ const { Schema } = mongoose;
 
 const feedbackOptionsSubSchema = new Schema ({
 	optionId: {
-		type: Schema.Types.ObjectId, ref: 'feedbackOptions'
+		type: Schema.Types.ObjectId, ref: 'feedbackoptions'
 	},
 	count: {
 		type: Number,
@@ -62,7 +62,11 @@ const courseSchema = new Schema({
 	sections: [{ 
 		type: Schema.Types.ObjectId, ref: 'sections'
 	}],
-	feedbackOptions: [feedbackOptionsSubSchema]
+	feedbackOptions:{
+		type: [feedbackOptionsSubSchema],
+		default: []
+	}
+		
 });
 
 const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema

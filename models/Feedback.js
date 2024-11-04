@@ -5,14 +5,17 @@ const { Schema } = mongoose;
 //Schema for providing feedback after finishing a course.
 const feedbackSchema = new Schema({
 	courseId: {
-		type: Schema.Types.ObjectId, ref: 'courses' 
+		type: Schema.Types.ObjectId, ref: 'courses',
+		required: [true, 'course id is required']
 	},
 	rating: {
 		type: Number,
-		required: [true, 'rating is required']
+		required: [true, 'rating is required'],
+		min: 1,
+		max: 5
 	},
 	feedbackText: {
-		type : String
+		type: String
 	},
 	feedbackOptions: [{
 		type: Schema.Types.ObjectId, ref: 'feedbackOptions'
@@ -22,6 +25,6 @@ const feedbackSchema = new Schema({
 	}
 });
 
-const FeedbackModel = mongoose.model('feedback', feedbackSchema);
+const FeedbackModel = mongoose.model('feedbacks', feedbackSchema);
 
 module.exports = { FeedbackModel };

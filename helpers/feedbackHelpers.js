@@ -12,7 +12,7 @@ function assert(condition, errorcode) {
 
 function calculateAverageRating(numOfRatings, oldRating, newRating) {
 
-	const updatedRating = ((oldRating * numOfRatings) + newRating)/(numOfRatings + 1);
+	const updatedRating = ((oldRating * numOfRatings) + newRating) / (numOfRatings + 1);
 
 	return updatedRating;
 }
@@ -20,10 +20,8 @@ function calculateAverageRating(numOfRatings, oldRating, newRating) {
 //If feedback option has been given to course previously, increment by 1
 //otherwise add it to the history of feedbackoptions given.
 function compareFeedbackOptions(feedbackOptions, newFeedbackOptions) {
-	newFeedbackOptions.forEach((option) => {
-		const optionId = option._id;
+	newFeedbackOptions.forEach((optionId) => {
 		let isNew = true;
-
 		for (let i = 0; i < feedbackOptions.length; i++) {
 			if (feedbackOptions[i]._id == optionId) {
 				feedbackOptions[i].count += 1;
@@ -65,15 +63,15 @@ function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
  * @throws {Error} If any assertion fails or if saving feedback fails.
  */
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
-	assert(typeof(rating) === 'number', errorCodes.E0020);
-	assert(feedbackOptions instanceof Array, errorCodes.E0021);
-	
+	assert(typeof (rating) === 'number', errorCodes.E1303);
+	assert(feedbackOptions instanceof Array, errorCodes.E1304);
+
 	const course = await CourseModel.findById(courseId);
 	assert(course, errorCodes.E0006);
 
 	const feedBackEntry = createNewFeedback(courseId, rating, feedbackString, feedbackOptions);
 	const feedbackResult = feedBackEntry.save({ new: true });
-	assert(feedbackResult, errorCodes.E0022);
+	assert(feedbackResult, errorCodes.E1305);
 
 	const oldFeedbackOptions = course.feedbackOptions;
 	const numOfRatings = course.numOfRatings ? course.numOfRatings : 0;
@@ -100,4 +98,3 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 module.exports = {
 	saveFeedback
 };
-

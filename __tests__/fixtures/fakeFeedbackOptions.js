@@ -16,5 +16,5 @@ module.exports = function makeFakeFeedbackOptions() {
 			name: 'Hard to understand',
 			color: 'red',
 		}
-	])
+	]);
 };
