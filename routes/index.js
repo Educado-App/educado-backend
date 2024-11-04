@@ -14,8 +14,8 @@ const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
-const UserInfoRoutes = require('../routes/userInfoRoutes');
-const InstituitionRoutes = require('./institutions/institutionsRoutes');
+//const UserInfoRoutes = require('../routes/userInfoRoutes');
+//const InstituitionRoutes = require('./institutions/institutionsRoutes');
 const AiRoutes = require('../routes/aiRoutes');
 
 // Print all routes defined in app
