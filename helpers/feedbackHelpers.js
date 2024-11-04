@@ -2,21 +2,8 @@ const { CourseModel } = require('../models/Courses');
 const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('./errorCodes');
+const { assert } = require('./error');
 
-class CustomError extends Error {
-	constructor(errorCode) {
-		super(errorCode.message);
-		this.name = this.constructor.name;
-		this.code = errorCode.code;
-	}
-}
-
-
-function assert(condition, errorcode) {
-	if (!condition) {
-		throw new CustomError(errorcode);
-	}
-}
 
 function calculateAverageRating(numOfRatings, oldRating, newRating) {
 

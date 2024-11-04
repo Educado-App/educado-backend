@@ -23,12 +23,11 @@ router.post('/:courseId', async (req, res) => {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
 	} catch (e){
-		console.log(e.code);
-		if (e.code == 'E0006') {
-			return res.status(404).json({ 'error': e.message }); //Feedback could not be saved
-
-		} else {
-			return res.status(400).json({ 'error': e.message }); //Feedback could not be saved
+		switch (e.code) {
+		case 'E006':
+			return res.status(404).json({ 'error': e.message });
+		default:
+			return res.status(400).json({ 'error': e.message });
 		}
 	}
 });
