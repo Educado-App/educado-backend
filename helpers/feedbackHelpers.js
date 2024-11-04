@@ -72,6 +72,7 @@ function createNewFeedback(courseId, rating, feedbackString, feedbackOptions) {
  */
 async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	assert(typeof (rating) === 'number', errorCodes.E1303);
+	assert(rating>= 1 && rating <=5, errorCodes.E1306);
 	assert(feedbackOptions instanceof Array, errorCodes.E1304);
 
 	const course = await CourseModel.findById(courseId);

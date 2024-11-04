@@ -383,8 +383,12 @@ module.exports = {
 		code: 'E1304',
 		message: 'Feedback options must be an array'
 	},
-	E1306: {
+	E1305: {
 		code: 'E1305',
 		message: 'Could not save feedback options when populating database'
+	},
+	E1306: {
+		code: 'E1306',
+		message: 'Rating must be between 1 and 5'
 	},
 };
