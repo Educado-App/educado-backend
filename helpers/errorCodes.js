@@ -314,7 +314,6 @@ module.exports = {
 	E1006: {
 		code: 'E1006',
 		message: 'Could not upload application'
-
 	},
 
 	// E11 - Component Errors
@@ -350,22 +349,27 @@ module.exports = {
 		code: 'E1201',
 		message: 'Could not upload Institution'
 	},
-
 	E1202: {
 		code: 'E1202',
 		message: 'This Institution already exists'
 	},
-
 	E1203: {
 		code: 'E1203',
 		message: 'This Email Domain already exists as part of another Institution'
 	},
-  
 	E1204: {
-		code: 'E1203',
+		code: 'E1204',
 		message: 'This Secondary Email Domain already exists as part of another Institution'
 	},
-
+  E1205: {
+		code: 'E1205',
+		message: 'This name already exists as part of another Institution'
+	},
+	E1206: {
+		code: 'E1206',
+		message: 'Institution not found'
+  },
+  
 	// E13 - Feedback Errors
 	E1301: {
 		code: 'E1301',
