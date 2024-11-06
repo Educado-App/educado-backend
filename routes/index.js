@@ -15,7 +15,6 @@ const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
 const FeedbackRoutes = require('../routes/feedbackRoutes');
-const UserInfoRoutes = require('../routes/userInfoRoutes');
 
 const UserInfoRoutes = require('../routes/userInfoRoutes');
 const InstituitionRoutes = require('./institutions/institutionsRoutes');
