@@ -4,6 +4,9 @@ const errorCodes = require('../helpers/errorCodes');
 const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 
+//import the Email functions from the applicationController
+const { approveEmail, rejectionEmail } = require('../applications/content-creator-applications/controller/applicationController');
+
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
 
@@ -68,6 +71,9 @@ router.put('/:id?approve', async (req, res) => {
 			{ approved: true, rejected: false }
 		);
         
+		//send email to the user
+		await approveEmail(id);
+
 		//Return successful response
 		return res.status(200).json();
 
@@ -88,6 +94,9 @@ router.put('/:id?reject', async (req, res) => {
 			{ baseUser: id },
 			{ rejected: true, approved: false, rejectionReason: req.body.rejectionReason }
 		);
+
+		//send email to the user
+		await rejectionEmail(id, req.body.rejectionReason);
 
 		//Return successful response
 		return res.status(200).json();
