@@ -1,23 +1,9 @@
-const { ContentCreatorModel } = require('../../../models/ContentCreators');
 const { UserModel } = require('../../../models/Users');
 const mail = require('../../../helpers/email');
 
 const kindRegardsPT = 'Atenciosamente, Equipe Educado';
 
-const approve = async (id) => {
-
-	//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
-	const returnDoc = await ContentCreatorModel.findOneAndUpdate(
-		{ baseUser: id },
-		{ $set: { approved: true, rejected: false } },
-		{ returnDocument: 'after' } // 'after' returns the updated document
-	);
-
-	//If the document was not updated correctly, return false
-	if (!returnDoc) {
-		return false;
-	}
-
+const approveEmail = async (id) => {
 
 	//Find the user whose id matches the above id
 	const contentCreator = await UserModel
@@ -34,20 +20,7 @@ const approve = async (id) => {
 	return true;
 };
 
-const reject = async (id, reason) => {
-	// Find the content creator whose "baseUser" id matches the above id, and update their "rejected" field to true
-
-	const returnDoc = await ContentCreatorModel.findOneAndUpdate(
-		{ baseUser: id },
-		{ $set: { approved: false, rejected: true } },  // Correct update logic
-		{ returnDocument: 'after' } // 'after' returns the updated document
-	);
-
-	// If the document was not updated correctly, return false
-	if (!returnDoc) {
-		return false;
-	}
-
+const rejectionEmail = async (id, reason) => {
 
 	// Find the user whose id matches the above id
 	const contentCreator = await UserModel.findOne({ _id: id }).select('email');
@@ -66,4 +39,4 @@ const reject = async (id, reason) => {
 };
 
 
-module.exports = { approve, reject };
+module.exports = { approveEmail, rejectionEmail };
