@@ -76,6 +76,13 @@ const userSchema = new Schema({
 	joinedAt: Date,
 	dateUpdated: Date,
 	resetAttempts: [Date],
+	role: {
+		type: String,
+		enum: ['user', 'admin', 'creator'],
+		default: 'user',
+		required: true
+	},
+
 });
 
 const UserModel = mongoose.model('users', userSchema);
