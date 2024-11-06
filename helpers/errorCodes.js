@@ -361,14 +361,14 @@ module.exports = {
 		code: 'E1204',
 		message: 'This Secondary Email Domain already exists as part of another Institution'
 	},
-  E1205: {
+	E1205: {
 		code: 'E1205',
 		message: 'This name already exists as part of another Institution'
 	},
 	E1206: {
 		code: 'E1206',
 		message: 'Institution not found'
-  },
+	},
   
 	// E13 - Feedback Errors
 	E1301: {
