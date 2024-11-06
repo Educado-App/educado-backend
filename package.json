@@ -52,6 +52,7 @@
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "prettier": "^3.0.3",
+    "server": "file:",
     "supertest": "^6.3.3"
   },
   "devDependencies": {
