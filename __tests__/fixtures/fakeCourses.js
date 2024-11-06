@@ -1,3 +1,7 @@
+const makeCourseFakeFeedbackOptions = require('./fakeCourseFeedbackOptions');
+
+const fakeCourseFeedbackOptions = makeCourseFakeFeedbackOptions();
+
 const courses = [
 	{
 		'title': 'fakeCourse1',
@@ -11,6 +15,8 @@ const courses = [
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse2',
@@ -24,6 +30,8 @@ const courses = [
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse3',
@@ -37,6 +45,8 @@ const courses = [
 		'difficulty': 2,
 		'estimatedHours': 3,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse4',
@@ -50,6 +60,8 @@ const courses = [
 		'difficulty': 6,
 		'estimatedHours': 2,
 		'rating': 3,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	}
 ];
 

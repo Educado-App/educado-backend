@@ -369,4 +369,30 @@ module.exports = {
 		code: 'E1206',
 		message: 'Institution not found'
 	},
+  
+	// E13 - Feedback Errors
+	E1301: {
+		code: 'E1301',
+		message: 'No Feedbackoptions found'
+	},
+	E1302: {
+		code: 'E1302',
+		message: 'Could not save feedback entry'
+	},
+	E1303: {
+		code: 'E1303',
+		message: 'Feedback must contain a rating'
+	},
+	E1304: {
+		code: 'E1304',
+		message: 'Feedback options must be an array'
+	},
+	E1305: {
+		code: 'E1305',
+		message: 'Could not save feedback options when populating database'
+	},
+	E1306: {
+		code: 'E1306',
+		message: 'Rating must be between 1 and 5'
+	},
 };
