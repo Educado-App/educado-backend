@@ -6,6 +6,7 @@ const errorCodes = require('../helpers/errorCodes');
 // Models
 const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
+const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 const { ExerciseModel } = require('../models/Exercises');
 const { LectureModel } = require('../models/Lectures');
 const { ContentCreatorModel } = require('../models/ContentCreators');
@@ -46,15 +47,56 @@ router.get('/creator/:id', requireLogin, async (req, res) => {
 
 });
 
-//Get all courses
-router.get('/', async (req, res) => {
 
+const topFeedbackOptionForCourses = async (courses) => {
+	// Fetch all feedback options in a single query
+	const feedbackOptions = await FeedbackOptionsModel.find().lean();
+
+	// Create a map of feedback options by ID for quick lookup
+	const feedbackOptionsMap = feedbackOptions.reduce((map, option) => {
+		map[option._id] = option;
+		return map;
+	}, {});
+
+	// Process each course
+	courses.forEach(course => {
+		if (course.feedbackOptions && course.feedbackOptions.length > 0) {
+			// Sort feedback options by count in descending order and take the top two
+			const topFeedbackOptions = course.feedbackOptions
+				.sort((a, b) => b.count - a.count)
+				.slice(0, 2);
+
+			// Get the names of the top feedback options
+			const feedbackOptionNames = topFeedbackOptions.map(option => {
+				const feedbackOption = feedbackOptionsMap[option._id];
+				if (!feedbackOption) {
+					console.log(`Feedback option with ID ${option._id} not found`);
+					return null;
+				}
+				return feedbackOption.name;
+			});
+
+			// Filter out null values and attach the names to the course object
+			course.topFeedbackOptions = feedbackOptionNames.filter(name => name !== null);
+		} else {
+			course.topFeedbackOptions = [];
+		}
+	});
+
+	return courses;
+};
+
+// Get all courses
+router.get('/', async (req, res) => {
 	try {
-		// find all courses in the database
-		const courses = await CourseModel.find();
-		res.send(courses);
+		// Find all courses in the database and convert to plain objects
+		const courses = await CourseModel.find().lean();
+
+		// Get top feedback options for each course
+		const coursesWithFeedback = await topFeedbackOptionForCourses(courses);
+		res.json(coursesWithFeedback);
 	} catch (error) {
-		// If the server could not be reached, return an error message
+		console.error('Error fetching courses:', error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
@@ -155,7 +197,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 	}
 });
 
-
 /**
  * This route is deprecated, but it might be used on mobile so we can't delete it yet
  * instead of the old lecture model, we should use the new one
@@ -239,7 +280,7 @@ router.post('/:id/subscribe', async (req, res) => {
 
 		course.numOfSubscriptions++;
 		user.subscriptions.push(id);
-    
+
 		// find user based on id, and add the course's id to the user's subscriptions field
 		await StudentModel.findOneAndUpdate(
 			{ baseUser: studentId },
@@ -344,7 +385,6 @@ router.put('/', async (req, res) => {
 		//_user: req.user.id,
 		creator: id,
 		published: false,
-		coverImg: '',
 		dateCreated: Date.now(),
 		dateUpdated: Date.now(),
 		sections: [],
@@ -354,7 +394,14 @@ router.put('/', async (req, res) => {
 	});
 
 	try {
-		const result = await course.save({ new: true });
+		const result = await course.save({ new: true })
+			//As id is generated at save, we need to .then() and then save
+			.then(savedCourse => {
+				const generatedId = savedCourse._id;
+				savedCourse.coverImg = generatedId + '_c';
+
+				return savedCourse.save();
+			});
 		return res.status(201).send(result);
 	} catch (err) {
 		return res.status(400).send(err);
@@ -376,7 +423,8 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 			estimatedHours: course.estimatedHours,
 			published: course.published,
 			status: course.status,
-			dateUpdated: Date.now()
+			dateUpdated: Date.now(),
+			coverImg: course.coverImg
 		},
 		function (err) {
 			if (err) {
@@ -386,7 +434,45 @@ router.patch('/:id', /*requireLogin,*/ async (req, res) => {
 	);
 	return res.status(200).send(dbCourse);
 });
+// Update section order of a course 
+router.patch('/:id/sections', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { sections } = req.body;
 
+		// Validate course ID
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).send({ error: errorCodes['E0014'], msg: 'Invalid courseID' + id }); // If id is not valid, return error
+		}
+
+		// Validate section IDs
+		for (const sectionId of sections) {
+			if (!mongoose.Types.ObjectId.isValid(sectionId)) {
+				return res.status(400).send({ error: errorCodes['E0014'], msg: 'invalid sectionID' + sectionId }); // If section id is not valid, return error
+			}
+		}
+
+		// Find the course
+		const course = await CourseModel.findById(id);
+
+		// Check if course exists
+		if (!course) {
+			return res.status(404).json({ error: errorCodes['E0006'] }); // If course not found, return error
+		}
+
+		// Update the sections order
+		course.sections = sections;
+
+		// Save the updated course
+		await course.save();
+
+		// Send response
+		return res.status(200).send(course);
+
+	} catch (error) {
+		return res.status(500).json({ error: errorCodes['E0003'] });
+	}
+});
 
 /**
  * Delete course by id
@@ -430,22 +516,25 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 });
 
 
-// Update course published state
-router.patch('/published', async (req, res) => {
-	const { published, course_id } = req.body;
+// Update course published status 
+// Status is enum: "published", "draft", "hidden"
+router.patch('/:id/updateStatus', async (req, res) => {
+	const { status } = req.body;
+	const { id } = req.params;
 
 	// find object in database and update title to new value
 	(
 		await CourseModel.findOneAndUpdate(
-			{ _id: course_id },
-			{ published: published }
+			{ _id: id },
+			{ status: status }
 		)
 	).save;
-	const course = await CourseModel.findById(course_id);
+	const course = await CourseModel.findById(id);
 
 	// Send response
 	res.send(course);
 });
+
 
 
 module.exports = router;

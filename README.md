@@ -16,10 +16,10 @@ Below is a short guide explaining how to set up and run the educado backend in d
 
 ### Setting up Node environment
 
-- Ensure that local version of Node.js is latest stable version (v20.9.0, at the time of writing this)
+- Ensure that local version of Node.js is latest stable version (v20.10.0, at the time of writing this)
   - run `node --version`
-  - if version == v20.9.0, then all is good :)
-  - if version is NOT vv20.9.0 then do the following
+  - if version == v20.10.0, then all is good :)
+  - if version is NOT v20.10.0 then do the following
     - Ensure that you have npm installed
     - run `npm install -g n` to install node version manager
     - when installed, run `n stable`, to install latest stable version of node
@@ -68,6 +68,11 @@ Remember, these secrets are exactly that... **Secrets**... So make extra sure th
 ### Run app in development mode
 
 - Run `npm run dev` to start application
+- Rest api runs on ://localhost:8888
+
+### Run app in production mode
+
+- Run `npm run prod` to start application
 - Rest api runs on ://localhost:8888
 
 ## Docker Commands
