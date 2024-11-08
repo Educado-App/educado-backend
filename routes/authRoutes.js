@@ -199,7 +199,7 @@ router.post('/verify-email', async (req, res) => {
 		const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: lowercaseEmail });
 
 		if (!emailVerificationToken) {
-			return res.status(400).json({ message: 'Token inválido ou expirado' });
+			return res.status(400).json({ message: 'Código inválido ou expirado' });
 		}
 
 		// Check if the token matches
@@ -207,7 +207,7 @@ router.post('/verify-email', async (req, res) => {
 
 		if (!isValid) {
 			return res.status(400).json({
-				message: 'Token inválido ou expirado', 
+				message: 'Código inválido ou expirado', 
 			});
 		}
 
