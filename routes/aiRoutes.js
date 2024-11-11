@@ -1,15 +1,16 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const router = express.Router();
-const criticalLimiter = require('../middlewares/rate_limiting');
+const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
+
 
 // Apply rate limiter to the GET route
-router.get('/', criticalLimiter, (req, res) => {
+router.get('/', shorttermLimiter, longtermLimiter , (req, res) => {
     console.log('GET request received at /api/ai');
     res.send('AI Route is working or is it fuck you');
 });
 
-router.post('/', criticalLimiter, async (req, res) => {
+router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
 	req.setTimeout(30000);
 	const { userInput } = req.body;
 
