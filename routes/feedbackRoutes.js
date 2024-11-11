@@ -4,7 +4,7 @@ const errorCodes = require('../helpers/errorCodes');
 // Models
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 
-const { saveFeedback } = require('../helpers/feedbackHelpers.js');
+const { saveFeedback, getAllFeedback, getFeedbackForCourse } = require('../helpers/feedbackHelpers.js');
 const { populate } = require('../helpers/populateFeedbackOptions');
 
 
@@ -56,6 +56,26 @@ router.post('/populate/new', async (req, res) => {
 		res.send('Feedback options populated successfully');
 	} catch (e) {
 		return res.status(400).json({ 'error': e.message }); // Feedback options could not be populated
+	}
+});
+
+
+router.get('/getAllFeedback', async (req, res) => {
+	try {
+		const feedback = await getAllFeedback();
+		res.send(feedback);
+	} catch (e) {
+		return res.status(400).json({ 'error': e.message });
+	}
+});
+
+router.get('/getFeedbackForCourse/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+	try {
+		const feedback = await getFeedbackForCourse(courseId);
+		res.send(feedback);
+	} catch (e) {
+		return res.status(400).json({ 'error': e.message });
 	}
 });
 

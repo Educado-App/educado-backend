@@ -91,6 +91,19 @@ async function saveFeedback(courseId, rating, feedbackString, feedbackOptions) {
 	return updatedCourse;
 }
 
+async function getAllFeedback() {
+	const feedback = await FeedbackModel.find();
+	return feedback;
+}
+
+async function getFeedbackForCourse(courseId) {
+	const feedback = await FeedbackModel.find({ courseId: courseId });
+	return feedback;
+}
+
+
 module.exports = {
-	saveFeedback
+	saveFeedback,
+	getAllFeedback,
+	getFeedbackForCourse
 };
