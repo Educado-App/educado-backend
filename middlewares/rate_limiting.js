@@ -8,7 +8,7 @@ const shorttermLimiter = rateLimit({
 
 const longtermLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, 
-    max: 100, // Limit each IP to 5 requests per 10 seconds
+    max: 100, // Limit each IP to 100 requests per hour
     message: "Too many requests, long term failure",
 });
 
