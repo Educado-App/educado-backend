@@ -64,6 +64,7 @@ const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
 
 // Route for handling MP3 upload, processing it without saving to disk
 router.post('/stt', upload.single('audio'), (req, res) => {
+	console.log("something hit")
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -115,6 +116,11 @@ router.post('/stt', upload.single('audio'), (req, res) => {
         console.error('Server Error:', error.message);
         res.status(500).json({ error: 'Error running Python script' });
     }
+});
+
+router.get('/stt', (req, res) => {
+	console.log('GET request received at /api/ai');
+	res.send('AI Route is working!!!???!');
 });
 
 module.exports = router;
