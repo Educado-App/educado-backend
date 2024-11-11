@@ -63,7 +63,7 @@ router.post('/populate/new', async (req, res) => {
 router.get('/getAllFeedback', async (req, res) => {
 	try {
 		const feedback = await getAllFeedback();
-		res.send(feedback);
+		res.json(feedback);
 	} catch (e) {
 		return res.status(400).json({ 'error': e.message });
 	}
@@ -73,7 +73,7 @@ router.get('/getFeedbackForCourse/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 	try {
 		const feedback = await getFeedbackForCourse(courseId);
-		res.send(feedback);
+		res.json(feedback);
 	} catch (e) {
 		return res.status(400).json({ 'error': e.message });
 	}
