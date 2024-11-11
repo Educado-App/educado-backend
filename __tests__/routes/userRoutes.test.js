@@ -264,7 +264,7 @@ describe('Users Routes', () => {
 			expect(updatedUser).toMatchObject({
 				firstName: 'newFirstName',
 				lastName: 'newLastName',
-				email: 'newEmail@email.com',
+				email: 'newemail@email.com',
 				password: expect.any(String),
 				joinedAt: user.joinedAt,
 				resetAttempts: user.resetAttempts,

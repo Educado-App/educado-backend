@@ -43,6 +43,7 @@ const userSchema = new Schema({
 	},
 	email: {
 		type: String,
+		lowercase: true,
 		required: [true, 'Email is required'],
 		minLength: [6, 'Email must be at least 6 characters'],
 		unique: [true, 'Email must be unique'],

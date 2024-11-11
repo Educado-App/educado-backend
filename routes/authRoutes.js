@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
 
 	try {
 		// Searching for a single user in the database, with the email provided in the request body. 
-		const user = await UserModel.findOne({ email: req.body.email.toLowerCase() });		
+		const user = await UserModel.findOne({ email: new RegExp(`^${req.body.email}$`, 'i')  });		
 		// If email is found, compare the password provided in the request body with the password in the database
 		if (!user) {
 			// Invalid email (email not found)
