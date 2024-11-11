@@ -1,13 +1,9 @@
 const rateLimit = require('express-rate-limit');
 
-
 const criticalLimiter = rateLimit({
-    windowsMs: 10 * 60 * 1000,
-    max: 20,
-    mesage: "too many requests, fuck off"
+    windowMs: 10 * 1000, // 10 seconds for testing
+    max: 5, // Limit each IP to 5 requests per 10 seconds
+    message: "Too many requests, please try again later, fuck off please, u idiot",
 });
 
-app.get('/api/ai', criticalLimiter, (req, res) => {
-    res.send('Critical api/ai endpoint');
-});
-
+module.exports = criticalLimiter;

@@ -1,10 +1,12 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const router = express.Router();
+const criticalLimiter = require('../middlewares/rate_limiting');
 
-router.get('/', (req, res) => {
-	console.log('GET request received at /api/ai');
-	res.send('AI Route is working!!!???!');
+// Apply rate limiter to the GET route
+router.get('/', criticalLimiter, (req, res) => {
+    console.log('GET request received at /api/ai');
+    res.send('AI Route is working or is it fuck you');
 });
 
 router.post('/', async (req, res) => {
