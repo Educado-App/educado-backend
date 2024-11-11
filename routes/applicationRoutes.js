@@ -142,9 +142,10 @@ router.post('/newinstitution', async (req, res) => {
 
 		const data = req.body;
 
-		// Set secondaryDomain to null if it is an empty string
-		if (data.secondaryDomain === '') {
-			data.secondaryDomain = null;
+		 // Set secondaryDomain to null if it is not defined or is an empty string
+		if (!data.secondaryDomain || data.secondaryDomain === null) {
+			data.secondaryDomain = '';
+			console.log('Secondary Domain is null');
 		}
 
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
@@ -161,18 +162,18 @@ router.post('/newinstitution', async (req, res) => {
 			return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain });
 		}
 
-		//Since the secondary domain is optional, forcibly set it to null, as to avoid any type errors
 		let sharedSecondaryDomain;
-		!(data.secondaryDomain) ? sharedSecondaryDomain = null : sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
-
-		if (sharedSecondaryDomain) {
-			//This Secondary Email Domain already exists as part of another Institution
-			return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
+		if (data.secondaryDomain) {
+			sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
+			if (sharedSecondaryDomain) {
+				//This Secondary Email Domain already exists as part of another Institution
+				return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
+			}
 		}
 
-		const institutionData = InstitutionModel(data);
+		const institutionData = new InstitutionModel(data);
 		const institution = await institutionData.save();
-		console.log('institution' + institution);
+
 
 		//Return successful response
 		return res.status(201).json({ institution: institution });
@@ -183,5 +184,6 @@ router.post('/newinstitution', async (req, res) => {
 	}
 
 });
+
 
 module.exports = router;

@@ -71,7 +71,7 @@ router.post('/', adminOnly, async (req, res) => {
 		}
 	}
 });
-
+// Update the secondary domain
 router.patch('/:id', [validateId, adminOnly], async (req, res) => {
 	const objectId = req.objectId;
 	const { institutionName, domain, secondaryDomain } = req.body;
