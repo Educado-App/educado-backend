@@ -316,6 +316,11 @@ module.exports = {
 		message: 'Could not upload application'
 	},
 
+	E1007: {
+		code: 'E1007',
+		message: 'Could not save application forms'
+	},
+
 	// E11 - Component Errors
 	E1101: {
 		code: 'E1101',

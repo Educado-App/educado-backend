@@ -10,6 +10,9 @@ const { approveEmail, rejectionEmail } = require('../applications/content-creato
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
 
+// Services
+const { storeEducationAndExperienceFormsInDB } = require('../services/applicationService');
+
 //Route for when getting all applications
 router.get('/', async (req, res) => {
 	try {
@@ -70,16 +73,30 @@ router.put('/:id?approve', async (req, res) => {
 			{ baseUser: id },
 			{ approved: true, rejected: false }
 		);
+
+		// Fetch application belonging to content creator
+		const application = await ApplicationModel.findOne({ baseUser: id });
+		if (!application) {
+			console.error('Application for content creator not found in database!');
+			throw new Error('E1005');
+		}
         
 		//send email to the user
 		await approveEmail(id);
+
+		// Save academic and work experience forms to database
+		await storeEducationAndExperienceFormsInDB(application);
 
 		//Return successful response
 		return res.status(200).json();
 
 	} catch(error) {
-		//If anything unexpected happens, throw error
-		return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
+		if (error.message === 'E1005') 
+			return res.status(400).json({ 'error': errorCodes['E1005'] }); // 'Could not get Content Creator application'
+		else if (error.message === 'E1007') 
+			return res.status(400).json({ 'error': errorCodes['E1007'] }); // 'Could not save application forms'
+		else
+			return res.status(400).json({ 'error': errorCodes['E1003'] }); // 'Could not approve Content Creator'
 	}
 });
 
