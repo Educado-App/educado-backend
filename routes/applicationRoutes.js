@@ -142,6 +142,11 @@ router.post('/newinstitution', async (req, res) => {
 
 		const data = req.body;
 
+		// Set secondaryDomain to null if it is an empty string
+		if (data.secondaryDomain === '') {
+			data.secondaryDomain = null;
+		}
+
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
 		const sharedName = await InstitutionModel.findOne({ institutionName: data.institutionName });
 		if (sharedName) {
@@ -167,7 +172,7 @@ router.post('/newinstitution', async (req, res) => {
 
 		const institutionData = InstitutionModel(data);
 		const institution = await institutionData.save();
-
+		console.log('institution' + institution);
 
 		//Return successful response
 		return res.status(201).json({ institution: institution });

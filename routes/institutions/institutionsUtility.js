@@ -13,10 +13,10 @@ const handleFieldAlreadyInUseErrorInfo = (err, res) => {
 
 const validateInstitutionFields = (institutionName, domain, secondaryDomain) => {
 	const isMandatoryFieldsValid = typeof institutionName === 'string' && typeof domain === 'string';
-	const isSecondaryDomainValid = secondaryDomain && typeof secondaryDomain === 'string';
+	const isSecondaryDomainValid = !secondaryDomain || typeof secondaryDomain === 'string';
 	const isDomainsTheSame = domain === secondaryDomain;
 
-	return (isMandatoryFieldsValid && isSecondaryDomainValid && !isDomainsTheSame);
+	return (isMandatoryFieldsValid && isSecondaryDomainValid && (!secondaryDomain || !isDomainsTheSame));
 };
 
 module.exports = {
