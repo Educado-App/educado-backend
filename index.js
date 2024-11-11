@@ -15,10 +15,10 @@ const PORT = process.env.PORT || 8888; // Get dynamic port allocation when deplo
 // Setup connection to database
 connectToDb(keys.mongoURI, {
 	dbName: process.env.NODE_ENV === 'production' ? 'prod' : 'test',
-}, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 	useFindAndModify: false,
+	useCreateIndex: true,
 });
 
 const app = express(); // Configuration for listening, communicate to handlers
