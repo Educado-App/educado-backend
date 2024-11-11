@@ -9,7 +9,7 @@ router.get('/', criticalLimiter, (req, res) => {
     res.send('AI Route is working or is it fuck you');
 });
 
-router.post('/', async (req, res) => {
+router.post('/', criticalLimiter, async (req, res) => {
 	req.setTimeout(30000);
 	const { userInput } = req.body;
 
