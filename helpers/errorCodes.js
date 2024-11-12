@@ -154,6 +154,10 @@ module.exports = {
 		code: 'E0214',
 		message: 'Password must contain at least one letter.'
 	},
+	E0215: {
+		code: 'E0215',
+		message: 'Verification token is invalid or expired.'
+	},
 
 	// E03 - Logout errors
 	E0301: {
@@ -400,4 +404,5 @@ module.exports = {
 		code: 'E1306',
 		message: 'Rating must be between 1 and 5'
 	},
+
 };
