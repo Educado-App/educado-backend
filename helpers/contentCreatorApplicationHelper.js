@@ -35,7 +35,7 @@ async function storeEducationAndExperienceFormsInDB(application) {
 		await ProfileExperienceModel.insertMany(workExperienceData);
 	} 
 	catch (error) {
-		console.error('Failed creating entries in database from forms in approved application: ' +  error);
+		console.error('Failed creating entries in database from forms in approved content creator application: ' +  error);
 		throw new Error('E1007');
 	}
 }

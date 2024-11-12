@@ -1,5 +1,8 @@
 const router = require('express').Router();
+// Helpers
 const errorCodes = require('../helpers/errorCodes');
+const { storeEducationAndExperienceFormsInDB } = require('../helpers/contentCreatorApplicationHelper');
+
 //Import all relevant models
 const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
@@ -9,9 +12,6 @@ const { approveEmail, rejectionEmail } = require('../applications/content-creato
 
 const { UserModel } = require('../models/Users'); 
 const { InstitutionModel } = require('../models/Institutions'); 
-
-// Services
-const { storeEducationAndExperienceFormsInDB } = require('../services/applicationService');
 
 //Route for when getting all applications
 router.get('/', async (req, res) => {
@@ -91,12 +91,14 @@ router.put('/:id?approve', async (req, res) => {
 		return res.status(200).json();
 
 	} catch(error) {
-		if (error.message === 'E1005') 
+		switch (error.message) {
+		case 'E1005':
 			return res.status(400).json({ 'error': errorCodes['E1005'] }); // 'Could not get Content Creator application'
-		else if (error.message === 'E1007') 
-			return res.status(400).json({ 'error': errorCodes['E1007'] }); // 'Could not save application forms'
-		else
+		case 'E1007':
+			return res.status(400).json({ 'error': errorCodes['E1007'] }); // 'Could not save Content Creator application forms to database!'
+		default:
 			return res.status(400).json({ 'error': errorCodes['E1003'] }); // 'Could not approve Content Creator'
+		}
 	}
 });
 

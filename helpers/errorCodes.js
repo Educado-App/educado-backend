@@ -318,7 +318,7 @@ module.exports = {
 
 	E1007: {
 		code: 'E1007',
-		message: 'Could not save application forms'
+		message: 'Could not save Content Creator application forms to database!'
 	},
 
 	// E11 - Component Errors
