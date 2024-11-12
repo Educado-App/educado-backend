@@ -64,7 +64,7 @@ describe('POST /api/auth/verify-email', () => {
             .send(fakeUser);
         
         expect(res.status).toBe(400);
-        expect(res.body.message).toBe('Código inválido ou expirado');
+        expect(res.body.error).toBe('Invalid or expired token.1');
     });
 
     it('should return 400 if the token is invalid or expired', async () => {
@@ -76,7 +76,7 @@ describe('POST /api/auth/verify-email', () => {
             .send(fakeUser);
         
         expect(res.status).toBe(400);
-        expect(res.body.message).toBe('Código inválido ou expirado');
+        expect(res.body.error).toBe('Invalid or expired token.1');
     });
 
 	afterAll(async () => {

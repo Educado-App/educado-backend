@@ -158,6 +158,7 @@ router.post('/newapplication', async (req, res) => {
 //This is the only route currently required for the Institutional Onboarding, so it will be placed here for now
 router.post('/newinstitution', async (req, res) => {
 	try {
+
 		const data = req.body;
 
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
@@ -168,31 +169,33 @@ router.post('/newinstitution', async (req, res) => {
 		}
 
 		const sharedDomain = await InstitutionModel.findOne({ domain: data.domain });
+
 		if (sharedDomain) {
 			//This Email Domain already exists as part of another Institution
 			return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain });
 		}
 
-		if (data.secondaryDomain !== null || data.secondaryDomain !== '') {
-			const sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
-			if (sharedSecondaryDomain) {
-				//This Secondary Email Domain already exists as part of another Institution
-				return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
-			}
+		//Since the secondary domain is optional, forcibly set it to null, as to avoid any type errors
+		let sharedSecondaryDomain;
+		!(data.secondaryDomain) ? sharedSecondaryDomain = null : sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
+
+		if (sharedSecondaryDomain) {
+			//This Secondary Email Domain already exists as part of another Institution
+			return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
 		}
 
-		const institutionData = new InstitutionModel(data);
+		const institutionData = InstitutionModel(data);
 		const institution = await institutionData.save();
+
 
 		//Return successful response
 		return res.status(201).json({ institution: institution });
 
-	} catch (err) {
-		console.error(err);
-
+	}
+	catch (err) {
 		return res.status(500).json({ 'error': errorCodes['E1201'] }); //Could not upload institution
 	}
-});
 
+});
 
 module.exports = router;

@@ -71,39 +71,40 @@ router.post('/', adminOnly, async (req, res) => {
 		}
 	}
 });
-// Update the secondary domain
+
+//update
 router.patch('/:id', [validateId, adminOnly], async (req, res) => {
 	const objectId = req.objectId;
 	const { institutionName, domain, secondaryDomain } = req.body;
-	// Check for missing fields
-	if (!institutionName || !domain) {
-		return res.status(400).send({ error: errorCodes['E0016'] });
+
+	//missing fields
+	//there might be a way for mongoose to check this and it could be handled in the try catch block
+	if(!institutionName || !domain) {
+		return res.status(400).send({ error: errorCodes['E0016']});
 	}
 
-	// Check for invalid fields
+	//invalid fields
+	//there might be a way for mongoose to check this and it could be handled in the try catch block
 	const isFieldsValid = validateInstitutionFields(institutionName, domain, secondaryDomain);
 	if (!isFieldsValid) {
-		return res.status(400).send({ error: errorCodes['E0016'] });
+		return res.status(400).send({ error: errorCodes['E0016']});
 	}
 
 	try {
-		// Update institution and return the updated document
+		//contains the institution entity before it was updated
 		const updatedInstitution = await InstitutionModel.findByIdAndUpdate(
-			objectId,
-			{ institutionName, domain, secondaryDomain },
-			{ new: true } // Add this option to return the updated document
+			objectId, { institutionName, domain, secondaryDomain }
 		);
 		
-		// Check if the institution was found
+		//404
 		if (!updatedInstitution) {
 			return res.status(404).send({ error: errorCodes['E1206'] });
 		}
 
-		// Return a success response
-		res.status(200).send({ message: 'Institution updated successfully', institution: updatedInstitution });
+		res.status(204).send();
 	} catch (err) {
 		switch (err.code) {
-		// Field already in use
+		//field already in use
 		case 11000:
 			handleFieldAlreadyInUseErrorInfo(err, res);
 			break;
