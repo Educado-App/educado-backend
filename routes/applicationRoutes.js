@@ -139,14 +139,7 @@ router.post('/newapplication', async (req, res) => {
 //This is the only route currently required for the Institutional Onboarding, so it will be placed here for now
 router.post('/newinstitution', async (req, res) => {
 	try {
-
 		const data = req.body;
-
-		 // Set secondaryDomain to null if it is not defined or is an empty string
-		if (!data.secondaryDomain || data.secondaryDomain === null) {
-			data.secondaryDomain = '';
-			console.log('Secondary Domain is null');
-		}
 
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
 		const sharedName = await InstitutionModel.findOne({ institutionName: data.institutionName });
@@ -156,15 +149,13 @@ router.post('/newinstitution', async (req, res) => {
 		}
 
 		const sharedDomain = await InstitutionModel.findOne({ domain: data.domain });
-
 		if (sharedDomain) {
 			//This Email Domain already exists as part of another Institution
 			return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain });
 		}
 
-		let sharedSecondaryDomain;
-		if (data.secondaryDomain) {
-			sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
+		if (data.secondaryDomain !== null || data.secondaryDomain !== '') {
+			const sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
 			if (sharedSecondaryDomain) {
 				//This Secondary Email Domain already exists as part of another Institution
 				return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
@@ -174,15 +165,14 @@ router.post('/newinstitution', async (req, res) => {
 		const institutionData = new InstitutionModel(data);
 		const institution = await institutionData.save();
 
-
 		//Return successful response
 		return res.status(201).json({ institution: institution });
 
-	}
-	catch (err) {
+	} catch (err) {
+		console.error(err);
+
 		return res.status(500).json({ 'error': errorCodes['E1201'] }); //Could not upload institution
 	}
-
 });
 
 
