@@ -126,7 +126,7 @@ describe('Application Routes', () => {
 
     it('Should create a new institution', async () => {
 
-      const newInstitution = makeFakeApplication("companyName", "@mail.com", "@mail.sub.com");
+      const newInstitution = makeFakeInstitution("companyName", "@mail.com", "@sub.mail.com");
 
       const response = await request(app)
         .post('/api/application/newinstitution')
