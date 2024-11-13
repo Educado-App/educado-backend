@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 // Helpers
-const { CustomError, assert } = require('../helpers/error');
+const { assert } = require('../helpers/error');
 const errorCodes = require('../helpers/errorCodes');
 const { storeEducationAndExperienceFormsInDB } = require('../helpers/contentCreatorApplicationHelper');
 
