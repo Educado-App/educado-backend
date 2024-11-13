@@ -1,4 +1,5 @@
 const router = require('express').Router();
+
 // Helpers
 const { CustomError, assert } = require('../helpers/error');
 const errorCodes = require('../helpers/errorCodes');
@@ -78,13 +79,8 @@ router.put('/:id?approve', async (req, res) => {
 		assert(updatedContentCreator, errorCodes.E1003);
 
 		// Fetch application belonging to content creator
-		// const application = await ApplicationModel.findOne({ baseUser: id });
 		const application = await ApplicationModel.findOne({ baseUser: id });
-
-		if (!application) {
-			console.error('Application for content creator not found in database!');
-			throw new CustomError(errorCodes.E1005);
-		}
+		assert(application, errorCodes.E1005);
         
 		//send email to the user
 		await approveEmail(id);
@@ -99,13 +95,13 @@ router.put('/:id?approve', async (req, res) => {
 		console.error(error.code);
 		switch (error.code) {
 		case 'E1005':
-			return res.status(400).json({ 'error': error.message }); // 'Could not get Content Creator application'
+			return res.status(404).json({ 'error': error.message });  // 'Could not get Content Creator application'
 		case 'E1007':
-			return res.status(400).json({ 'error': error.message }); // 'Could not save Content Creator application forms to database!'
+			return res.status(500).json({ 'error': error.message });  // 'Could not save Content Creator application forms to database!'
 		case 'E1003':
-			return res.status(400).json({'error' : error.message});
+			return res.status(404).json({ 'error' : error.message }); // 'Could not approve Content Creator'
 		default:
-			return res.status(400).json({ 'error': errorCodes.E0000.message }); // 'Could not approve Content Creator'
+			return res.status(400).json({ 'error': errorCodes.E0000.message }); // 'Unknown error'
 		}
 	}
 });
