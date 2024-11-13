@@ -27,19 +27,25 @@ jest.mock('../../helpers/email.js', () => ({
 }));
 
 
+
 describe('Application Routes', () => {
   let db; // Store the database connection
-
+  
   beforeAll(async () => {
     db = await connectDb(); // Connect to the database
   });
-
+  
   beforeEach(async () => {
     await db.collection('users').insertOne(newUser);
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
+    
     let approved = false, rejected = false;
     const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
+    
+    const fakeApplication = makeFakeApplication(user._id);
+
     await db.collection('content-creators').insertOne(newContentCreator);
+    await db.collection('applications').insertOne(fakeApplication);
 
   });
 
@@ -87,10 +93,6 @@ describe('Application Routes', () => {
     it('Should approve an application', async () => {
       const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
 
-      const fakeApplication = makeFakeApplication(fakeId);
-      await db.collection('applications').insertOne(fakeApplication);
-
-
       const res = await request(app)
         .put(`/api/application/${fakeId}approve`)  // Updated the route
         .expect(200);  // Expect a successful approval
@@ -106,9 +108,6 @@ describe('Application Routes', () => {
     it('Should reject an application with a reason', async () => {
       const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
       const reason = 'Not meeting the criteria';
-
-      const fakeApplication = makeFakeApplication(fakeId);
-      await db.collection('applications').insertOne(fakeApplication);
 
       const res = await request(app)
         .put(`/api/application/${fakeId}reject`)  // Updated the route
@@ -127,7 +126,7 @@ describe('Application Routes', () => {
 
     it('Should create a new institution', async () => {
 
-      const newInstitution = makeFakeApplication("companyName", "@mail.com", "@mail.sub.com");
+      const newInstitution = makeFakeInstitution("companyName", "@mail.com", "@sub.mail.com");
 
       const response = await request(app)
         .post('/api/application/newinstitution')
