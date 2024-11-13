@@ -147,13 +147,16 @@ router.put('/:id?reject', async (req, res) => {
 
 //Route for creating new application
 router.post('/newapplication', async (req, res) => {
-	// Find Application 
-	const application = await ApplicationModel.findOne({ baseUser: req.body.baseUser });
 	try {
+
+		const data = req.body;
+		const baseUser = data.baseUser;
+		// Find Application 
+		const application = await ApplicationModel.findOne({ baseUser: baseUser });
+		
 		if (!application) {
 			//Define the new application based on the data from the request body
-			const data = req.body;
-			const applicator = await UserModel.findOne({ _id: req.body.baseUser });
+			const applicator = await UserModel.findOne({ _id: baseUser });
 
 			//Save the data as part of the MongoDB ApplicationModel 
 			const application = ApplicationModel(data);
@@ -177,9 +180,12 @@ router.post('/newinstitution', async (req, res) => {
 	try {
 
 		const data = req.body;
+		const institutionName = data.institutionName;
 
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
-		const sharedName = await InstitutionModel.findOne({ institutionName: data.institutionName });
+		const sharedName = await InstitutionModel.findOne({ institutionName: institutionName });
+
+		console.log(sharedName);
 		if (sharedName) {
 			//This Institution already exists
 			return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.institutionName });
