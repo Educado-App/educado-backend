@@ -1,6 +1,8 @@
 const { ProfileEducationModel } = require('../models/ProfileEducation');
 const { ProfileExperienceModel } = require('../models/ProfileExperience');
 
+const errorCodes = require('./errorCodes');
+const { CustomError } = require('./error');
 /**
  * Creates database entries for academic and work experience forms from approved content creator application.
  *
@@ -36,7 +38,7 @@ async function storeEducationAndExperienceFormsInDB(application) {
 	} 
 	catch (error) {
 		console.error('Failed creating entries in database from forms in approved content creator application: ' +  error);
-		throw new Error('E1007');
+		throw new CustomError(errorCodes.E1007);
 	}
 }
 
