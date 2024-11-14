@@ -1,54 +1,37 @@
 const router = require('express').Router();
+
+// Helpers
 const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
+const { deleteAllUserDataInDB } = require('../helpers/userHelper');
 const errorCodes = require('../helpers/errorCodes');
+const { assert } = require('../helpers/error');
+const { encrypt, compare } = require('../helpers/password');
+
+// Models
 const { UserModel } = require('../models/Users');
-const { StudentModel } = require('../models/Students');
-const { ContentCreatorModel } = require('../models/ContentCreators');
-const { ApplicationModel } = require('../models/Applications');
+
+// Middlewares
 const requireLogin = require('../middlewares/requireLogin');
 const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
-const { encrypt, compare } = require('../helpers/password');
 
+// Route for user deletion
 router.delete('/:id', requireLogin, async (req, res) => {
-	console.log('hello1');
 	try {
-		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-			return res.status(400).send({ error: errorCodes['E0014'] });
-		}
+		// Ensure passed in id is valid
+		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		const id = mongoose.Types.ObjectId(req.params.id);	
 		
-		const id = mongoose.Types.ObjectId(req.params.id);
-		console.log('id: ' + id);
-		const user = await UserModel.findById(id);
-		console.log('user: ' + user);
-		// const deletedUser = await UserModel.findByIdAndDelete(id);
-		await UserModel.findByIdAndDelete(id);
-		// console.log('deletedUser: ' + deletedUser);
-
-
-		// if (!deletedUser) {
-		// 	console.log('yo');
-		// 	return res.status(204).send(); // User not found
-		// }
-
-		// const deletedStudentProfile = await StudentModel.findOneAndDelete({ baseUser: id });
-		await StudentModel.findOneAndDelete({ baseUser: id });
-		// const deletedContentCreatorProfile = await ContentCreatorModel.findOneAndDelete({ baseUser: id });
-		await ContentCreatorModel.findOneAndDelete({ baseUser: id });
-		await ApplicationModel.findOneAndDelete({ baseUser: id });
-
-		console.log("User succcesfully deleted!");
-		return res.status(200).send({
+		await deleteAllUserDataInDB(id);
 		
-			//baseUser: deletedUser,
-			// studentProfile: deletedStudentProfile,
-			// contentCreatorProfile: deletedContentCreatorProfile
-		});
-
+		return res.status(200);
 
 	} catch (error) {
-		console.error(error);
-		return res.status(500).send({ error: errorCodes['E0003'] });
+		console.error(error.code);
+		if(error.code === 'E0014')
+			return res.status(400).send({ error: error.message });	// 'Invalid id'
+		else if(error.code === 'E0018')
+			return res.status(500).send({ error: error.message });	// 'Failed to delete some or all user data from database!'
 	} 
 });
 
