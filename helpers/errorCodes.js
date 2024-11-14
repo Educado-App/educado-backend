@@ -320,6 +320,11 @@ module.exports = {
 		message: 'Could not upload application'
 	},
 
+	E1007: {
+		code: 'E1007',
+		message: 'Could not save Content Creator application forms to database!'
+	},
+
 	// E11 - Component Errors
 	E1101: {
 		code: 'E1101',

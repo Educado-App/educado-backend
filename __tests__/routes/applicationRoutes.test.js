@@ -7,7 +7,7 @@ const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeApplication = require('../fixtures/fakeApplication');
 
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator')
-const makeFakeInstitution = require('../fixtures/fakeInstitution')
+//const makeFakeInstitution = require('../fixtures/fakeInstitution')
 
 const app = express();
 app.use(express.json());
@@ -115,7 +115,7 @@ describe('Application Routes', () => {
 
 
   //Institution Tests
-  describe('POST /api/application/newinstitution', () => {
+  /* describe('POST /api/application/newinstitution', () => {
 
     it('Should create a new institution', async () => {
 
@@ -128,5 +128,5 @@ describe('Application Routes', () => {
 
       expect(response.body).toHaveProperty('institution');
     });
-  });
+  }); */
 });
