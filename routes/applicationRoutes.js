@@ -1,5 +1,10 @@
 const router = require('express').Router();
+
+// Helpers
+const { assert } = require('../helpers/error');
 const errorCodes = require('../helpers/errorCodes');
+const { storeEducationAndExperienceFormsInDB } = require('../helpers/contentCreatorApplicationHelper');
+
 //Import all relevant models
 const { ApplicationModel } = require('../models/Applications');
 const { ContentCreatorModel } = require('../models/ContentCreators');
@@ -66,20 +71,38 @@ router.put('/:id?approve', async (req, res) => {
 		const { id } = req.params;
         
 		//Find the content creator whose "baseUser" id matches the above id, and update their "approved" field to "true"
-		await ContentCreatorModel.findOneAndUpdate(
+		const updatedContentCreator = await ContentCreatorModel.findOneAndUpdate(
 			{ baseUser: id },
-			{ approved: true, rejected: false }
+			{ approved: true, rejected: false },
+			{ new: true }
 		);
+		assert(updatedContentCreator, errorCodes.E1003);
+
+		// Fetch application belonging to content creator
+		const application = await ApplicationModel.findOne({ baseUser: id });
+		assert(application, errorCodes.E1005);
         
 		//send email to the user
 		await approveEmail(id);
+
+		// Save academic and work experience forms to database
+		await storeEducationAndExperienceFormsInDB(application);
 
 		//Return successful response
 		return res.status(200).json();
 
 	} catch(error) {
-		//If anything unexpected happens, throw error
-		return res.status(400).json({ 'error': errorCodes['E1003'] }); //Could not approve Content Creator
+		console.error(error.code);
+		switch (error.code) {
+		case 'E1003':
+			return res.status(404).json({ 'error' : error.message }); // 'Could not approve Content Creator'
+		case 'E1005':
+			return res.status(404).json({ 'error': error.message });  // 'Could not get Content Creator application'
+		case 'E1007':
+			return res.status(500).json({ 'error': error.message });  // 'Could not save Content Creator application forms to database!'
+		default:
+			return res.status(400).json({ 'error': errorCodes.E0000.message }); // 'Unknown error'
+		}
 	}
 });
 
@@ -139,7 +162,6 @@ router.post('/newapplication', async (req, res) => {
 //This is the only route currently required for the Institutional Onboarding, so it will be placed here for now
 router.post('/newinstitution', async (req, res) => {
 	try {
-
 		const data = req.body;
 
 		//Before saving the new Institution, make sure that both the Email Domains and the Institution name are unique
@@ -150,33 +172,31 @@ router.post('/newinstitution', async (req, res) => {
 		}
 
 		const sharedDomain = await InstitutionModel.findOne({ domain: data.domain });
-
 		if (sharedDomain) {
 			//This Email Domain already exists as part of another Institution
 			return res.status(400).json({ 'error': errorCodes['E1203'], errorCause: data.domain });
 		}
 
-		//Since the secondary domain is optional, forcibly set it to null, as to avoid any type errors
-		let sharedSecondaryDomain;
-		!(data.secondaryDomain) ? sharedSecondaryDomain = null : sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
-
-		if (sharedSecondaryDomain) {
-			//This Secondary Email Domain already exists as part of another Institution
-			return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
+		if (data.secondaryDomain !== null || data.secondaryDomain !== '') {
+			const sharedSecondaryDomain = await InstitutionModel.findOne({ secondaryDomain: data.secondaryDomain });
+			if (sharedSecondaryDomain) {
+				//This Secondary Email Domain already exists as part of another Institution
+				return res.status(400).json({ 'error': errorCodes['E1202'], errorCause: data.secondaryDomain });
+			}
 		}
 
-		const institutionData = InstitutionModel(data);
+		const institutionData = new InstitutionModel(data);
 		const institution = await institutionData.save();
-
 
 		//Return successful response
 		return res.status(201).json({ institution: institution });
 
-	}
-	catch (err) {
+	} catch (err) {
+		console.error(err);
+
 		return res.status(500).json({ 'error': errorCodes['E1201'] }); //Could not upload institution
 	}
-
 });
+
 
 module.exports = router;
