@@ -1,5 +1,6 @@
 const { StudentModel } = require('../models/Students');
 const { SectionModel } = require('../models/Sections');
+const { CourseModel } = require('../models/Courses');
 const mongoose = require('mongoose');
 
 const COMP_TYPES = {
@@ -7,113 +8,112 @@ const COMP_TYPES = {
 	EXERCISE: 'exercise'
 };
 
-async function markAsCompleted(student, comp, points, isComplete) {
-	const sectionId = mongoose.Types.ObjectId(comp.parentSection.toString());
-	const section = await SectionModel.findById(sectionId);
+async function markAsCompleted(student, comp, isComplete) {
+	try {
+		const sectionId = mongoose.Types.ObjectId(comp.parentSection.toString());
+		const section = await SectionModel.findById(sectionId);
+		if (!section) {
+			return undefined;
+		}
 
-	if (!section) {
+		const courseId = mongoose.Types.ObjectId(section.parentCourse.toString());
+		const course = await CourseModel.findById(courseId);
+		if (!course) {
+			return undefined;
+		}
+
+		const courseStudent = findCourse(student, courseId);
+		const sectionStudent = findSection(courseStudent, sectionId);
+		const componentStudent = findComp(sectionStudent, comp._id);
+
+		const obj = await markComponentAsCompleted(course, courseStudent, sectionStudent, componentStudent, student, isComplete);
+		obj.section = await markSectionAsCompleted(course, student, obj.section, isComplete);
+		obj.course = await markCourseAsCompleted(course, obj.course, student, isComplete);
+
+		const index = obj.student.courses.findIndex(course => course.courseId.toString() === courseId.toString());
+		if (index >= 0) {
+			obj.student.courses[index] = obj.course;
+			student = await updateUserLevel(obj.student);
+			const updatedStudent = await StudentModel.findByIdAndUpdate(
+				{ _id: student._id },
+				{
+					$set: {
+						courses: student.courses,
+						level: student.level,
+						points: student.points
+					}
+				},
+				{ new: true }
+			);
+			return updatedStudent;
+		}
 		return undefined;
+	} catch (error) {
+		console.error('Error in markAsCompleted:', error);
+		throw error;
 	}
-
-	const courseId = mongoose.Types.ObjectId(section.parentCourse.toString());
-
-	const courseStudent = findCourse(student, courseId);
-	const sectionStudent = findSection(courseStudent, sectionId);
-	const componentStudent = findComp(sectionStudent, comp._id);
-
-	const obj = markComponentAsCompleted(courseStudent, sectionStudent, componentStudent, student, points, isComplete);
-
-	obj.section = markSectionAsCompleted(student, obj.section, isComplete);
-	obj.course = markCourseAsCompleted(obj.course, isComplete);
-
-	// update extra points
-	obj.student.points += obj.section.extraPoints; 
-
-	const index = obj.student.courses.findIndex(course => course.courseId.toString() === courseId.toString());
-
-	if (index >= 0) {
-		obj.student.courses[index] = obj.course;
-
-		student = await updateUserLevel(obj.student);
-
-		await StudentModel.findByIdAndUpdate(
-			{ _id: student._id },
-			{
-				$set: {
-					courses: student.courses,
-					level: student.level,
-					points: student.points
-				}
-			},
-			{ new: true }
-		);
-
-		return student;
-	}
-
-	return undefined;
 }
 
-function markComponentAsCompleted(course, section, component, student, points, isComplete) {
-	if (!component) {
+async function markComponentAsCompleted(course, courseStudent, sectionStudent, componentStudent, student, isComplete) {
+	if (!componentStudent) {
 		return undefined;
 	}
 
-	if (component.compType === COMP_TYPES.EXERCISE) {
+	if (componentStudent.compType === COMP_TYPES.EXERCISE && isComplete) {
+		// Only award points if this is the first time completing
+		if (!componentStudent.isComplete) {
+			const pointsToAward = componentStudent.isFirstAttempt ? 
+				course.pointsConfig.exerciseCompletion + course.pointsConfig.firstAttemptBonus :
+				course.pointsConfig.exerciseCompletion;
 
-		// update the section's, course's and student's points
-		section.totalPoints += points;
-		course.totalPoints += points;
-		student.points += points;
-
-		if (!component.isComplete) {
-			if (isComplete) {
-				component.pointsGiven = points;
-			} else {
-				component.isFirstAttempt = false;
-			}
+			sectionStudent.totalPoints += pointsToAward;
+			courseStudent.totalPoints += pointsToAward;
+			student.points += pointsToAward;
+			componentStudent.pointsGiven = pointsToAward;
 		}
 	}
 
-	if (!component.isComplete) {
-		component.isComplete = isComplete;
+	if (!componentStudent.isComplete) {
+		componentStudent.isComplete = isComplete;
 	}
 
 	if (isComplete) {
-		component.completionDate = Date.now();
+		componentStudent.completionDate = Date.now();
 	}
 
 	return {
-		course,
-		section,
+		course: courseStudent,
+		section: sectionStudent,
 		student,
-		component,
+		component: componentStudent,
 	};
 }
 
-function markSectionAsCompleted(student, section, isComplete) {
+async function markSectionAsCompleted(course, student, section, isComplete) {
 	if (isComplete) {
 		const anyComponentIncomplete = section.components.some(component => !component.isComplete);
-
-		if (!anyComponentIncomplete) {
+		if (!anyComponentIncomplete && !section.isComplete) {
 			section.isComplete = true;
-			section.extraPoints = student.currentExtraPoints;
 			section.completionDate = Date.now();
+			// Award section completion points
+			section.extraPoints = course.pointsConfig.sectionCompletion;
+			student.points += course.pointsConfig.sectionCompletion;
 		}
 	}
 	return section;
 }
 
-function markCourseAsCompleted(course, isComplete) {
+async function markCourseAsCompleted(course, courseStudent, student, isComplete) {
 	if (isComplete) {
-		const anySectionIncomplete = course.sections.some(section => !section.isComplete);
-
-		if (!anySectionIncomplete) {
-			course.isComplete = true;
-			course.completionDate = Date.now();
+		const anySectionIncomplete = courseStudent.sections.some(section => !section.isComplete);
+		if (!anySectionIncomplete && !courseStudent.isComplete) {
+			courseStudent.isComplete = true;
+			courseStudent.completionDate = Date.now();
+			// Award course completion points
+			student.points += course.pointsConfig.courseCompletion;
 		}
 	}
-	return course;
+	return courseStudent;
 }
 
 function findCourse(student, courseId) {

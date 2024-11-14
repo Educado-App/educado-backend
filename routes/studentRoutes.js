@@ -3,10 +3,10 @@ const errorCodes = require('../helpers/errorCodes');
 const { markAsCompleted } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { findTop100Students } = require('../helpers/leaderboard');
 const { addIncompleteCourse } = require('../helpers/completing');
 const { StudentModel } = require('../models/Students');
 const { CourseModel } = require('../models/Courses');
+const { SectionModel } = require('../models/Sections');
 const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
@@ -319,76 +319,31 @@ router.patch('/:id/courses/:courseId/enroll', requireLogin, async (req, res) => 
 router.patch('/:id/complete', requireLogin, async (req, res) => {
 	try {
 		const { id } = req.params;
-		let { comp, isComplete, points } = req.body;
+		let { comp, isComplete } = req.body;  // Remove points from destructuring
 
 		let student = await StudentModel.findOne({ baseUser: id });
-
 		if (!student) {
 			return res.status(404).json({ error: errorCodes['E0004'] });
 		}
 
-		const updatedStudent = await markAsCompleted(student, comp, points, isComplete);
+		// Get course to access pointsConfig
+		const section = await SectionModel.findById(comp.parentSection);
+		if (!section) {
+			return res.status(404).json({ error: errorCodes['E0007'] }); // Add section not found error code
+		}
+
+		const course = await CourseModel.findById(section.parentCourse);
+		if (!course) {
+			return res.status(404).json({ error: errorCodes['E0006'] });
+		}
+
+		// Pass course to markAsCompleted instead of points
+		const updatedStudent = await markAsCompleted(student, comp, course, isComplete);
 
 		res.status(200).send(updatedStudent);
 	} catch (error) {
-		// If the server could not be reached, return an error message
+		console.error('Error in completion endpoint:', error);
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
-	}
-});
-
-// Update the current extra points for a student like daily streaks
-router.put('/:id/extraPoints', requireLogin, async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { extraPoints } = req.body;
-
-		if (!mongoose.Types.ObjectId.isValid(id)) {
-			return res.status(400).json({ error: errorCodes['E0014'] });
-		}
-
-		if (isNaN(extraPoints)) {
-			return res.status(400).json({ error: errorCodes['E0804'] });
-		}
-
-		const student = await StudentModel.findOneAndUpdate(
-			{ baseUser: id },
-			{
-				$inc: {
-					currentExtraPoints: extraPoints
-				}
-			}
-		);
-
-		if (!student) {
-			return res.status(404).json({ error: errorCodes['E0004'] });
-		}
-
-		res.status(200).json(student);
-	} catch (error) {
-		res.status(500).json({ error: errorCodes['E0003'] });
-	}
-});
-
-/* NOT USED  */
-// Get the 100 students with the highest points, input is the time interval (day, week, month, all)
-router.get('/leaderboard', async (req, res) => {
-	try {
-		const { timeInterval } = req.body;
-
-		if (!timeInterval) {
-			throw errorCodes['E0015'];
-		}
-
-		const leaderboard = await findTop100Students(timeInterval);
-
-		res.status(200).send(leaderboard);
-	} catch (error) {
-		// Handle errors appropriately
-		if (error === errorCodes['E0015']) {
-			res.status(500).json({ 'error': errorCodes['E0015'] });
-		} else {
-			res.status(500).json({ 'error': errorCodes['E0003'] });
-		}
 	}
 });
 

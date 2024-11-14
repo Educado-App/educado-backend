@@ -32,9 +32,9 @@ const courseSchema = new Schema({
 		type: String,
 		enum: ['personal finance', 'health and workplace safety', 'sewing', 'electronics'],
 	},
-	creator: { 
-		type: Schema.Types.ObjectId, 
-		ref: 'content-creators' 
+	creator: {
+		type: Schema.Types.ObjectId,
+		ref: 'content-creators'
 	},
 	difficulty: {
 		type: Number,
@@ -45,6 +45,25 @@ const courseSchema = new Schema({
 		type: String,
 		enum: ['draft', 'published', 'hidden'],
 		default: 'draft',
+	},
+	// Add point configuration
+	pointsConfig: {
+		exerciseCompletion: {
+			type: Number,
+			default: 1  // Default 1 point for completing an exercise
+		},
+		sectionCompletion: {
+			type: Number,
+			default: 5  // Default 5 points for completing a section
+		},
+		courseCompletion: {
+			type: Number,
+			default: 10 // Default 10 points for completing the course
+		},
+		firstAttemptBonus: {
+			type: Number,
+			default: 1  // Optional bonus point for first attempt success
+		}
 	},
 	estimatedHours: Number,
 	rating: {
@@ -59,16 +78,15 @@ const courseSchema = new Schema({
 		type: Number,
 		default: 0,
 	},
-	sections: [{ 
-		type: Schema.Types.ObjectId, ref: 'sections'
+	sections: [{
+		type: Schema.Types.ObjectId, 
+		ref: 'sections'
 	}],
 	feedbackOptions:{
 		type: [feedbackOptionsSubSchema],
 		default: []
 	}
-		
 });
 
-const CourseModel = mongoose.model('courses', courseSchema); // Create new collection called courses, using the courseScema
-
+const CourseModel = mongoose.model('courses', courseSchema);
 module.exports = { CourseModel };
