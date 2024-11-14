@@ -12,7 +12,7 @@ const { ProfileExperienceModel } = require('../models/ProfileExperience');
 const errorCodes = require('./errorCodes');
 const { CustomError } = require('./error');
 
-async function deleteAllUserDataInDB(id) {
+async function deleteAccountDataInDB(id) {
 	try {
 		// Delete database entries
 		await UserModel.findByIdAndDelete(id);							// User
@@ -42,8 +42,8 @@ async function deleteAllUserDataInDB(id) {
 		await StudentModel.deleteOne({ baseUser: id });
 	}
 	catch(error) {
-		throw new CustomError(errorCodes.E0018);    // 'Failed to delete some or all user data from database!'
+		throw new CustomError(errorCodes.E0018);    // 'Failed to delete all account data from database!'
 	}
 }
 
-module.exports = { deleteAllUserDataInDB };
+module.exports = { deleteAccountDataInDB };

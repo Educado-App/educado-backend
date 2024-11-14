@@ -76,7 +76,7 @@ module.exports = {
 	},
 	E0018: {
 		code: 'E0018',
-		message: 'Failed to delete some or all user data from database!'
+		message: 'Failed to delete all account data from database!'
 	},
 
 	// E01 - Login errors

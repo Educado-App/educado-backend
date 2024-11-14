@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 // Helpers
 const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
-const { deleteAllUserDataInDB } = require('../helpers/userHelper');
+const { deleteAccountDataInDB } = require('../helpers/userHelper');
 const errorCodes = require('../helpers/errorCodes');
 const { assert } = require('../helpers/error');
 const { encrypt, compare } = require('../helpers/password');
@@ -15,23 +15,39 @@ const requireLogin = require('../middlewares/requireLogin');
 const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
 
-// Route for user deletion
+// Route for account deletion
 router.delete('/:id', requireLogin, async (req, res) => {
 	try {
+		console.log("Invoked delete route!");
+		
 		// Ensure passed in id is valid
 		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		console.log("id is valid!");
+
 		const id = mongoose.Types.ObjectId(req.params.id);	
+		console.log("id is stored!");
+
+		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
+		console.log("user is found!");
+
+		await deleteAccountDataInDB(id);
+		console.log("Account deleted!");
 		
-		await deleteAllUserDataInDB(id);
-		
+		// return res.status(200).send({ baseUser: id });
 		return res.status(200);
 
 	} catch (error) {
-		console.error(error.code);
-		if(error.code === 'E0014')
-			return res.status(400).send({ error: error.message });	// 'Invalid id'
-		else if(error.code === 'E0018')
-			return res.status(500).send({ error: error.message });	// 'Failed to delete some or all user data from database!'
+		console.error(error.message);
+		switch(error.code) {
+		case 'E0014':
+			return res.status(400).send({ error: error.message }); // 'Invalid id'
+		case 'E0004':
+			return res.status(404).send({ error: error.message }); // 'User not found'
+		case 'E0018':
+			return res.status(500).send({ error: error.message }); // 'Failed to delete all account data from database!'
+		default:
+			return res.status(400).send({ error: errorCodes.E0000.message }); // 'Unknown error'
+		}
 	} 
 });
 
