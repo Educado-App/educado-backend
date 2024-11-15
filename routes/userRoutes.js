@@ -18,22 +18,17 @@ const mongoose = require('mongoose');
 // Route for account deletion
 router.delete('/:id', requireLogin, async (req, res) => {
 	try {
-		console.log("Invoked delete route!");
-		
 		// Ensure passed in id is valid
 		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
-		console.log("id is valid!");
 
 		const id = mongoose.Types.ObjectId(req.params.id);	
-		console.log("id is stored!");
 
+		// Ensure user is actually existing
 		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
-		console.log("user is found!");
 
 		await deleteAccountDataInDB(id);
-		console.log("Account deleted!");
 		
-		return res.status(200).send({ baseUser: id });
+		return res.status(200).send({ message: 'Account successfully deleted!' });
 		
 	} catch (error) {
 		console.error(error.message);
