@@ -1,16 +1,16 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/applicationRoutes');
+
 const mongoose = require('mongoose');
 const connectDb = require('../fixtures/db');
+
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeApplication = require('../fixtures/fakeApplication');
-
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
 const makeFakeInstitution = require('../fixtures/fakeInstitution');
 
 const errorCodes = require('../../helpers/errorCodes');
-const fakeContentCreator = require('../fixtures/fakeContentCreator');
 
 const app = express();
 app.use(express.json());
