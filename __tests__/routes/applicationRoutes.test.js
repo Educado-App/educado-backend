@@ -6,8 +6,8 @@ const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeApplication = require('../fixtures/fakeApplication');
 
-const makeFakeContentCreator = require('../fixtures/fakeContentCreator')
-//const makeFakeInstitution = require('../fixtures/fakeInstitution')
+const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
+const makeFakeInstitution = require('../fixtures/fakeInstitution');
 
 const app = express();
 app.use(express.json());
@@ -39,6 +39,9 @@ describe('Application Routes', () => {
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
     let approved = false, rejected = false;
     const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
+    const newApplication = makeFakeApplication(user._id);
+
+    await db.collection('applications').insertOne(newApplication);
     await db.collection('content-creators').insertOne(newContentCreator);
 
   });
@@ -72,54 +75,68 @@ describe('Application Routes', () => {
   describe('POST /api/application/newapplication', () => {
     it('Should create a new application', async () => {
 
-      const newApplication = makeFakeApplication(newUser._id);
+      const newApplicationUser = makeFakeUser(email = "fake@fakefake.dk");
+      const newApplicationUserId = newApplicationUser._id;
+
+      await db.collection('users').insertOne(newApplicationUser);
+      
+      const fakeApplication = makeFakeApplication(newApplicationUserId);
+
+
       const response = await request(app)
         .post('/api/application/newapplication')
-        .send(newApplication)
+        .send(fakeApplication)
         .expect(201);
 
       expect(response.body).toHaveProperty('application');
+
+      expect(response.body.application).toHaveProperty('baseUser');
+
+      const applicationBaseUserString = response.body.application.baseUser.toString();
+      const baseUserIdString = newApplicationUserId.toString();
+
+      expect(applicationBaseUserString).toEqual(baseUserIdString);
     });
   });
 
-  // //Test Application Approval
-  // describe('PUT /api/application/:id?approve', () => {
-  //   it('Should approve an application', async () => {
-  //     const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
+  //Test Application Approval
+  describe('PUT /api/application/:id?approve', () => {
+    it('Should approve an application', async () => {
+      const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
 
-  //     await request(app)
-  //       .put(`/api/application/${fakeId}approve`)  // Updated the route
-  //       .expect(200);  // Expect a successful approval
+      await request(app)
+        .put(`/api/application/${fakeId}approve`)  // Updated the route
+        .expect(200);  // Expect a successful approval
 
-  //     const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-  //     console.log(updatedNewContentCreator);
-  //     expect(updatedNewContentCreator.approved).toBe(true);
-  //   });
-  // });
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      console.log(updatedNewContentCreator);
+      expect(updatedNewContentCreator.approved).toBe(true);
+    });
+  });
 
-  // //Test Application Rejection
-  // describe('PUT /api/application/:id?reject', () => {
-  //   it('Should reject an application with a reason', async () => {
-  //     const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
-  //     const reason = 'Not meeting the criteria';
+  //Test Application Rejection
+  describe('PUT /api/application/:id?reject', () => {
+    it('Should reject an application with a reason', async () => {
+      const fakeId = newUser._id;  // Assuming newUser is already defined in your test setup
+      const rejectionReason = 'Not meeting the criteria';
 
-  //     await request(app)
-  //       .put(`/api/application/${fakeId}/reject`)  // Updated the route
-  //       .send({ reason })  // Sending the reason in the request body
-  //       .expect(200);  // Expect a successful rejection
+      await request(app)
+        .put(`/api/application/${fakeId}reject`)
+        .send({ rejectionReason: rejectionReason })
+        .expect(200);  // Expect a successful rejection
 
-  //     const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-  //     expect(updatedNewContentCreator.rejected).toBe(true);
-  //   });
-  // });
+      const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
+      expect(updatedNewContentCreator.rejected).toBe(true);
+    });
+  });
 
 
   //Institution Tests
-  /* describe('POST /api/application/newinstitution', () => {
+  describe('POST /api/application/newinstitution', () => {
 
     it('Should create a new institution', async () => {
 
-      const newInstitution = makeFakeApplication("companyName", "@mail.com", "@mail.sub.com");
+      const newInstitution = makeFakeInstitution("companyName", "@mail.com", "@mail.sub.com");
 
       const response = await request(app)
         .post('/api/application/newinstitution')
@@ -128,5 +145,5 @@ describe('Application Routes', () => {
 
       expect(response.body).toHaveProperty('institution');
     });
-  }); */
+  });
 });
