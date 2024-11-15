@@ -9,6 +9,9 @@ const makeFakeApplication = require('../fixtures/fakeApplication');
 const makeFakeContentCreator = require('../fixtures/fakeContentCreator');
 const makeFakeInstitution = require('../fixtures/fakeInstitution');
 
+const errorCodes = require('../../helpers/errorCodes');
+const fakeContentCreator = require('../fixtures/fakeContentCreator');
+
 const app = express();
 app.use(express.json());
 app.use('/api/application', router); // Mount the router under '/api' path
@@ -38,6 +41,7 @@ describe('Application Routes', () => {
     await db.collection('users').insertOne(newUser);
     const user = await db.collection('users').findOne({ email: 'fake@gmail.com' });
     let approved = false, rejected = false;
+
     const newContentCreator = makeFakeContentCreator(user._id, approved, rejected);
     const newApplication = makeFakeApplication(user._id);
 
@@ -109,8 +113,42 @@ describe('Application Routes', () => {
         .expect(200);  // Expect a successful approval
 
       const updatedNewContentCreator = await db.collection('content-creators').findOne({ baseUser: fakeId });
-      console.log(updatedNewContentCreator);
+      
       expect(updatedNewContentCreator.approved).toBe(true);
+    });
+  });
+
+  describe('PUT /api/application/:id?approve', () => {
+    it('Should fail because it cannot find a content creator', async () => {
+      const fakeNonContentCreator = makeFakeUser(email = "iamnotacontentcreator@mailmail.dk");
+      await db.collection('users').insertOne(fakeNonContentCreator);
+
+      const fakeNonContentCreatorId = fakeNonContentCreator._id;
+
+      const res = await request(app)
+        .put(`/api/application/${fakeNonContentCreatorId}approve`)  // Updated the route
+        .expect(404);  // Expect a successful approval
+
+      expect(res.body.error).toEqual(errorCodes.E1003.message);
+    });
+  });
+
+  describe('PUT /api/application/:id?approve', () => {
+    it('Should fail because it cannot find an application for a content creator', async () => {
+      const newUserNoApp = makeFakeUser(email = "ihavenotapplied@mailmail.dk");
+      await db.collection('users').insertOne(newUserNoApp);
+      
+      const fakeContentCreatorWithoutApplication = fakeContentCreator(newUserNoApp._id, false, false);
+      await db.collection('content-creators').insertOne(fakeContentCreatorWithoutApplication);
+
+
+      const newUserNoAppId = newUserNoApp._id;
+
+      const res = await request(app)
+        .put(`/api/application/${newUserNoAppId}approve`)  // Updated the route
+        .expect(404);  // Expect a successful approval
+
+      expect(res.body.error).toEqual(errorCodes.E1005.message);
     });
   });
 
