@@ -33,9 +33,8 @@ router.delete('/:id', requireLogin, async (req, res) => {
 		await deleteAccountDataInDB(id);
 		console.log("Account deleted!");
 		
-		// return res.status(200).send({ baseUser: id });
-		return res.status(200);
-
+		return res.status(200).send({ baseUser: id });
+		
 	} catch (error) {
 		console.error(error.message);
 		switch(error.code) {
