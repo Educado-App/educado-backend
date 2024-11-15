@@ -84,12 +84,12 @@ describe('Application Routes', () => {
 
       await db.collection('users').insertOne(newApplicationUser);
       
-      const fakeApplication = makeFakeApplication(newApplicationUserId);
+      const fakeTestApplication = makeFakeApplication(newApplicationUserId);
 
 
       const response = await request(app)
         .post('/api/application/newapplication')
-        .send(fakeApplication)
+        .send(fakeTestApplication)
         .expect(201);
 
       expect(response.body).toHaveProperty('application');
@@ -138,7 +138,7 @@ describe('Application Routes', () => {
       const newUserNoApp = makeFakeUser(email = "ihavenotapplied@mailmail.dk");
       await db.collection('users').insertOne(newUserNoApp);
       
-      const fakeContentCreatorWithoutApplication = fakeContentCreator(newUserNoApp._id, false, false);
+      const fakeContentCreatorWithoutApplication = makeFakeContentCreator(newUserNoApp._id, false, false);
       await db.collection('content-creators').insertOne(fakeContentCreatorWithoutApplication);
 
 
