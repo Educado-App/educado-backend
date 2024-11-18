@@ -540,24 +540,33 @@ router.patch('/:id/updateStatus', async (req, res) => {
 
 
 //When creating new course from scratch
-router.post('/create/new', async(req, res) => {
+router.put('/create/new', async(req, res) => {
+	try{
 	// title, category, difficulty, description, coverImg	
-	const { courseInfo } = req.body.courseInfo;
-	const { sections } = req.body.sections ? req.body.sections : [];
+		const { courseInfo } = req.body.courseInfo;
+		const { sections } = req.body.sections ? req.body.sections : [];
 
-	const courseObject = createCourseObject(courseInfo);
+		const courseObject = createCourseObject(courseInfo);
 
-	const sectionsArrayObject = createSections(sections);
+		const sectionsArrayObject = createSections(sections);
 
-	courseObject.sections = sectionsArrayObject;
-
-	const course = await CourseModel.insertOne(courseObject);
-	
-	if(course.acknowledged) {
-		res.send(200);
+		courseObject.sections = sectionsArrayObject;
+		
+		const course = await CourseModel.insertOne(courseObject);
+		
+		if(course.acknowledged) {
+			res.send(200);
+		}
+		res.send(500);
+	} catch {
+		res.send(404);
 	}
-	res.send(500);
+});
 
+router.get('/create/new', async(req, res) => {
+
+	console.log('test');
+	res.send(200);
 });
 
 
@@ -617,5 +626,5 @@ dateCreated
 dateUpdated
 
 What is a course?
-	- 
+	- title, category, difficulty, description, coverImg
 */
