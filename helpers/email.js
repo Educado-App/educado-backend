@@ -81,11 +81,13 @@ function generateEmailTemplate(content) {
         display: block;
       }
       .footer {
+		text-align: center;
         padding: 20px;
         background-color: #f2f4f6;
         border-top: 1px solid #eaeaec;
       }
       .footer img {
+	  	text-align: center;
         width: 100px;
         vertical-align: middle;
       }
@@ -108,7 +110,7 @@ function generateEmailTemplate(content) {
                     </td>
                   </tr>
                   <tr>
-                    <td class="footer">
+                    <td class="footer text-align: center;">
                       <img style="width: 20px; height: 20px;" src="https://i.imgur.com/awfkK2F.png" alt="Educado Logo" />
                       <img src="https://i.imgur.com/dEaqpbg.png" alt="Educado Text" />
                     </td>
