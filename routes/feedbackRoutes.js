@@ -20,6 +20,7 @@ router.post('/:courseId', async (req, res) => {
 	const { rating, feedbackText, feedbackOptions } = req.body;
 
 	try {
+		console.log('plz plz plz not run this shit');
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
 	} catch (e){
@@ -78,5 +79,9 @@ router.get('/getFeedbackForCourse/:courseId', async (req, res) => {
 		return res.status(400).json({ 'error': e.message });
 	}
 });
+
+
+
+
 
 module.exports = router;

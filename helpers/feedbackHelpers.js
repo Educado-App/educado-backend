@@ -101,9 +101,54 @@ async function getFeedbackForCourse(courseId) {
 	return feedback;
 }
 
+async function getOverallRatingOfCourse(courseId) {
+	const course = await CourseModel.findById(courseId);
+	return course.rating;
+}
+
+// given a user id and an optional period, return the rating of the user
+async function getOverallRatingForCC(userid, period = null) {
+	const query = { creator: userid };
+	// possible period values: 'this_month', 'last_month', '7_days', 'this_year', 'all'
+	if (period) {
+		const now = new Date();
+		let start;
+		switch (period) {
+			case 'this_month':
+				start = new Date(now.getFullYear(), now.getMonth(), 1);
+				break;
+			case 'last_month'://TODO: check if this works for january
+				start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+				break;
+			case '7_days':
+				start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+				break;
+			case 'this_year':
+				start = new Date(now.getFullYear(), 0, 1);
+				break;
+			default:
+				start = new Date(0);
+		}
+		query.dateCreated = { $gte: start, $lt: now };
+	}
+
+	const courses = await CourseModel.find(query);
+	let totalRating = 0;
+	let totalNumOfCoursesWithRatings = 0;
+	courses.forEach((course) => {
+		if (course.numOfRatings !== 0) { 
+			totalRating += course.rating * course.numOfRatings;
+			totalNumOfCoursesWithRatings += course.numOfRatings;
+		}
+	});
+	if (totalNumOfCoursesWithRatings === 0) { return 0; }
+	return totalRating / totalNumOfCoursesWithRatings;
+}
 
 module.exports = {
 	saveFeedback,
 	getAllFeedback,
-	getFeedbackForCourse
+	getFeedbackForCourse,
+	getOverallRatingForCC,
+	getOverallRatingOfCourse
 };
