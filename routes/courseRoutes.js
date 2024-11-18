@@ -17,6 +17,8 @@ const { StudentModel } = require('../models/Students');
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
 
+const { createCourseObject, createSections } = require('../helpers/courseHelpers');
+
 const COMP_TYPES = {
 	LECTURE: 'lecture',
 	EXERCISE: 'exercise',
@@ -537,4 +539,83 @@ router.patch('/:id/updateStatus', async (req, res) => {
 
 
 
+//When creating new course from scratch
+router.post('/create/new', async(req, res) => {
+	// title, category, difficulty, description, coverImg	
+	const { courseInfo } = req.body.courseInfo;
+	const { sections } = req.body.sections ? req.body.sections : [];
+
+	const courseObject = createCourseObject(courseInfo);
+
+	const sectionsArrayObject = createSections(sections);
+
+	courseObject.sections = sectionsArrayObject;
+
+	const course = await CourseModel.insertOne(courseObject);
+	
+	if(course.acknowledged) {
+		res.send(200);
+	}
+	res.send(500);
+
+});
+
+
+
 module.exports = router;
+
+/*
+//course
+title
+category
+difficulty
+description
+coverImg
+
+status
+
+sections[]
+
+creator
+dateCreated
+dateUpdated
+_id
+
+//section
+title
+description
+
+components[] // lecture, exercise
+
+dateCreated
+dateUpdated
+_id
+parentCourse
+
+//lecture
+title
+description
+
+contentType
+content
+
+
+dateCreated
+dateUpdated
+_id
+parentSection
+
+//exercise
+title
+question
+
+answers[] -- _id, text, correct : bool, feedback, dateUpdated
+
+_id
+parentSection
+dateCreated
+dateUpdated
+
+What is a course?
+	- 
+*/
