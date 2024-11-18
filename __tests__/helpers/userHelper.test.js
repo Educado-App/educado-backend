@@ -1,70 +1,129 @@
+/**
+ * @file userHelper.test.js
+ * @description Test suite for userHelper.js, simulating database interactions without actually connecting to database.
+ */
+
+// Helpers
+const mongoose = require('mongoose');
+const { handleAccountDeletion, handleSubscriptions, deleteDatabaseEntries } = require('../../helpers/userHelper');
+
+// Models
 const { UserModel } = require('../../models/Users');
 const { StudentModel } = require('../../models/Students');
 const { ContentCreatorModel } = require('../../models/ContentCreators');
+const { CourseModel } = require('../../models/Courses');
 const { ApplicationModel } = require('../../models/Applications');
 const { ProfileModel } = require('../../models/Profile');
 const { ProfileEducationModel } = require('../../models/ProfileEducation');
 const { ProfileExperienceModel } = require('../../models/ProfileExperience');
-const { deleteAccountDataInDB } = require('../../helpers/userHelper');
 
-// Mock models to isolate database interactions during testing
-jest.mock('../../models/Users');
-jest.mock('../../models/Profile');
-jest.mock('../../models/ContentCreators');
-jest.mock('../../models/Applications');
-jest.mock('../../models/ProfileEducation');
-jest.mock('../../models/ProfileExperience');
-jest.mock('../../models/Students');
+// Mock mongoose and models to isolate database interactions during testing
+jest.mock('mongoose');
+jest.mock('../../models/Users', () => ({ UserModel: { deleteOne: jest.fn() } }));
+jest.mock('../../models/Profile', () => ({ ProfileModel: { deleteOne: jest.fn() } }));
+jest.mock('../../models/ContentCreators', () => ({ ContentCreatorModel: { deleteOne: jest.fn() } }));
+jest.mock('../../models/Applications', () => ({ ApplicationModel: { deleteOne: jest.fn() } }));
+jest.mock('../../models/ProfileEducation', () => ({ ProfileEducationModel: { deleteMany: jest.fn() } }));
+jest.mock('../../models/ProfileExperience', () => ({ ProfileExperienceModel: { deleteMany: jest.fn() } }));
+jest.mock('../../models/Students', () => ({ StudentModel: { findOne: jest.fn(), deleteOne: jest.fn() } }));
+jest.mock('../../models/Courses', () => ({ CourseModel: { updateOne: jest.fn() } }));
 
 // Test suite
-describe('deleteAccountDataInDB', () => {
+describe('userHelper', () => {
+    let mockSession;
     const mockId = '1234567890abcdef12345678';
+    const mockCourseId_1 = '6734acc78e0307256e657aa7';
+    const mockCourseId_2 = '6733597286cbe52f37d1b982';
+    const mockCourseId_3 = '673347fcf81b271895d46efe';
 
     beforeEach(() => {
+        mockSession = {
+            startTransaction: jest.fn(),
+            commitTransaction: jest.fn(),
+            abortTransaction: jest.fn(),
+            endSession: jest.fn()
+        };
+        mongoose.startSession.mockResolvedValue(mockSession);
+    });
+
+    afterEach(() => {
         jest.clearAllMocks();
     });
 
-    // Test deleteAccountDataInDB for success
-    it('should delete all associated data for a given user ID', async () => {
-        // Arrange
-        UserModel.findByIdAndDelete.mockResolvedValue(true);
-        ProfileModel.findOneAndDelete.mockResolvedValue(true);
-        ContentCreatorModel.findOneAndDelete.mockResolvedValue(true);
-        ApplicationModel.findOneAndDelete.mockResolvedValue(true);
-        ProfileEducationModel.deleteMany.mockResolvedValue(true);
-        ProfileExperienceModel.deleteMany.mockResolvedValue(true);
-        StudentModel.deleteOne.mockResolvedValue(true);
-        
-        // Act
-        await expect(deleteAccountDataInDB(mockId)).resolves.not.toThrow();
+    describe('handleAccountDeletion', () => {
+        it('should delete all account data, handle subscriptions and commit transaction', async () => {
+            UserModel.deleteOne.mockResolvedValue(true);
+            ProfileModel.deleteOne.mockResolvedValue(true);
+            ContentCreatorModel.deleteOne.mockResolvedValue(true);
+            ApplicationModel.deleteOne.mockResolvedValue(true);
+            ProfileEducationModel.deleteMany.mockResolvedValue(true);
+            ProfileExperienceModel.deleteMany.mockResolvedValue(true);
+            StudentModel.deleteOne.mockResolvedValue(true);
+            StudentModel.findOne.mockResolvedValue({ subscriptions: [mockCourseId_1, mockCourseId_2, mockCourseId_3] });
+            CourseModel.updateOne.mockResolvedValue(true);
 
-        // Assert
-        expect(UserModel.findByIdAndDelete).toHaveBeenCalledWith(mockId);
-        expect(ProfileModel.findOneAndDelete).toHaveBeenCalledWith({ userID: mockId });
-        expect(ContentCreatorModel.findOneAndDelete).toHaveBeenCalledWith({ baseUser: mockId });
-        expect(ApplicationModel.findOneAndDelete).toHaveBeenCalledWith({ baseUser: mockId });
-        expect(ProfileEducationModel.deleteMany).toHaveBeenCalledWith({ userID: mockId });
-        expect(ProfileExperienceModel.deleteMany).toHaveBeenCalledWith({ userID: mockId });
-        expect(StudentModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId });
+            await handleAccountDeletion(mockId);
+
+            expect(mockSession.startTransaction).toHaveBeenCalled();
+            expect(UserModel.deleteOne).toHaveBeenCalledWith({ _id: mockId }, { session: mockSession });
+            expect(ProfileModel.deleteOne).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(ContentCreatorModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+            expect(ApplicationModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+            expect(ProfileEducationModel.deleteMany).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(ProfileExperienceModel.deleteMany).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(StudentModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+            expect(StudentModel.findOne).toHaveBeenCalledWith({ baseUser: mockId });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_1 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_2 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_3 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+            expect(mockSession.commitTransaction).toHaveBeenCalled();
+            expect(mockSession.endSession).toHaveBeenCalled();
+        });
+
+        it('should abort the database transaction if an error occurs', async () => {
+            UserModel.deleteOne.mockRejectedValue(new Error());
+
+            await expect(handleAccountDeletion(mockId)).rejects.toThrow('Failed to delete all account data from database!');
+
+            expect(mockSession.startTransaction).toHaveBeenCalled();
+            expect(mockSession.abortTransaction).toHaveBeenCalled();
+            expect(mockSession.endSession).toHaveBeenCalled();
+        });
     });
 
-    // Test deleteAccountDataInDB for failure
-    it('should throw an error if any deletion operation fails', async () => {
-        // Arrange
-        UserModel.findByIdAndDelete.mockResolvedValue(true);
-        ProfileModel.findOneAndDelete.mockResolvedValue(true);
-        ContentCreatorModel.findOneAndDelete.mockRejectedValue(new Error());
-        ApplicationModel.findOneAndDelete.mockResolvedValue(true);
-        ProfileEducationModel.deleteMany.mockResolvedValue(true);
-        ProfileExperienceModel.deleteMany.mockResolvedValue(true);
-        StudentModel.deleteOne.mockResolvedValue(true);
-        
-        // Act
-        await expect(deleteAccountDataInDB(mockId)).rejects.toThrow('Failed to delete all account data from database!');
+    describe('handleSubscriptions', () => {
+        it('should decrement numOfSubscriptions for each subscribed course', async () => {
+            StudentModel.findOne.mockResolvedValue({ subscriptions: [mockCourseId_1, mockCourseId_2, mockCourseId_3] });
+            CourseModel.updateOne.mockResolvedValue(true);
 
-        // Assert
-        expect(UserModel.findByIdAndDelete).toHaveBeenCalledWith(mockId);
-        expect(ProfileModel.findOneAndDelete).toHaveBeenCalledWith({ userID: mockId });
-        expect(ContentCreatorModel.findOneAndDelete).toHaveBeenCalledWith({ baseUser: mockId });    
+            await handleSubscriptions(mockId, mockSession);
+
+            expect(StudentModel.findOne).toHaveBeenCalledWith({ baseUser: mockId });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_1 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_2 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+            expect(CourseModel.updateOne).toHaveBeenCalledWith({ _id: mockCourseId_3 }, { $inc: { numOfSubscriptions: -1 } }, { session: mockSession });
+        });
+    }); 
+
+    describe('deleteDatabaseEntries', () => {
+        it('should delete all database entries', async () => {
+            UserModel.deleteOne.mockResolvedValue(true);
+            ProfileModel.deleteOne.mockResolvedValue(true);
+            ContentCreatorModel.deleteOne.mockResolvedValue(true);
+            ApplicationModel.deleteOne.mockResolvedValue(true);
+            ProfileEducationModel.deleteMany.mockResolvedValue(true);
+            ProfileExperienceModel.deleteMany.mockResolvedValue(true);
+            StudentModel.deleteOne.mockResolvedValue(true);
+
+            await deleteDatabaseEntries(mockId, mockSession);
+
+            expect(UserModel.deleteOne).toHaveBeenCalledWith({ _id: mockId }, { session: mockSession });
+            expect(ProfileModel.deleteOne).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(ContentCreatorModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+            expect(ApplicationModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+            expect(ProfileEducationModel.deleteMany).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(ProfileExperienceModel.deleteMany).toHaveBeenCalledWith({ userID: mockId }, { session: mockSession });
+            expect(StudentModel.deleteOne).toHaveBeenCalledWith({ baseUser: mockId }, { session: mockSession });
+        });
     });
 });

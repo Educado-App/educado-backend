@@ -1,3 +1,8 @@
+// Helpers
+const mongoose = require('mongoose');
+const errorCodes = require('./errorCodes');
+const { CustomError } = require('./error');
+
 // Models
 const { UserModel } = require('../models/Users');
 const { StudentModel } = require('../models/Students');
@@ -8,42 +13,66 @@ const { ProfileModel } = require('../models/Profile');
 const { ProfileEducationModel } = require('../models/ProfileEducation');
 const { ProfileExperienceModel } = require('../models/ProfileExperience');
 
-// Helpers
-const errorCodes = require('./errorCodes');
-const { CustomError } = require('./error');
-
-async function deleteAccountDataInDB(id) {
+/**
+ * Handles deletion of all account data associated with a given user ID from the database:
+ * - User
+ * - Profile
+ * - Content Creator
+ * - Student
+ * - Application
+ * - Educations (academic)
+ * - Experiences (professional)
+ * 
+ * And decrements the numOfSubscriptions attribute for each course the student is subscribed to.
+ *
+ * @param {string} id - The ID of the user whose account data is to be deleted.
+ * @throws {CustomError} Throws errorCode E0018 if deletion fails.
+ */
+async function handleAccountDeletion(id) {
+	const session = await mongoose.startSession();
+	
 	try {
-		// Delete database entries
-		await UserModel.findByIdAndDelete(id);							// User
-		await ProfileModel.findOneAndDelete({ userID: id }); 			// Profile
-		await ContentCreatorModel.findOneAndDelete({ baseUser: id });	// Content creator
-		await ApplicationModel.findOneAndDelete({ baseUser: id });		// Application
-		await ProfileEducationModel.deleteMany({ userID: id });			// Academic experience forms
-		await ProfileExperienceModel.deleteMany({ userID: id });		// Work experience forms 
-		
-		// Fetch student
-		const student = await StudentModel.findOne({ baseUser: id });
-		
-		// Fetch all ids for each course the student is subscribed to
-		const courseIdArray = student ? student.subscriptions : [];
+		session.startTransaction();
 
-		// Decrement numOfSubscriptions attribute for each subscribed course
-		if (courseIdArray.length > 0) {
-			courseIdArray.forEach(async (courseId) => {
-				await CourseModel.updateOne(
-					{ _id: courseId },
-					{ $inc: { numOfSubscriptions: -1 } } // Decrement 1
-				);
-			});
-		}
+		await handleSubscriptions(id, session);
+		await deleteDatabaseEntries(id, session);
 		
-		// Finally delete student entry in database
-		await StudentModel.deleteOne({ baseUser: id });
+		await session.commitTransaction();
 	}
 	catch(error) {
-		throw new CustomError(errorCodes.E0018);    // 'Failed to delete all account data from database!'
+		// Cancel database operations
+		await session.abortTransaction();	
+		throw new CustomError(errorCodes.E0018); // 'Failed to delete all account data from database!'
+	}
+	finally {
+		await session.endSession();
 	}
 }
 
-module.exports = { deleteAccountDataInDB };
+// Decrement numOfSubscriptions attribute for each subscribed course
+async function handleSubscriptions(id, session) {
+	const student = await StudentModel.findOne({ baseUser: id });
+	const courseIdArray = student ? student.subscriptions : [];
+	
+	if (courseIdArray?.length > 0) {
+		for (const courseId of courseIdArray) {
+			await CourseModel.updateOne(
+				{ _id: courseId },
+				{ $inc: { numOfSubscriptions: -1 } }, // Decrement by 1
+				{ session }
+			);
+		}
+	}
+}
+
+async function deleteDatabaseEntries(id, session) {
+	await UserModel.deleteOne({ _id: id }, { session });
+	await ProfileModel.deleteOne({ userID: id }, { session });
+	await ContentCreatorModel.deleteOne({ baseUser: id }, { session });
+	await ApplicationModel.deleteOne({ baseUser: id }, { session });
+	await ProfileEducationModel.deleteMany({ userID: id }, { session });
+	await ProfileExperienceModel.deleteMany({ userID: id }, { session });
+	await StudentModel.deleteOne({ baseUser: id }, { session });
+}
+
+module.exports = { handleAccountDeletion, handleSubscriptions, deleteDatabaseEntries };

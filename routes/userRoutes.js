@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 // Helpers
 const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
-const { deleteAccountDataInDB } = require('../helpers/userHelper');
+const { handleAccountDeletion } = require('../helpers/userHelper');
 const errorCodes = require('../helpers/errorCodes');
 const { assert } = require('../helpers/error');
 const { encrypt, compare } = require('../helpers/password');
@@ -20,13 +20,12 @@ router.delete('/:id', requireLogin, async (req, res) => {
 	try {
 		// Ensure passed in id is valid
 		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
-
 		const id = mongoose.Types.ObjectId(req.params.id);	
 
 		// Ensure user is actually existing
 		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
-
-		await deleteAccountDataInDB(id);
+		
+		await handleAccountDeletion(id);
 		
 		return res.status(200).send({ message: 'Account successfully deleted!' });
 		
