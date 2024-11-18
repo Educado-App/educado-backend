@@ -22,8 +22,13 @@ jest.mock('../../config/keys', () => {
 });
 
 describe('JWT verify', () => {
+	let originalConsoleError;
 
 	beforeAll(done => {
+		// Suppress console.error during tests by mocking it
+		originalConsoleError = console.error;
+		console.error = jest.fn();
+
 		done();
 	});
 
@@ -56,6 +61,8 @@ describe('JWT verify', () => {
 	});
 
 	afterAll(async () => {
+		console.error = originalConsoleError; // Restore console.error
+
 		await server.close();
 	});
 });

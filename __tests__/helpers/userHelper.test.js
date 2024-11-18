@@ -30,7 +30,7 @@ jest.mock('../../models/Courses', () => ({ CourseModel: { updateOne: jest.fn() }
 
 // Test suite
 describe('userHelper', () => {
-    let mockSession;
+    let mockSession, originalConsoleError;
     const mockId = '1234567890abcdef12345678';
     const mockCourseId_1 = '6734acc78e0307256e657aa7';
     const mockCourseId_2 = '6733597286cbe52f37d1b982';
@@ -44,10 +44,15 @@ describe('userHelper', () => {
             endSession: jest.fn()
         };
         mongoose.startSession.mockResolvedValue(mockSession);
+
+        // Suppress console.error during tests by mocking it
+        originalConsoleError = console.error;
+        console.error = jest.fn();
     });
 
     afterEach(() => {
         jest.clearAllMocks();
+        console.error = originalConsoleError; // Restore console.error
     });
 
     describe('handleAccountDeletion', () => {

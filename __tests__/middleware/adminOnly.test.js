@@ -22,8 +22,13 @@ jest.mock('../../config/keys', () => {
 });
 
 describe('Admin token verify', () => {
+	let originalConsoleError;
 
 	beforeAll(done => {
+		// Suppress console.error during tests by mocking it
+        originalConsoleError = console.error;
+        console.error = jest.fn();
+		
 		done();
 	});
 
@@ -55,6 +60,8 @@ describe('Admin token verify', () => {
 	});
 
 	afterAll(async () => {
+		console.error = originalConsoleError; // Restore console.error
+		
 		server.close();
 	});
 });

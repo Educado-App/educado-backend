@@ -55,7 +55,7 @@ afterAll(async () => {
 
 // Test suite
 describe('DELETE /api/users/:id', () => {
-    let mockUserToken, mockAdminToken, insertedMockUser;
+    let mockUserToken, mockAdminToken, insertedMockUser, originalConsoleError;
 
     beforeEach(async () => {
         // Insert the mockUser into simulated database
