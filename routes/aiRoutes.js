@@ -2,13 +2,15 @@ const express = require('express');
 const { spawn } = require('child_process');
 const multer = require('multer');
 const router = express.Router();
+const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
 
-router.get('/', (req, res) => {
+
+router.get('/', shorttermLimiter, longtermLimiter,  (req, res) => {
 	console.log('GET request received at /api/ai');
 	res.send('AI Route is working!!!???!');
 });
 
-router.post('/', async (req, res) => {
+router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
 	req.setTimeout(30000);
 	const { userInput } = req.body;
 
@@ -63,7 +65,7 @@ const upload = multer({ storage: storage });
 const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
 
 // Route for handling MP3 upload, processing it without saving to disk
-router.post('/stt', upload.single('audio'), (req, res) => {
+router.post('/stt', shorttermLimiter, longtermLimiter, upload.single('audio'), (req, res) => {
 	console.log("something hit")
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
@@ -118,7 +120,7 @@ router.post('/stt', upload.single('audio'), (req, res) => {
     }
 });
 
-router.get('/stt', (req, res) => {
+router.get('/stt', shorttermLimiter, longtermLimiter, (req, res) => {
 	console.log('GET request received at /api/ai');
 	res.send('AI Route is working!!!???!');
 });
