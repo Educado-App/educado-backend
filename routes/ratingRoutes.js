@@ -1,11 +1,12 @@
 const router = require('express').Router();
-const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const {
 	getOverallRatingForCC,
 	getOverallRatingOfCourse,
 } = require('../helpers/feedbackHelpers.js');
+
+
 
 // route is /api/rating
 
@@ -19,11 +20,10 @@ router.get('/getOverallRatingOfCourse/:courseId', async (req, res) => {
 	}
 });
 
+// given a user id and an optional period, return the rating of the user
 router.post('/getOverallRatingOfCC/', async (req, res) => {
-	console.log('Received request:', req.query); // Log the request query
 	const { userid, period } = req.query;
 	try {
-		console.log(userid, period);
 		const averageRating = await getOverallRatingForCC(userid, period);
 		res.json({ averageRating });
 	} catch (e) {

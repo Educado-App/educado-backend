@@ -102,8 +102,16 @@ async function getFeedbackForCourse(courseId) {
 }
 
 async function getOverallRatingOfCourse(courseId) {
-	const course = await CourseModel.findById(courseId);
-	return course.rating;
+	// search for all feedbacks for the course with the given courseId and calculate the average rating
+	const feedback = await FeedbackModel.find({ courseId: courseId });
+	let totalRating = 0;
+	let totalNumOfRatings = 0;
+	feedback.forEach((entry) => {
+		totalRating += entry.rating;
+		totalNumOfRatings += 1;
+	});
+	if (totalNumOfRatings === 0) { return -1; }
+	return totalRating / totalNumOfRatings;
 }
 
 // given a user id and an optional period, return the rating of the user
@@ -114,20 +122,20 @@ async function getOverallRatingForCC(userid, period = null) {
 		const now = new Date();
 		let start;
 		switch (period) {
-			case 'this_month':
-				start = new Date(now.getFullYear(), now.getMonth(), 1);
-				break;
-			case 'last_month'://TODO: check if this works for january
-				start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-				break;
-			case '7_days':
-				start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-				break;
-			case 'this_year':
-				start = new Date(now.getFullYear(), 0, 1);
-				break;
-			default:
-				start = new Date(0);
+		case 'this_month':
+			start = new Date(now.getFullYear(), now.getMonth(), 1);
+			break;
+		case 'last_month'://TODO: check if this works for january
+			start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+			break;
+		case '7_days':
+			start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+			break;
+		case 'this_year':
+			start = new Date(now.getFullYear(), 0, 1);
+			break;
+		default:
+			start = new Date(0);
 		}
 		query.dateCreated = { $gte: start, $lt: now };
 	}

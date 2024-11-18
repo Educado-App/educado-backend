@@ -21,7 +21,6 @@ const RatingRoutes = require('../routes/ratingRoutes');
 const UserInfoRoutes = require('../routes/userInfoRoutes');
 const InstituitionRoutes = require('./institutions/institutionsRoutes');
 const AiRoutes = require('../routes/aiRoutes');
-const { ContentCreatorModel } = require('../models/ContentCreators');
 
 
 

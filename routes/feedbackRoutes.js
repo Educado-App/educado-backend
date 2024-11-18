@@ -20,7 +20,6 @@ router.post('/:courseId', async (req, res) => {
 	const { rating, feedbackText, feedbackOptions } = req.body;
 
 	try {
-		console.log('plz plz plz not run this shit');
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
 	} catch (e){
