@@ -58,14 +58,12 @@ function generateEmailTemplate(content) {
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         margin: 0 auto;
-        text-align: center;
       }
       .content-cell {
         padding: 30px;
         font-family: 'Nunito Sans', Arial, sans-serif;
         color: #51545e;
         line-height: 1.5;
-        text-align: center;
       }
       .button {
         background-color: #3869d4;
@@ -83,7 +81,6 @@ function generateEmailTemplate(content) {
         display: block;
       }
       .footer {
-        text-align: center;
         padding: 20px;
         background-color: #f2f4f6;
         border-top: 1px solid #eaeaec;
@@ -100,7 +97,7 @@ function generateEmailTemplate(content) {
         <td height="20%"></td>
       </tr>
       <tr>
-        <td align="center" valign="top">
+        <td align="" valign="top">
           <table class="email-wrapper" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td>
@@ -166,15 +163,15 @@ async function sendResetPasswordEmail(user, token) {
 	const text = `Olá ${user.firstName},\n\nRecebemos uma solicitação para redefinir a senha de sua conta no Educado.\n\nUse o código abaixo para redefinir sua senha:\n\nCódigo de redefinição: ${token}\n\nEste código é válido por 5 minutos. Caso não tenha solicitado a redefinição, por favor, ignore este e-mail ou entre em contato com nosso suporte para garantir a segurança de sua conta.\n\nEstamos aqui para ajudar!\n\nAtenciosamente,\nEquipe Educado.\n\n---\nEsta é uma mensagem automática. Por favor, não responda diretamente a este e-mail.`;
 
 	const content = `
-	<h1 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center;">Olá, ${user.firstName}</h1>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Recebemos uma solicitação para redefinir a senha de sua conta no Educado.</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Use o código abaixo para redefinir sua senha:</p>
+	<h1 style="margin: 0; font-size: 22px; font-weight: bold;">Olá, ${user.firstName}</h1>
+	<p style="margin: 16px 0; font-size: 16px; ">Recebemos uma solicitação para redefinir a senha de sua conta no Educado.</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Use o código abaixo para redefinir sua senha:</p>
 	<p class="code" style="font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0;">${token}</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Este código é válido por <strong>5 minutos</strong>. Por favor, insira-o antes que expire.</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Se você não solicitou esta redefinição, ignore este e-mail ou entre em contato com nosso suporte para garantir a segurança de sua conta.</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Obrigado por usar o Educado!</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Atenciosamente,</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center; font-weight: bold;">Educado</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Este código é válido por <strong>5 minutos</strong>. Por favor, insira-o antes que expire.</p>
+	<p style="margin: 16px 0; font-size: 16px;">Se você não solicitou esta redefinição, ignore este e-mail ou entre em contato com nosso suporte para garantir a segurança de sua conta.</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Obrigado por usar o Educado!</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Atenciosamente,</p>
+	<p style="margin: 16px 0; font-size: 16px; font-weight: bold;">Educado</p>
 	<p style="margin-top: 32px; font-size: 12px; text-align: center; color: #999;">Esta é uma mensagem automática. Por favor, não responda diretamente a este e-mail.</p>
 	`;
 
@@ -188,15 +185,15 @@ async function sendVerificationEmail(user, token) {
 	const text = `Olá ${user.firstName},\n\nObrigado por iniciar o processo de criação de sua conta no Educado!\n\nPara confirmar seu endereço de e-mail, use o código abaixo:\n\nCódigo de verificação: ${token}\n\nEste código é válido por apenas 5 minutos, então não espere muito para usá-lo.\n\nCaso você não tenha solicitado esta ação, por favor ignore este e-mail ou entre em contato com nossa equipe de suporte imediatamente para garantir a segurança da sua conta.\n\nEstamos aqui para ajudar!\n\nAtenciosamente,\nEquipe Educado.\n\n---\nEsta é uma mensagem automática, por favor, não responda diretamente a este e-mail.`;
 
 	const content = `
-	<h1 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center;">Bem-vindo ao Educado, ${user.firstName}!</h1>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Estamos animados por você estar se juntando à nossa comunidade!</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Para concluir seu registro, use o código abaixo para verificar seu e-mail:</p>
+	<h1 style="margin: 0; font-size: 22px; font-weight: bold;">Bem-vindo ao Educado, ${user.firstName}!</h1>
+	<p style="margin: 16px 0; font-size: 16px;">Estamos animados por você estar se juntando à nossa comunidade!</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Para concluir seu registro, use o código abaixo para verificar seu e-mail:</p>
 	<p class="code" style="font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0;">${token}</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Este código é válido por <strong>5 minutos</strong>. Por favor, insira-o antes que expire.</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Se você não fez esta solicitação, ignore este e-mail ou entre em contato com nossa equipe de suporte para garantir a segurança de sua conta.</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Obrigado por escolher o Educado!</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center;">Atenciosamente,</p>
-	<p style="margin: 16px 0; font-size: 16px; text-align: center; font-weight: bold;">Educado</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Este código é válido por <strong>5 minutos</strong>. Por favor, insira-o antes que expire.</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Se você não fez esta solicitação, ignore este e-mail ou entre em contato com nossa equipe de suporte para garantir a segurança de sua conta.</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Obrigado por escolher o Educado!</p>
+	<p style="margin: 16px 0; font-size: 16px; ">Atenciosamente,</p>
+	<p style="margin: 16px 0; font-size: 16px;  font-weight: bold;">Educado</p>
 	<p style="margin-top: 32px; font-size: 12px; text-align: center; color: #999;">Esta é uma mensagem automática. Por favor, não responda diretamente a este e-mail.</p>
 	`;
 
