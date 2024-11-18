@@ -78,10 +78,15 @@ describe('DELETE /api/users/:id', () => {
         mockAdminToken = signAccessToken({ id: mockAdminId, role: "admin" });
 
         handleAccountDeletion.mockResolvedValue();
+
+        // Suppress console.error during tests by mocking it
+        originalConsoleError = console.error;
+        console.error = jest.fn();
     });
 
     afterEach(() => {
         jest.clearAllMocks();
+        console.error = originalConsoleError; // Restore console.error
     });
 
     // User deleting own account
