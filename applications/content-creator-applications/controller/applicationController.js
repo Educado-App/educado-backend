@@ -29,7 +29,6 @@ const rejectionEmail = async (id, reason) => {
 	const to = contentCreator.email;
 	const subject = 'Aplicação de Criador de Conteúdo Rejeitada';
 	const html = '<p>Infelizmente, sua aplicação para se tornar um Criador de Conteúdo foi rejeitada.</p><p> Motivo:' + reason + '</p><p>Para tentar novamente, <a href="https://app-staging.educado.io/welcome">clique aqui</a>.</p><p>' + kindRegardsPT + '</p>';
-	console.log(id);
 
 	// Send an email to the content creator to inform them of the rejection
 	mail.sendMail({ to, subject, html });
