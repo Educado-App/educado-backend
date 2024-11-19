@@ -1,0 +1,15 @@
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+
+// Class description
+const CertificateContentCreatorSchema = new Schema({
+  contentCreator: contentCreator,
+  course: course,
+});
+
+const ContentCreatorModel = mongoose.model(
+  "creator-certificates",
+  CertificateContentCreatorSchema
+);
+
+module.exports = { ContentCreatorModel };
