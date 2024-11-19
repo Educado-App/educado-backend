@@ -52,8 +52,7 @@ router.get('/:id', requireLogin, async (req, res) => {
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
 
-		const user = await UserModel.findById(id);
-
+		const user = await UserModel.findById(id).select('-password');
 		return res.status(200).send(user);
 
 	} catch (error) {
@@ -120,7 +119,7 @@ router.patch('/:id/password', requireLogin, async (req, res) => {
 		return res.status(400).send({ error: errorCodes['E0805'] });
 	}
 
-	const user = await UserModel.findById(id);
+	const user = await UserModel.findById(id).select('+password');
 
 	if (!user) {
 		return res.status(400).send({ error: errorCodes['E0004'] });
@@ -175,7 +174,6 @@ async function validateFields(fields) {
 
 //Update user role
 router.patch('/:id/role', adminOnly, async (req, res) => {
-	console.log('hello');
 	if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 		return res.status(400).send({ error: errorCodes['E0014'] });
 	}
