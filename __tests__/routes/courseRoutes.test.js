@@ -865,4 +865,82 @@ describe('Course Routes', () => {
 			expect(updatedCourse.status).toBe('draft');
 		});
 	});
+
+	describe("PUT /courses/create/new", () => {
+		it('Creates a new course from scratch', async() => {
+			const courseInfo = {
+				title: "Hello",
+				description: "world",
+				difficulty: 2,
+				coverImg: "123"
+			};
+			
+			const sections = [
+				{
+					title: 'sectionName',
+					description: 'sectionDesc',
+					components: [
+						{
+							compType: 'exercise',
+							title: 'Exercise 1',
+							onWrongFeedback: 'Wow you\'re stupid',
+							question: 'What is 2 + 2?',
+							answers: [
+								{ text: '3', correct: false, feedback: 'Incorrect' },
+								{ text: '4', correct: true, feedback: 'Correct' }
+							]
+						},
+						{
+							compType: 'lecture',
+							title: 'Lecture 1',
+							description: 'This is the first lecture',
+							contentType: 'video',
+							content: 'http://example.com/video.mp4'
+						}
+					]
+				},
+				{
+					title: 'sectionName2',
+					description: 'sectionDesc2',
+					components: [
+						{
+							compType: 'exercise',
+							title: 'Exercise 2',
+							onWrongFeedback: 'Wow you\'re stupid',
+							question: 'What is 3 + 3?',
+							answers: [
+								{ text: '5', correct: false, feedback: 'Incorrect' },
+								{ text: '6', correct: true, feedback: 'Correct' }
+							]
+						},
+						{
+							compType: 'lecture',
+							title: 'Lecture 2',
+							description: 'This is the second lecture',
+							contentType: 'text',
+							content: 'xxxxxxxxxxxx'
+						}
+					]
+				}
+			];
+
+			const token = signAccessToken({ id: fakeUser._id });
+			const response = await request(app)
+				.put('/api/courses/create/new')
+				.set('Authorization', `Bearer ${token}`)
+				.send({
+					courseInfo: courseInfo, 
+					sections: sections
+				});
+
+			expect(response.status).toBe(201);
+			// expect(response.body.title).toBe(newCourseData.title);
+			// expect(response.body.category).toBe(newCourseData.category);
+			// expect(response.body.difficulty).toBe(newCourseData.difficulty);
+			// expect(response.body.description).toBe(newCourseData.description);
+			// expect(response.body.estimatedHours).toBe(newCourseData.estimatedHours);
+			// expect(response.body.creator).toBe(fakeUser._id.toString());
+
+		});
+	});
 });

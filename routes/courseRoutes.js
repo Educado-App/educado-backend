@@ -17,7 +17,7 @@ const { StudentModel } = require('../models/Students');
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
 
-const { createCourseObject, createSections } = require('../helpers/courseHelpers');
+const { createCourseObject, saveFullCourse } = require('../helpers/courseHelpers');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -544,87 +544,25 @@ router.put('/create/new', async(req, res) => {
 	try{
 	// title, category, difficulty, description, coverImg	
 		const { courseInfo } = req.body.courseInfo;
-		const { sections } = req.body.sections ? req.body.sections : [];
+		const { sections } = req.body.sections ? Object.hasOwn(req.body, 'sections') : [];
 
-		const courseObject = createCourseObject(courseInfo);
+		const courseObject = createCourseObject(courseInfo, sections);
 
-		const sectionsArrayObject = createSections(sections);
-
-		courseObject.sections = sectionsArrayObject;
-		
-		const course = await CourseModel.insertOne(courseObject);
-		
+		const course = await saveFullCourse(courseObject);
+				
 		if(course.acknowledged) {
-			res.send(200);
+			res.send(201);
 		}
+
 		res.send(500);
+	
 	} catch {
 		res.send(404);
 	}
 });
 
-router.get('/create/new', async(req, res) => {
 
-	console.log('test');
-	res.send(200);
-});
 
 
 
 module.exports = router;
-
-/*
-//course
-title
-category
-difficulty
-description
-coverImg
-
-status
-
-sections[]
-
-creator
-dateCreated
-dateUpdated
-_id
-
-//section
-title
-description
-
-components[] // lecture, exercise
-
-dateCreated
-dateUpdated
-_id
-parentCourse
-
-//lecture
-title
-description
-
-contentType
-content
-
-
-dateCreated
-dateUpdated
-_id
-parentSection
-
-//exercise
-title
-question
-
-answers[] -- _id, text, correct : bool, feedback, dateUpdated
-
-_id
-parentSection
-dateCreated
-dateUpdated
-
-What is a course?
-	- title, category, difficulty, description, coverImg
-*/
