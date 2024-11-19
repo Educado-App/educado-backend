@@ -29,6 +29,9 @@ jest.mock('../../helpers/email.js', () => ({
   sendMail: jest.fn().mockResolvedValue(true),  // Mock implementation
 }));
 
+jest.mock('../../config/keys', () => ({
+	TOKEN_SECRET: 'test-secret'
+}));
 
 describe('Application Routes', () => {
   let db; // Store the database connection
