@@ -34,6 +34,9 @@ jest.mock('../../models/Applications');
 jest.mock('../../models/ProfileEducation');
 jest.mock('../../models/ProfileExperience');
 jest.mock('../../helpers/userHelper');
+jest.mock('../../config/keys', () => ({
+	TOKEN_SECRET: 'test-secret'
+}));
 
 // Express and mongo server
 const app = express();

@@ -15,11 +15,9 @@ const server = app.listen(PORT);
 const TOKEN_SECRET = 'test';
 
 // Mock token secret
-jest.mock('../../config/keys', () => {
-	return {
-		TOKEN_SECRET
-	};
-});
+jest.mock('../../config/keys', () => ({
+	TOKEN_SECRET: 'test-secret'
+}));
 
 describe('Admin token verify', () => {
 	let originalConsoleError;
