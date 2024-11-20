@@ -15,15 +15,18 @@ const server = app.listen(PORT);
 const TOKEN_SECRET = 'test';
 
 // Mock token secret
-jest.mock('../../config/keys', () => {
-	return {
-		TOKEN_SECRET
-	};
-});
+jest.mock('../../config/keys', () => ({
+	TOKEN_SECRET: 'test-secret'
+}));
 
 describe('JWT verify', () => {
+	let originalConsoleError;
 
 	beforeAll(done => {
+		// Suppress console.error during tests by mocking it
+		originalConsoleError = console.error;
+		console.error = jest.fn();
+
 		done();
 	});
 
@@ -56,6 +59,8 @@ describe('JWT verify', () => {
 	});
 
 	afterAll(async () => {
+		console.error = originalConsoleError; // Restore console.error
+
 		await server.close();
 	});
 });

@@ -1,40 +1,47 @@
 const router = require('express').Router();
+
+// Helpers
 const { validateEmail, validateName, validatePassword, ensureNewValues } = require('../helpers/validation');
+const { handleAccountDeletion } = require('../helpers/userHelper');
 const errorCodes = require('../helpers/errorCodes');
+const { assert } = require('../helpers/error');
+const { encrypt, compare } = require('../helpers/password');
+
+// Models
 const { UserModel } = require('../models/Users');
-const { StudentModel } = require('../models/Students');
-const { ContentCreatorModel } = require('../models/ContentCreators');
+
+// Middlewares
 const requireLogin = require('../middlewares/requireLogin');
 const adminOnly = require('../middlewares/adminOnly');
 const mongoose = require('mongoose');
-const { encrypt, compare } = require('../helpers/password');
 
+// Route for account deletion
 router.delete('/:id', requireLogin, async (req, res) => {
 	try {
-		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-			return res.status(400).send({ error: errorCodes['E0014'] });
-		}
-		const id = mongoose.Types.ObjectId(req.params.id);
-		const deletedUser = await UserModel.findByIdAndDelete(id);
+		// Ensure passed in id is valid
+		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		const id = mongoose.Types.ObjectId(req.params.id);	
 
-		if (!deletedUser) {
-			return res.status(204).send(); // User not found
-		}
-
-		const deletedStudentProfile = await StudentModel.findOneAndDelete({ baseUser: id });
-		const deletedContentCreatorProfile = await ContentCreatorModel.findOneAndDelete({ baseUser: id });
-
-		return res.status(200).send({
-			baseUser: deletedUser,
-			studentProfile: deletedStudentProfile,
-			contentCreatorProfile: deletedContentCreatorProfile
-		});
-
-
+		// Ensure user is actually existing
+		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
+		
+		await handleAccountDeletion(id);
+		
+		return res.status(200).send({ message: 'Account successfully deleted!' });
+		
 	} catch (error) {
-		console.error(error);
-		return res.status(500).send({ error: errorCodes['E0003'] });
-	}
+		console.error(error.message);
+		switch(error.code) {
+		case 'E0014':
+			return res.status(400).send({ error: error.message }); // 'Invalid id'
+		case 'E0004':
+			return res.status(404).send({ error: error.message }); // 'User not found'
+		case 'E0018':
+			return res.status(500).send({ error: error.message }); // 'Failed to delete all account data from database!'
+		default:
+			return res.status(400).send({ error: errorCodes.E0000.message }); // 'Unknown error'
+		}
+	} 
 });
 
 // GET User by ID
@@ -45,8 +52,7 @@ router.get('/:id', requireLogin, async (req, res) => {
 		}
 		const id = mongoose.Types.ObjectId(req.params.id);
 
-		const user = await UserModel.findById(id);
-
+		const user = await UserModel.findById(id).select('-password');
 		return res.status(200).send(user);
 
 	} catch (error) {
@@ -113,7 +119,7 @@ router.patch('/:id/password', requireLogin, async (req, res) => {
 		return res.status(400).send({ error: errorCodes['E0805'] });
 	}
 
-	const user = await UserModel.findById(id);
+	const user = await UserModel.findById(id).select('+password');
 
 	if (!user) {
 		return res.status(400).send({ error: errorCodes['E0004'] });
@@ -168,7 +174,6 @@ async function validateFields(fields) {
 
 //Update user role
 router.patch('/:id/role', adminOnly, async (req, res) => {
-	console.log('hello');
 	if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 		return res.status(400).send({ error: errorCodes['E0014'] });
 	}
