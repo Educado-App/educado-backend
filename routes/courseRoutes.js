@@ -90,7 +90,13 @@ const topFeedbackOptionForCourses = async (courses) => {
 router.get('/', async (req, res) => {
 	try {
 		// Find all courses in the database and convert to plain objects
-		const courses = await CourseModel.find().lean();
+		const courses = await CourseModel.find().lean().populate({ 
+			path: 'creator',
+			populate: {
+				path: 'baseUser',
+				select: '-password'
+			}
+		});
 
 		// Get top feedback options for each course
 		const coursesWithFeedback = await topFeedbackOptionForCourses(courses);
@@ -111,7 +117,13 @@ router.get('/:id', async (req, res) => {
 		}
 
 		// find a course based on it's id
-		const course = await CourseModel.findById(id);
+		const course = await CourseModel.findById(id).lean().populate({ 
+			path: 'creator',
+			populate: {
+				path: 'baseUser',
+				select: '-password'
+			}
+		});
 
 		// check if courses exist
 		if (!course) {
