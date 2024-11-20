@@ -6,9 +6,9 @@ const {
 } = require("../models/CertificateContentCreator");
 const errorCodes = require("../helpers/errorCodes");
 
-router.post("/api/creator-certificates", async (req, res) => {
+router.post("/creator-certificates", async (req, res) => {
   try {
-    const { creatorId, courseId } = req.body; // Expect these fields from the request
+    const { creatorId, courseId } = req.body;
     const certificate = await createCertificate(creatorId, courseId);
     res.status(201).json(certificate);
   } catch (error) {
@@ -16,13 +16,13 @@ router.post("/api/creator-certificates", async (req, res) => {
   }
 });
 
-router.get("/api/creator-certificates/:creatorId", async (req, res) => {
+router.get("/creator-certificates/:creatorId", async (req, res) => {
   try {
     const { creatorId } = req.params;
     const certificates = await CertificateContentCreatorModel.find({
       contentCreator: creatorId,
     })
-      .populate("course") // Optionally, populate related course information
+      .populate("creator-certificates")
       .exec();
 
     res.status(200).json(certificates);

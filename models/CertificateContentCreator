@@ -3,8 +3,33 @@ const { Schema } = mongoose;
 
 // Class description
 const CertificateContentCreatorSchema = new Schema({
-  contentCreator: contentCreator,
-  course: course,
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: "content-creators",
+  },
+  title: {
+    type: String,
+    required: [true, "Title is required"],
+  },
+  category: {
+    type: String,
+    enum: [
+      "personal finance",
+      "health and workplace safety",
+      "sewing",
+      "electronics",
+    ],
+  },
+  rating: {
+    type: Number,
+    default: 0,
+  },
+  numOfSubscriptions: {
+    type: Number,
+    default: 0,
+  },
+  dateCreated: Date,
+  dateUpdated: Date,
 });
 
 const ContentCreatorModel = mongoose.model(
