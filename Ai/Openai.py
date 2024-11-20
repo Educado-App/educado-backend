@@ -13,7 +13,7 @@ client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 # Function to generate a chatbot response
 def chatbot(userInput):
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="ft:gpt-4o-mini-2024-07-18:group-1-chatbotters:edu2:AUtL6885",
         messages=[
         {"role": "system", "content": prompt.generatePrompt2()},
         {
