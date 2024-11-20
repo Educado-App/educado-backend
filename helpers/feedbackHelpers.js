@@ -1,4 +1,5 @@
 const { CourseModel } = require('../models/Courses');
+const { ContentCreatorModel } = require('../models/ContentCreators');
 const { FeedbackModel } = require('../models/Feedback');
 
 const errorCodes = require('./errorCodes');
@@ -114,9 +115,17 @@ async function getOverallRatingOfCourse(courseId) {
 	return totalRating / totalNumOfRatings;
 }
 
+
+async function findContentCreatorFromUserID(userID) {
+	const contentCreator = await ContentCreatorModel.findOne({ baseUser: userID });
+	return contentCreator._id;
+}
+
+
 // given a user id and an optional period, return the rating of the user
 async function getOverallRatingForCC(userid, period = null) {
-	const query = { creator: userid };
+	const contentCreator = await findContentCreatorFromUserID(userid);
+	const query = { creator: contentCreator };
 	// possible period values: 'this_month', 'last_month', '7_days', 'this_year', 'all'
 	if (period) {
 		const now = new Date();
