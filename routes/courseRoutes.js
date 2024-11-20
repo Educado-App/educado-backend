@@ -544,10 +544,13 @@ router.patch('/:id/updateStatus', async (req, res) => {
 router.post('/create/new', async(req, res) => {
 	try{
 	// title, category, difficulty, description, coverImg	
-		const { courseInfo, sections = [] } = req.body;	
-		const course = await createAndSaveCourse(courseInfo, sections);
+		const { course, userID } = req.body;
+		const { courseInfo, sections = [] } = course;	
+		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
+
+		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
 			
-		if(course) {
+		if(newCourse) {
 			res.status('201').send(course);
 		} else {
 			throw new CustomError(errorCodes.E1401);

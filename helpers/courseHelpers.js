@@ -50,8 +50,8 @@ function createSectionObject(title, description, parentCourse) {
 	});
 }
 
-function createCourseObject(courseInfo) {
-	const {title, category, difficulty, description, coverImg, status, creator } = courseInfo;
+function createCourseObject(courseInfo, creator) {
+	const {title, category, difficulty, description, coverImg, status } = courseInfo;
 	
 	return new CourseModel({
 		title: title, 
@@ -117,8 +117,8 @@ async function createAndSaveSection(section, parentCourse) {
 }
 
 
-async function createAndSaveCourse(courseInfo, sections = []) {
-	const courseObject = createCourseObject(courseInfo);
+async function createAndSaveCourse(courseInfo, sections = [], creator) {
+	const courseObject = createCourseObject(courseInfo, creator);
 	const courseId = courseObject._id;
 
 
