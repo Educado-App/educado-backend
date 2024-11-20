@@ -8,16 +8,15 @@ const handleFieldAlreadyInUseErrorInfo = (err, res) => {
 	else if (fieldAlreadyInUse === 'domain') repeatedFieldErrorCode = 'E1203';
 	else if (fieldAlreadyInUse === 'secondaryDomain') repeatedFieldErrorCode = 'E1204';
 	else return res.status(500).send({ error: errorCodes['E1206'] });
-				
 	return res.status(400).send({ error: errorCodes[repeatedFieldErrorCode] });
 };
 
 const validateInstitutionFields = (institutionName, domain, secondaryDomain) => {
 	const isMandatoryFieldsValid = typeof institutionName === 'string' && typeof domain === 'string';
-	const isSecondaryDomainValid = secondaryDomain && typeof secondaryDomain === 'string';
+	const isSecondaryDomainValid = !secondaryDomain || typeof secondaryDomain === 'string';
 	const isDomainsTheSame = domain === secondaryDomain;
 
-	return (isMandatoryFieldsValid && isSecondaryDomainValid && !isDomainsTheSame);
+	return (isMandatoryFieldsValid && isSecondaryDomainValid && (!secondaryDomain || !isDomainsTheSame));
 };
 
 module.exports = {

@@ -74,6 +74,10 @@ module.exports = {
 		code: 'E0017',
 		message: 'Service Unavailable'
 	},
+	E0018: {
+		code: 'E0018',
+		message: 'Failed to delete all account data from database!'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -153,6 +157,10 @@ module.exports = {
 	E0214: {
 		code: 'E0214',
 		message: 'Password must contain at least one letter.'
+	},
+	E0215: {
+		code: 'E0215',
+		message: 'Verification token is invalid or expired.'
 	},
 
 	// E03 - Logout errors
@@ -316,6 +324,11 @@ module.exports = {
 		message: 'Could not upload application'
 	},
 
+	E1007: {
+		code: 'E1007',
+		message: 'Could not save Content Creator application forms to database!'
+	},
+
 	// E11 - Component Errors
 	E1101: {
 		code: 'E1101',
@@ -395,4 +408,5 @@ module.exports = {
 		code: 'E1306',
 		message: 'Rating must be between 1 and 5'
 	},
+
 };
