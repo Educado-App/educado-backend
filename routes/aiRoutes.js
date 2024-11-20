@@ -7,7 +7,7 @@ const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limit
 // Apply rate limiter to the GET route
 router.get('/', shorttermLimiter, longtermLimiter , (req, res) => {
     console.log('GET request received at /api/ai');
-    res.send('AI Route is working or is it fuck you');
+    res.send('AI Route is working');
 });
 
 router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
