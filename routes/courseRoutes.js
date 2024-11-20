@@ -544,9 +544,9 @@ router.patch('/:id/updateStatus', async (req, res) => {
 router.post('/create/new', async(req, res) => {
 	try{
 	// title, category, difficulty, description, coverImg	
-		const { course, userID } = req.body;
+		const { course, userId } = req.body;
 		const { courseInfo, sections = [] } = course;	
-		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
+		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
 
 		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
 			
