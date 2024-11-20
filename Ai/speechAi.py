@@ -1,30 +1,37 @@
 import sys
 from openai import OpenAI
+import base64
 
+# Initialize OpenAI client
 client = OpenAI()
 
-def audioBot(userInput):
+def generate_audio(text_input):
+    # Generate audio from text
     response = client.audio.speech.create(
         model="tts-1",
         voice="alloy",
-        input=  userInput,
+        input=text_input,
     )
-    print(response)
-    return response
-
+    return response.content  # Binary audio content
 
 if __name__ == "__main__":
-    # Get userInput and currentPage from the command-line arguments
+    import sys
+    import os
+
     if len(sys.argv) < 2:
-        print("Error: Not enough arguments provided.")
+        print("Error: No input text provided.", file=sys.stderr)
         sys.exit(1)
-    
-    userInput = sys.argv[1]  # First command-line argument
-    
-    # Call the chatbot function and print the result
+
+    text_input = sys.argv[1]
+
     try:
-        result = audioBot(userInput)
+        # Assuming `generate_audio` is your function for generating audio
+        audio_binary = generate_audio(text_input)
+
+        # Output binary data to stdout
+        sys.stdout.buffer.write(audio_binary)
+
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
