@@ -17,7 +17,8 @@ const { StudentModel } = require('../models/Students');
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
 
-const { createCourseObject, saveFullCourse } = require('../helpers/courseHelpers');
+const { createAndSaveCourse } = require('../helpers/courseHelpers');
+const { CustomError } = require('../helpers/error');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -540,24 +541,22 @@ router.patch('/:id/updateStatus', async (req, res) => {
 
 
 //When creating new course from scratch
-router.put('/create/new', async(req, res) => {
+router.post('/create/new', async(req, res) => {
 	try{
 	// title, category, difficulty, description, coverImg	
-		const { courseInfo } = req.body.courseInfo;
-		const { sections } = req.body.sections ? Object.hasOwn(req.body, 'sections') : [];
-
-		const courseObject = createCourseObject(courseInfo, sections);
-
-		const course = await saveFullCourse(courseObject);
-				
-		if(course.acknowledged) {
-			res.send(201);
+		const { courseInfo, sections = [] } = req.body;	
+		const course = await createAndSaveCourse(courseInfo, sections);
+			
+		if(course) {
+			res.status('201').send(course);
+		} else {
+			throw new CustomError(errorCodes.E1401);
 		}
-
-		res.send(500);
 	
-	} catch {
-		res.send(404);
+	} catch(e) {
+		console.log('why did we fail?');
+		console.log(e);
+		res.send(500);
 	}
 });
 

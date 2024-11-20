@@ -405,4 +405,26 @@ module.exports = {
 		message: 'Rating must be between 1 and 5'
 	},
 
+	//course creation errors
+	E1401: {
+		code: 'E1401',
+		message: 'Could not save course'
+	},
+	E1402: {
+		code: 'E1402',
+		message: 'Could not save sections for course'
+	},
+	E1403: {
+		code: 'E1403',
+		message: 'Could not save components for section'
+	},
+	E1404: {
+		code: 'E1404',
+		message: 'Could not save lecture for section'
+	},
+	E1405: {
+		code: 'E1405',
+		message: 'Could not save exercise for section'
+	},
+
 };

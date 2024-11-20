@@ -2,6 +2,7 @@ const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/courseRoutes');
 const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb'); 
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
@@ -16,6 +17,8 @@ const makeFakeCoursePublished = require('../fixtures/fakeCoursePublished');
 const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
+const makeFakeCreateCourseData = require('../fixtures/fakeCourseCreationData');
+
 
 const app = express();
 app.use(express.json());
@@ -866,80 +869,31 @@ describe('Course Routes', () => {
 		});
 	});
 
-	describe("PUT /courses/create/new", () => {
+	describe("POST /courses/create/new", () => {
 		it('Creates a new course from scratch', async() => {
-			const courseInfo = {
-				title: "Hello",
-				description: "world",
-				difficulty: 2,
-				coverImg: "123"
-			};
-			
-			const sections = [
-				{
-					title: 'sectionName',
-					description: 'sectionDesc',
-					components: [
-						{
-							compType: 'exercise',
-							title: 'Exercise 1',
-							onWrongFeedback: 'Wow you\'re stupid',
-							question: 'What is 2 + 2?',
-							answers: [
-								{ text: '3', correct: false, feedback: 'Incorrect' },
-								{ text: '4', correct: true, feedback: 'Correct' }
-							]
-						},
-						{
-							compType: 'lecture',
-							title: 'Lecture 1',
-							description: 'This is the first lecture',
-							contentType: 'video',
-							content: 'http://example.com/video.mp4'
-						}
-					]
-				},
-				{
-					title: 'sectionName2',
-					description: 'sectionDesc2',
-					components: [
-						{
-							compType: 'exercise',
-							title: 'Exercise 2',
-							onWrongFeedback: 'Wow you\'re stupid',
-							question: 'What is 3 + 3?',
-							answers: [
-								{ text: '5', correct: false, feedback: 'Incorrect' },
-								{ text: '6', correct: true, feedback: 'Correct' }
-							]
-						},
-						{
-							compType: 'lecture',
-							title: 'Lecture 2',
-							description: 'This is the second lecture',
-							contentType: 'text',
-							content: 'xxxxxxxxxxxx'
-						}
-					]
-				}
-			];
+			const fakeId = fakeUser._id;
 
-			const token = signAccessToken({ id: fakeUser._id });
+			const courseData = makeFakeCreateCourseData(fakeId);
+			
+			const token = signAccessToken({ id: fakeId });
 			const response = await request(app)
-				.put('/api/courses/create/new')
+				.post('/api/courses/create/new')
 				.set('Authorization', `Bearer ${token}`)
-				.send({
-					courseInfo: courseInfo, 
-					sections: sections
-				});
+				.send(courseData);
+
+			console.log('sent request');
+
+			const courseId = response.body._id;
+			const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
+
+			console.log(courseId);
+			console.log(course._id);
 
 			expect(response.status).toBe(201);
-			// expect(response.body.title).toBe(newCourseData.title);
-			// expect(response.body.category).toBe(newCourseData.category);
-			// expect(response.body.difficulty).toBe(newCourseData.difficulty);
-			// expect(response.body.description).toBe(newCourseData.description);
-			// expect(response.body.estimatedHours).toBe(newCourseData.estimatedHours);
-			// expect(response.body.creator).toBe(fakeUser._id.toString());
+			expect(course.title).toBe(courseData.courseInfo.title);
+			expect(course.category).toBe(courseData.courseInfo.category);
+			expect(course.description).toBe(courseData.courseInfo.description);
+			expect(course.creator.toString()).toBe(fakeId.toString());
 
 		});
 	});
