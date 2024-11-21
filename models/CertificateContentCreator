@@ -32,9 +32,9 @@ const CertificateContentCreatorSchema = new Schema({
   dateUpdated: Date,
 });
 
-const ContentCreatorModel = mongoose.model(
+const CertificateContentCreatorModel = mongoose.model(
   "creator-certificates",
   CertificateContentCreatorSchema
 );
 
-module.exports = { ContentCreatorModel };
+module.exports = { CertificateContentCreatorModel };

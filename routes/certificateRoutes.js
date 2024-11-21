@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { ContentCreator } = require("../models/ContentCreators");
 const { Course } = require("../models/Courses");
 const {
-  ContentCreatorCertificate,
+  CertificateContentCreatorModel,
 } = require("../models/CertificateContentCreator");
 const errorCodes = require("../helpers/errorCodes");
 
@@ -19,8 +19,8 @@ router.post("/creator-certificates", async (req, res) => {
 router.get("/creator-certificates/:creatorId", async (req, res) => {
   try {
     const { creatorId } = req.params;
-    const certificates = await CertificateContentCreatorModel.find({
-      contentCreator: creatorId,
+    const certificates = await CertificateContentCreatorModel.findOne({
+      _id: creatorId,
     })
       .populate("creator-certificates")
       .exec();

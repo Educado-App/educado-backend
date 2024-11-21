@@ -15,7 +15,7 @@ const StudentRoutes = require("../routes/studentRoutes");
 const ComponentRoutes = require("../routes/componentRoutes");
 const ProfileRoutes = require("../routes/profileRoutes");
 const FeedbackRoutes = require("../routes/feedbackRoutes");
-const certificateRoutes = require("../routes/certificateRoutes");
+const CertificateRoutes = require("../routes/certificateRoutes");
 
 const UserInfoRoutes = require("../routes/userInfoRoutes");
 const InstituitionRoutes = require("./institutions/institutionsRoutes");
@@ -44,7 +44,7 @@ router.use("/api/feedback", FeedbackRoutes);
 router.use("/api/ai", AiRoutes);
 router.use("/api/user-info", UserInfoRoutes);
 router.use("/api/institutions", InstituitionRoutes);
-router.use("/api/certificate", certificateRoutes);
+router.use("/api/certificate", CertificateRoutes);
 
 // Test route
 router.use("/api/test", TestRoutes);
