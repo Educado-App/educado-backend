@@ -18,7 +18,9 @@ router.get("/get-creator-certificates/:creatorId&:courseId", async (req, res) =>
     }
 
     const certificate = await CertificateContentCreatorModel.findOneAndUpdate(
-			{ course: courseId },
+			{ course: courseId,
+        creator: creatorId,
+      },
 			{
 				numOfSubscriptions: course.numOfSubscriptions, // Is the field needed for certificate creator table? We have the info in course
 				dateUpdated: Date.now(),
