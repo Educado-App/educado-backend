@@ -7,6 +7,10 @@ const CertificateContentCreatorSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "content-creators",
   },
+  course: {
+    type: Schema.Types.ObjectId,
+    ref: "courses",
+  },
   title: {
     type: String,
     required: [true, "Title is required"],

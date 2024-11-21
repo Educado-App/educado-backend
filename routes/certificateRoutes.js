@@ -6,16 +6,39 @@ const {
 const errorCodes = require("../helpers/errorCodes");
 
 // Get creator certificate
-router.get("/get-creator-certificates/:creatorId", async (req, res) => {
+router.get("/get-creator-certificates/:creatorId&:courseId", async (req, res) => {
   try {
     const creatorId = req.params.creatorId;
-    const certificates = await CertificateContentCreatorModel.findOne({
-      creator: creatorId,
-    })
+    const courseId = req.params.courseId;
+
+    const course = await CourseModel.findOne({ _id: courseId });
+
+    if (!course) {
+      return res.status(400).send({ error: errorCodes['E0006'] }); // E0006 - Course not found
+    }
+
+    const certificate = await CertificateContentCreatorModel.findOneAndUpdate(
+			{ course: courseId },
+			{
+				numOfSubscriptions: course.numOfSubscriptions, // Is the field needed for certificate creator table? We have the info in course
+				dateUpdated: Date.now(),
+			},
+			function (err) {
+				if (err) {
+					return res.status(400).send(err);
+				}
+			}
+
+      // TODO: Make error code for this
+
+      // if (!course) {
+      //   return res.status(400).send({ error: errorCodes['E0006'] }); // E0006 - Course not found
+      // }
+		)
       .populate("creator-certificates")
       .exec();
 
-    res.status(200).json(certificates);
+    res.status(200).json(certificate);
   } catch (error) {
     console.error("Error fetching certificates:", error);
     res.status(500).json({ error: "Error fetching certificates" });
@@ -26,18 +49,17 @@ router.get("/get-creator-certificates/:creatorId", async (req, res) => {
 router.put('/create-creator-certificate', async (req, res) => {
 	const { courseId, creatorId } = req.body;
 
-  // Time of creation
-
   const course = await CourseModel.findOne({ _id: courseId, });
 
   if (!course) {
-		return res.status(400).send({ error: errorCodes['E0006'] }); // If course does not exist, return error
+		return res.status(400).send({ error: errorCodes['E0006'] }); // E0006 - Course not found
 	}
 
 	const contentCreatorCertificate = new CertificateContentCreatorModel({
 		title: course.title,
 		category: course.category,
 		creator: creatorId,
+    course: courseId,
     rating: course.rating,
     numOfSubscriptions: 0,
 		dateCreated: Date.now(),
