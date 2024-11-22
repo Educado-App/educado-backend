@@ -93,109 +93,109 @@ const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
 
 // Route for handling MP3 upload, processing it without saving to disk
 router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('audio'), (req, res) => {
-    console.log("Audio processing request received");
+	console.log('Audio processing request received');
 
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
+	if (!req.file) {
+		return res.status(400).json({ error: 'No file uploaded' });
+	}
 
-    try {
-        // Step 1: Transcribe audio using the first Python script
-        console.log('Starting transcription with Python script...');
-        const sttPython = spawn(pythonCommand, ['./Ai/transcribeAudio.py'], {
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
+	try {
+		// Step 1: Transcribe audio using the first Python script
+		console.log('Starting transcription with Python script...');
+		const sttPython = spawn(pythonCommand, ['./Ai/transcribeAudio.py'], {
+			stdio: ['pipe', 'pipe', 'pipe']
+		});
 
-        sttPython.stdin.write(req.file.buffer);
-        sttPython.stdin.end();
+		sttPython.stdin.write(req.file.buffer);
+		sttPython.stdin.end();
 
-        let sttOutput = '';
-        let sttError = '';
+		let sttOutput = '';
+		let sttError = '';
 
-        sttPython.stdout.on('data', (data) => {
-            sttOutput += data.toString();
-        });
+		sttPython.stdout.on('data', (data) => {
+			sttOutput += data.toString();
+		});
 
-        sttPython.stderr.on('data', (data) => {
-            sttError += data.toString();
-            console.error('STT Error:', sttError);
-        });
+		sttPython.stderr.on('data', (data) => {
+			sttError += data.toString();
+			console.error('STT Error:', sttError);
+		});
 
-        sttPython.on('close', (sttCode) => {
-            if (sttCode !== 0) {
-                const errorMsg = sttError || `STT script exited with code ${sttCode}`;
-                console.error('STT Process Error:', errorMsg);
-                return res.status(500).json({ error: errorMsg });
-            }
+		sttPython.on('close', (sttCode) => {
+			if (sttCode !== 0) {
+				const errorMsg = sttError || `STT script exited with code ${sttCode}`;
+				console.error('STT Process Error:', errorMsg);
+				return res.status(500).json({ error: errorMsg });
+			}
 
-            const transcription = sttOutput.trim();
-            console.log('STT Result:', transcription);
+			const transcription = sttOutput.trim();
+			console.log('STT Result:', transcription);
 
-            // Step 2: Generate chatbot response using the second Python script
-            console.log('Generating chatbot response with Python script...');
-            const openaiPython = spawn(pythonCommand, ['./Ai/Openai.py', transcription]);
+			// Step 2: Generate chatbot response using the second Python script
+			console.log('Generating chatbot response with Python script...');
+			const openaiPython = spawn(pythonCommand, ['./Ai/Openai.py', transcription]);
 
-            let openaiOutput = '';
-            let openaiError = '';
+			let openaiOutput = '';
+			let openaiError = '';
 
-            openaiPython.stdout.on('data', (data) => {
-                openaiOutput += data.toString();
-            });
+			openaiPython.stdout.on('data', (data) => {
+				openaiOutput += data.toString();
+			});
 
-            openaiPython.stderr.on('data', (data) => {
-                openaiError += data.toString();
-                console.error('OpenAI Error:', openaiError);
-            });
+			openaiPython.stderr.on('data', (data) => {
+				openaiError += data.toString();
+				console.error('OpenAI Error:', openaiError);
+			});
 
-            openaiPython.on('close', (openaiCode) => {
-                if (openaiCode !== 0) {
-                    const errorMsg = openaiError || `OpenAI script exited with code ${openaiCode}`;
-                    console.error('OpenAI Process Error:', errorMsg);
-                    return res.status(500).json({ error: errorMsg });
-                }
+			openaiPython.on('close', (openaiCode) => {
+				if (openaiCode !== 0) {
+					const errorMsg = openaiError || `OpenAI script exited with code ${openaiCode}`;
+					console.error('OpenAI Process Error:', errorMsg);
+					return res.status(500).json({ error: errorMsg });
+				}
 
-                const chatbotResponse = openaiOutput.trim();
-                console.log('Chatbot Response:', chatbotResponse);
+				const chatbotResponse = openaiOutput.trim();
+				console.log('Chatbot Response:', chatbotResponse);
 
-                // Step 3: Generate audio from chatbot response using the third Python script
-                console.log('Starting audio generation with Python script...');
-                const audioBotPython = spawn(pythonCommand, ['./Ai/speechAi.py', chatbotResponse]);
+				// Step 3: Generate audio from chatbot response using the third Python script
+				console.log('Starting audio generation with Python script...');
+				const audioBotPython = spawn(pythonCommand, ['./Ai/speechAi.py', chatbotResponse]);
 
-                let audioBotError = '';
-                let audioBotOutput = [];
+				let audioBotError = '';
+				let audioBotOutput = [];
 
-                audioBotPython.stdout.on('data', (chunk) => {
-                    audioBotOutput.push(chunk);
-                });
+				audioBotPython.stdout.on('data', (chunk) => {
+					audioBotOutput.push(chunk);
+				});
 
-                audioBotPython.stderr.on('data', (data) => {
-                    audioBotError += data.toString();
-                    console.error('AudioBot Error:', audioBotError);
-                });
+				audioBotPython.stderr.on('data', (data) => {
+					audioBotError += data.toString();
+					console.error('AudioBot Error:', audioBotError);
+				});
 
-                audioBotPython.on('close', (audioBotCode) => {
-                    if (audioBotCode !== 0) {
-                        const errorMsg = audioBotError || `AudioBot script exited with code ${audioBotCode}`;
-                        console.error('AudioBot Process Error:', errorMsg);
-                        return res.status(500).json({ error: errorMsg });
-                    }
+				audioBotPython.on('close', (audioBotCode) => {
+					if (audioBotCode !== 0) {
+						const errorMsg = audioBotError || `AudioBot script exited with code ${audioBotCode}`;
+						console.error('AudioBot Process Error:', errorMsg);
+						return res.status(500).json({ error: errorMsg });
+					}
 
-                    console.log('Audio generation completed.');
+					console.log('Audio generation completed.');
 
-                    // Combine the results
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json({
-                        message: sttOutput,
-                        aiResponse: chatbotResponse, // The chatbot response
-                        audio: Buffer.concat(audioBotOutput).toString('base64') // Base64 encoded MP3 binary
-                    });
-                });
-            });
-        });
-    } catch (error) {
-        console.error('Server Error:', error.message);
-        res.status(500).json({ error: 'Error processing audio' });
-    }
+					// Combine the results
+					res.setHeader('Content-Type', 'application/json');
+					res.json({
+						message: sttOutput,
+						aiResponse: chatbotResponse, // The chatbot response
+						audio: Buffer.concat(audioBotOutput).toString('base64') // Base64 encoded MP3 binary
+					});
+				});
+			});
+		});
+	} catch (error) {
+		console.error('Server Error:', error.message);
+		res.status(500).json({ error: 'Error processing audio' });
+	}
 });
 
 
