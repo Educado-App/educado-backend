@@ -1,6 +1,5 @@
 import sys
 from openai import OpenAI
-import base64
 
 # Initialize OpenAI client
 client = OpenAI()
@@ -15,8 +14,6 @@ def generate_audio(text_input):
     return response.content  # Binary audio content
 
 if __name__ == "__main__":
-    import sys
-    import os
 
     if len(sys.argv) < 2:
         print("Error: No input text provided.", file=sys.stderr)
