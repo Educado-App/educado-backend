@@ -3,7 +3,34 @@ const { spawn } = require('child_process');
 const multer = require('multer');
 const router = express.Router();
 const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
+const Feedback = require('../models/Feedback');
 
+router.get('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => {
+    console.log('GET request received at /api/ai/feedback');
+	res.send('feedback route is working!!!???!');
+});
+
+router.post('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => {
+    const { userPrompt, chatbotResponse, feedback } = req.body;
+
+    if (!userPrompt || !chatbotResponse || typeof feedback === 'undefined'){
+        return res.status(400).json({error: 'Missing fields required fields'});
+    }
+
+    try {
+        const newFeedback = new Feedback({
+            userPrompt,
+            chatbotResponse,
+            feedback
+        });
+        await newFeedback.save();
+        console.log('Feedback successfully saved', newFeedback);
+        res.status(200).json({message: 'Feedback successfully saved'});
+    } catch (error){
+        console.error('error saving feedback', error.message);
+        res.status(500).json({error: 'Internal server error'});
+    }
+});
 
 router.get('/', shorttermLimiter, longtermLimiter,  (req, res) => {
 	console.log('GET request received at /api/ai');
