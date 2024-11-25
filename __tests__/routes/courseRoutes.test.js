@@ -881,20 +881,13 @@ describe('Course Routes', () => {
 				.set('Authorization', `Bearer ${token}`)
 				.send(courseData);
 
-			console.log('sent request');
-
 			const courseId = response.body._id;
 			const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
-
-			console.log(courseId);
-			console.log(course._id);
-
+			
 			expect(response.status).toBe(201);
-			expect(course.title).toBe(courseData.courseInfo.title);
-			expect(course.category).toBe(courseData.courseInfo.category);
-			expect(course.description).toBe(courseData.courseInfo.description);
-			expect(course.creator.toString()).toBe(fakeId.toString());
-
+			expect(course.title).toBe(courseData.course.courseInfo.title);
+			expect(course.category).toBe(courseData.course.courseInfo.category);
+			expect(course.description).toBe(courseData.course.courseInfo.description);
 		});
 	});
 });

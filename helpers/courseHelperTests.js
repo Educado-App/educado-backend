@@ -1,16 +1,16 @@
-module.exports = function makeFakeCreateCourseData(creatorId) {
+const { createCourse, saveFullCourse } = require('../helpers/courseHelpers');
 
-	const courseInfo = {
+
+const request = {
+	'courseInfo':{
 		title: 'yaay',
 		category: 'health and workplace safety',
 		difficulty: '2',
-		creator: creatorId,
 		description: 'woows',
 		coverImg: '0_c',
 		status: 'draft'
-	};
-
-	const sections = [
+	},
+	'sections': [
 		{
 			title: 'sec1',
 			description: 'ahhaa',
@@ -66,12 +66,17 @@ module.exports = function makeFakeCreateCourseData(creatorId) {
 				}
 			]
 		}
-	];
-
-	return {
-		course: {
-			courseInfo: courseInfo, 
-			sections: sections
-		}
-	};
+	]
 };
+
+const courseInfo = request.courseInfo;
+const sections = request.sections;
+
+const course = createCourse(courseInfo, sections);
+const saved = await saveFullCourse(course);
+
+console.log(saved.acknowledged);
+console.log('------------------')
+console.log(saved);
+
+console.log(course);

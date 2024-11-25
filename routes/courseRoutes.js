@@ -563,19 +563,16 @@ router.post('/create/new', async(req, res) => {
 		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
 			
 		if(newCourse) {
-			res.status('201').send(course);
+			res.status('201').send(newCourse);
 		} else {
 			throw new CustomError(errorCodes.E1401);
 		}
 	
 	} catch(e) {
-		console.log('why did we fail?');
-		console.log(e);
-		res.send(500);
+		console.error(e);
+		res.sendStatus(500);
 	}
 });
-
-
 
 
 
