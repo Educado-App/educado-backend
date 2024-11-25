@@ -430,5 +430,9 @@ module.exports = {
 		code: 'E1405',
 		message: 'Could not save exercise for section'
 	},
+	E1406: {
+		code: 'E1406',
+		message: 'Could not save media'
+	},
 
 };

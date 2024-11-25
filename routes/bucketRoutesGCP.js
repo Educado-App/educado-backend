@@ -4,6 +4,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { PassThrough } = require('stream');
 const Buffer = require('buffer').Buffer;
+const {uploadFileToBucket} = require('../helpers/bucketUtils');
 
 //Get serviceUrl from environment variable
 
@@ -53,7 +54,6 @@ router.get('/:filename', (req, res) => {
 });
 
 
-
 // Delete file from bucket
 router.delete('/:filename', (req, res) => {
 	//Forward to service api
@@ -72,17 +72,7 @@ router.delete('/:filename', (req, res) => {
 
 // Upload file to bucket
 router.post('/', upload.single('file'), (req, res) => {
-	const form = new FormData();
-
-	// Add file and filename to form
-	form.append('file', req.file.buffer, {
-		filename: req.file.originalname,
-		contentType: req.file.mimetype
-	});
-	form.append('fileName', req.body.fileName);
-
-	// Forward to service api
-	axios.post(serviceUrl + '/bucket/', form, { headers: form.getHeaders() })
+	uploadFileToBucket(req.file, req.body.fileName)
 		.then(response => {
 			res.send(response.data);
 		})
@@ -96,7 +86,6 @@ router.post('/', upload.single('file'), (req, res) => {
 			}
 		});
 });
-
 
 
 axios.interceptors.response.use(response => {
@@ -163,3 +152,4 @@ router.get('/stream/:filename', async (req, res) => {
 
 
 module.exports = router;
+

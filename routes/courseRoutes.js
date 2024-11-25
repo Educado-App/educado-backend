@@ -557,6 +557,7 @@ router.post('/create/new', async(req, res) => {
 	try{
 		// title, category, difficulty, description, coverImg	
 		const { course, userId } = req.body;
+		console.log('course', JSON.stringify(course, null, 2));
 		const { courseInfo, sections = [] } = course;	
 		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
 

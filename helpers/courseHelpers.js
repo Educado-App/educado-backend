@@ -2,9 +2,24 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises'); 
 const { LectureModel } = require('../models/Lectures');
+const { uploadFileToBucket } = require('./bucketUtils');
 
 const errorCodes = require('./errorCodes');
 const { assert } = require('./error');
+
+async function handleMedia(media) {
+	console.log('Media:', media);
+	if (media) {
+		const mediaString = `${media.id}_${media.parentType}`;
+		const file = media.file;
+		try {
+			await uploadFileToBucket(file, mediaString);
+		} catch (error) {
+			console.log('Media upload error:', error.message);
+			throw new Error(errorCodes.E1406);
+		}
+	}
+}
 
 function createExersiceObject(exercise, parentSection) {
 	const { title, onWrongFeedback, question, answers } = exercise;
@@ -51,20 +66,27 @@ function createSectionObject(title, description, parentCourse) {
 }
 
 function createCourseObject(courseInfo, creator) {
-	const {title, category, difficulty, description, coverImg, status } = courseInfo;
-	
-	return new CourseModel({
-		title: title, 
+	const { title, category, difficulty, description, coverImg, status } = courseInfo;
+
+	let courseObject = new CourseModel({
+		title: title,
 		category: category,
 		difficulty: difficulty,
 		description: description,
-		// coverImg: coverImg,
-		coverImg: '',
+		coverImg: coverImg,
 		status: status,
 		creator: creator,
 		dateCreated: Date.now(),
 		dateUpdated: Date.now()
 	});
+
+	coverImg.id = courseObject._id;
+	handleMedia(coverImg);
+	const coverImgString = `${courseObject._id}_${coverImg.parentType}`;
+	console.log('CoverImg:', coverImgString);
+	courseObject.coverImg = coverImgString;
+
+	return courseObject;
 }
 
 async function createAndSaveExercise(component, parentSection) {
@@ -102,6 +124,10 @@ async function createAndSaveComponent(component, parentSection){
 		componentInfo = await createAndSaveExercise(component, parentSection);
 	} else if (component.compType === 'lecture') {
 		componentInfo = await createAndSaveLecture(component, parentSection);
+		if (component.video) {
+			component.video.id = componentInfo.compId;
+			await handleMedia(component.video);
+		}
 	}
 
 	return componentInfo;
@@ -137,6 +163,8 @@ async function createAndSaveSection(section, parentCourse) {
 
 
 async function createAndSaveCourse(courseInfo, sections = [], creator) {
+	console.log('CourseInfo:', courseInfo);
+	console.log('Sections:', sections);
 	const courseObject = createCourseObject(courseInfo, creator);
 	const courseId = courseObject._id;
 
