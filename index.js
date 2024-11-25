@@ -8,6 +8,8 @@ const keys = require('./config/keys');
 const cookieSession = require('cookie-session');
 const router = require('./routes');
 const passport = require('passport');
+const { createTimeSeriesCollection } = require('./db/timeSeriesCollection');
+const { addMetricsData } = require('./scripts/addMetricsData');
 
 /* global process */
 const PORT = process.env.PORT || 8888; // Get dynamic port allocation when deployed by Heroku. Otherwise, by default, use port 5000
@@ -19,6 +21,11 @@ connectToDb(keys.mongoURI, {
 	useUnifiedTopology: true,
 	useFindAndModify: false,
 	useCreateIndex: true,
+}).then(async () => {
+	await createTimeSeriesCollection();
+	await addMetricsData();
+}).catch((error) => {
+	console.error('Error connecting to mongoDB:', error);
 });
 
 const app = express(); // Configuration for listening, communicate to handlers
