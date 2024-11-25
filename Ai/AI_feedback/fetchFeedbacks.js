@@ -9,7 +9,6 @@ async function fetchAndWriteFeedbacks() {
     // Fetch the feedback data from the API
     const response = await axios.get(feedbacksUrl);
     
-    // Assuming the response data is an array of feedback objects
     const feedbackData = response.data;
 
     const messages = feedbackData.map(feedback => {
@@ -20,7 +19,6 @@ async function fetchAndWriteFeedbacks() {
         { role: 'assistant', content: feedback.chatbotResponse }
       ];
 
-      // Return the messages array for each feedback
       return { messages: chatMessages };
     });
 
