@@ -15,11 +15,10 @@ def generate_audio(text_input):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
-        print("Error: No input text provided.", file=sys.stderr)
+    text_input = sys.stdin.read().strip()
+    if not text_input:
+        print("No input provided!")
         sys.exit(1)
-
-    text_input = sys.argv[1]
 
     try:
         # Assuming `generate_audio` is your function for generating audio

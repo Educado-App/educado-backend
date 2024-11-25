@@ -32,177 +32,139 @@ router.post('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => 
     }
 });
 
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+
+// Utility function to execute a Python script
+const executePythonScript = (scriptPath, input = null, isBinary = false) => {
+    return new Promise((resolve, reject) => {
+        const python = spawn(pythonCommand, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+        if (input) {
+            python.stdin.write(input);
+            python.stdin.end();
+        }
+
+        let output = [];
+        let errorOutput = '';
+
+        python.stdout.on('data', (data) => {
+            if (isBinary) {
+                output.push(data); // Collect binary chunks
+            } else {
+                output.push(data.toString()); // Collect text output
+            }
+        });
+
+        python.stderr.on('data', (data) => {
+            errorOutput += data.toString();
+        });
+
+        python.on('close', (code) => {
+            if (code === 0) {
+                if (isBinary) {
+                    resolve(Buffer.concat(output)); // Return concatenated binary buffer
+                } else {
+                    resolve(output.join('').trim()); // Return concatenated string output
+                }
+            } else {
+                reject(errorOutput || `Script exited with code ${code}`);
+            }
+        });
+    });
+};
+
+// Step 1: Transcribe audio
+const transcribeAudio = async (audioBuffer) => {
+    console.log('Starting transcription...');
+    return await executePythonScript('./Ai/transcribeAudio.py', audioBuffer);
+};
+
+// Step 2: Generate chatbot response
+const generateChatbotResponse = async (transcription) => {
+    console.log('Generating chatbot response... ' + transcription);
+    return await executePythonScript('./Ai/Openai.py', transcription);
+};
+
+// Step 3: Generate audio response
+const generateAudioResponse = async (chatbotResponse) => {
+    console.log('Generating audio response...');
+    return await executePythonScript('./Ai/speechAi.py', chatbotResponse, true); // Pass true for binary output
+};
+
+
 router.get('/', shorttermLimiter, longtermLimiter,  (req, res) => {
 	console.log('GET request received at /api/ai');
 	res.send('AI Route is working!!!???!');
 });
 
 router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
-	req.setTimeout(30000);
 	const { userInput } = req.body;
 
-	if (!userInput) {
-		return res.status(400).json({ error: 'userInput are required' });
-	}
-
 	try {
-		console.log('Starting Python script...');
-		const python = spawn('python3', ['./Ai/Openai.py', userInput]);
-		let output = '';
-		let errorOutput = '';
+        if (!userInput) {
+			return res.status(400).json({ error: 'userInput are required' });
+		}
 
-		python.stdout.on('data', (data) => {
-			output += data.toString();
-		});
+        // Step 1: Chatbot Response
+        const chatbotResponse = await generateChatbotResponse(userInput);
 
-		python.stderr.on('data', (data) => {
-			errorOutput += data.toString();
-			console.error('Python Error:', errorOutput);
-		});
+        // Step 2: Audio Generation
+        const audioBinary = await generateAudioResponse(chatbotResponse);
 
-		python.on('error', (err) => {
-			console.error('Failed to start Python process:', err);
-			res.status(500).json({ error: 'Failed to start Python script' });
-		});
+        console.log('Audio processing completed.');
 
-		python.on('close', (code) => {
-			if (code === 0) {
-				if (output) {
-					console.log('returning' + output);
-					res.json({ message: output });
-				} else {
-					res.status(500).json({ error: 'Python script returned no output' });
-				}
-			} else {
-				const errorMsg = errorOutput || `Python process exited with code ${code}`;
-				res.status(500).json({ error: errorMsg });
-			}
-		});
-	} catch (error) {
-		console.error('Server Error:', error.message);
-		res.status(500).json({ error: 'Error running Python script' });
-	}
-});
-
-// Configure multer to store files in memory
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
-// Determine Python command based on the operating system
-const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
-
-// Route for handling MP3 upload, processing it without saving to disk
-router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('audio'), (req, res) => {
-	console.log('Audio processing request received');
-
-	if (!req.file) {
-		return res.status(400).json({ error: 'No file uploaded' });
-	}
-
-	try {
-		// Step 1: Transcribe audio using the first Python script
-		console.log('Starting transcription with Python script...');
-		const sttPython = spawn(pythonCommand, ['./Ai/transcribeAudio.py'], {
-			stdio: ['pipe', 'pipe', 'pipe']
-		});
-
-		sttPython.stdin.write(req.file.buffer);
-		sttPython.stdin.end();
-
-		let sttOutput = '';
-		let sttError = '';
-
-		sttPython.stdout.on('data', (data) => {
-			sttOutput += data.toString();
-		});
-
-		sttPython.stderr.on('data', (data) => {
-			sttError += data.toString();
-			console.error('STT Error:', sttError);
-		});
-
-		sttPython.on('close', (sttCode) => {
-			if (sttCode !== 0) {
-				const errorMsg = sttError || `STT script exited with code ${sttCode}`;
-				console.error('STT Process Error:', errorMsg);
-				return res.status(500).json({ error: errorMsg });
-			}
-
-			const transcription = sttOutput.trim();
-			console.log('STT Result:', transcription);
-
-			// Step 2: Generate chatbot response using the second Python script
-			console.log('Generating chatbot response with Python script...');
-			const openaiPython = spawn(pythonCommand, ['./Ai/Openai.py', transcription]);
-
-			let openaiOutput = '';
-			let openaiError = '';
-
-			openaiPython.stdout.on('data', (data) => {
-				openaiOutput += data.toString();
-			});
-
-			openaiPython.stderr.on('data', (data) => {
-				openaiError += data.toString();
-				console.error('OpenAI Error:', openaiError);
-			});
-
-			openaiPython.on('close', (openaiCode) => {
-				if (openaiCode !== 0) {
-					const errorMsg = openaiError || `OpenAI script exited with code ${openaiCode}`;
-					console.error('OpenAI Process Error:', errorMsg);
-					return res.status(500).json({ error: errorMsg });
-				}
-
-				const chatbotResponse = openaiOutput.trim();
-				console.log('Chatbot Response:', chatbotResponse);
-
-				// Step 3: Generate audio from chatbot response using the third Python script
-				console.log('Starting audio generation with Python script...');
-				const audioBotPython = spawn(pythonCommand, ['./Ai/speechAi.py', chatbotResponse]);
-
-				let audioBotError = '';
-				let audioBotOutput = [];
-
-				audioBotPython.stdout.on('data', (chunk) => {
-					audioBotOutput.push(chunk);
-				});
-
-				audioBotPython.stderr.on('data', (data) => {
-					audioBotError += data.toString();
-					console.error('AudioBot Error:', audioBotError);
-				});
-
-				audioBotPython.on('close', (audioBotCode) => {
-					if (audioBotCode !== 0) {
-						const errorMsg = audioBotError || `AudioBot script exited with code ${audioBotCode}`;
-						console.error('AudioBot Process Error:', errorMsg);
-						return res.status(500).json({ error: errorMsg });
-					}
-
-					console.log('Audio generation completed.');
-
-					// Combine the results
-					res.setHeader('Content-Type', 'application/json');
-					res.json({
-						message: sttOutput,
-						aiResponse: chatbotResponse, // The chatbot response
-						audio: Buffer.concat(audioBotOutput).toString('base64') // Base64 encoded MP3 binary
-					});
-				});
-			});
-		});
-	} catch (error) {
-		console.error('Server Error:', error.message);
-		res.status(500).json({ error: 'Error processing audio' });
-	}
+        // Combine the results and respond
+        res.setHeader('Content-Type', 'application/json');
+        res.json({
+            message: chatbotResponse,
+            audio: audioBinary.toString('base64'), // Convert binary data to Base64
+        });
+    } catch (error) {
+        console.error('Error processing audio:', error);
+        res.status(500).json({ error: 'Internal server error', details: error });
+    }
 });
 
 
 
-router.get('/stt', shorttermLimiter, longtermLimiter, (req, res) => {
-	console.log('GET request received at /api/ai');
-	res.send('AI Route is working!!!???!');
+
+
+// Route for processing audio
+router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('audio'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const audioBuffer = req.file.buffer;
+
+        // Step 1: Transcription
+        const transcription = await transcribeAudio(audioBuffer);
+        console.log("trans= " + transcription);
+
+        // Step 2: Chatbot Response
+        const chatbotResponse = await generateChatbotResponse(transcription);
+
+        // Step 3: Audio Generation
+        const audioBinary = await generateAudioResponse(chatbotResponse);
+
+        console.log('Audio processing completed.');
+
+        // Combine the results and respond
+        res.setHeader('Content-Type', 'application/json');
+        res.json({
+            message: transcription,
+            aiResponse: chatbotResponse,
+            audio: audioBinary.toString('base64'), // Convert binary data to Base64
+        });
+    } catch (error) {
+        console.error('Error processing audio:', error);
+        res.status(500).json({ error: 'Internal server error', details: error });
+    }
 });
 
 module.exports = router;

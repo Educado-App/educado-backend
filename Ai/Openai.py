@@ -28,11 +28,12 @@ def chatbot(userInput):
 # Check if the script is being executed directly
 if __name__ == "__main__":
     # Get userInput and currentPage from the command-line arguments
-    if len(sys.argv) < 2:
-        print("Error: Not enough arguments provided.")
+    userInput = sys.stdin.read().strip()
+    if not userInput:
+        print("No input provided!")
         sys.exit(1)
     
-    userInput = sys.argv[1]  # First command-line argument
+      # First command-line argument
     
     # Call the chatbot function and print the result
     try:
