@@ -29,6 +29,9 @@ jest.mock('../../helpers/email.js', () => ({
   sendMail: jest.fn().mockResolvedValue(true),  // Mock implementation
 }));
 
+jest.mock('../../config/keys', () => ({
+	TOKEN_SECRET: 'test-secret'
+}));
 
 describe('Application Routes', () => {
   let db; // Store the database connection
@@ -61,6 +64,8 @@ describe('Application Routes', () => {
     await server.close();
     await mongoose.connection.close();
   });
+
+  
 
   // Test GET request
   describe('GET /api/application/:id', () => {
