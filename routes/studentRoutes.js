@@ -3,7 +3,6 @@ const errorCodes = require('../helpers/errorCodes');
 const { markAsCompleted } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { findTop100Students } = require('../helpers/leaderboard');
 const { addIncompleteCourse } = require('../helpers/completing');
 const { StudentModel } = require('../models/Students');
 const { CourseModel } = require('../models/Courses');
@@ -11,6 +10,7 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const process = require('process');
+const { getLeaderboard } = require('../helpers/leaderboard');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -398,6 +398,16 @@ router.get('/leaderboard', async (req, res) => {
 		} else {
 			res.status(500).json({ 'error': errorCodes['E0003'] });
 		}
+	}
+});
+
+// Get the leaderboard data
+router.get('/leaderboard', async (req, res) => {
+	try {
+		const leaderboard = await getLeaderboard();
+		res.status(200).json(leaderboard);
+	} catch (error) {
+		res.status(500).json({ error: errorCodes['E0003'] });
 	}
 });
 
