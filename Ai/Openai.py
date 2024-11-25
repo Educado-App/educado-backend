@@ -16,8 +16,7 @@ def chatbot(userInput, courses):
     response = client.chat.completions.create(
         model="ft:gpt-4o-mini-2024-07-18:group-1-chatbotters:edu2:AUtL6885",
         messages=[
-        {"role": "system", "content": prompt.generatePrompt2()},
-        {"role": "system", "content": prompt.generatePrompt3(courses)},
+        {"role": "system", "content": prompt.generateUnifiedPrompt(courses)},
         {
             "role": "user",
             "content": (userInput)
@@ -34,7 +33,7 @@ if __name__ == "__main__":
     
     if not input_data:
         print("No input provided!")
-        sys.exit(1)
+        sys.exit(2)
     try:
         data = json.loads(input_data)
         userInput = data.get("input")
@@ -48,7 +47,7 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         print(f"Error occurred: {str(e)}")
-        sys.exit(1)
+        sys.exit(2)
 
 
 # Main loop for backend testing
