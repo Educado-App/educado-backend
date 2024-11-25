@@ -381,27 +381,17 @@ router.put('/:id/extraPoints', requireLogin, async (req, res) => {
 /* NOT USED  */
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
 router.get('/leaderboard', async (req, res) => {
-	try {
-		const { timeInterval } = req.query; // Get time interval from query parameters
-
-		if (!timeInterval || !['day', 'week', 'month', 'all'].includes(timeInterval)) {
-			return res.status(400).json({ error: errorCodes['E0015'] });
-		}
-
-		const leaderboard = await getLeaderboard(timeInterval);
-		res.status(200).json(leaderboard);
-	} catch (error) {
-		res.status(500).json({ error: errorCodes['E0003'] });
-	}
-});
-
-// Get the leaderboard data
-router.get('/leaderboard', async (req, res) => {
   try {
-    const leaderboard = await getLeaderboard();
+    const { timeInterval } = req.query; // Get time interval from query parameters
+
+    if (!timeInterval || !['day', 'week', 'month', 'all'].includes(timeInterval)) {
+      return res.status(400).json({ error: errorCodes['E0015'] });
+    }
+
+    const leaderboard = await getLeaderboard(timeInterval);
     res.status(200).json(leaderboard);
   } catch (error) {
-    res.status(500).json({ error: errorCodes['E0003'] });
+    res.status(500).json({ error: errorCodes['E0003'], message: error.message });
   }
 });
 
