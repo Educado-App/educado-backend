@@ -116,9 +116,11 @@ router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
         const audioBinary = await generateAudioResponse(chatbotResponse);
 
         console.log('Audio processing completed.');
+		console.log("response is " + chatbotResponse )
 
         // Combine the results and respond
         res.setHeader('Content-Type', 'application/json');
+		
         res.json({
             message: chatbotResponse,
             audio: audioBinary.toString('base64'), // Convert binary data to Base64
@@ -144,7 +146,6 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
 
         // Step 1: Transcription
         const transcription = await transcribeAudio(audioBuffer);
-        console.log("trans= " + transcription);
 
         // Step 2: Chatbot Response
         const chatbotResponse = await generateChatbotResponse(transcription);
