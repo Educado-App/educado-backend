@@ -74,6 +74,10 @@ module.exports = {
 		code: 'E0017',
 		message: 'Service Unavailable'
 	},
+	E0018: {
+		code: 'E0018',
+		message: 'Creator Certificate not found'
+	},
 
 	// E01 - Login errors
 	E0101: {
