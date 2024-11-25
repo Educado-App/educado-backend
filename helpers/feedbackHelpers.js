@@ -116,6 +116,7 @@ async function getOverallRatingOfCourse(courseId) {
 }
 
 
+
 async function findContentCreatorFromUserID(userID) {
 	const contentCreator = await ContentCreatorModel.findOne({ baseUser: userID });
 	return contentCreator._id;
@@ -126,6 +127,7 @@ async function findContentCreatorFromUserID(userID) {
 async function getOverallRatingForCC(userid, period = null) {
 	const contentCreator = await findContentCreatorFromUserID(userid);
 	const query = { creator: contentCreator };
+
 	// possible period values: 'this_month', 'last_month', '7_days', 'this_year', 'all'
 	if (period) {
 		const now = new Date();
