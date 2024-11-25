@@ -16,6 +16,15 @@ const upload = multer({ storage: storage });
 
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
+router.get('/all', async (req, res) => {
+	try {
+	  const students = await StudentModel.find({});
+	  return res.status(200).json(students);
+	} catch (error) {
+	  return res.status(500).json({ error: errorCodes['E0003'] });
+	}
+  });
+
 router.get('/:id/info', async (req, res) => {
 	try {
 		const id = mongoose.Types.ObjectId(req.params.id);
