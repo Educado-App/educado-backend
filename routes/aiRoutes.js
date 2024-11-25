@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 const express = require('express');
 const { spawn } = require('child_process');
 const multer = require('multer');
@@ -144,6 +145,7 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
 
         // Step 1: Transcription
         const transcription = await transcribeAudio(audioBuffer);
+        // eslint-disable-next-line quotes
         console.log("trans= " + transcription);
 
         // Step 2: Chatbot Response
