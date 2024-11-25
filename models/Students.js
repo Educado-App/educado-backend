@@ -14,7 +14,15 @@ const studentSchema = new Schema({
 	},
 	level: {
 		type: Number,
-		default: 1
+		default: 0
+	},
+	studyStreak: {
+		type: Number,
+		default: 0
+	},
+	lastStudyDate: {
+		type: Date,
+		default: Date.now
 	},
 	subscriptions: [{
 		type: Schema.Types.ObjectId,

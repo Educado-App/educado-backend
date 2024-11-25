@@ -78,6 +78,10 @@ module.exports = {
 		code: 'E0018',
 		message: 'Failed to delete all account data from database!'
 	},
+	E0019: {
+		code: 'E0019',
+		message: 'Failed to update student study streak!'
+	},
 
 	// E01 - Login errors
 	E0101: {
