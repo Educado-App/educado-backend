@@ -14,7 +14,7 @@ const { PasswordResetToken } = require('../models/PasswordResetToken');
 const { EmailVerificationToken } = require('../models/EmailVerificationToken');
 const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
-const { ensureStudyStreak } = require('../helpers/studentHelper');
+const { ensureStudyStreakConsistency } = require('../helpers/studentHelper');
 
 const bcrypt = require('bcrypt');
 // Utility function to encrypt the token or password
@@ -71,10 +71,9 @@ router.post('/login', async (req, res) => {
 			profile = await StudentModel.findOne({baseUser: user._id});
 
 			// Ensure student is on a study streak, else reset the streak
-			//ensureStudyStreak(profile.baseUser);	// <- Here 'profile' is the student object
+			// TODO: handle error thrown!
+			ensureStudyStreakConsistency(profile._id, profile.lastStudyDate);	// <- Here 'profile' is the student object
 		}
-
-
 
 		// If the passwords match, return a success message
 		if (result) {
@@ -176,14 +175,11 @@ router.post('/signup', async (req, res) => {
 			// Create content creator and student profiles
 			const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
 			const studentProfile = new StudentModel({ baseUser: newUser._id });
-			console.log("studentProfile: " + studentProfile);	// TODO: remove
 
 			// Save the user and profiles
 			const createdUser = await newUser.save();  // Save user
 			let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
 			const createdStudent = await studentProfile.save(); // Save student
-			console.log("createdStudent: " + createdStudent);	// TODO: remove
-
 
 			// Respond with the created user and institution data
 			res.status(201).json({

@@ -399,11 +399,10 @@ router.get('/leaderboard', async (req, res) => {
 router.patch('/:id/updateStudyStreak', async (req, res) => {
 	try {
 		// Ensure passed in id is valid
-		// assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
-		const id = mongoose.Types.ObjectId(req.params.id);	
-		console.log("StudentId: ", id);
+		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		const studentId = mongoose.Types.ObjectId(req.params.id);	
 
-		//await updateStudyStreak(id);
+		await updateStudyStreak(studentId);
 
 		return res.status(200).json({ message: 'Student study streak updated!' });
 	} 
