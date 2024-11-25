@@ -384,7 +384,7 @@ router.get('/leaderboard', async (req, res) => {
   try {
     const { timeInterval } = req.query; // Get time interval from query parameters
 
-    if (!timeInterval || !['day', 'week', 'month', 'all'].includes(timeInterval)) {
+    if (!timeInterval || !['day', 'week', 'month', 'all', 'everyMonth'].includes(timeInterval)) {
       return res.status(400).json({ error: errorCodes['E0015'] });
     }
 

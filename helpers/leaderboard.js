@@ -18,6 +18,9 @@ const getLeaderboard = async (timeInterval) => {
         case 'month':
           startDate = new Date(now.setMonth(now.getMonth() - 1));
           break;
+        case 'everyMonth':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Start of the current month
+          break;
       }
       matchStage.createdAt = { $gte: startDate };
     }
@@ -29,7 +32,7 @@ const getLeaderboard = async (timeInterval) => {
       { $project: { baseUser: 1, points: 1 } }
     ]);
 
-    const userDetailsPromises = students.map(async (student, index) => {
+    const userDetailsPromises = students.map(async (student) => {
       try {
         const user = await UserModel.findById(student.baseUser).select('firstName lastName profilePhoto');
         if (!user) {
@@ -37,7 +40,6 @@ const getLeaderboard = async (timeInterval) => {
           return null;
         }
         return {
-          rank: index + 1,
           name: `${user.firstName} ${user.lastName}`,
           score: student.points,
           image: user.profilePhoto ? `${process.env.TRANSCODER_SERVICE_URL}/bucket/${user.profilePhoto}` : null
@@ -48,8 +50,16 @@ const getLeaderboard = async (timeInterval) => {
       }
     });
 
-    const userDetails = await Promise.all(userDetailsPromises);
-    return userDetails.filter(detail => detail !== null);
+    let userDetails = await Promise.all(userDetailsPromises);
+    userDetails = userDetails.filter(detail => detail !== null);
+
+    // Assign ranks after filtering out null values
+    userDetails = userDetails.map((detail, index) => ({
+      ...detail,
+      rank: index + 1
+    }));
+
+    return userDetails;
   } catch (error) {
     throw new Error('Error fetching leaderboard data: ' + error.message);
   }
