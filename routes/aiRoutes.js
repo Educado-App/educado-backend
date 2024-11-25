@@ -170,4 +170,9 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
     }
 });
 
-module.exports = router;
+module.exports = {
+    router,
+    executePythonScript,
+    generateChatbotResponse,
+    generateAudioResponse,
+};
