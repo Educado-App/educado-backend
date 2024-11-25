@@ -72,6 +72,7 @@ module.exports = function makeFakeCreateCourseData(creatorId) {
 		course: {
 			courseInfo: courseInfo, 
 			sections: sections
-		}
+		},
+		UserId: creatorId
 	};
 };

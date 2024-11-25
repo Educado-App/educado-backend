@@ -884,10 +884,13 @@ describe('Course Routes', () => {
 			const courseId = response.body._id;
 			const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
 			
+
 			expect(response.status).toBe(201);
 			expect(course.title).toBe(courseData.course.courseInfo.title);
 			expect(course.category).toBe(courseData.course.courseInfo.category);
 			expect(course.description).toBe(courseData.course.courseInfo.description);
+			expect(course.creator.toString()).toBe(fakeId.toString());
+
 		});
 	});
 });

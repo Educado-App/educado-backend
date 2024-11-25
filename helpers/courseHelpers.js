@@ -58,7 +58,8 @@ function createCourseObject(courseInfo, creator) {
 		category: category,
 		difficulty: difficulty,
 		description: description,
-		coverImg: coverImg,
+		// coverImg: coverImg,
+		coverImg: '',
 		status: status,
 		creator: creator,
 		dateCreated: Date.now(),
@@ -66,41 +67,59 @@ function createCourseObject(courseInfo, creator) {
 	});
 }
 
+async function createAndSaveExercise(component, parentSection) {
+	
+	const exerciseObject = createExersiceObject(component.component, parentSection);
+	
+	const componentInfo = {
+		compType: component.compType,
+		compId: exerciseObject._id
+	};
+
+	const savedExercise = await exerciseObject.save();
+	assert(savedExercise, errorCodes.E0000); //TODO
+
+	return componentInfo;
+}
+
+async function createAndSaveLecture(component, parentSection){
+	const lectureObject = createLectureObject(component.component, parentSection);
+			
+	const componentInfo = {
+		compType: component.compType,
+		compId: lectureObject._id
+	};
+
+	const savedLecture = await lectureObject.save();
+	assert(savedLecture, errorCodes.E0000); //TODO
+
+	return componentInfo;
+}
+
+async function createAndSaveComponent(component, parentSection){
+	let componentInfo;
+	if (component.compType === 'exercise') {
+		componentInfo = createAndSaveExercise(component, parentSection);
+	} else if (component.compType === 'lecture') {
+		componentInfo = createAndSaveLecture(component, parentSection);
+	}
+
+	return componentInfo;
+}
+
+
 //this creates an array of full object components
 //we only need to pass on compType and id
-async function createAndSaveComponents(components, parentSection) {
+async function createAndSaveAllComponents(components, parentSection) {
 	let componentsArray = [];
 
 	await Promise.all(components.map(async component => {
-		let componentInfo = {};
-		
-		if (component.compType === 'exercise') {
-			const exerciseObject = createExersiceObject(component.component, parentSection);
-			
-			componentInfo = {
-				compType: component.compType,
-				compId: exerciseObject._id
-			};
-
-			const savedExercise = await exerciseObject.save();
-
-		} else if (component.compType === 'lecture') {
-			const lectureObject = createLectureObject(component.component, parentSection);
-			
-			componentInfo = {
-				compType: component.compType,
-				compId: lectureObject._id
-			};
-
-			const savedLecture = await lectureObject.save();
-		}
-
+		const componentInfo = createAndSaveComponent(component, parentSection);
 		componentsArray.push(componentInfo);
 	}));
 
 	return componentsArray;	
 }
-
 
 
 async function createAndSaveSection(section, parentCourse) {
@@ -109,7 +128,7 @@ async function createAndSaveSection(section, parentCourse) {
 	const sectionObject = createSectionObject(title, description, parentCourse);
 
 	const sectionId = sectionObject._id;
-	sectionObject.components = createAndSaveComponents(components, sectionId);
+	sectionObject.components = createAndSaveAllComponents(components, sectionId);
 
 	const savedSection = await sectionObject.save();
 
@@ -120,7 +139,6 @@ async function createAndSaveSection(section, parentCourse) {
 async function createAndSaveCourse(courseInfo, sections = [], creator) {
 	const courseObject = createCourseObject(courseInfo, creator);
 	const courseId = courseObject._id;
-
 
 	let sectionsArray = [];
 	await Promise.all(sections.map(async section => {
@@ -135,6 +153,185 @@ async function createAndSaveCourse(courseInfo, sections = [], creator) {
 	return savedCourse;
 }
 
+
+function updateCourseObject(courseInfo) {
+	// const { title, category, difficulty, description, coverImg, status } = courseInfo;
+	const { title, category, difficulty, description, status } = courseInfo;
+
+	const update = {
+		title: title,
+		category: category,
+		difficulty: difficulty,
+		description: description,
+		status: status,
+		dataUpdated: Date.now(),
+	};
+
+	return update;
+}
+
+function updateSectionObject(title, description) {
+	const update = {
+		title: title,
+		description: description,		
+	};
+
+	return update;
+}
+
+
+async function updateAndSaveExercise(exercise) {
+	const { title, onWrongFeedback, question, answers, _id } = exercise;
+
+	const update = {
+		title: title,
+		onWrongFeedback: onWrongFeedback,
+		question: question, 
+		answers: answers,
+	};
+
+	const updatedExercise = await ExerciseModel.findByIdAndUpdate(_id, update, {
+		new: true
+	});
+
+	const componentInfo = {
+		compType: updatedExercise.contentType,
+		compId: _id
+	};
+
+	return componentInfo;
+}
+
+async function updateAndSaveLecture(lecture){
+	const { title, description, contentType, content, _id } = lecture;
+
+	const update = {
+		title: title,
+		description: description,
+		contentType: contentType,
+		content: content,
+	};
+
+	const updatedLecture = await LectureModel.findByIdAndUpdate(_id, update, {
+		new: true
+	});
+
+	const componentInfo = {
+		compType: updatedLecture.contentType,
+		compId: _id
+	};
+
+	return componentInfo;
+}
+
+async function deleteRemovedComponents(componentsUpdate, oldComponents){
+	return 0;
+}
+
+async function updateAndSaveComponent(component){
+	let componentInfo;
+	if (component.compType === 'exercise') {
+		componentInfo = updateAndSaveExercise(component);
+	} else if (component.compType === 'lecture') {
+		componentInfo = updateAndSaveLecture(component);
+	}
+
+	return componentInfo;
+}
+
+
+async function deleteRemovedSections(sections, existingSections) {
+	return 0;
+}
+
+
+async function updateAndSaveAllComponents(components, oldSection) {
+	const sectionId = oldSection._id;
+	const oldComponents = oldSection.components;
+	
+	let componentsUpdate = [];
+	
+	await Promise.all(components.map(async component => {
+		let componentObject;
+		if (oldComponents.some(oldComponent => oldComponent._id === component._id)) {
+			//update
+			componentObject = updateAndSaveComponent(component, sectionId);
+			
+		} else{
+			//create
+			componentObject = createAndSaveComponent(component, sectionId);
+			
+		}
+		
+		componentsUpdate.push(componentObject);
+	}));
+	
+	await deleteRemovedComponents(componentsUpdate, oldComponents);
+	
+	return componentsUpdate;
+	
+}
+
+async function updateAndSaveSection(section, oldSection){
+	const { title, description, components, _id } = section;
+	
+	const update = updateSectionObject(title, description);
+	
+	const updatedComponents = await updateAndSaveAllComponents(components, oldSection);
+	
+	update.components = updatedComponents;
+
+	const updatedSection = await SectionModel.findByIdAndUpdate(_id, update, {
+		new: true
+	});
+	
+	return update;
+}
+
+async function updateAndSaveAllSections(sections, oldSections, courseId) {
+	
+	let sectionsUpdate = [];
+	
+	await Promise.all(sections.map(async section => {
+		const sectionId = section._id;
+		let sectionObject;
+		
+		if (oldSections.includes(section._id)) {
+			//update
+			const oldSection = await SectionModel.findOne({_id: sectionId});
+			assert(oldSection, errorCodes.E0000); //TODO
+
+			sectionObject = await updateAndSaveSection(section, oldSection);
+		} else {
+			sectionObject = await createAndSaveSection(section, courseId);
+		}
+		
+		sectionsUpdate.push(sectionObject._id);
+	}));
+
+	await deleteRemovedSections(sectionsUpdate, oldSections);
+
+	return sectionsUpdate;
+}
+
+async function updateAndSaveCourse(courseInfo, sections, baseCourse) {
+	const courseId = baseCourse._id;
+	const oldSections = baseCourse.sections;
+
+	const updatedCourseInfo = updateCourseObject(courseInfo);
+
+	const updatedSections = updateAndSaveAllSections(sections, oldSections);
+	updatedCourseInfo.sections = updatedSections;
+
+	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, updatedCourseInfo, {
+		new: true
+	});
+
+
+	return updatedCourse;
+}
+
 module.exports = {
 	createAndSaveCourse,
+	updateAndSaveCourse,
 };

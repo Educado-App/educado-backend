@@ -12,13 +12,14 @@ const { LectureModel } = require('../models/Lectures');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb'); 
 const { StudentModel } = require('../models/Students');
 
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
 
-const { createAndSaveCourse } = require('../helpers/courseHelpers');
-const { CustomError } = require('../helpers/error');
+const { createAndSaveCourse, updateAndSaveCourse } = require('../helpers/courseHelpers');
+const { assert, CustomError } = require('../helpers/error');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -555,15 +556,17 @@ router.patch('/:id/updateStatus', async (req, res) => {
 //When creating new course from scratch
 router.post('/create/new', async(req, res) => {
 	try{
-	// title, category, difficulty, description, coverImg	
+		// title, category, difficulty, description, coverImg	
 		const { course, userId } = req.body;
 		const { courseInfo, sections = [] } = course;	
 		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
 
+		assert(creatorProfile, errorCodes.E0013);
+
 		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
 			
 		if(newCourse) {
-			res.status('201').send(newCourse);
+			res.status(201).send(newCourse);
 		} else {
 			throw new CustomError(errorCodes.E1401);
 		}
@@ -574,6 +577,26 @@ router.post('/create/new', async(req, res) => {
 	}
 });
 
-
+router.post('update/:id', async(req, res) => {
+	const { id } = req.params;
+	
+	try {
+		console.log('so far so good');
+		const { courseInfo, sections = [] } = req.body;	
+		console.log('can we find base course?');
+		const baseCourse = await CourseModel.findOne({_id: new ObjectId(id)});
+		
+		console.log('before update');
+		
+		const updatedCourse = await updateAndSaveCourse(courseInfo, sections, baseCourse);
+		console.log('after update');
+		console.log(updatedCourse);
+		
+		res.sendStatus(201);
+	} catch {
+		console.error('why?');
+		res.sendStatus(500);
+	}
+});
 
 module.exports = router;
