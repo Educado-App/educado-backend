@@ -5,6 +5,7 @@ const router = express.Router();
 const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
 const Feedback = require('../models/Feedback');
 
+
 router.get('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => {
     console.log('GET request received at /api/ai/feedback');
 	res.send('feedback route is working!!!???!');
@@ -39,14 +40,21 @@ const upload = multer({ storage: storage });
 const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
 
 // Utility function to execute a Python script
-const executePythonScript = (scriptPath, input = null, isBinary = false) => {
+const executePythonScript = (scriptPath, input = null, isBinary = false, courses = null) => {
     return new Promise((resolve, reject) => {
         const python = spawn(pythonCommand, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
 
-        if (input) {
+
+        if (input && courses){
+            const payload = JSON.stringify({input, courses });
+            
+            python.stdin.write(payload);
+            python.stdin.end();
+        }else if(input){
             python.stdin.write(input);
             python.stdin.end();
         }
+
 
         let output = [];
         let errorOutput = '';
@@ -84,15 +92,15 @@ const transcribeAudio = async (audioBuffer) => {
 };
 
 // Step 2: Generate chatbot response
-const generateChatbotResponse = async (transcription) => {
-    console.log('Generating chatbot response... ' + transcription);
-    return await executePythonScript('./Ai/Openai.py', transcription);
+const generateChatbotResponse = async (question, courses) => {
+    console.log('Generating chatbot response... ' + question);
+    return await executePythonScript('./Ai/Openai.py', question, false, courses);
 };
 
 // Step 3: Generate audio response
 const generateAudioResponse = async (chatbotResponse) => {
     console.log('Generating audio response...');
-    return await executePythonScript('./Ai/speechAi.py', chatbotResponse, true); // Pass true for binary output
+    return await executePythonScript('./Ai/speechAi.py', chatbotResponse, isBinary= true); // Pass true for binary output
 };
 
 
@@ -102,7 +110,7 @@ router.get('/', shorttermLimiter, longtermLimiter,  (req, res) => {
 });
 
 router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
-	const { userInput } = req.body;
+	const { userInput, courses } = req.body;
 
 	try {
         if (!userInput) {
@@ -110,13 +118,13 @@ router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
 		}
 
         // Step 1: Chatbot Response
-        const chatbotResponse = await generateChatbotResponse(userInput);
+        const chatbotResponse = await generateChatbotResponse(userInput, courses);
 
         // Step 2: Audio Generation
         const audioBinary = await generateAudioResponse(chatbotResponse);
 
         console.log('Audio processing completed.');
-		console.log("response is " + chatbotResponse )
+		console.log("Edu response is: " + chatbotResponse )
 
         // Combine the results and respond
         res.setHeader('Content-Type', 'application/json');
@@ -126,7 +134,7 @@ router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
             audio: audioBinary.toString('base64'), // Convert binary data to Base64
         });
     } catch (error) {
-        console.error('Error processing audio:', error);
+        console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error', details: error });
     }
 });
