@@ -396,11 +396,12 @@ router.get('/leaderboard', async (req, res) => {
 
 // TODO: update route documentation!
 // Update studyStreak
-router.patch('/:id/updateStudyStreak', requireLogin, async (req, res) => {
+router.patch('/:id/updateStudyStreak', async (req, res) => {
 	try {
 		// Ensure passed in id is valid
-		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		// assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
 		const id = mongoose.Types.ObjectId(req.params.id);	
+		console.log("StudentId: ", id);
 
 		//await updateStudyStreak(id);
 
