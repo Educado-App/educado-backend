@@ -12,7 +12,6 @@ const { LectureModel } = require('../models/Lectures');
 const { ContentCreatorModel } = require('../models/ContentCreators');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb'); 
 const { StudentModel } = require('../models/Students');
 
 // This one is deprecated, but it is used on mobile so we can't delete it yet
@@ -577,22 +576,18 @@ router.post('/create/new', async(req, res) => {
 	}
 });
 
-router.post('update/:id', async(req, res) => {
+router.post('/update/:id', async(req, res) => {
 	const { id } = req.params;
 	
 	try {
-		console.log('so far so good');
-		const { courseInfo, sections = [] } = req.body;	
-		console.log('can we find base course?');
-		const baseCourse = await CourseModel.findOne({_id: new ObjectId(id)});
+		const { updatedCourse } = req.body;
+		const { courseInfo, sections = [] } = updatedCourse;	
 		
-		console.log('before update');
+		const baseCourse = await CourseModel.findOne({ _id: id });
 		
-		const updatedCourse = await updateAndSaveCourse(courseInfo, sections, baseCourse);
-		console.log('after update');
-		console.log(updatedCourse);
+		const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
 		
-		res.sendStatus(201);
+		res.sendStatus(200);
 	} catch {
 		console.error('why?');
 		res.sendStatus(500);
