@@ -152,12 +152,13 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
         }
 
         const audioBuffer = req.file.buffer;
+        const courses = JSON.parse(req.body.courses);
 
         // Step 1: Transcription
         const transcription = await transcribeAudio(audioBuffer);
 
         // Step 2: Chatbot Response
-        const chatbotResponse = await generateChatbotResponse(transcription);
+        const chatbotResponse = await generateChatbotResponse(transcription,courses);
 
         // Step 3: Audio Generation
         const audioBinary = await generateAudioResponse(chatbotResponse);
