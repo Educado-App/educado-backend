@@ -349,7 +349,6 @@ async function updateAndSaveSection(section, oldSection){
 }
 
 async function updateAndSaveAllSections(sections, oldSections, courseId) {
-	
 	let sectionsUpdate = [];
 	
 	await Promise.all(sections.map(async section => {
@@ -381,6 +380,7 @@ async function updateAndSaveCourse(courseInfo, sections, baseCourse) {
 	const updatedCourseInfo = updateCourseObject(courseInfo);
 
 	const updatedSections = await updateAndSaveAllSections(sections, oldSections);
+
 	updatedCourseInfo.sections = updatedSections;
 
 	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, updatedCourseInfo, {
