@@ -14,7 +14,7 @@ async function fetchAndWriteFeedbacks() {
     const messages = feedbackData.map(feedback => {
       // Build the array of messages
       const chatMessages = [
-        { role: 'system', content: "You are an chatbo" },
+        { role: 'system', content: "You are an chatbot" },
         { role: 'user', content: feedback.userPrompt },
         { role: 'assistant', content: feedback.chatbotResponse 
             //+ ' - Feedback: ' + feedback.feedback
