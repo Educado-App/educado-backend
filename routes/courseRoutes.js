@@ -583,7 +583,7 @@ router.post('/update/:id', async(req, res) => {
 	try {
 		const { updatedCourse } = req.body;
 		const { courseInfo, sections = [] } = updatedCourse;	
-		
+
 		const baseCourse = await CourseModel.findOne({ _id: id });
 		
 		const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);

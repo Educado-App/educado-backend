@@ -223,7 +223,7 @@ async function updateAndSaveExercise(exercise) {
 	});
 
 	const componentInfo = {
-		compType: updatedExercise.contentType,
+		compType: 'exercise',
 		compId: updatedExercise._id
 	};
 
@@ -231,13 +231,14 @@ async function updateAndSaveExercise(exercise) {
 }
 
 async function updateAndSaveLecture(lecture){
-	const { title, description, contentType, content, _id } = lecture;
+	const { title, description, contentType, content, _id } = lecture.component;
 
 	const update = {
 		title: title,
 		description: description,
 		contentType: contentType,
 		content: content,
+		dateUpdated: Date.now(),
 	};
 
 	const updatedLecture = await LectureModel.findByIdAndUpdate(_id, update, {
@@ -245,14 +246,34 @@ async function updateAndSaveLecture(lecture){
 	});
 
 	const componentInfo = {
-		compType: updatedLecture.contentType,
+		compType: 'lecture',
 		compId: updatedLecture._id
 	};
 
 	return componentInfo;
 }
 
+async function deleteComponent(component) {
+	switch (component.compType) {
+	case 'exercise':
+		await ExerciseModel.deleteOne({_id: component.compId});
+		break;
+	case 'lecture':
+		await LectureModel.deleteOne({_id: component.compId});
+		break;
+	default:
+		return;
+	}
+	return;
+}
+
 async function deleteRemovedComponents(componentsUpdate, oldComponents){
+	await Promise.all(oldComponents.map(async component => {
+		//if id was in old course, but not in update
+		if (!componentsUpdate.some(componentsUpdate => componentsUpdate.compId.toString() === component.compId.toString())) {
+			await deleteComponent(component);
+		}
+	}));
 	return 0;
 }
 
@@ -268,7 +289,17 @@ async function updateAndSaveComponent(component){
 }
 
 
-async function deleteRemovedSections(sections, existingSections) {
+async function deleteRemovedSections(sections, oldSections) {
+	await Promise.all(oldSections.map(async oldSection => {
+
+		if(!sections.some(section => section.toString() === oldSection.toString())) {
+			await ExerciseModel.deleteMany({parentSection: oldSection});
+			await LectureModel.deleteMany({parentSection: oldSection});
+
+			await SectionModel.deleteOne({_id: oldSection});
+		}
+	}));
+
 	return 0;
 }
 
@@ -276,25 +307,24 @@ async function deleteRemovedSections(sections, existingSections) {
 async function updateAndSaveAllComponents(components, oldSection) {
 	const sectionId = oldSection._id;
 	const oldComponents = oldSection.components;
-	
+
 	let componentsUpdate = [];
-	
+
 	await Promise.all(components.map(async component => {
 		let componentObject;
-		if (oldComponents.some(oldComponent => oldComponent._id === component._id)) {
+
+		if (oldComponents.some(oldComponent => oldComponent.compId.toString() === component.component._id.toString())) {
 			//update
 			componentObject = await updateAndSaveComponent(component, sectionId);
 			
 		} else{
 			//create
-			componentObject = await createAndSaveComponent(component, sectionId);
-
-			
+			componentObject = await createAndSaveComponent(component, sectionId);			
 		}
 		
 		componentsUpdate.push(componentObject);
 	}));
-
+		
 	await deleteRemovedComponents(componentsUpdate, oldComponents);
 	
 	return componentsUpdate;
