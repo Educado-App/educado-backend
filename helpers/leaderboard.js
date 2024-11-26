@@ -1,7 +1,7 @@
 const { StudentModel } = require('../models/Students');
 const { UserModel } = require('../models/Users');
 
-const getLeaderboard = async (timeInterval) => {
+const getLeaderboard = async (timeInterval, userId) => {
   try {
     // Adjust the aggregation pipeline based on the time interval
     const matchStage = {};
@@ -42,7 +42,8 @@ const getLeaderboard = async (timeInterval) => {
         return {
           name: `${user.firstName} ${user.lastName}`,
           score: student.points,
-          image: user.profilePhoto ? `${process.env.TRANSCODER_SERVICE_URL}/bucket/${user.profilePhoto}` : null
+          image: user.profilePhoto ? `${process.env.TRANSCODER_SERVICE_URL}/bucket/${user.profilePhoto}` : null,
+          baseUser: student.baseUser
         };
       } catch (error) {
         console.error(`Error fetching user details for student with baseUser ID ${student.baseUser}:`, error);
@@ -59,7 +60,11 @@ const getLeaderboard = async (timeInterval) => {
       rank: index + 1
     }));
 
-    return userDetails;
+    // Find the current user's rank
+    const currentUser = userDetails.find(user => user.baseUser.toString() === userId.toString());
+    const currentUserRank = currentUser ? currentUser.rank : null;
+
+    return { leaderboard: userDetails, currentUserRank };
   } catch (error) {
     throw new Error('Error fetching leaderboard data: ' + error.message);
   }

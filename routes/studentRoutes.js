@@ -380,16 +380,17 @@ router.put('/:id/extraPoints', requireLogin, async (req, res) => {
 
 /* NOT USED  */
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
-router.get('/leaderboard', async (req, res) => {
+router.get('/leaderboard', requireLogin, async (req, res) => {
   try {
     const { timeInterval } = req.query; // Get time interval from query parameters
+    const userId = req.user._id; // Get the current user's ID from the request
 
     if (!timeInterval || !['day', 'week', 'month', 'all', 'everyMonth'].includes(timeInterval)) {
       return res.status(400).json({ error: errorCodes['E0015'] });
     }
 
-    const leaderboard = await getLeaderboard(timeInterval);
-    res.status(200).json(leaderboard);
+    const { leaderboard, currentUserRank } = await getLeaderboard(timeInterval, userId);
+    res.status(200).json({ leaderboard, currentUserRank });
   } catch (error) {
     res.status(500).json({ error: errorCodes['E0003'], message: error.message });
   }
