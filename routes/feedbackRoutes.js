@@ -3,9 +3,11 @@ const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
+const { FeedbackModel } = require('../models/Feedback');
 
 const { saveFeedback } = require('../helpers/feedbackHelpers.js');
 const { populate } = require('../helpers/populateFeedbackOptions');
+const mongoose = require('mongoose');
 
 
 /**
@@ -56,6 +58,16 @@ router.post('/populate/new', async (req, res) => {
 		res.send('Feedback options populated successfully');
 	} catch (e) {
 		return res.status(400).json({ 'error': e.message }); // Feedback options could not be populated
+	}
+});
+
+router.get('/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+	try {
+		const feedbacks = await FeedbackModel.find({ courseId: mongoose.Types.ObjectId(courseId) });
+		res.status(200).send(feedbacks);
+	} catch (error) {
+		res.status(500).send('Internal Server Error');
 	}
 });
 
