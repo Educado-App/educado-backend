@@ -8,7 +8,9 @@ const errorCodes = require('./errorCodes');
 const { assert } = require('./error');
 
 async function handleMedia(media) {
-	console.log('Media:', media);
+	console.log('Media ID:', media.id);
+	console.log('Media Parent Type:', media.parentType);
+	console.log('Media File:', media.file);
 	if (media) {
 		const mediaString = `${media.id}_${media.parentType}`;
 		const file = media.file;
@@ -68,7 +70,7 @@ function createSectionObject(title, description, parentCourse) {
 function createCourseObject(courseInfo, creator) {
 	const { title, category, difficulty, description, coverImg, status } = courseInfo;
 
-	let courseObject = new CourseModel({
+	const courseObject = new CourseModel({
 		title: title,
 		category: category,
 		difficulty: difficulty,
@@ -83,7 +85,6 @@ function createCourseObject(courseInfo, creator) {
 	coverImg.id = courseObject._id;
 	handleMedia(coverImg);
 	const coverImgString = `${courseObject._id}_${coverImg.parentType}`;
-	console.log('CoverImg:', coverImgString);
 	courseObject.coverImg = coverImgString;
 
 	return courseObject;
@@ -126,6 +127,7 @@ async function createAndSaveComponent(component, parentSection){
 		componentInfo = await createAndSaveLecture(component, parentSection);
 		if (component.video) {
 			component.video.id = componentInfo.compId;
+			component.video.parentType = 'l';
 			await handleMedia(component.video);
 		}
 	}

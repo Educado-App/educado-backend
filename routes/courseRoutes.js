@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
+const multer = require('multer');
+const upload = multer();
 
 // TODO: Update subscriber count to check actual value in DB
 
@@ -551,27 +553,46 @@ router.patch('/:id/updateStatus', async (req, res) => {
 });
 
 
+router.post('/create/new', upload.fields([
+	{ name: 'coverImg', maxCount: 1 },
+	{ name: 'sections[0].components[0].video', maxCount: 10 }
+]), async (req, res) => {
+	try {
+		console.dir('req body', req.body);
+		console.dir('req files', req.files);
 
-//When creating new course from scratch
-router.post('/create/new', async(req, res) => {
-	try{
-		// title, category, difficulty, description, coverImg	
-		const { course, userId } = req.body;
-		console.log('course', JSON.stringify(course, null, 2));
-		const { courseInfo, sections = [] } = course;	
+		const { courseData } = req.body;
+		const parsedCourseData = JSON.parse(courseData);
+		const { courseInfo, sections = [], userId } = parsedCourseData;
+		console.log('courseInfo:', courseInfo);
+		console.log('sections:', sections);
+
 		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
-
 		assert(creatorProfile, errorCodes.E0013);
 
+		// Add the coverImg file to courseInfo
+		if (req.files['coverImg']) {
+			courseInfo.coverImg.file = req.files['coverImg'][0];
+		}
+
+		// Add video files to the respective components in sections
+		sections.forEach((section, sectionIndex) => {
+			section.components.forEach((component, componentIndex) => {
+				const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
+				if (req.files[videoKey]) {
+					component.video = { file: req.files[videoKey][0] };
+				}
+			});
+		});
+
 		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
-			
-		if(newCourse) {
+
+		if (newCourse) {
 			res.status(201).send(newCourse);
 		} else {
 			throw new CustomError(errorCodes.E1401);
 		}
-	
-	} catch(e) {
+	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);
 	}
