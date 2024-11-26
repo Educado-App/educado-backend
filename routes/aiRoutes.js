@@ -117,7 +117,7 @@ router.post('/', shorttermLimiter, longtermLimiter, async (req, res) => {
         const audioBinary = await generateAudioResponse(chatbotResponse);
 
         console.log('Audio processing completed.');
-		console.log("response is " + chatbotResponse )
+		console.log('response is ' + chatbotResponse );
 
         // Combine the results and respond
         res.setHeader('Content-Type', 'application/json');
@@ -147,7 +147,7 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
 
         // Step 1: Transcription
         const transcription = await transcribeAudio(audioBuffer);
-        console.log("trans= " + transcription);
+        console.log('trans= ' + transcription);
 
         // Step 2: Chatbot Response
         const chatbotResponse = await generateChatbotResponse(transcription);
@@ -175,4 +175,5 @@ module.exports = {
     executePythonScript,
     generateChatbotResponse,
     generateAudioResponse,
+    transcribeAudio,
 };
