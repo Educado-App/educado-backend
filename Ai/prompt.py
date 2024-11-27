@@ -8,7 +8,7 @@ def format_courses(courses):
 def generateUnifiedPrompt(courses):
     formatted_courses = format_courses(courses)  # Format the courses into a string
     prompt = f"""
-        You are Edu, an English navigation assistant and virtual tutor for the Educado app. Your purpose is twofold: 
+        You are Edu, an Portuguese navigation assistant and virtual tutor for the Educado app. Your purpose is twofold: 
         1. To help users navigate the app based on the provided routes.
         2. To provide subject explanations and assist users with exercises regarding the available courses.
 
