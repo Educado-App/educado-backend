@@ -1,6 +1,7 @@
 const { verify } = require('../helpers/token');
 const errorCodes = require('../helpers/errorCodes');
 const { UserModel } = require('../models/Users');
+const mongoose = require('mongoose');
 
 module.exports = async (req, res, next) => {
 	let claims;
@@ -32,6 +33,11 @@ module.exports = async (req, res, next) => {
 			}
 		}
 
+		if (!mongoose.Types.ObjectId.isValid(claims.id)) {
+			console.error('Invalid ObjectId');
+			return res.status(401).send({ error: errorCodes['E0001'] });
+		}
+
 		// Fetch user details and set req.user
 		const user = await UserModel.findById(claims.id);
 		if (!user) { 
@@ -52,6 +58,6 @@ module.exports = async (req, res, next) => {
 		}
 	} catch (error) {
 		console.error('Token verification failed:', error);
-		return res.status(401).send({ error: errorCodes['E0001'] });
+		return res.status(401).send({ error: errorCodes['E0001'], message: 'Authentication token is invalid or expired.' });
 	}
 };

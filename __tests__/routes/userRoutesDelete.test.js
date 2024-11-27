@@ -122,7 +122,7 @@ describe('DELETE /api/users/:id', () => {
             .set('Authorization', `Bearer ${mockAdminToken}`)
             .expect(404);
 
-        expect(UserModel.findById).toHaveBeenCalledWith({ _id: nonExistentUserId });
+        expect(UserModel.findById).toHaveBeenCalledWith(nonExistentUserId);
     });
 
     // Invalid id

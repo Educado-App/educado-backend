@@ -581,6 +581,9 @@ describe('Course Routes', () => {
 			);
 			const updatedCourse = courseUpdated.value;
 
+			// Ensure the updatedCourse is not null
+			expect(updatedCourse).not.toBeNull();
+
 			// find a user and add the course to the user's subscriptions
 			const userUpdated = await db.collection('students').findOneAndUpdate(
 				{ baseUser: actualUser._id },
@@ -601,7 +604,6 @@ describe('Course Routes', () => {
 			expect(courseNew.numOfSubscriptions).toBe(2);
 			expect(userNew.subscriptions).toHaveLength(0);
 		});
-
 	});
 
 	describe('GET /courses/creator/:userId', () => {
@@ -650,7 +652,6 @@ describe('Course Routes', () => {
 		});
 
 		it('Returns error 401 if user is not authorized to access', async () => {
-
 			// Send a get request to the courses endpoint
 			const res = await request(`http://localhost:${PORT}`)
 				.get(`/api/courses/creator/${fakeUser._id}`)
@@ -659,7 +660,7 @@ describe('Course Routes', () => {
 			// Verify response body
 			const result = res.body;
 
-			expect(result.error).toStrictEqual(errorCodes['E0002']);
+			expect(result.error).toStrictEqual(errorCodes['E0001']);
 		});
 
 	});
