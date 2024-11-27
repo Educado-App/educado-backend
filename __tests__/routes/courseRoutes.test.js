@@ -18,7 +18,7 @@ const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
 const makeFakeCreateCourseData = require('../fixtures/fakeCourseCreationData');
-
+const makeFakeUpdateCourseData = require('../fixtures/fakeCourseUpdateData');
 
 const app = express();
 app.use(express.json());
@@ -884,13 +884,35 @@ describe('Course Routes', () => {
 			const courseId = response.body._id;
 			const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
 			
-
 			expect(response.status).toBe(201);
 			expect(course.title).toBe(courseData.course.courseInfo.title);
 			expect(course.category).toBe(courseData.course.courseInfo.category);
 			expect(course.description).toBe(courseData.course.courseInfo.description);
 			expect(course.creator.toString()).toBe(fakeId.toString());
 
+		});
+	});
+
+	describe("POST /courses/:id/update", () => {
+		it('Update an existing course with new information', async() => {
+			const fakeId = fakeUser._id;
+
+			const updateCourseData = makeFakeUpdateCourseData(fakeId);
+
+			const token = signAccessToken({ id: fakeUser._id });
+			const response = await request(app)
+				.post(`/api/courses/update/${fakeCourse._id}`)
+				.set('Authorization', `Bearer ${token}`)
+				.send(updateCourseData);
+
+			const courseId = response.body._id;
+			const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
+
+			expect(response.status).toBe(201);
+			expect(response.body.title).toBe(updateCourseData.courseInfo.title);
+			expect(response.body.category).toBe(updateCourseData.courseInfo.category);
+			expect(response.body.description).toBe(updateCourseData.courseInfo.description);
+			expect(response.body.difficulty).toBe(updateCourseData.courseInfo.difficulty);
 		});
 	});
 });
