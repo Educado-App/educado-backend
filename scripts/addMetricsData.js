@@ -1,36 +1,39 @@
 
 const { MetricsModel } = require('../models/Metrics');
+const { CourseModel } = require('../models/Courses');
 
 async function addMetricsData() {
 	try {
-		
-		// Hardcoded data for testing
-		const metricsData = {
-			timestamp: new Date(),
-			type: 'snapshot',
-			totalUsers: 100,
-			totalCourses: 10,
-		};
-		const metricsData2 = {
-			timestamp: new Date(),
-			type: 'snapshot',
-			totalUsers: 70,
-			totalCourses: 12,
-		};
+		// Fetch all unique creators from the courses collection
+		const creators = await CourseModel.distinct('creator');
 
-		// Insert the document
-		const newMetrics = new MetricsModel(metricsData);
-		await newMetrics.save();
+		// Iterate over each creator and collect metrics data
+		for (const creator of creators) {
+			const totalCourses = await CourseModel.countDocuments({ creator });
+			const totalUsers = await CourseModel.aggregate([
+				{ $match: { creator } },
+				{ $group: { _id: null, totalSubscriptions: { $sum: '$numOfSubscriptions' } } }
+			]);
+			// Hardcoded data for testing
+			const metricsData = {
+				timestamp: new Date(),
+				type: 'snapshot',
+				totalCourses: totalCourses,
+				totalUsers: totalUsers[0] ? totalUsers[0].totalSubscriptions : 0,
+				creatorID: creator,
+			// totalUsers: totalUsers[0] ? totalUsers[0].totalSubscriptions : 0,
+			// totalCourses,
+			};
 
-		console.log('Metrics data added:', newMetrics);
+			// Insert the document
+			const newMetrics = new MetricsModel(metricsData);
+			await newMetrics.save();
 
-		const newMetrics2 = new MetricsModel(metricsData2);
-		await newMetrics2.save();
-		console.log('Metrics data added:', newMetrics2);
-
+			console.log('Metrics data added:', newMetrics);
+		}
 	} catch (error) {
 		console.error('Error adding metrics data:', error);
 	} 
 }
 
-addMetricsData();
+module.exports = { addMetricsData };
