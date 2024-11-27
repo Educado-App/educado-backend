@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { router, executePythonScript } = require('../../routes/aiRoutes');
+const executePythonScript = require('../../helpers/excutePython');
 
 // Mock child_process.spawn
 jest.mock('child_process', () => ({

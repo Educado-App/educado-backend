@@ -4,7 +4,7 @@ const multer = require('multer');
 const router = express.Router();
 const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
 const FeedbackAi = require('../models/FeedbackAi');
-const executePythonScript = require('../helpers/excutePython.js')
+const executePythonScript = require('../helpers/excutePython');
 
 
 //get all feedbacks
