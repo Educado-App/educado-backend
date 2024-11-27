@@ -38,7 +38,7 @@ jest.mock('../../routes/aiRoutes', () => {
     return mockRouter;
 });
 
-const Feedback = require('../../models/Feedback'); // Mocked feedback model
+const Feedback = require('../../models/FeedbackAi'); // Mocked feedback model
 const router = require('../../routes/aiRoutes'); // Adjust the path as needed
 
 const app = express();
