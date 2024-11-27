@@ -89,29 +89,20 @@ const assignRanks = (userDetails, userId) => {
 
 const getFinalLeaderboard = (userDetails, currentUserRank) => {
 	const TotalUsers = 30; // Total users to fetch the leaderboard
-	if (currentUserRank <= 10) {
+	if (currentUserRank <= 30) {
 		return userDetails.slice(0, 30);
 	} else {
-		const topSixUsers = userDetails.slice(0, 9);
+		const topTenUsers = userDetails.slice(0, 10);
 		const currentUserIndex = userDetails.findIndex(
 			(user) => user.rank === currentUserRank
 		);
 		const adjacentUsers = userDetails.slice(
 			Math.max(currentUserIndex - 1, 0),
-			Math.min(currentUserIndex + 11, userDetails.length)
-		);
-		const additionalUsers = userDetails.slice(
-			Math.min(currentUserIndex + 11, userDetails.length),
-			Math.min(
-				currentUserIndex +
-          11 +
-          (TotalUsers - (topSixUsers.length + adjacentUsers.length)),
-				userDetails.length
-			)
+			Math.min(currentUserIndex + 2, userDetails.length)
 		);
 
 		// Remove duplicates
-		const uniqueUsers = [...new Map([...topSixUsers, ...adjacentUsers, ...additionalUsers].map(user => [user.baseUser, user])).values()];
+		const uniqueUsers = [...new Map([...topTenUsers, ...adjacentUsers].map(user => [user.baseUser, user])).values()];
 
 		return uniqueUsers.slice(0, TotalUsers);
 	}
