@@ -7,7 +7,7 @@ const Buffer = require('buffer').Buffer;
 
 //Get serviceUrl from environment variable
 
-/* global process */
+
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 //const serviceUrl = "http://localhost:8080/api/v1";
 
