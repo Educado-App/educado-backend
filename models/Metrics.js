@@ -7,7 +7,7 @@ const MetricsSchema = new Schema({
 	type: { type: String, required: true },
 	totalUsers: { type: Number, required: true },
 	totalCourses: { type: Number, required: true },
-	createID: { type: Schema.Types.ObjectId, ref: 'content-creators' },
+	creatorID: { type: Schema.Types.ObjectId, ref: 'content-creators' },
 });
 
 const MetricsModel = mongoose.model('metrics', MetricsSchema);
