@@ -24,13 +24,13 @@ router.post('/:courseId', async (req, res) => {
 	try {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
-	} catch (e){
+	} catch (e) {
 		//handle what http request to return based on error code
 		switch (e.code) {
-		case 'E006':
-			return res.status(404).json({ 'error': e.message });
-		default:
-			return res.status(400).json({ 'error': e.message });
+			case 'E006':
+				return res.status(404).json({ 'error': e.message });
+			default:
+				return res.status(400).json({ 'error': e.message });
 		}
 	}
 });
@@ -61,13 +61,20 @@ router.post('/populate/new', async (req, res) => {
 	}
 });
 
+// Get all feedback for a given course
 router.get('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
+
+	// Check if courseId is a valid ObjectId
+	if (!mongoose.Types.ObjectId.isValid(courseId)) {
+		return res.status(400).json({ error: errorCodes.E0014 });
+	}
+
 	try {
 		const feedbacks = await FeedbackModel.find({ courseId: mongoose.Types.ObjectId(courseId) });
 		res.status(200).send(feedbacks);
 	} catch (error) {
-		res.status(500).send('Internal Server Error');
+		res.status(500).send('Internal Server Error:' + error);
 	}
 });
 
