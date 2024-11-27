@@ -33,23 +33,10 @@ module.exports = async (req, res, next) => {
 			}
 		}
 
-		if (!mongoose.Types.ObjectId.isValid(claims.id)) {
-			console.error('Invalid ObjectId');
-			return res.status(401).send({ error: errorCodes['E0001'] });
-		}
-
-		// Fetch user details and set req.user
-		const user = await UserModel.findById(claims.id);
-		if (!user) { 
-			console.error('User not found');
-			return res.status(401).send({ error: errorCodes['E0001'], message: 'User not found' });
-		}
-		req.user = user;
 
 		// Admin
 		if (claims.role === 'admin') return next();
-
-		// Non-admin 
+		// Non-admin user
 		if (!req.params.id || claims.id === req.params.id) {
 			// If token is present, proceed to the next middleware
 			return next();

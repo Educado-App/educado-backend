@@ -20,28 +20,28 @@ router.delete('/:id', requireLogin, async (req, res) => {
 	try {
 		// Ensure passed in id is valid
 		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
-		const id = mongoose.Types.ObjectId(req.params.id);	
+		const id = mongoose.Types.ObjectId(req.params.id);
 
 		// Ensure user is actually existing
 		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
-		
+
 		await handleAccountDeletion(id);
-		
+
 		return res.status(200).send({ message: 'Account successfully deleted!' });
-		
+
 	} catch (error) {
 		console.error(error.message);
-		switch(error.code) {
-		case 'E0014':
-			return res.status(400).send({ error: error.message }); // 'Invalid id'
-		case 'E0004':
-			return res.status(404).send({ error: error.message }); // 'User not found'
-		case 'E0018':
-			return res.status(500).send({ error: error.message }); // 'Failed to delete all account data from database!'
-		default:
-			return res.status(400).send({ error: errorCodes.E0000.message }); // 'Unknown error'
+		switch (error.code) {
+			case 'E0014':
+				return res.status(400).send({ error: error.message }); // 'Invalid id'
+			case 'E0004':
+				return res.status(404).send({ error: error.message }); // 'User not found'
+			case 'E0018':
+				return res.status(500).send({ error: error.message }); // 'Failed to delete all account data from database!'
+			default:
+				return res.status(400).send({ error: errorCodes.E0000.message }); // 'Unknown error'
 		}
-	} 
+	}
 });
 
 // GET User by ID
@@ -153,20 +153,20 @@ async function validateFields(fields) {
 
 	for (const [fieldName, fieldValue] of fieldEntries) {
 		switch (fieldName) {
-		case 'email':
-			if (!(await validateEmail(fieldValue))) {
-				return false;
-			}
-			break;
-		case 'firstName':
-		case 'lastName':
-			if (!validateName(fieldValue)) {
-				return false;
-			}
-			break;
+			case 'email':
+				if (!(await validateEmail(fieldValue))) {
+					return false;
+				}
+				break;
+			case 'firstName':
+			case 'lastName':
+				if (!validateName(fieldValue)) {
+					return false;
+				}
+				break;
 			// Add more cases for other fields if needed
-		default:
-			throw errorCodes['E0801'];
+			default:
+				throw errorCodes['E0801'];
 		}
 	}
 	return true;
