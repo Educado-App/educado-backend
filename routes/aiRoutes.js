@@ -191,10 +191,4 @@ router.post('/processAudio', shorttermLimiter, longtermLimiter, upload.single('a
     }
 });
 
-module.exports = {
-    router,
-    executePythonScript,
-    generateChatbotResponse,
-    generateAudioResponse,
-    transcribeAudio,
-};
+module.exports = router;

@@ -14,9 +14,9 @@ const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
+const AiRoutes = require('../routes/aiRoutes');
 //const UserInfoRoutes = require('../routes/userInfoRoutes');
 //const InstituitionRoutes = require('./institutions/institutionsRoutes');
-const AiRoutes = require('../routes/aiRoutes');
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
