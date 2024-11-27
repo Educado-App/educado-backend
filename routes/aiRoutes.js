@@ -7,6 +7,17 @@ const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limit
 const FeedbackAi = require('../models/FeedbackAi');
 
 
+//get all feedbacks
+router.get('/feedbacks', shorttermLimiter, longtermLimiter, async (req, res) => {
+	try {
+		const feedbacks = await Feedback.find();
+		res.json(feedbacks);
+	} catch (error){
+		console.error('error fetching feedbacks', error.message);
+		res.status(500).json({error: 'Internal server error'});
+	}
+});
+
 router.get('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => {
     console.log('GET request received at /api/ai/feedback');
 	res.send('feedback route is working!!!???!');
