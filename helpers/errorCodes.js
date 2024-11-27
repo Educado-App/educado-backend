@@ -454,6 +454,10 @@ module.exports = {
 		code: 'E1411',
 		message: 'Could not update section'
 	},
+	E1412: {
+		code: 'E1412',
+		message: 'Could not update course'
+	},
 
 
 };

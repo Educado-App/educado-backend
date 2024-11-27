@@ -586,15 +586,13 @@ router.post('/create/new', upload.fields([
 		});
 
 		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
+		assert(newCourse, errorCodes.E1401);
 
-		if (newCourse) {
-			res.status(201).send(newCourse);
-		} else {
-			throw new CustomError(errorCodes.E1401);
-		}
+		res.status(201).send(newCourse);
+
 	} catch (e) {
 		console.error(e);
-		res.sendStatus(500);
+		res.status(500).send(e.message);
 	}
 });
 
@@ -608,11 +606,12 @@ router.post('/update/:id', async(req, res) => {
 		const baseCourse = await CourseModel.findOne({ _id: id });
 		
 		const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
+		assert(updatedCourseModel, errorCodes.E1412);
 		
-		res.sendStatus(200);
-	} catch {
-		console.error('why?');
-		res.sendStatus(500);
+		res.status(200).send(updatedCourseModel);
+	} catch (e) {
+		console.error(e.message);
+		res.status(500).send(e.message);
 	}
 });
 
