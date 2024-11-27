@@ -1,5 +1,6 @@
 const { StudentModel } = require('../models/Students');
 const { UserModel } = require('../models/Users');
+const process = require('process');
 
 const getLeaderboard = async (timeInterval, userId) => {
 	try {

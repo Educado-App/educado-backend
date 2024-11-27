@@ -1,7 +1,5 @@
 const { verify } = require('../helpers/token');
 const errorCodes = require('../helpers/errorCodes');
-const { UserModel } = require('../models/Users');
-const mongoose = require('mongoose');
 
 module.exports = async (req, res, next) => {
 	let claims;
