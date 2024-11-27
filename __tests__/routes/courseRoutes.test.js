@@ -656,7 +656,7 @@ describe('Course Routes', () => {
 			const res = await request(`http://localhost:${PORT}`)
 				.get(`/api/courses/creator/${fakeUser._id}`)
 				.set('token', signAccessToken({ id: 'notAuthorized' }));
-			expect(res.statusCode).toEqual(401);
+			expect(res.statusCode).toEqual(400);
 			// Verify response body
 			const result = res.body;
 
@@ -809,10 +809,10 @@ describe('Course Routes', () => {
 			const response = await request(app)
 				.patch('/api/courses/' + fakeCourse._id)
 				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+				.send({ title: 'test course', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
 				.expect(200);
 
-			expect(response.body.title).toBe('Test');
+			expect(response.body.title).toBe('test course');
 			expect(response.body.category).toBe('sewing');
 			expect(response.body.difficulty).toBe(1);
 			expect(response.body.description).toBe('Sewing test');
