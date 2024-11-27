@@ -44,8 +44,8 @@ const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
 const executePythonScript = (scriptPath, input = null, isBinary = false, courses = null) => {
     return new Promise((resolve, reject) => {
         const python = spawn(pythonCommand, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
-        console.log(courses)
-        console.log(input)
+        console.log(courses);
+        console.log(input);
 
         if (input && courses){
             const payload = JSON.stringify({ input, courses });
@@ -102,7 +102,7 @@ const generateChatbotResponse = async (question, courses) => {
 // Step 3: Generate audio response
 const generateAudioResponse = async (chatbotResponse) => {
     console.log('Generating audio response...');
-    return await executePythonScript('./Ai/speechAi.py', chatbotResponse, isBinary= true); // Pass true for binary output
+    return await executePythonScript('./Ai/speechAi.py', chatbotResponse, true); // Pass true for binary output
 };
 
 
