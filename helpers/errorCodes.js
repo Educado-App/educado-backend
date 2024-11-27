@@ -434,5 +434,13 @@ module.exports = {
 		code: 'E1406',
 		message: 'Could not save media'
 	},
+	E1407: {
+		code: 'E1407',
+		message: 'Could not delete sections'
+	},
+	E1408: {
+		code: 'E1408',
+		message: 'Could not delete components'
+	},
 
 };

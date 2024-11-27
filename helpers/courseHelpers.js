@@ -5,7 +5,7 @@ const { LectureModel } = require('../models/Lectures');
 const { uploadFileToBucket } = require('./bucketUtils');
 
 const errorCodes = require('./errorCodes');
-const { assert } = require('./error');
+const { assert, CustomError } = require('./error');
 
 async function handleMedia(media) {
 	console.log('Media ID:', media.id);
@@ -292,17 +292,19 @@ async function updateAndSaveComponent(component){
 
 
 async function deleteRemovedSections(sections, oldSections) {
-	await Promise.all(oldSections.map(async oldSection => {
+	try {
+		await Promise.all(oldSections.map(async oldSection => {
+			if(!sections.some(section => section.toString() === oldSection.toString())) {
+				await ExerciseModel.deleteMany({parentSection: oldSection});
+				await LectureModel.deleteMany({parentSection: oldSection});
 
-		if(!sections.some(section => section.toString() === oldSection.toString())) {
-			await ExerciseModel.deleteMany({parentSection: oldSection});
-			await LectureModel.deleteMany({parentSection: oldSection});
-
-			await SectionModel.deleteOne({_id: oldSection});
-		}
-	}));
-
-	return 0;
+				await SectionModel.deleteOne({_id: oldSection});
+			}
+		}));
+	} catch(e) {
+		console.error(e.message);
+		throw new CustomError(errorCodes.E1407);
+	}
 }
 
 
@@ -388,7 +390,7 @@ async function updateAndSaveCourse(courseInfo, sections, baseCourse) {
 	const updatedCourse = await CourseModel.findByIdAndUpdate(courseId, updatedCourseInfo, {
 		new: true
 	});
-
+	assert(updatedCourse, errorCodes.E1401);
 
 	return updatedCourse;
 }
