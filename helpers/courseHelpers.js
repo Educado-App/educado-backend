@@ -7,6 +7,12 @@ const { uploadFileToBucket } = require('./bucketUtils');
 const errorCodes = require('./errorCodes');
 const { assert, CustomError } = require('./error');
 
+
+const componentModels = {
+	exercise: ExerciseModel,
+	lecture: LectureModel,
+};
+
 async function handleMedia(media) {
 	console.log('Media ID:', media.id);
 	console.log('Media Parent Type:', media.parentType);
@@ -100,7 +106,7 @@ async function createAndSaveExercise(component, parentSection) {
 	};
 
 	const savedExercise = await exerciseObject.save();
-	assert(savedExercise, errorCodes.E0000); //TODO
+	assert(savedExercise, errorCodes.E1405);
 
 	return componentInfo;
 }
@@ -114,7 +120,7 @@ async function createAndSaveLecture(component, parentSection){
 	};
 
 	const savedLecture = await lectureObject.save();
-	assert(savedLecture, errorCodes.E0000); //TODO
+	assert(savedLecture, errorCodes.E1404);
 
 	return componentInfo;
 }
@@ -223,6 +229,7 @@ async function updateAndSaveExercise(exercise) {
 	const updatedExercise = await ExerciseModel.findByIdAndUpdate(_id, update, {
 		new: true
 	});
+	assert(updatedExercise, errorCodes.E1409);
 
 	const componentInfo = {
 		compType: 'exercise',
@@ -246,6 +253,7 @@ async function updateAndSaveLecture(lecture){
 	const updatedLecture = await LectureModel.findByIdAndUpdate(_id, update, {
 		new: true
 	});
+	assert(updatedLecture, errorCodes.E1410);
 
 	const componentInfo = {
 		compType: 'lecture',
@@ -255,28 +263,27 @@ async function updateAndSaveLecture(lecture){
 	return componentInfo;
 }
 
+
 async function deleteComponent(component) {
-	switch (component.compType) {
-	case 'exercise':
-		await ExerciseModel.deleteOne({_id: component.compId});
-		break;
-	case 'lecture':
-		await LectureModel.deleteOne({_id: component.compId});
-		break;
-	default:
-		return;
+	const model = componentModels[component.compType];
+	if (model) {
+		await model.deleteOne({_id: component.compId});
 	}
-	return;
 }
 
 async function deleteRemovedComponents(componentsUpdate, oldComponents){
-	await Promise.all(oldComponents.map(async component => {
-		//if id was in old course, but not in update
-		if (!componentsUpdate.some(componentsUpdate => componentsUpdate.compId.toString() === component.compId.toString())) {
-			await deleteComponent(component);
-		}
-	}));
-	return 0;
+	try {
+		await Promise.all(oldComponents.map(async component => {
+			//if id was in old course, but not in update
+			const isRemoved = !componentsUpdate.some(componentsUpdate => componentsUpdate.compId.toString() === component.compId.toString());
+			if (isRemoved) {
+				await deleteComponent(component);
+			}
+		}));
+	} catch (e) {
+		console.error(e.message);
+		throw CustomError(errorCodes.E1408);
+	}
 }
 
 async function updateAndSaveComponent(component){
@@ -348,6 +355,7 @@ async function updateAndSaveSection(section, oldSection){
 	const updatedSection = await SectionModel.findByIdAndUpdate(_id, update, {
 		new: true
 	});
+	assert(updatedSection, errorCodes.E1411);
 	
 	return updatedSection;
 }

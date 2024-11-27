@@ -424,11 +424,11 @@ module.exports = {
 	},
 	E1404: {
 		code: 'E1404',
-		message: 'Could not save lecture for section'
+		message: 'Could not save lecture'
 	},
 	E1405: {
 		code: 'E1405',
-		message: 'Could not save exercise for section'
+		message: 'Could not save exercise'
 	},
 	E1406: {
 		code: 'E1406',
@@ -442,5 +442,18 @@ module.exports = {
 		code: 'E1408',
 		message: 'Could not delete components'
 	},
+	E1409: {
+		code: 'E1409',
+		message: 'Could not update exercise'
+	},
+	E1410: {
+		code: 'E1410',
+		message: 'Could not update lecture'
+	},
+	E1411: {
+		code: 'E1411',
+		message: 'Could not update section'
+	},
+
 
 };
