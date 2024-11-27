@@ -690,7 +690,7 @@ describe('Course Routes', () => {
 					category: fakeCourses[i].category,
 					published: fakeCourses[i].published,
 					sections: fakeCourses[i].sections,
-					creator: fakeCourses[i].creator,
+					creator: null,
 					difficulty: fakeCourses[i].difficulty,
 					estimatedHours: fakeCourses[i].estimatedHours,
 					rating: fakeCourses[i].rating,

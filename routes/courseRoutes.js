@@ -90,7 +90,13 @@ const topFeedbackOptionForCourses = async (courses) => {
 router.get('/', async (req, res) => {
 	try {
 		// Find all courses in the database and convert to plain objects
-		const courses = await CourseModel.find().lean();
+		const courses = await CourseModel.find().lean().populate({ 
+			path: 'creator',
+			populate: {
+				path: 'baseUser',
+				select: '-password'
+			}
+		});
 
 		// Get top feedback options for each course
 		const coursesWithFeedback = await topFeedbackOptionForCourses(courses);
@@ -111,7 +117,13 @@ router.get('/:id', async (req, res) => {
 		}
 
 		// find a course based on it's id
-		const course = await CourseModel.findById(id);
+		const course = await CourseModel.findById(id).lean().populate({ 
+			path: 'creator',
+			populate: {
+				path: 'baseUser',
+				select: '-password'
+			}
+		});
 
 		// check if courses exist
 		if (!course) {
@@ -490,21 +502,24 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 
 
 	// Get the section array from the course object
-	const sectionIds = course.sections;
+	if (course.sections) {
 
-	// Loop through all sections in course
-	sectionIds.map(async (section_id) => {
+		const sectionIds = course.sections;
 
-		// Get the section object from the id in sectionIds array
-		let section = await SectionModel.findById(section_id);
+		// Loop through all sections in course
+		sectionIds.map(async (section_id) => {
 
-		// Delete all lectures and excercises in the section
-		await LectureModel.deleteMany({ parentSection: section._id });
-		await ExerciseModel.deleteMany({ parentSection: section._id });
+			// Get the section object from the id in sectionIds array
+			let section = await SectionModel.findById(section_id);
 
-		// Delete the section
-		await SectionModel.findByIdAndDelete(section_id);
-	});
+			// Delete all lectures and excercises in the section
+			await LectureModel.deleteMany({ parentSection: section._id });
+			await ExerciseModel.deleteMany({ parentSection: section._id });
+
+			// Delete the section
+			await SectionModel.findByIdAndDelete(section_id);
+		});
+	}
 
 	// Delete the course
 	await CourseModel.findByIdAndDelete(id).catch((err) => res.status(204).send(err));
