@@ -2,7 +2,6 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const multer = require('multer');
-const multer = require('multer');
 const router = express.Router();
 const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
 const FeedbackAi = require('../models/FeedbackAi');
@@ -11,7 +10,7 @@ const FeedbackAi = require('../models/FeedbackAi');
 //get all feedbacks
 router.get('/feedbacks', shorttermLimiter, longtermLimiter, async (req, res) => {
 	try {
-		const feedbacks = await Feedback.find();
+		const feedbacks = await FeedbackAi.find();
 		res.json(feedbacks);
 	} catch (error){
 		console.error('error fetching feedbacks', error.message);
