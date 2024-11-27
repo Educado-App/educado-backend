@@ -33,12 +33,6 @@ module.exports = async (req, res, next) => {
 			}
 		}
 
-		const user = await UserModel.findById(claims.id);
-		if (!user) {
-			return res.status(401).send({ error: errorCodes['E0002'] });
-		}
-
-		req.user = user;
 
 		// Admin
 		if (claims.role === 'admin') return next();

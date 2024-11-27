@@ -14,6 +14,7 @@ const { getLeaderboard } = require('../helpers/leaderboard');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
 router.get('/all', async (req, res) => {
@@ -379,10 +380,13 @@ router.put('/:id/extraPoints', requireLogin, async (req, res) => {
 });
 
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
-router.get('/leaderboard', requireLogin, async (req, res) => {
+router.post('/leaderboard', requireLogin, async (req, res) => {
 	try {
-		const { timeInterval } = req.query; 
-		const userId = req.user._id; 
+		const { timeInterval, userId } = req.body; 
+
+		if (!userId) {
+			return res.status(400).json({ error: 'User ID is required' });
+		}
 
 		if (!timeInterval || !['day', 'week', 'month', 'all', 'everyMonth'].includes(timeInterval)) {
 			return res.status(400).json({ error: errorCodes['E0015'] });
