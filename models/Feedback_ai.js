@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const feedbackSchema = new mongoose.Schema({
+const feedbackSchemaAi = new mongoose.Schema({
 	userPrompt: { type: String, required: true },
 	chatbotResponse: { type: String, required: true },
 	feedback: { type: Boolean, required: true }, // true for thumbs up, false for thumbs down
@@ -9,4 +9,4 @@ const feedbackSchema = new mongoose.Schema({
 {collection: 'ai_feedback'}
 );
 
-module.exports = mongoose.model('Feedback', feedbackSchema);
+module.exports = mongoose.model('FeedbackAi', feedbackSchemaAi);

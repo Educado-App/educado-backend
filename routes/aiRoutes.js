@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const multer = require('multer');
 const router = express.Router();
 const { shorttermLimiter, longtermLimiter } = require('../middlewares/rate_limiting');
-const Feedback = require('../models/Feedback');
+const FeedbackAi = require('../models/FeedbackAi');
 
 
 router.get('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => {
@@ -20,13 +20,13 @@ router.post('/feedback', shorttermLimiter, longtermLimiter, async (req, res) => 
     }
 
     try {
-        const newFeedback = new Feedback({
+        const newFeedbackAi = new FeedbackAi({
             userPrompt,
             chatbotResponse,
             feedback
         });
-        await newFeedback.save();
-        console.log('Feedback successfully saved', newFeedback);
+        await newFeedbackAi.save();
+        console.log('Feedback successfully saved', newFeedbackAi);
         res.status(200).json({message: 'Feedback successfully saved'});
     } catch (error){
         console.error('error saving feedback', error.message);
