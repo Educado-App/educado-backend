@@ -15,8 +15,13 @@ const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
 const AiRoutes = require('../routes/aiRoutes');
-//const UserInfoRoutes = require('../routes/userInfoRoutes');
-//const InstituitionRoutes = require('./institutions/institutionsRoutes');
+const FeedbackRoutes = require('../routes/feedbackRoutes');
+const RatingRoutes = require('../routes/ratingRoutes');
+
+const UserInfoRoutes = require('../routes/userInfoRoutes');
+const InstituitionRoutes = require('./institutions/institutionsRoutes');
+
+
 
 // Print all routes defined in app
 router.get('/api', (req, res) => {
@@ -37,7 +42,11 @@ router.use('/api/utility', UtilityRoutes);
 router.use('/api/students', StudentRoutes);
 router.use('/api/components', ComponentRoutes);
 router.use('/api/profiles', ProfileRoutes);
+router.use('/api/feedback', FeedbackRoutes);
 router.use('/api/ai', AiRoutes);
+router.use('/api/user-info', UserInfoRoutes);
+router.use('/api/institutions', InstituitionRoutes);
+router.use('/api/rating', RatingRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

@@ -74,6 +74,10 @@ module.exports = {
 		code: 'E0017',
 		message: 'Service Unavailable'
 	},
+	E0018: {
+		code: 'E0018',
+		message: 'Failed to delete all account data from database!'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -153,6 +157,10 @@ module.exports = {
 	E0214: {
 		code: 'E0214',
 		message: 'Password must contain at least one letter.'
+	},
+	E0215: {
+		code: 'E0215',
+		message: 'Verification token is invalid or expired.'
 	},
 
 	// E03 - Logout errors
@@ -316,6 +324,11 @@ module.exports = {
 		message: 'Could not upload application'
 	},
 
+	E1007: {
+		code: 'E1007',
+		message: 'Could not save Content Creator application forms to database!'
+	},
+
 	// E11 - Component Errors
 	E1101: {
 		code: 'E1101',
@@ -369,4 +382,31 @@ module.exports = {
 		code: 'E1206',
 		message: 'Institution not found'
 	},
+  
+	// E13 - Feedback Errors
+	E1301: {
+		code: 'E1301',
+		message: 'No Feedbackoptions found'
+	},
+	E1302: {
+		code: 'E1302',
+		message: 'Could not save feedback entry'
+	},
+	E1303: {
+		code: 'E1303',
+		message: 'Feedback must contain a rating'
+	},
+	E1304: {
+		code: 'E1304',
+		message: 'Feedback options must be an array'
+	},
+	E1305: {
+		code: 'E1305',
+		message: 'Could not save feedback options when populating database'
+	},
+	E1306: {
+		code: 'E1306',
+		message: 'Rating must be between 1 and 5'
+	},
+
 };

@@ -13,6 +13,7 @@ const makeFakeStudent = require('../fixtures/fakeStudent');
 const makeFakeLecture = require('../fixtures/fakeLecture');
 const makeFakeExercise = require('../fixtures/fakeExercise');
 const makeFakeCoursePublished = require('../fixtures/fakeCoursePublished');
+const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
 
@@ -44,6 +45,8 @@ let fakeCourses = getFakeCourses();
 let fakeLection = makeFakeLecture();
 let fakeExercise = makeFakeExercise();
 let fakeCoursePublished = makeFakeCoursePublished();
+let fakeFeedbackOptions = makeFakeFeedbackOptions();
+
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -65,6 +68,7 @@ describe('Course Routes', () => {
 		await db.collection('sections').insertOne(fakeSection);
 		await db.collection('lectures').insertOne(fakeLection);
 		await db.collection('exercises').insertOne(fakeExercise);
+		await db.collection('feedbackoptions').insertMany(fakeFeedbackOptions);
 
 		actualUser = await db.collection('users').findOne({ email: fakeUser.email });
 		fakeCreator = makeFakeCreator(actualUser._id);
@@ -81,6 +85,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
+		await db.collection('feedbackoptions').deleteMany({}); 
 	});
 
 	afterAll(async () => {
@@ -684,7 +689,7 @@ describe('Course Routes', () => {
 					category: fakeCourses[i].category,
 					published: fakeCourses[i].published,
 					sections: fakeCourses[i].sections,
-					creator: fakeCourses[i].creator,
+					creator: null,
 					difficulty: fakeCourses[i].difficulty,
 					estimatedHours: fakeCourses[i].estimatedHours,
 					rating: fakeCourses[i].rating,
@@ -861,4 +866,3 @@ describe('Course Routes', () => {
 		});
 	});
 });
-

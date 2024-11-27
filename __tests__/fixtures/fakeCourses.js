@@ -1,3 +1,7 @@
+const makeCourseFakeFeedbackOptions = require('./fakeCourseFeedbackOptions');
+
+const fakeCourseFeedbackOptions = makeCourseFakeFeedbackOptions();
+
 const courses = [
 	{
 		'title': 'fakeCourse1',
@@ -7,10 +11,12 @@ const courses = [
 		'category': 'mathematics',
 		'published': false,
 		'sections': [],
-		'creator': [],
+		'creator': '673e05109203b5ba64409b20',
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse2',
@@ -20,10 +26,12 @@ const courses = [
 		'category': 'language',
 		'published': false,
 		'sections': [],
-		'creator': ['1234567891011'],
+		'creator': '673e05109203b5ba64409b20',
 		'difficulty': 1,
 		'estimatedHours': 1,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse3',
@@ -33,10 +41,12 @@ const courses = [
 		'category': 'programming',
 		'published': true,
 		'sections': [],
-		'creator': [],
+		'creator': '673e05109203b5ba64409b20',
 		'difficulty': 2,
 		'estimatedHours': 3,
 		'rating': 5,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	},
 	{
 		'title': 'fakeCourse4',
@@ -46,10 +56,12 @@ const courses = [
 		'category': 'music',
 		'published': true,
 		'sections': [],
-		'creator': ['1234567891011'],
+		'creator': '673e05109203b5ba64409b20',
 		'difficulty': 6,
 		'estimatedHours': 2,
 		'rating': 3,
+		'numOfRatings': 0,
+		'feedbackOpions': fakeCourseFeedbackOptions,
 	}
 ];
 

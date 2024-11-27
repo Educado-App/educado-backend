@@ -10,6 +10,7 @@ module.exports = function makeFakeCoursePublished(){
 		difficulty: 1,
 		estimatedHours: 1,
 		rating: 5,
+		numOfRatings: 0,
 		numOfSubscriptions: 0,
 	};
 };

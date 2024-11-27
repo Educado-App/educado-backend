@@ -17,8 +17,7 @@ const { sendVerificationEmail } = require('../helpers/email');
 
 const bcrypt = require('bcrypt');
 // Utility function to encrypt the token or password
-const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5;
-
+const TOKEN_EXPIRATION_TIME = 1000 * 60 * 5; // 5 minutes
 
 // Utility function to compare raw token with hashed token
 const compareTokens = async (rawToken, hashedToken) => {
@@ -100,10 +99,16 @@ router.post('/login', async (req, res) => {
 		return res.status(500).send({ 'error': errorCodes['E0003'] });
 	}
 });
+
+
 router.post('/signup', async (req, res) => {
 	const { firstName, lastName, email, password } = req.body;
+
+	// Convert email to lowercase
+	const lowercaseEmail = email.toLowerCase();
+
 	// Get the user's email domain to determine if they are part of an onboarded institution
-	const emailDomain = email.substring(email.indexOf('@'));
+	const emailDomain = lowercaseEmail.substring(lowercaseEmail.indexOf('@'));
 	const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
 	const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 	try {
@@ -111,38 +116,36 @@ router.post('/signup', async (req, res) => {
 		validateName(firstName);
 		validateName(lastName);
 		validatePassword(password);
-		await validateEmail(email);
+		await validateEmail(lowercaseEmail);
 
 		// Check if the user already exists
-		const user = await UserModel.findOne({ email: email });
+		const user = await UserModel.findOne({ email: lowercaseEmail });
         
 		// If user already exists, return error E0201
 		if (user) {
-			return res.status(400).json({ error: errorCodes['E0201'] }); // Content creator already registered
+			return res.status(400).send({ error: errorCodes['E0201'] }); // Content creator already registered
 		} 
-		
 		
 		if(onboardedInstitution || onboardedSecondaryInstitution){
 
 			// Delete any existing token
-			let existing_token = await EmailVerificationToken.findOne({ userEmail: email });
+			let existing_token = await EmailVerificationToken.findOne({ userEmail: lowercaseEmail });
 			if (existing_token) console.log('Token found');
 			if (existing_token) await existing_token.deleteOne();
 
-			
 			// Generate and hash the verification token
 			const verificationToken = generateVerificationToken();
 			const hashedToken = await encrypt(verificationToken); // Hash the token
 
 			// Save the token and email in the database
 			await new EmailVerificationToken({
-				userEmail: email,
+				userEmail: lowercaseEmail,
 				token: hashedToken,  // Store the hashed token
-				expiresAt: Date.now() + TOKEN_EXPIRATION_TIME,
+				expiresAt: new Date(Date.now() + TOKEN_EXPIRATION_TIME), // Convert to Date object  
 			}).save();
 
 			// Send verification email with the raw token (not hashed)
-			await sendVerificationEmail({ firstName, email }, verificationToken);
+			await sendVerificationEmail({ firstName, email: lowercaseEmail }, verificationToken);
 
 			// Respond to client
 			res.status(200).send({
@@ -160,7 +163,7 @@ router.post('/signup', async (req, res) => {
 			const newUser = new UserModel({
 				firstName,
 				lastName,
-				email,
+				email: lowercaseEmail,
 				password: hashedPassword,
 				joinedAt,
 				modifiedAt
@@ -170,7 +173,6 @@ router.post('/signup', async (req, res) => {
 			const contentCreatorProfile = new ContentCreatorModel({ baseUser: newUser._id });
 			const studentProfile = new StudentModel({ baseUser: newUser._id });
 
-
 			// Save the user and profiles
 			const createdUser = await newUser.save();  // Save user
 			let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
@@ -178,57 +180,55 @@ router.post('/signup', async (req, res) => {
 
 			// Respond with the created user and institution data
 			res.status(201).json({
-				message: 'Email verified and user created successfully!',
+				message: 'Email verificado e usuário criado com sucesso!',
 				baseUser: createdUser,
 				contentCreatorProfile: createdContentCreator,
 				studentProfile: createdStudent,
 			});
 		}
-		
-
 	} catch (error) {
 		res.status(400).send({ error: error });
 	}
 });
-
-
-// Email verification route
 router.post('/verify-email', async (req, res) => {
-	const { firstName, lastName, email, password, token } = req.body;  // Destructure the token and user data
+	const { firstName, lastName, email, password, token } = req.body;
+	const lowercaseEmail = email.toLowerCase(); // Convert email to lowercase
 
 	try {
 		// Find the verification token by email
-		const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: email });
+		const emailVerificationToken = await EmailVerificationToken.findOne({ userEmail: lowercaseEmail });
 
 		if (!emailVerificationToken) {
-			return res.status(400).json({ error: 'Invalid or expired token.1' });
+			return res.status(400).json({ message: 'Código inválido ou expirado' });
 		}
 
 		// Check if the token matches
-		const isValid = await compareTokens(token, emailVerificationToken.token); // Compare raw token with hashed token
+		const isValid = await compareTokens(token, emailVerificationToken.token);
 
-		if (!isValid || emailVerificationToken.expiresAt < Date.now()) {
-			return res.status(400).json({ error: 'Invalid or expired token.1' });
+		if (!isValid) {
+			return res.status(400).json({
+				message: 'Código inválido ou expirado', 
+			});
 		}
 
 		// Token is valid, proceed with additional user validation
-		validateName(firstName);  // Validate first name
-		validateName(lastName);   // Validate last name
-		validatePassword(password);  // Validate password
-		await validateEmail(email);   // Validate email format
+		validateName(firstName);
+		validateName(lastName);
+		validatePassword(password);
+		await validateEmail(lowercaseEmail);
 
 		// Set dates for creation and modification
 		const joinedAt = Date.now();
 		const modifiedAt = Date.now();
 
 		// Hash the password for security
-		const hashedPassword = await encrypt(password);  // Encrypt the password
+		const hashedPassword = await encrypt(password);
 
 		// Create user object
 		const newUser = new UserModel({
 			firstName,
 			lastName,
-			email,
+			email: lowercaseEmail,
 			password: hashedPassword,
 			joinedAt,
 			modifiedAt
@@ -239,23 +239,23 @@ router.post('/verify-email', async (req, res) => {
 		const studentProfile = new StudentModel({ baseUser: newUser._id });
 
 		// Get the user's email domain to determine if they are part of an onboarded institution
-		const emailDomain = email.substring(email.indexOf('@'));
+		const emailDomain = lowercaseEmail.substring(lowercaseEmail.indexOf('@'));
 		const onboardedInstitution = await InstitutionModel.findOne({ domain: emailDomain });
 		const onboardedSecondaryInstitution = await InstitutionModel.findOne({ secondaryDomain: emailDomain });
 
 		// Save the user and profiles
-		const createdUser = await newUser.save();  // Save user
-		let createdContentCreator = await contentCreatorProfile.save(); // Save content creator
-		const createdStudent = await studentProfile.save(); // Save student
+		const createdUser = await newUser.save();
+		let createdContentCreator = await contentCreatorProfile.save();
+		const createdStudent = await studentProfile.save();
 
 		// If the email is under either of the onboarded institutions' domains, approve the content creator automatically
 		if (onboardedInstitution || onboardedSecondaryInstitution) {
 			await ContentCreatorModel.findOneAndUpdate({ baseUser: newUser._id }, { approved: true });
-			createdContentCreator = await ContentCreatorModel.findOne({ baseUser: newUser._id });  // Refresh content creator profile
+			createdContentCreator = await ContentCreatorModel.findOne({ baseUser: newUser._id });
 		}
 
-		// Delete the verification token as it is no longer needed
-		await EmailVerificationToken.deleteOne({ userEmail: email });
+		// Delete all verification tokens associated with the userEmail
+		await EmailVerificationToken.deleteMany({ userEmail: lowercaseEmail });
 
 		// Respond with the created user and institution data
 		res.status(201).json({
@@ -263,7 +263,7 @@ router.post('/verify-email', async (req, res) => {
 			baseUser: createdUser,
 			contentCreatorProfile: createdContentCreator,
 			studentProfile: createdStudent,
-			institution: onboardedInstitution || onboardedSecondaryInstitution,  // Respond with the institution if found
+			institution: onboardedInstitution || onboardedSecondaryInstitution,
 		});
 
 	} catch (error) {
@@ -271,7 +271,6 @@ router.post('/verify-email', async (req, res) => {
 		res.status(500).json({ error: 'Internal server error' });
 	}
 });
-
 
 
 
@@ -317,7 +316,7 @@ router.post('/reset-password-request', async (req, res) => {
 	await new PasswordResetToken({
 		userId: user._id,
 		token: hash,
-		expiresAt: Date.now() + TOKEN_EXPIRATION_TIME // 5 minutes
+		expiresAt: new Date(Date.now() + TOKEN_EXPIRATION_TIME), // Set expiration time
 	}).save();
 
 	// Send email with reset token
