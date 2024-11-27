@@ -1,5 +1,5 @@
-const { StudentModel } = require("../models/Students");
-const { UserModel } = require("../models/Users");
+const { StudentModel } = require('../models/Students');
+const { UserModel } = require('../models/Users');
 
 const getLeaderboard = async (timeInterval, userId) => {
 	try {
@@ -12,26 +12,26 @@ const getLeaderboard = async (timeInterval, userId) => {
 
 		return { leaderboard, currentUserRank };
 	} catch (error) {
-		throw new Error("Error fetching leaderboard data: " + error.message);
+		throw new Error('Error fetching leaderboard data: ' + error.message);
 	}
 };
 
 const getMatchStage = (timeInterval) => {
-	if (timeInterval === "all") return {};
+	if (timeInterval === 'all') return {};
 
 	const now = new Date();
 	let startDate;
 	switch (timeInterval) {
-	case "day":
+	case 'day':
 		startDate = new Date(now.setDate(now.getDate() - 1));
 		break;
-	case "week":
+	case 'week':
 		startDate = new Date(now.setDate(now.getDate() - 7));
 		break;
-	case "month":
+	case 'month':
 		startDate = new Date(now.setMonth(now.getMonth() - 1));
 		break;
-	case "everyMonth":
+	case 'everyMonth':
 		startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 		break;
 	}
@@ -51,10 +51,9 @@ const fetchUserDetails = async (students) => {
 	const userDetailsPromises = students.map(async (student) => {
 		try {
 			const user = await UserModel.findById(student.baseUser).select(
-				"firstName lastName profilePhoto"
+				'firstName lastName profilePhoto'
 			);
 			if (!user) {
-				console.warn(`User with ID ${student.baseUser} not found`);
 				return null;
 			}
 			return {

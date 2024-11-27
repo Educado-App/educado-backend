@@ -38,19 +38,6 @@ router.get('/', async (req, res) => {
 	}
 });
 
-// Route for getting leaderboard data
-router.get('/leaderboard', async (req, res) => {
-	try {
-		const { timeInterval } = req.query;
-		if (!timeInterval || !['day', 'week', 'month', 'all'].includes(timeInterval)) {
-			return res.status(400).json({ error: errorCodes['E0015'] });
-		}
-		const leaderboard = await getLeaderboard(timeInterval);
-		res.status(200).json(leaderboard);
-	} catch (error) {
-		res.status(500).json({ error: errorCodes['E0003'], message: error.message });
-	}
-});
 
 //  Route for getting specific content creator
 router.get('/:id', async (req, res) => {
