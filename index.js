@@ -10,6 +10,7 @@ const router = require('./routes');
 const passport = require('passport');
 const { createTimeSeriesCollection } = require('./db/timeSeriesCollection');
 const { addMetricsData } = require('./scripts/addMetricsData');
+const cron = require('node-cron');
 
 /* global process */
 const PORT = process.env.PORT || 8888; // Get dynamic port allocation when deployed by Heroku. Otherwise, by default, use port 5000
@@ -24,6 +25,11 @@ connectToDb(keys.mongoURI, {
 }).then(async () => {
 	await createTimeSeriesCollection();
 	await addMetricsData();
+	// Schedule the task to run every minute
+	cron.schedule('* * * * *', async () => {
+		console.log('Taking snapshot...');
+		await addMetricsData();
+	});
 }).catch((error) => {
 	console.error('Error connecting to mongoDB:', error);
 });

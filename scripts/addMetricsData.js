@@ -15,7 +15,7 @@ async function addMetricsData() {
 				{ $group: { _id: null, totalSubscriptions: { $sum: '$numOfSubscriptions' } } }
 			]);
 			// Hardcoded data for testing
-			const metricsData = {
+			const metricsData = new MetricsModel({
 				timestamp: new Date(),
 				type: 'snapshot',
 				totalCourses: totalCourses,
@@ -23,13 +23,13 @@ async function addMetricsData() {
 				creatorID: creator,
 			// totalUsers: totalUsers[0] ? totalUsers[0].totalSubscriptions : 0,
 			// totalCourses,
-			};
+			});
 
 			// Insert the document
-			const newMetrics = new MetricsModel(metricsData);
-			await newMetrics.save();
+			//const newMetrics = new MetricsModel(metricsData);
+			await metricsData.save();
 
-			console.log('Metrics data added:', newMetrics);
+			console.log('Metrics data added:', metricsData);
 		}
 	} catch (error) {
 		console.error('Error adding metrics data:', error);

@@ -46,6 +46,7 @@
     "mongoose": "^5.13.20",
     "multer": "^1.4.2",
     "multer-s3": "^2.10.0",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.6",
     "openai": "^4.68.4",
