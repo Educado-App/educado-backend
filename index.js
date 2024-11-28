@@ -9,7 +9,7 @@ const cookieSession = require('cookie-session');
 const router = require('./routes');
 const passport = require('passport');
 const { createTimeSeriesCollection } = require('./db/timeSeriesCollection');
-const { addMetricsData } = require('./scripts/addMetricsData');
+const { addMetricsData, addTestData, addMetricsData2 } = require('./scripts/addMetricsData');
 const cron = require('node-cron');
 
 /* global process */
@@ -24,7 +24,9 @@ connectToDb(keys.mongoURI, {
 	useCreateIndex: true,
 }).then(async () => {
 	await createTimeSeriesCollection();
-	await addMetricsData();
+	await addTestData(); //static data for testing
+	await addMetricsData2(); //dynamic data for testing
+
 	// Schedule the task to run every minute
 	cron.schedule('* * * * *', async () => {
 		console.log('Taking snapshot...');

@@ -9,7 +9,7 @@ async function createTimeSeriesCollection() {
 				timeseries: {
 					timeField: 'timestamp',   // Field storing the timestamp
 					metaField: 'type',        // Optional metadata about the document
-					granularity: 'minutes'      // Adjust granularity ("seconds", "minutes", "hours") based on your data collection frequency
+					granularity: 'seconds'      // Adjust granularity ("seconds", "minutes", "hours") based on your data collection frequency
 				},
 				expireAfterSeconds: 60, // Automatically delete documents after 5 minutes
 			}
