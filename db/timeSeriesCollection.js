@@ -11,8 +11,9 @@ async function createTimeSeriesCollection() {
 					metaField: 'type',        // Optional metadata about the document
 					granularity: 'minutes'      // Adjust granularity ("seconds", "minutes", "hours") based on your data collection frequency
 				},
-				//expireAfterSeconds: 60, // Automatically delete documents after 5 minutes
-			});
+				expireAfterSeconds: 60, // Automatically delete documents after 5 minutes
+			}
+			);
 			console.log('Time-series collection created');
 		} else {
 			console.log('Time-series collection already exists');
@@ -25,13 +26,16 @@ async function createTimeSeriesCollection() {
 		if (!ttlIndexExists) {
 			await db.collection('metrics').createIndex(
 				{ timestamp: 1 },
-				{ expireAfterSeconds: 50}
-				//	partialFilterExpression: { type: { $exists: true } }
-				//} 
+				{ expireAfterSeconds: 60,
+					partialFilterExpression: { type: 'snapshot' }
+				} 
 			);
 			console.log('TTL index created successfully!');
 		} else {
 			console.log('TTL index already exists.');
+			const indexes = await db.collection('metrics').listIndexes().toArray();
+			console.log(indexes); // Ensure 'timestamp_1' TTL index is listed with expireAfterSeconds: 50.
+
 		}
 	} catch (error) {
 		console.error('Error creating time-series collection:', error);
