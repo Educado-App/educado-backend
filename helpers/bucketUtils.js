@@ -9,7 +9,6 @@ const uploadFileToBucket = async (file, fileName) => {
 	const form = new FormData();
 
 	// Add file and filename to form
-	console.log('file', file);
 	form.append('file', file.buffer, {
 		filename: file.originalname,
 		contentType: file.mimetype

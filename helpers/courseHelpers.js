@@ -174,8 +174,6 @@ async function createAndSaveSection(section, parentCourse) {
 
 
 async function createAndSaveCourse(courseInfo, sections = [], creator) {
-	console.log('CourseInfo:', courseInfo);
-	console.log('Sections:', sections);
 	const courseObject = createCourseObject(courseInfo, creator);
 	const courseId = courseObject._id;
 

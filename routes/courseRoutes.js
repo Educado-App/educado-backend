@@ -424,8 +424,6 @@ router.put('/create/new',
 					}
 				});
 			});
-			console.log('courseInfo', courseInfo);
-			console.log('sections', sections);
 			const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
 			assert(newCourse, errorCodes.E1401);
 
@@ -477,8 +475,6 @@ router.post('/update/:id',
 					}
 				});
 			});
-			console.log('courseInfo', courseInfo);
-			console.log('sections', sections);
 			const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
 			assert(updatedCourseModel, errorCodes.E1412);
 
