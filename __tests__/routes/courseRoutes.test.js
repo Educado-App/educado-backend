@@ -869,7 +869,7 @@ describe('Course Routes', () => {
 		});
 	});
 
-	describe("POST /courses/create/new", () => {
+	describe("PUT /courses/create/new", () => {
 		it('Creates a new course from scratch', async() => {
 			const fakeId = fakeUser._id;
 
@@ -877,7 +877,7 @@ describe('Course Routes', () => {
 			
 			const token = signAccessToken({ id: fakeId });
 			const response = await request(app)
-				.post('/api/courses/create/new')
+				.put('/api/courses/create/new')
 				.set('Authorization', `Bearer ${token}`)
 				.send(courseData);
 

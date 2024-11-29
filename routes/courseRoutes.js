@@ -560,7 +560,7 @@ router.patch('/:id/updateStatus', async (req, res) => {
 });
 
 
-router.post('/create/new', 
+router.put('/create/new', 
 	dynamicUpload.any(), 
 	async (req, res) => {
 		try {
