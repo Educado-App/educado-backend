@@ -25,7 +25,7 @@ const { StudentModel } = require('../models/Students');
 const { OldLectureModel } = require('../models/Lecture');
 
 const { createAndSaveCourse, updateAndSaveCourse } = require('../helpers/courseHelpers');
-const { assert, CustomError } = require('../helpers/error');
+const { assert } = require('../helpers/error');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
