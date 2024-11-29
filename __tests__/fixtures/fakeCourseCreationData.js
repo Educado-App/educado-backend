@@ -6,7 +6,13 @@ module.exports = function makeFakeCreateCourseData(creatorId) {
 		difficulty: '2',
 		creator: creatorId,
 		description: 'woows',
-		coverImg: '0_c',
+		coverImg: {
+			id: '0',
+			file: {
+				path: 'path/to/testimage.png'
+			},
+			parentType: 'c'
+		},
 		status: 'draft'
 	};
 
@@ -24,11 +30,7 @@ module.exports = function makeFakeCreateCourseData(creatorId) {
 						contentType: 'video',
 						parentSection: '1'
 					},
-					video: {
-						id: '1',
-						file: {},
-						parentType: 'l'
-					}
+					video: null,
 				},
 				{
 					compType: 'lecture',
