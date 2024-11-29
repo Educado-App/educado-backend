@@ -3,6 +3,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import prompt
+import json
 
 load_dotenv("config/.env")
 
@@ -11,11 +12,11 @@ client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
  
 
 # Function to generate a chatbot response
-def chatbot(userInput):
+def chatbot(userInput, courses):
     response = client.chat.completions.create(
         model="ft:gpt-4o-mini-2024-07-18:group-1-chatbotters:edu2:AUtL6885",
         messages=[
-        {"role": "system", "content": prompt.generatePrompt2()},
+        {"role": "system", "content": prompt.generateUnifiedPrompt(courses)},
         {
             "role": "user",
             "content": (userInput)
@@ -27,20 +28,26 @@ def chatbot(userInput):
 
 # Check if the script is being executed directly
 if __name__ == "__main__":
-    # Get userInput and currentPage from the command-line arguments
-    if len(sys.argv) < 2:
-        print("Error: Not enough arguments provided.")
-        sys.exit(1)
     
-    userInput = sys.argv[1]  # First command-line argument
+    input_data = sys.stdin.read().strip()
     
-    # Call the chatbot function and print the result
+    if not input_data:
+        print("No input provided!")
+        sys.exit(2)
     try:
-        result = chatbot(userInput)
+        data = json.loads(input_data)
+        userInput = data.get("input")
+        courses = data.get("courses")
+
+        result = chatbot(userInput, courses)
         print(result)
+
+    except json.JSONDecodeError:
+        print("Invalid input format. Expected JSON.")
+        sys.exit(1)
     except Exception as e:
         print(f"Error occurred: {str(e)}")
-        sys.exit(1)
+        sys.exit(2)
 
 
 # Main loop for backend testing
