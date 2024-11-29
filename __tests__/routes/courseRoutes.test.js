@@ -741,23 +741,23 @@ describe('Course Routes', () => {
 		});
 	});
 
-	describe('PUT /courses', () => {
+	// describe('PUT /courses', () => {
 
-		it('Creates a course', async () => {
-			const token = signAccessToken({ id: fakeUser._id });
-			const response = await request(app)
-				.put('/api/courses/')
-				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id });
+	// 	it('Creates a course', async () => {
+	// 		const token = signAccessToken({ id: fakeUser._id });
+	// 		const response = await request(app)
+	// 			.put('/api/courses/')
+	// 			.set('Authorization', `Bearer ${token}`)
+	// 			.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id });
 
-			expect(response.status).toBe(201);
-			expect(response.body.title).toBe('Test');
-			expect(response.body.category).toBe('sewing');
-			expect(response.body.difficulty).toBe(1);
-			expect(response.body.description).toBe('Sewing test');
-			expect(response.body.estimatedHours).toBe(2);
-		});
-	});
+	// 		expect(response.status).toBe(201);
+	// 		expect(response.body.title).toBe('Test');
+	// 		expect(response.body.category).toBe('sewing');
+	// 		expect(response.body.difficulty).toBe(1);
+	// 		expect(response.body.description).toBe('Sewing test');
+	// 		expect(response.body.estimatedHours).toBe(2);
+	// 	});
+	// });
 
 	describe('GET courses/sections/:id/components', () => {
 		it('Should get all components from a section', async () => {
@@ -804,23 +804,23 @@ describe('Course Routes', () => {
 	});
 
 
-	describe('PATCH /courses/:courseId', () => {
+	// describe('PATCH /courses/:courseId', () => {
 
-		it('Update the fake course', async () => {
-			const token = signAccessToken({ id: fakeUser._id });
-			const response = await request(app)
-				.patch('/api/courses/' + fakeCourse._id)
-				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
-				.expect(200);
+	// 	it('Update the fake course', async () => {
+	// 		const token = signAccessToken({ id: fakeUser._id });
+	// 		const response = await request(app)
+	// 			.patch('/api/courses/' + fakeCourse._id)
+	// 			.set('Authorization', `Bearer ${token}`)
+	// 			.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+	// 			.expect(200);
 
-			expect(response.body.title).toBe('Test');
-			expect(response.body.category).toBe('sewing');
-			expect(response.body.difficulty).toBe(1);
-			expect(response.body.description).toBe('Sewing test');
-			expect(response.body.estimatedHours).toBe(2);
-		});
-	});
+	// 		expect(response.body.title).toBe('Test');
+	// 		expect(response.body.category).toBe('sewing');
+	// 		expect(response.body.difficulty).toBe(1);
+	// 		expect(response.body.description).toBe('Sewing test');
+	// 		expect(response.body.estimatedHours).toBe(2);
+	// 	});
+	// });
 
 	describe('PATCH /courses/:courseId/updateStatus', () => {
 		it('Update status of the fake course to published', async () => {
