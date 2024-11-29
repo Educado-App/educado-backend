@@ -14,15 +14,19 @@ const componentModels = {
 };
 
 async function handleMedia(media) {
-	console.log('____________start:_________\n', media, '_______end________\n');
-	if (media.file) {
+	if (!media || !media.file) {
+		console.log('No media or file to handle');
+		return;
+	}
+
+	if (media.file.mimetype !== 'text/plain') {
+		console.log('Media to handle : ', media.file);
 		const mediaString = `${media.id}_${media.parentType}`;
 		const file = media.file;
 		try {
 			await uploadFileToBucket(file, mediaString);
 		} catch (error) {
-			console.error('Error details:', error.message);
-			throw new Error(`${errorCodes.E1406}: ${error.message}`);
+			throw new Error(`${errorCodes.E1406}: ${error.message} : ${media.file}`);
 		}
 	}else{
 		console.log('No media to handle');
@@ -305,6 +309,7 @@ async function updateAndSaveComponent(component){
 		componentInfo = await updateAndSaveExercise(component);
 	} else if (component.compType === 'lecture') {
 		componentInfo = await updateAndSaveLecture(component);
+		console.log('ComponentInfo:', component.video);
 		if (component.video) {
 			component.video.id = componentInfo.compId;
 			await handleMedia(component.video);
