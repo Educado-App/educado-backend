@@ -611,7 +611,7 @@ router.post('/update/:id', async(req, res) => {
 		const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
 		assert(updatedCourseModel, errorCodes.E1412);
 		
-		res.status(200).send(updatedCourseModel);
+		res.status(201).send(updatedCourseModel);
 	} catch (e) {
 		console.error(e.message);
 		res.status(500).send(e.message);
