@@ -5,22 +5,22 @@ const { CustomError } = require('./error');
 // Models
 const { StudentModel } = require('../models/Students');
 
-// Increment studyStreak if student studied yesterday, else reset it if streak has been broken
+/**
+ * @function updateStudyStreak
+ * @description Increment the study streak if the student studied yesterday, else reset it if the streak has been broken.
+ * @param {ObjectId} id - The ID of the student.
+ * @throws {CustomError} - Throws a custom error (errorCode 'E0019') if the update fails.
+ */
 async function updateStudyStreak(id) {
 	try {
 		const { studyStreak, lastStudyDate } = await StudentModel.findById(id).select('studyStreak lastStudyDate');
 		const currentDate = new Date();
+		const dayDifference = differenceInDays(lastStudyDate, currentDate);
 
-		const differenceInDays = handleDateDifference(lastStudyDate, currentDate);
-
-		if (differenceInDays === 1) {
+		if (dayDifference === 1)
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: studyStreak + 1, lastStudyDate: currentDate});
-			console.log("Study streak incremented!");		// TODO: REMOVE
-		}
-		else if (differenceInDays > 1) {
+		else if (dayDifference > 1)
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: 1, lastStudyDate: currentDate });
-			console.log("Study streak reset!");		// TODO: REMOVE
-		}
 	}
 	catch (error) {
 		console.error(error.message);	// TODO: suppress in unit test!
@@ -29,25 +29,24 @@ async function updateStudyStreak(id) {
 	}
 }
 
-function handleDateDifference(lastStudyDate, currentDate) {
+// Calculates the full difference between days, ignoring the time of day
+// E.g., the difference in days between monday 23:59 and tuesday 00:01 is still 1 day
+function differenceInDays(lastStudyDate, currentDate) {
 	// Instance check
 	if (!(lastStudyDate instanceof Date) || !(currentDate instanceof Date))
-		throw new Error('lastStudyDate is not a Date instance!');
+		throw new Error('lastStudyDate/currentDate is not a Date instance!');
 
 	// Validity check
 	if (isNaN(lastStudyDate.getTime()) || isNaN(currentDate.getTime()))
-		throw new Error('lastStudyDate is not valid!');
+		throw new Error('lastStudyDate/currentDate is not a valid date!');
 
 	// Get dates without time by setting the time to midnight
-	const startDate = new Date(lastStudyDate.getFullYear(), lastStudyDate.getMonth(), lastStudyDate.getDate());
-	const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+	const startDateMidnight = new Date(lastStudyDate.getFullYear(), lastStudyDate.getMonth(), lastStudyDate.getDate());
+	const endDateMidnight = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
 	
 	// Calculate the difference in milliseconds, and convert it to days
-	const differenceInMs = endDate - startDate;
-
-	// E.g., the difference in days between monday 23:59 and tuesday 00:01 is still 1 day
+	const differenceInMs = endDateMidnight - startDateMidnight;
 	const differenceInDays = differenceInMs / (1000 * 60 * 60 * 24);
-	console.log("Difference in days: " + differenceInDays);
 
 	return differenceInDays;
 }
@@ -56,20 +55,14 @@ function handleDateDifference(lastStudyDate, currentDate) {
 async function ensureStudyStreakConsistency(id, lastStudyDate) {
 	try {    
 		const currentDate = new Date();
-		const differenceInDays = handleDateDifference(lastStudyDate, currentDate);
+		const dayDifference = differenceInDays(lastStudyDate, currentDate);
 
 		// Reset studyStreak if streak has been broken
-		if (differenceInDays > 1) {
+		if (dayDifference > 1)
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: 0 });
-			console.log("Study streak reset!");	// TODO: remove
-		}
-		else {
-			console.log("Student is study active!");	// TODO: remove
-		}
 	}
 	catch (error) {
-		// TODO: update resources documents!
-		throw new CustomError(errorCodes.E0019); // 'Failed to update student study streak!'
+		console.error('Failed to ensure study streak consistency!');	// TODO: suppress in unit test!
 	}
 }
 
