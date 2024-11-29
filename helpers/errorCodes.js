@@ -416,11 +416,11 @@ module.exports = {
 	},
 	E1402: {
 		code: 'E1402',
-		message: 'Could not save sections for course'
+		message: 'Could not save sections'
 	},
 	E1403: {
 		code: 'E1403',
-		message: 'Could not save components for section'
+		message: 'Could not save components'
 	},
 	E1404: {
 		code: 'E1404',
@@ -458,6 +458,4 @@ module.exports = {
 		code: 'E1412',
 		message: 'Could not update course'
 	},
-
-
 };
