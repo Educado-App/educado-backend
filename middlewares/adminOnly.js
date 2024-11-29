@@ -19,7 +19,6 @@ module.exports = (req, res, next) => {
 			return res.status(401).send({ error: errorCodes['E0001'] });
 		}
 	} catch {
-		// TODO: add updated error messages
-		return res.status(401).send({ error: errorCodes['E0002'] });
+		return res.status(401).send({ error: errorCodes['E0001'], message: 'Authentication token is invalid or expired.' });
 	}
 };
