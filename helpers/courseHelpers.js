@@ -209,7 +209,8 @@ function updateCourseObject(courseInfo) {
 function updateSectionObject(title, description) {
 	const update = {
 		title: title,
-		description: description,		
+		description: description,
+		dateUpdated: Date.now(),
 	};
 
 	return update;
@@ -224,6 +225,7 @@ async function updateAndSaveExercise(exercise) {
 		onWrongFeedback: onWrongFeedback,
 		question: question, 
 		answers: answers,
+		dateUpdated: Date.now(),
 	};
 
 	const updatedExercise = await ExerciseModel.findByIdAndUpdate(_id, update, {
