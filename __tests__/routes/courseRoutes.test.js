@@ -745,24 +745,6 @@ describe('Course Routes', () => {
 		});
 	});
 
-	// describe('PUT /courses', () => {
-
-	// 	it('Creates a course', async () => {
-	// 		const token = signAccessToken({ id: fakeUser._id });
-	// 		const response = await request(app)
-	// 			.put('/api/courses/')
-	// 			.set('Authorization', `Bearer ${token}`)
-	// 			.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id });
-
-	// 		expect(response.status).toBe(201);
-	// 		expect(response.body.title).toBe('Test');
-	// 		expect(response.body.category).toBe('sewing');
-	// 		expect(response.body.difficulty).toBe(1);
-	// 		expect(response.body.description).toBe('Sewing test');
-	// 		expect(response.body.estimatedHours).toBe(2);
-	// 	});
-	// });
-
 	describe('GET courses/sections/:id/components', () => {
 		it('Should get all components from a section', async () => {
 			const section = await db.collection('sections').findOne({ _id: fakeSection._id });
@@ -806,73 +788,6 @@ describe('Course Routes', () => {
 			expect(response.text).toBe('Course Deleted');
 		});
 	});
-
-
-	// describe('PATCH /courses/:courseId', () => {
-
-	// 	it('Update the fake course', async () => {
-	// 		const token = signAccessToken({ id: fakeUser._id });
-	// 		const response = await request(app)
-	// 			.patch('/api/courses/' + fakeCourse._id)
-	// 			.set('Authorization', `Bearer ${token}`)
-	// 			.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
-	// 			.expect(200);
-
-	// 		expect(response.body.title).toBe('Test');
-	// 		expect(response.body.category).toBe('sewing');
-	// 		expect(response.body.difficulty).toBe(1);
-	// 		expect(response.body.description).toBe('Sewing test');
-	// 		expect(response.body.estimatedHours).toBe(2);
-	// 	});
-	// });
-
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to published', async () => {
-
-			const course = await db.collection('courses').findOne({ title: 'test course' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('draft');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "published"})
-				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
-
-			expect(updatedCourse.status).toBe('published');
-		});
-	});
-
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to draft', async () => {
-
-			//set up a published course in db
-			await db.collection('courses').insertOne(fakeCoursePublished);
-		
-			const course = await db.collection('courses').findOne({ title: 'test course published' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('published');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "draft"})
-				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
-
-			expect(updatedCourse.status).toBe('draft');
-		});
-	});
-	
 
 
 	/*____________________________________________________________________________________________________________________
