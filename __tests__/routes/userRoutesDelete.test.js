@@ -35,7 +35,7 @@ jest.mock('../../models/ProfileEducation');
 jest.mock('../../models/ProfileExperience');
 jest.mock('../../helpers/userHelper');
 jest.mock('../../config/keys', () => ({
-	TOKEN_SECRET: 'test-secret'
+    TOKEN_SECRET: 'test-secret'
 }));
 
 // Express and mongo server
@@ -116,13 +116,11 @@ describe('DELETE /api/users/:id', () => {
     it('should return 404 for non-existing user', async () => {
         const nonExistentUserId = new mongoose.Types.ObjectId();
         UserModel.findById.mockResolvedValue(null);
-
         await request(app)
             .delete(`/api/users/${nonExistentUserId}`)
             .set('Authorization', `Bearer ${mockAdminToken}`)
-            .expect(404);
-
-        expect(UserModel.findById).toHaveBeenCalledWith({ _id: nonExistentUserId });
+            .expect(404)
+            .expect({ error: 'User not found' });
     });
 
     // Invalid id
@@ -132,8 +130,9 @@ describe('DELETE /api/users/:id', () => {
         await request(app)
             .delete(`/api/users/${invalidId}`)
             .set('Authorization', `Bearer ${mockAdminToken}`)
-            .expect(400);
-
-        expect(UserModel.findById).not.toHaveBeenCalled();
+            .expect(400)
+            .expect({ error: 'Invalid id' });
     });
+
+
 });

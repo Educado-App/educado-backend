@@ -92,7 +92,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-		await db.collection('feedbackoptions').deleteMany({}); 
+		await db.collection('feedbackoptions').deleteMany({});
 	});
 
 	afterAll(async () => {
@@ -372,7 +372,7 @@ describe('Course Routes', () => {
 		it('add incomplete course when subbing', async () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
-      
+
 			const obj = await addIncompleteCourse(course);
 
 			expect(obj).toBeInstanceOf(Object);
@@ -588,6 +588,9 @@ describe('Course Routes', () => {
 			);
 			const updatedCourse = courseUpdated.value;
 
+			// Ensure the updatedCourse is not null
+			expect(updatedCourse).not.toBeNull();
+
 			// find a user and add the course to the user's subscriptions
 			const userUpdated = await db.collection('students').findOneAndUpdate(
 				{ baseUser: actualUser._id },
@@ -608,7 +611,6 @@ describe('Course Routes', () => {
 			expect(courseNew.numOfSubscriptions).toBe(2);
 			expect(userNew.subscriptions).toHaveLength(0);
 		});
-
 	});
 
 	describe('GET /courses/creator/:userId', () => {
@@ -657,7 +659,6 @@ describe('Course Routes', () => {
 		});
 
 		it('Returns error 401 if user is not authorized to access', async () => {
-
 			// Send a get request to the courses endpoint
 			const res = await request(`http://localhost:${PORT}`)
 				.get(`/api/courses/creator/${fakeUser._id}`)
@@ -665,10 +666,8 @@ describe('Course Routes', () => {
 			expect(res.statusCode).toEqual(401);
 			// Verify response body
 			const result = res.body;
-
 			expect(result.error).toStrictEqual(errorCodes['E0002']);
 		});
-
 	});
 
 	describe('GET /courses', () => {
@@ -766,10 +765,10 @@ describe('Course Routes', () => {
 				{ $set: section },
 				{ returnDocument: 'after' }
 			);
-  
+
 			const response = await request(`http://localhost:${PORT}`)
 				.get('/api/courses/sections/' + fakeSection._id + '/components');
-  
+
 			expect(response.status).toBe(200);
 			expect(await response.body).toBeInstanceOf(Array);
 		});
