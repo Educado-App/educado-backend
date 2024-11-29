@@ -16,20 +16,18 @@ const componentModels = {
 async function handleMedia(media) {
 	if (!media || !media.file) {
 		console.log('No media or file to handle');
-		return;
+		throw new Error(`${errorCodes.E1406}: No media or file to handle`);
 	}
 
 	if (media.file.mimetype !== 'text/plain') {
-		console.log('Media to handle : ', media.file);
 		const mediaString = `${media.id}_${media.parentType}`;
 		const file = media.file;
+
 		try {
-			await uploadFileToBucket(file, mediaString);
+			await uploadFileToBucket(file, mediaString); //upload new media
 		} catch (error) {
-			throw new Error(`${errorCodes.E1406}: ${error.message} : ${media.file}`);
+			throw new Error(`${errorCodes.E1406}: error uploading media to service`);
 		}
-	}else{
-		console.log('No media to handle');
 	}
 }
 
