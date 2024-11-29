@@ -2,7 +2,7 @@ const { CourseModel } = require('../models/Courses');
 const { SectionModel } = require('../models/Sections');
 const { ExerciseModel } = require('../models/Exercises'); 
 const { LectureModel } = require('../models/Lectures');
-const { uploadFileToBucket } = require('./bucketUtils');
+const { uploadFileToBucket, deleteFileFromBucket} = require('./bucketUtils');
 
 const errorCodes = require('./errorCodes');
 const { assert, CustomError } = require('./error');
@@ -14,18 +14,18 @@ const componentModels = {
 };
 
 async function handleMedia(media) {
-	console.log('Media ID:', media.id);
-	console.log('Media Parent Type:', media.parentType);
-	console.log('Media File:', media.file);
-	if (media) {
+	console.log('____________start:_________\n', media, '_______end________\n');
+	if (media.file) {
 		const mediaString = `${media.id}_${media.parentType}`;
 		const file = media.file;
 		try {
 			await uploadFileToBucket(file, mediaString);
 		} catch (error) {
-			console.log('Media upload error:', error.message);
-			throw new Error(errorCodes.E1406);
+			console.error('Error details:', error.message);
+			throw new Error(`${errorCodes.E1406}: ${error.message}`);
 		}
+	}else{
+		console.log('No media to handle');
 	}
 }
 
@@ -75,6 +75,8 @@ function createSectionObject(title, description, parentCourse) {
 
 function createCourseObject(courseInfo, creator) {
 	const { title, category, difficulty, description, coverImg, status } = courseInfo;
+
+	console.log('coverImgcreate:', coverImg);
 
 	const courseObject = new CourseModel({
 		title: title,
@@ -133,7 +135,6 @@ async function createAndSaveComponent(component, parentSection){
 		componentInfo = await createAndSaveLecture(component, parentSection);
 		if (component.video) {
 			component.video.id = componentInfo.compId;
-			component.video.parentType = 'l';
 			await handleMedia(component.video);
 		}
 	}
@@ -192,7 +193,9 @@ async function createAndSaveCourse(courseInfo, sections = [], creator) {
 
 function updateCourseObject(courseInfo) {
 	// const { title, category, difficulty, description, coverImg, status } = courseInfo;
-	const { title, category, difficulty, description, status } = courseInfo;
+	const {title, category, difficulty, description, status, coverImg } = courseInfo;
+
+	console.log('CoverImgUpdate:', coverImg);
 
 	const update = {
 		title: title,
@@ -200,8 +203,13 @@ function updateCourseObject(courseInfo) {
 		difficulty: difficulty,
 		description: description,
 		status: status,
+		coverImg: coverImg,
 		dateUpdated: Date.now(),
 	};
+
+	handleMedia(coverImg);
+	const coverImgString = `${coverImg.id}_${coverImg.parentType}`;
+	update.coverImg = coverImgString;
 
 	return update;
 }
@@ -279,6 +287,9 @@ async function deleteRemovedComponents(componentsUpdate, oldComponents){
 			//if id was in old course, but not in update
 			const isRemoved = !componentsUpdate.some(componentsUpdate => componentsUpdate.compId.toString() === component.compId.toString());
 			if (isRemoved) {
+				if (component.video) {
+					await deleteFileFromBucket(`${component.compId}_v`).then(() => console.log('Video deleted')).catch(e => console.error(e.message));
+				}
 				await deleteComponent(component);
 			}
 		}));
@@ -294,6 +305,10 @@ async function updateAndSaveComponent(component){
 		componentInfo = await updateAndSaveExercise(component);
 	} else if (component.compType === 'lecture') {
 		componentInfo = await updateAndSaveLecture(component);
+		if (component.video) {
+			component.video.id = componentInfo.compId;
+			await handleMedia(component.video);
+		}
 	}
 
 	return componentInfo;
@@ -323,15 +338,18 @@ async function updateAndSaveAllComponents(components, oldSection) {
 
 	let componentsUpdate = [];
 
+	console.log('OldComponents:', oldComponents);
 	await Promise.all(components.map(async component => {
 		let componentObject;
 
 		if (oldComponents.some(oldComponent => oldComponent.compId.toString() === component.component._id.toString())) {
 			//update
+			console.log('UpdateComponent:', component);
 			componentObject = await updateAndSaveComponent(component, sectionId);
 			
 		} else{
 			//create
+			console.log('CreateComponent:', component);
 			componentObject = await createAndSaveComponent(component, sectionId);			
 		}
 		

@@ -2,9 +2,9 @@ const axios = require('axios');
 const FormData = require('form-data');
 const process = require('process');
 
-
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
+//also works as an update function since the service will overwrite the file if it already exists
 const uploadFileToBucket = async (file, fileName) => {
 	const form = new FormData();
 
@@ -21,13 +21,18 @@ const uploadFileToBucket = async (file, fileName) => {
 		return response.data;
 	} catch (error) {
 		if (error.response && error.response.data) {
-			throw new Error(error.response.data);
+			throw new Error(`Upload error: ${JSON.stringify(error.response.data)}`);
 		} else {
-			throw new Error('An error occurred during upload.');
+			throw new Error(`An error occurred during upload: ${error.message}`);
 		}
 	}
 };
 
+const deleteFileFromBucket = (fileName) => {
+	return axios.delete(serviceUrl + '/bucket/' + fileName);
+};
+
 module.exports = {
-	uploadFileToBucket
+	uploadFileToBucket,
+	deleteFileFromBucket,
 };

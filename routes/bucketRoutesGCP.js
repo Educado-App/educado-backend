@@ -4,7 +4,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { PassThrough } = require('stream');
 const Buffer = require('buffer').Buffer;
-const {uploadFileToBucket} = require('../helpers/bucketUtils');
+const {uploadFileToBucket, deleteFileFromBucket} = require('../helpers/bucketUtils');
 
 //Get serviceUrl from environment variable
 
@@ -56,18 +56,19 @@ router.get('/:filename', (req, res) => {
 
 // Delete file from bucket
 router.delete('/:filename', (req, res) => {
-	//Forward to service api
-	axios.delete(serviceUrl + '/bucket/' + req.params.filename).then((response) => {
-		res.send(response.data);
-	}).catch((error) => {
-		if (error.response && error.response.data) {
-			// Forward the status code from the Axios error if available
-			res.status(error.response.status || 500).send(error.response.data);
-		} else {
-			// Handle cases where the error does not have a response part (like network errors)
-			res.status(500).send({ message: 'An error occurred during deletion.' });
-		}
-	});
+	deleteFileFromBucket(req.params.filename)
+		.then((response) => {
+			res.send(response.data);
+		})
+		.catch((error) => {
+			if (error.response && error.response.data) {
+				// Forward the status code from the Axios error if available
+				res.status(error.response.status || 500).send(error.response.data);
+			} else {
+				// Handle cases where the error does not have a response part (like network errors)
+				res.status(500).send({ message: 'An error occurred during deletion.' });
+			}
+		});
 });
 
 // Upload file to bucket

@@ -1,7 +1,12 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
 const multer = require('multer');
-const upload = multer();
+const dynamicUpload = multer({
+	storage: multer.memoryStorage(),
+	fileFilter: (req, file, cb) => {
+		cb(null, true);
+	}
+});
 
 // TODO: Update subscriber count to check actual value in DB
 
@@ -555,66 +560,108 @@ router.patch('/:id/updateStatus', async (req, res) => {
 });
 
 
-router.post('/create/new', upload.fields([
-	{ name: 'coverImg', maxCount: 1 },
-	{ name: 'sections[0].components[0].video', maxCount: 10 }
-]), async (req, res) => {
-	try {
-		console.dir('req body', req.body);
-		console.dir('req files', req.files);
+router.post('/create/new', 
+	dynamicUpload.any(), 
+	async (req, res) => {
+		try {
+			const { courseData } = req.body;
+			const parsedCourseData = JSON.parse(courseData);
+			const { courseInfo, sections = [], userId } = parsedCourseData;
 
-		const { courseData } = req.body;
-		const parsedCourseData = JSON.parse(courseData);
-		const { courseInfo, sections = [], userId } = parsedCourseData;
-		console.log('courseInfo:', courseInfo);
-		console.log('sections:', sections);
+			const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
+			assert(creatorProfile, errorCodes.E0013);
 
-		const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
-		assert(creatorProfile, errorCodes.E0013);
+			// Centralized file mapping
+			const fileMap = req.files.reduce((acc, file) => {
+				acc[file.fieldname] = file;
+				return acc;
+			}, {});
 
-		// Add the coverImg file to courseInfo
-		if (req.files['coverImg']) {
-			courseInfo.coverImg.file = req.files['coverImg'][0];
-		}
+			// Handle cover image
+			if (fileMap['coverImg']) {
+				courseInfo.coverImg = {
+					...courseInfo.coverImg,
+					file: fileMap['coverImg']
+				};
+			}
 
-		// Add video files to the respective components in sections
-		sections.forEach((section, sectionIndex) => {
-			section.components.forEach((component, componentIndex) => {
-				const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
-				if (req.files[videoKey]) {
-					component.video = { file: req.files[videoKey][0] };
-				}
+			// Handle section videos more dynamically
+			sections.forEach((section, sectionIndex) => {
+				section.components.forEach((component, componentIndex) => {
+					const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
+					if (fileMap[videoKey]) {
+						component.video = {
+							...component.video,
+							file: fileMap[videoKey]
+						};
+					}
+				});
 			});
-		});
+			console.log('courseInfo', courseInfo);
+			console.log('sections', sections);
+			const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
+			assert(newCourse, errorCodes.E1401);
 
-		const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
-		assert(newCourse, errorCodes.E1401);
+			res.status(201).send(newCourse);
 
-		res.status(201).send(newCourse);
-
-	} catch (e) {
-		console.error(e);
-		res.status(500).send(e.message);
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e.message);
+		}
 	}
-});
+);
 
-router.post('/update/:id', async(req, res) => {
-	const { id } = req.params;
-	
-	try {
-		const { updatedCourse } = req.body;
-		const { courseInfo, sections = [] } = updatedCourse;	
+router.post('/update/:id', 
+	dynamicUpload.any(), 
+	async (req, res) => {
+		const { id } = req.params;
 
-		const baseCourse = await CourseModel.findOne({ _id: id });
-		
-		const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
-		assert(updatedCourseModel, errorCodes.E1412);
-		
-		res.status(201).send(updatedCourseModel);
-	} catch (e) {
-		console.error(e.message);
-		res.status(500).send(e.message);
+		try {
+			const { courseData } = req.body;
+			const parsedUpdatedCourse = JSON.parse(courseData);
+			const { courseInfo, sections = [] } = parsedUpdatedCourse;
+
+			const baseCourse = await CourseModel.findOne({ _id: id });
+			assert(baseCourse, errorCodes.E1402);
+
+			// Centralized file mapping
+			const fileMap = req.files.reduce((acc, file) => {
+				acc[file.fieldname] = file;
+				return acc;
+			}, {});
+
+			// Handle cover image
+			if (fileMap['coverImg']) {
+				courseInfo.coverImg = {
+					...courseInfo.coverImg,
+					file: fileMap['coverImg']
+				};
+			}
+
+			// Handle section videos more dynamically
+			sections.forEach((section, sectionIndex) => {
+				section.components.forEach((component, componentIndex) => {
+					const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
+					if (fileMap[videoKey]) {
+						component.video = {
+							...component.video,
+							file: fileMap[videoKey]
+						};
+					}
+				});
+			});
+			console.log('courseInfo', courseInfo);
+			console.log('sections', sections);
+			const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
+			assert(updatedCourseModel, errorCodes.E1412);
+
+			res.status(201).send(updatedCourseModel);
+
+		} catch (e) {
+			console.error(e.message);
+			res.status(500).send(e.message);
+		}
 	}
-});
+);
 
 module.exports = router;
