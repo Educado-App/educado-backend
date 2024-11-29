@@ -507,21 +507,24 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 
 
 	// Get the section array from the course object
-	const sectionIds = course.sections;
+	if (course.sections) {
 
-	// Loop through all sections in course
-	sectionIds.map(async (section_id) => {
+		const sectionIds = course.sections;
 
-		// Get the section object from the id in sectionIds array
-		let section = await SectionModel.findById(section_id);
+		// Loop through all sections in course
+		sectionIds.map(async (section_id) => {
 
-		// Delete all lectures and excercises in the section
-		await LectureModel.deleteMany({ parentSection: section._id });
-		await ExerciseModel.deleteMany({ parentSection: section._id });
+			// Get the section object from the id in sectionIds array
+			let section = await SectionModel.findById(section_id);
 
-		// Delete the section
-		await SectionModel.findByIdAndDelete(section_id);
-	});
+			// Delete all lectures and excercises in the section
+			await LectureModel.deleteMany({ parentSection: section._id });
+			await ExerciseModel.deleteMany({ parentSection: section._id });
+
+			// Delete the section
+			await SectionModel.findByIdAndDelete(section_id);
+		});
+	}
 
 	// Delete the course
 	await CourseModel.findByIdAndDelete(id).catch((err) => res.status(204).send(err));
