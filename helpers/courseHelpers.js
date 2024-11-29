@@ -78,8 +78,6 @@ function createSectionObject(title, description, parentCourse) {
 function createCourseObject(courseInfo, creator) {
 	const { title, category, difficulty, description, coverImg, status } = courseInfo;
 
-	console.log('coverImgcreate:', coverImg);
-
 	const courseObject = new CourseModel({
 		title: title,
 		category: category,
@@ -195,8 +193,6 @@ function updateCourseObject(courseInfo) {
 	// const { title, category, difficulty, description, coverImg, status } = courseInfo;
 	const {title, category, difficulty, description, status, coverImg } = courseInfo;
 
-	console.log('CoverImgUpdate:', coverImg);
-
 	const update = {
 		title: title,
 		category: category,
@@ -305,7 +301,6 @@ async function updateAndSaveComponent(component){
 		componentInfo = await updateAndSaveExercise(component);
 	} else if (component.compType === 'lecture') {
 		componentInfo = await updateAndSaveLecture(component);
-		console.log('ComponentInfo:', component.video);
 		if (component.video) {
 			component.video.id = componentInfo.compId;
 			await handleMedia(component.video);
@@ -339,18 +334,15 @@ async function updateAndSaveAllComponents(components, oldSection) {
 
 	let componentsUpdate = [];
 
-	console.log('OldComponents:', oldComponents);
 	await Promise.all(components.map(async component => {
 		let componentObject;
 
 		if (oldComponents.some(oldComponent => oldComponent.compId.toString() === component.component._id.toString())) {
 			//update
-			console.log('UpdateComponent:', component);
 			componentObject = await updateAndSaveComponent(component, sectionId);
 			
 		} else{
 			//create
-			console.log('CreateComponent:', component);
 			componentObject = await createAndSaveComponent(component, sectionId);			
 		}
 		
