@@ -7,25 +7,25 @@ const { StudentModel } = require('../models/Students');
 
 /**
  * @function updateStudyStreak
- * @description Increment the study streak if the student studied yesterday, else reset it if the streak has been broken.
+ * @description Increments studyStreak and updates lastStudyDate if student also studied yesterday, 
+ * 				else soft resets it as the streak has been broken but a new is beginning now.
  * @param {ObjectId} id - The ID of the student.
- * @throws {CustomError} - Throws a custom error (errorCode 'E0019') if the update fails.
+ * @throws {CustomError} - Throws a custom error (errorCode 'E0807') if the update fails.
  */
 async function updateStudyStreak(id) {
 	try {
 		const { studyStreak, lastStudyDate } = await StudentModel.findById(id).select('studyStreak lastStudyDate');
 		const currentDate = new Date();
 		const dayDifference = differenceInDays(lastStudyDate, currentDate);
-
+		
 		if (dayDifference === 1)
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: studyStreak + 1, lastStudyDate: currentDate});
 		else if (dayDifference > 1)
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: 1, lastStudyDate: currentDate });
 	}
 	catch (error) {
-		console.error(error.message);	// TODO: suppress in unit test!
-		// TODO: update resources documents!
-		throw new CustomError(errorCodes.E0019); // 'Failed to update student study streak!'
+		console.error(error.message);
+		throw new CustomError(errorCodes.E0807); // 'Failed to update student study streak!'
 	}
 }
 
@@ -51,7 +51,7 @@ function differenceInDays(lastStudyDate, currentDate) {
 	return differenceInDays;
 }
 
-// Check if student is on a study streak, and if not, reset the streak (invoked when student logs in)
+// Check if student is on a study streak, and if not, hard reset the streak (invoked when student logs in)
 async function ensureStudyStreakConsistency(id, lastStudyDate) {
 	try {    
 		const currentDate = new Date();
@@ -62,8 +62,8 @@ async function ensureStudyStreakConsistency(id, lastStudyDate) {
 			await StudentModel.findByIdAndUpdate(id, { studyStreak: 0 });
 	}
 	catch (error) {
-		console.error('Failed to ensure study streak consistency!');	// TODO: suppress in unit test!
+		console.error('Failed to ensure study streak consistency!');
 	}
 }
 
-module.exports = { updateStudyStreak, ensureStudyStreakConsistency };
+module.exports = { updateStudyStreak, differenceInDays, ensureStudyStreakConsistency };

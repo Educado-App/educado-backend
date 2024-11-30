@@ -394,7 +394,6 @@ router.get('/leaderboard', async (req, res) => {
 	}
 });
 
-// TODO: update route documentation!
 // Update studyStreak
 router.patch('/:id/updateStudyStreak', async (req, res) => {
 	try {
@@ -407,7 +406,7 @@ router.patch('/:id/updateStudyStreak', async (req, res) => {
 		return res.status(200).json({ message: 'Student study streak updated!' });
 	} 
 	catch (error) {
-		console.error(error.message);		// TODO: suppress in tests
+		console.error(error.message);
 		switch(error.code) {
 		case 'E0014':
 			return res.status(400).send({ error: error.message }); // 'Invalid id'

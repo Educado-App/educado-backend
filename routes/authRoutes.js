@@ -70,9 +70,8 @@ router.post('/login', async (req, res) => {
 		} else {
 			profile = await StudentModel.findOne({baseUser: user._id});
 
-			// Ensure student is on a study streak, else reset the streak
-			// TODO: handle error thrown!
-			ensureStudyStreakConsistency(profile._id, profile.lastStudyDate);	// <- Here 'profile' is the student object
+			// Ensure student is on a study streak, else reset their streak
+			ensureStudyStreakConsistency(profile._id, profile.lastStudyDate);	// <- Notice: here 'profile' is the student object
 		}
 
 		// If the passwords match, return a success message

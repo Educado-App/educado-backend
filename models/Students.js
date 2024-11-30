@@ -22,7 +22,11 @@ const studentSchema = new Schema({
 	},
 	lastStudyDate: {
 		type: Date,
-		default: Date.now
+		default: () => {
+			const yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			return yesterday;
+		}
 	},
 	subscriptions: [{
 		type: Schema.Types.ObjectId,
