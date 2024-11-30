@@ -74,6 +74,10 @@ module.exports = {
 		code: 'E0017',
 		message: 'Service Unavailable'
 	},
+	E0018: {
+		code: 'E0018',
+		message: 'Failed to delete all account data from database!'
+	},
 
 	// E01 - Login errors
 	E0101: {
@@ -408,5 +412,4 @@ module.exports = {
 		code: 'E1307',
 		message: 'Could not find any feedback for this course'
 	},
-
 };

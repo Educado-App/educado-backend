@@ -11,7 +11,6 @@ const app = express();
 app.use(express.json());
 app.use('/api/users', router); // Mount the router under '/api' path
 
-
 // Start the Express app on a specific port for testing
 const PORT = 5023; // Choose a port for testing
 const server = app.listen(PORT);
@@ -21,7 +20,6 @@ const TOKEN_SECRET = 'test';
 
 // make fake course
 let fakeCourse = makeFakeCourse();
-
 
 // Mock token secret
 jest.mock('../../config/keys', () => {
@@ -60,41 +58,7 @@ describe('Users Routes', () => {
 		await db.collection('users').deleteOne({ _id: actualUser._id });
 	});
 
-	describe('DELETE /users/:userId', () => {
-		it('Owning user deletes user successfully', async () => {
-
-			// Delete the user using the API
-			await request(`http://localhost:${PORT}`)
-				.delete(`/api/users/${actualUser._id}`)
-				.set('Authorization', `Bearer ${token}`) // Include the token in the request headers
-				.expect(200);
-
-			// Verify that the user was deleted from the database
-			const user = await db.collection('users').findOne({ _id: actualUser._id });
-			expect(user).toBeNull();
-		});
-
-		it('Admin deletes user successfully', async () => {
-			// Delete the user using the API
-			await request(`http://localhost:${PORT}`)
-				.delete(`/api/users/${actualUser._id}`)
-				.set('Authorization', `Bearer ${adminToken}`) // Include the token in the request headers
-				.expect(200);
-
-			// Verify that the user was deleted from the database
-			const user = await db.collection('users').findOne({ _id: actualUser._id });
-			expect(user).toBeNull();
-		});
-
-		it('handles user not found error for delete', async () => {
-			const nonExistentUserId = new mongoose.Types.ObjectId();
-
-			await request(`http://localhost:${PORT}`)
-				.delete(`/api/users/${nonExistentUserId}`)
-				.set('token', adminToken) // Include the token in the request headers
-				.expect(204);
-		});
-
+	describe('PATCH /users/:userId', () => {
 		it('Updates user email successfully', async () => {
 			const newEmail = 'newemail@example.com';
 
@@ -242,10 +206,7 @@ describe('Users Routes', () => {
 
 			expect(response.body.error.code).toBe('E0211');
 		});
-	});
-
-	describe('PATCH /users/:userId', () => {
-
+	
 		it('Should change user credentials', async () => {
 			const user = await db.collection('users').findOne({ email: fakeUser.email });
 

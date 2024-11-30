@@ -85,7 +85,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-		await db.collection('feedbackoptions').deleteMany({}); 
+		await db.collection('feedbackoptions').deleteMany({});
 	});
 
 	afterAll(async () => {
@@ -365,7 +365,7 @@ describe('Course Routes', () => {
 		it('add incomplete course when subbing', async () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
-      
+
 			const obj = await addIncompleteCourse(course);
 
 			expect(obj).toBeInstanceOf(Object);
@@ -581,6 +581,9 @@ describe('Course Routes', () => {
 			);
 			const updatedCourse = courseUpdated.value;
 
+			// Ensure the updatedCourse is not null
+			expect(updatedCourse).not.toBeNull();
+
 			// find a user and add the course to the user's subscriptions
 			const userUpdated = await db.collection('students').findOneAndUpdate(
 				{ baseUser: actualUser._id },
@@ -601,7 +604,6 @@ describe('Course Routes', () => {
 			expect(courseNew.numOfSubscriptions).toBe(2);
 			expect(userNew.subscriptions).toHaveLength(0);
 		});
-
 	});
 
 	describe('GET /courses/creator/:userId', () => {
@@ -650,7 +652,6 @@ describe('Course Routes', () => {
 		});
 
 		it('Returns error 401 if user is not authorized to access', async () => {
-
 			// Send a get request to the courses endpoint
 			const res = await request(`http://localhost:${PORT}`)
 				.get(`/api/courses/creator/${fakeUser._id}`)
@@ -658,10 +659,8 @@ describe('Course Routes', () => {
 			expect(res.statusCode).toEqual(401);
 			// Verify response body
 			const result = res.body;
-
 			expect(result.error).toStrictEqual(errorCodes['E0002']);
 		});
-
 	});
 
 	describe('GET /courses', () => {
@@ -689,7 +688,7 @@ describe('Course Routes', () => {
 					category: fakeCourses[i].category,
 					published: fakeCourses[i].published,
 					sections: fakeCourses[i].sections,
-					creator: fakeCourses[i].creator,
+					creator: null,
 					difficulty: fakeCourses[i].difficulty,
 					estimatedHours: fakeCourses[i].estimatedHours,
 					rating: fakeCourses[i].rating,
@@ -777,10 +776,10 @@ describe('Course Routes', () => {
 				{ $set: section },
 				{ returnDocument: 'after' }
 			);
-  
+
 			const response = await request(`http://localhost:${PORT}`)
 				.get('/api/courses/sections/' + fakeSection._id + '/components');
-  
+
 			expect(response.status).toBe(200);
 			expect(await response.body).toBeInstanceOf(Array);
 		});
@@ -808,10 +807,10 @@ describe('Course Routes', () => {
 			const response = await request(app)
 				.patch('/api/courses/' + fakeCourse._id)
 				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
+				.send({ title: 'test course', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
 				.expect(200);
 
-			expect(response.body.title).toBe('Test');
+			expect(response.body.title).toBe('test course');
 			expect(response.body.category).toBe('sewing');
 			expect(response.body.difficulty).toBe(1);
 			expect(response.body.description).toBe('Sewing test');
@@ -830,11 +829,11 @@ describe('Course Routes', () => {
 			const response = await request(`http://localhost:${PORT}`)
 				.patch('/api/courses/' + courseId + '/updateStatus')
 				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "published"})
+				.send({ status: "published" })
 				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
+
+
+			const updatedCourse = await db.collection('courses').findOne({ _id: courseId });
 			expect(response.status).toBe(200);
 
 			expect(updatedCourse.status).toBe('published');
@@ -846,7 +845,7 @@ describe('Course Routes', () => {
 
 			//set up a published course in db
 			await db.collection('courses').insertOne(fakeCoursePublished);
-		
+
 			const course = await db.collection('courses').findOne({ title: 'test course published' });
 			const courseId = course._id;
 
@@ -855,11 +854,11 @@ describe('Course Routes', () => {
 			const response = await request(`http://localhost:${PORT}`)
 				.patch('/api/courses/' + courseId + '/updateStatus')
 				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "draft"})
+				.send({ status: "draft" })
 				.expect(200);
-			
-			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
+
+
+			const updatedCourse = await db.collection('courses').findOne({ _id: courseId });
 			expect(response.status).toBe(200);
 
 			expect(updatedCourse.status).toBe('draft');

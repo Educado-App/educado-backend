@@ -14,11 +14,12 @@ const UtilityRoutes = require('../routes/utilityRoutes');
 const StudentRoutes = require('../routes/studentRoutes');
 const ComponentRoutes = require('../routes/componentRoutes');
 const ProfileRoutes = require('../routes/profileRoutes');
+const AiRoutes = require('../routes/aiRoutes');
 const FeedbackRoutes = require('../routes/feedbackRoutes');
+const RatingRoutes = require('../routes/ratingRoutes');
 
 const UserInfoRoutes = require('../routes/userInfoRoutes');
 const InstituitionRoutes = require('./institutions/institutionsRoutes');
-const AiRoutes = require('../routes/aiRoutes');
 
 
 
@@ -45,6 +46,7 @@ router.use('/api/feedback', FeedbackRoutes);
 router.use('/api/ai', AiRoutes);
 router.use('/api/user-info', UserInfoRoutes);
 router.use('/api/institutions', InstituitionRoutes);
+router.use('/api/rating', RatingRoutes);
 
 // Test route
 router.use('/api/test', TestRoutes);

@@ -5,7 +5,7 @@ const errorCodes = require('../helpers/errorCodes');
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
 const { FeedbackModel } = require('../models/Feedback');
 
-const { saveFeedback } = require('../helpers/feedbackHelpers.js');
+const { saveFeedback, getAllFeedback, getFeedbackForCourse } = require('../helpers/feedbackHelpers.js');
 const { populate } = require('../helpers/populateFeedbackOptions');
 const mongoose = require('mongoose');
 
@@ -75,6 +75,25 @@ router.get('/:courseId', async (req, res) => {
 		res.status(200).send(feedbacks);
 	} catch (error) {
 		res.status(500).send('Internal Server Error:' + error);
+	}
+});
+
+router.get('/getAllFeedback', async (req, res) => {
+	try {
+		const feedback = await getAllFeedback();
+		res.json(feedback);
+	} catch (e) {
+		return res.status(400).json({ 'error': e.message });
+	}
+});
+
+router.get('/getFeedbackForCourse/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+	try {
+		const feedback = await getFeedbackForCourse(courseId);
+		res.json(feedback);
+	} catch (e) {
+		return res.status(400).json({ 'error': e.message });
 	}
 });
 
