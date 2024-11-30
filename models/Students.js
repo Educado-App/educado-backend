@@ -14,7 +14,7 @@ const studentSchema = new Schema({
 	},
 	level: {
 		type: Number,
-		default: 0
+		default: 1
 	},
 	studyStreak: {
 		type: Number,
