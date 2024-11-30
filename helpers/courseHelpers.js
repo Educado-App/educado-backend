@@ -143,8 +143,8 @@ async function createAndSaveComponent(component, parentSection){
 }
 
 
-//this creates an array of full object components
-//we only need to pass on compType and id
+// This creates an array of full object components
+// We only need to pass on compType and id
 async function createAndSaveAllComponents(components, parentSection) {
 	let componentsArray = [];
 
@@ -158,7 +158,7 @@ async function createAndSaveAllComponents(components, parentSection) {
 
 
 async function createAndSaveSection(section, parentCourse) {
-	const { title, description, components} = section;
+	const { title, description, components } = section;
 	
 	const sectionObject = createSectionObject(title, description, parentCourse);
 
@@ -190,7 +190,6 @@ async function createAndSaveCourse(courseInfo, sections = [], creator) {
 
 
 function updateCourseObject(courseInfo) {
-	// const { title, category, difficulty, description, coverImg, status } = courseInfo;
 	const {title, category, difficulty, description, status, coverImg } = courseInfo;
 
 	const update = {
@@ -280,7 +279,7 @@ async function deleteComponent(component) {
 async function deleteRemovedComponents(componentsUpdate, oldComponents){
 	try {
 		await Promise.all(oldComponents.map(async component => {
-			//if id was in old course, but not in update
+			// If id was in old course, but not in update
 			const isRemoved = !componentsUpdate.some(componentsUpdate => componentsUpdate.compId.toString() === component.compId.toString());
 			if (isRemoved) {
 				if (component.video) {
@@ -338,11 +337,11 @@ async function updateAndSaveAllComponents(components, oldSection) {
 		let componentObject;
 
 		if (oldComponents.some(oldComponent => oldComponent.compId.toString() === component.component._id.toString())) {
-			//update
+			// Update
 			componentObject = await updateAndSaveComponent(component, sectionId);
 			
 		} else{
-			//create
+			// Create
 			componentObject = await createAndSaveComponent(component, sectionId);			
 		}
 		
@@ -381,9 +380,9 @@ async function updateAndSaveAllSections(sections, oldSections, courseId) {
 		let sectionObject;
 	
 		if (oldSections.includes(section._id)) {
-			//update
-			const oldSection = await SectionModel.findOne({_id: sectionId});
-			assert(oldSection, errorCodes.E0000); //TODO
+			// Update
+			const oldSection = await SectionModel.findOne({ _id: sectionId });
+			assert(oldSection, errorCodes.E1413);
 
 			sectionObject = await updateAndSaveSection(section, oldSection);
 		} else {

@@ -458,4 +458,8 @@ module.exports = {
 		code: 'E1412',
 		message: 'Could not update course'
 	},
+	E1413: {
+		code: 'E1413',
+		message: 'Could not find section in database'
+	},
 };

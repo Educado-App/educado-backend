@@ -3,7 +3,7 @@ const multer = require('multer');
 const axios = require('axios');
 const { PassThrough } = require('stream');
 const Buffer = require('buffer').Buffer;
-const {uploadFileToBucket, deleteFileFromBucket} = require('../helpers/bucketUtils');
+const { uploadFileToBucket, deleteFileFromBucket } = require('../helpers/bucketUtils');
 
 //Get serviceUrl from environment variable
 
@@ -16,7 +16,7 @@ const upload = multer({ storage: storage });
 
 // Get list of all files in bucket
 router.get('/', (req, res) => {
-	//Forward to service api
+	// Forward to service api
 	axios.get(serviceUrl + '/bucket/').then((response) => {
 		res.send(response.data);
 	}).catch((error) => {
@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
 
 // Get file from bucket
 router.get('/:filename', (req, res) => {
-	//Forward to service api
+	// Forward to service api
 	axios.get(serviceUrl + '/bucket/' + req.params.filename, {
 		responseType: 'arraybuffer'  // Ensure binary data handling
 	}).then((response) => {

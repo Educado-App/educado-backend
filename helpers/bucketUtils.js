@@ -4,7 +4,7 @@ const process = require('process');
 
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
 
-//also works as an update function since the service will overwrite the file if it already exists
+// Also works as an update function since the service will overwrite the file if it already exists
 const uploadFileToBucket = async (file, fileName) => {
 	const form = new FormData();
 
