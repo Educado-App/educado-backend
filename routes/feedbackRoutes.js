@@ -27,10 +27,10 @@ router.post('/:courseId', async (req, res) => {
 	} catch (e) {
 		//handle what http request to return based on error code
 		switch (e.code) {
-			case 'E006':
-				return res.status(404).json({ 'error': e.message });
-			default:
-				return res.status(400).json({ 'error': e.message });
+		case 'E006':
+			return res.status(404).json({ 'error': e.message });
+		default:
+			return res.status(400).json({ 'error': e.message });
 		}
 	}
 });
