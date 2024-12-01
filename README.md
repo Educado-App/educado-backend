@@ -43,6 +43,7 @@ Below is a short guide explaining how to set up and run the educado backend in d
 7. GOOGLE_APPLICATION_CREDENTIALS
 8. GMAIL_USER
 9. GMAIL_APP_PASSWORD
+10. TRANSCODER_SERVICE_URL
 
 ### The gcp_service.json file should contain the following fields:
 
