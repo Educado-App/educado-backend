@@ -1,6 +1,6 @@
 module.exports = {
 
-  
+
 	// E00 - General errors
 	E0000: {
 		code: 'E0000',
@@ -194,7 +194,7 @@ module.exports = {
 		code: 'E0406',
 		message: 'Too many requests. Please try again later.'
 	},
-  
+
 	// E05 - Verification errors
 	E0501: {
 		code: 'E0501',
@@ -334,7 +334,7 @@ module.exports = {
 		code: 'E1101',
 		message: 'The component array has reached its maximum size'
 	},
-  
+
 	E1102: {
 		code: 'E1102',
 		message: 'The component array reached its maximum number of lectures'
@@ -356,7 +356,7 @@ module.exports = {
 		code: 'E1106',
 		message: 'Lecture not found'
 	},
-  
+
 	// E12 - Institutinal Onboarding Errors
 	E1201: {
 		code: 'E1201',
@@ -382,7 +382,7 @@ module.exports = {
 		code: 'E1206',
 		message: 'Institution not found'
 	},
-  
+
 	// E13 - Feedback Errors
 	E1301: {
 		code: 'E1301',
@@ -408,7 +408,10 @@ module.exports = {
 		code: 'E1306',
 		message: 'Rating must be between 1 and 5'
 	},
-
+	E1307: {
+		code: 'E1307',
+		message: 'Could not find any feedback for this course'
+	},
 	//course creation errors
 	E1401: {
 		code: 'E1401',
