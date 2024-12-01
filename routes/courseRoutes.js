@@ -1,5 +1,12 @@
 const router = require('express').Router();
 const errorCodes = require('../helpers/errorCodes');
+const multer = require('multer');
+const dynamicUpload = multer({
+	storage: multer.memoryStorage(),
+	fileFilter: (req, file, cb) => {
+		cb(null, true);
+	}
+});
 
 // TODO: Update subscriber count to check actual value in DB
 
@@ -16,6 +23,9 @@ const { StudentModel } = require('../models/Students');
 
 // This one is deprecated, but it is used on mobile so we can't delete it yet
 const { OldLectureModel } = require('../models/Lecture');
+
+const { createAndSaveCourse, updateAndSaveCourse } = require('../helpers/courseHelpers');
+const { assert } = require('../helpers/error');
 
 const COMP_TYPES = {
 	LECTURE: 'lecture',
@@ -208,7 +218,6 @@ router.get('/:courseId/sections/:sectionId', async (req, res) => {
 		return res.status(500).json({ 'error': errorCodes['E0003'] });
 	}
 });
-
 /**
  * This route is deprecated, but it might be used on mobile so we can't delete it yet
  * instead of the old lecture model, we should use the new one
@@ -374,117 +383,110 @@ router.get('/:section_id/exercises', async (req, res) => {
 	res.send(list);
 });
 
-/*** CREATE COURSE ROUTES ***/
+// /*** CREATE COURSE ROUTES ***/
 
-//Create course route
-router.put('/', async (req, res) => {
-	const { title, category, difficulty, description, creator, status, estimatedHours } = req.body;
 
-	const creatorProfile = await ContentCreatorModel.findOne({ baseUser: creator });
 
-	if (!creatorProfile) {
-		return res.status(400).send({ error: errorCodes['E0004'] }); // If user does not exist, return error
-	}
+router.put('/create/new', 
+	dynamicUpload.any(), 
+	async (req, res) => {
+		try {
+			const { courseData } = req.body;
+			const parsedCourseData = JSON.parse(courseData);
+			const { courseInfo, sections = [], userId } = parsedCourseData;
 
-	const id = creatorProfile._id;
+			const creatorProfile = await ContentCreatorModel.findOne({ baseUser: userId });
+			assert(creatorProfile, errorCodes.E0013);
 
-	const course = new CourseModel({
-		title: title,
-		category: category,
-		difficulty: difficulty,
-		description: description,
-		//temporarily commented out as login has not been fully implemented yet
-		//_user: req.user.id,
-		creator: id,
-		published: false,
-		dateCreated: Date.now(),
-		dateUpdated: Date.now(),
-		sections: [],
-		status: status,
-		estimatedHours: estimatedHours,
-		rating: 0,
-	});
+			// Centralized file mapping
+			const fileMap = req.files.reduce((acc, file) => {
+				acc[file.fieldname] = file;
+				return acc;
+			}, {});
 
-	try {
-		const result = await course.save({ new: true })
-			//As id is generated at save, we need to .then() and then save
-			.then(savedCourse => {
-				const generatedId = savedCourse._id;
-				savedCourse.coverImg = generatedId + '_c';
+			// Handle cover image
+			if (fileMap['coverImg']) {
+				courseInfo.coverImg = {
+					...courseInfo.coverImg,
+					file: fileMap['coverImg']
+				};
+			}
 
-				return savedCourse.save();
+			// Handle section videos more dynamically
+			sections.forEach((section, sectionIndex) => {
+				section.components.forEach((component, componentIndex) => {
+					const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
+					if (fileMap[videoKey]) {
+						component.video = {
+							...component.video,
+							file: fileMap[videoKey]
+						};
+					}
+				});
 			});
-		return res.status(201).send(result);
-	} catch (err) {
-		return res.status(400).send(err);
-	}
-});
+			const newCourse = await createAndSaveCourse(courseInfo, sections, creatorProfile);
+			assert(newCourse, errorCodes.E1401);
 
-// Update Course
-router.patch('/:id', /*requireLogin,*/ async (req, res) => {
-	const course = req.body;
-	const { id } = req.params;
+			res.status(201).send(newCourse);
 
-	const dbCourse = await CourseModel.findByIdAndUpdate(
-		id,
-		{
-			title: course.title,
-			description: course.description,
-			category: course.category,
-			difficulty: course.difficulty,
-			estimatedHours: course.estimatedHours,
-			published: course.published,
-			status: course.status,
-			dateUpdated: Date.now(),
-			coverImg: course.coverImg
-		},
-		function (err) {
-			if (err) {
-				return res.status(400).send(err);
-			}
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e.message);
 		}
-	);
-	return res.status(200).send(dbCourse);
-});
-// Update section order of a course 
-router.patch('/:id/sections', async (req, res) => {
-	try {
+	}
+);
+
+router.post('/update/:id', 
+	dynamicUpload.any(), 
+	async (req, res) => {
 		const { id } = req.params;
-		const { sections } = req.body;
 
-		// Validate course ID
-		if (!mongoose.Types.ObjectId.isValid(id)) {
-			return res.status(400).send({ error: errorCodes['E0014'], msg: 'Invalid courseID' + id }); // If id is not valid, return error
-		}
+		try {
+			const { courseData } = req.body;
+			const parsedUpdatedCourse = JSON.parse(courseData);
+			const { courseInfo, sections = [] } = parsedUpdatedCourse;
 
-		// Validate section IDs
-		for (const sectionId of sections) {
-			if (!mongoose.Types.ObjectId.isValid(sectionId)) {
-				return res.status(400).send({ error: errorCodes['E0014'], msg: 'invalid sectionID' + sectionId }); // If section id is not valid, return error
+			const baseCourse = await CourseModel.findOne({ _id: id });
+			assert(baseCourse, errorCodes.E1402);
+
+			// Centralized file mapping
+			const fileMap = req.files.reduce((acc, file) => {
+				acc[file.fieldname] = file;
+				return acc;
+			}, {});
+
+			// Handle cover image
+			if (fileMap['coverImg']) {
+				courseInfo.coverImg = {
+					...courseInfo.coverImg,
+					file: fileMap['coverImg']
+				};
 			}
+
+			// Handle section videos more dynamically
+			sections.forEach((section, sectionIndex) => {
+				section.components.forEach((component, componentIndex) => {
+					const videoKey = `sections[${sectionIndex}].components[${componentIndex}].video`;
+					if (fileMap[videoKey]) {
+						component.video = {
+							...component.video,
+							file: fileMap[videoKey]
+						};
+					}
+				});
+			});
+			const updatedCourseModel = await updateAndSaveCourse(courseInfo, sections, baseCourse);
+			assert(updatedCourseModel, errorCodes.E1412);
+
+			res.status(201).send(updatedCourseModel);
+
+		} catch (e) {
+			console.error(e.message);
+			res.status(500).send(e.message);
 		}
-
-		// Find the course
-		const course = await CourseModel.findById(id);
-
-		// Check if course exists
-		if (!course) {
-			return res.status(404).json({ error: errorCodes['E0006'] }); // If course not found, return error
-		}
-
-		// Update the sections order
-		course.sections = sections;
-
-		// Save the updated course
-		await course.save();
-
-		// Send response
-		return res.status(200).send(course);
-
-	} catch (error) {
-		return res.status(500).json({ error: errorCodes['E0003'] });
 	}
-});
+);
+
 
 /**
  * Delete course by id
@@ -529,27 +531,6 @@ router.delete('/:id'/*, requireLogin*/, async (req, res) => {
 	return res.status(200).send('Course Deleted');
 
 });
-
-
-// Update course published status 
-// Status is enum: "published", "draft", "hidden"
-router.patch('/:id/updateStatus', async (req, res) => {
-	const { status } = req.body;
-	const { id } = req.params;
-
-	// find object in database and update title to new value
-	(
-		await CourseModel.findOneAndUpdate(
-			{ _id: id },
-			{ status: status }
-		)
-	).save;
-	const course = await CourseModel.findById(id);
-
-	// Send response
-	res.send(course);
-});
-
 
 
 module.exports = router;

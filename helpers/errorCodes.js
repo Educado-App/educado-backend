@@ -416,4 +416,57 @@ module.exports = {
 		code: 'E1307',
 		message: 'Could not find any feedback for this course'
 	},
+	//course creation errors
+	E1401: {
+		code: 'E1401',
+		message: 'Could not save course'
+	},
+	E1402: {
+		code: 'E1402',
+		message: 'Could not save sections'
+	},
+	E1403: {
+		code: 'E1403',
+		message: 'Could not save components'
+	},
+	E1404: {
+		code: 'E1404',
+		message: 'Could not save lecture'
+	},
+	E1405: {
+		code: 'E1405',
+		message: 'Could not save exercise'
+	},
+	E1406: {
+		code: 'E1406',
+		message: 'Could not save media'
+	},
+	E1407: {
+		code: 'E1407',
+		message: 'Could not delete sections'
+	},
+	E1408: {
+		code: 'E1408',
+		message: 'Could not delete components'
+	},
+	E1409: {
+		code: 'E1409',
+		message: 'Could not update exercise'
+	},
+	E1410: {
+		code: 'E1410',
+		message: 'Could not update lecture'
+	},
+	E1411: {
+		code: 'E1411',
+		message: 'Could not update section'
+	},
+	E1412: {
+		code: 'E1412',
+		message: 'Could not update course'
+	},
+	E1413: {
+		code: 'E1413',
+		message: 'Could not find section in database'
+	},
 };
