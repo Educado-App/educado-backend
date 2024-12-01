@@ -100,6 +100,7 @@ const topFeedbackOptionForCourses = async (courses) => {
 router.get('/', async (req, res) => {
 	try {
 		// Find all courses in the database and convert to plain objects
+
 		const courses = await CourseModel.find().lean().populate({
 			path: 'creator',
 			populate: {
