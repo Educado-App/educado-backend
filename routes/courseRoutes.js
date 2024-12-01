@@ -100,7 +100,7 @@ const topFeedbackOptionForCourses = async (courses) => {
 router.get('/', async (req, res) => {
 	try {
 		// Find all courses in the database and convert to plain objects
-		const courses = await CourseModel.find().lean().populate({ 
+		const courses = await CourseModel.find().lean().populate({
 			path: 'creator',
 			populate: {
 				path: 'baseUser',
@@ -127,7 +127,7 @@ router.get('/:id', async (req, res) => {
 		}
 
 		// find a course based on it's id
-		const course = await CourseModel.findById(id).lean().populate({ 
+		const course = await CourseModel.findById(id).lean().populate({
 			path: 'creator',
 			populate: {
 				path: 'baseUser',
@@ -385,10 +385,36 @@ router.get('/:section_id/exercises', async (req, res) => {
 
 // /*** CREATE COURSE ROUTES ***/
 
+router.patch('/:id', requireLogin, async (req, res) => {
+	const course = req.body;
+	const { id } = req.params;
+
+	const dbCourse = await CourseModel.findByIdAndUpdate(
+		id,
+		{
+			title: course.title,
+			description: course.description,
+			category: course.category,
+			difficulty: course.difficulty,
+			estimatedHours: course.estimatedHours,
+			published: course.published,
+			status: course.status,
+			dateUpdated: Date.now()
+		},
+		function (err) {
+			if (err) {
+				return res.status(400).send(err);
+			}
+		}
+	);
+	return res.status(200).send(dbCourse);
+});
 
 
-router.put('/create/new', 
-	dynamicUpload.any(), 
+
+router.put('/create/new',
+	requireLogin,
+	dynamicUpload.any(),
 	async (req, res) => {
 		try {
 			const { courseData } = req.body;
@@ -436,8 +462,9 @@ router.put('/create/new',
 	}
 );
 
-router.post('/update/:id', 
-	dynamicUpload.any(), 
+router.post('/update/:id',
+	requireLogin,
+	dynamicUpload.any(),
 	async (req, res) => {
 		const { id } = req.params;
 
