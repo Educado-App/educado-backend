@@ -13,6 +13,8 @@ const process = require('process');
 const { getLeaderboard } = require('../helpers/leaderboard');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const { updateStudyStreak } = require('../helpers/studentHelper');
+const { assert } = require('../helpers/error');
 
 
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
@@ -396,6 +398,30 @@ router.post('/leaderboard', requireLogin, async (req, res) => {
 		res.status(200).json({ leaderboard, currentUserRank });
 	} catch (error) {
 		res.status(500).json({ error: errorCodes['E0003'], message: error.message });
+	}
+});
+
+// Update studyStreak
+router.patch('/:id/updateStudyStreak', async (req, res) => {
+	try {
+		// Ensure passed in id is valid
+		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		const studentId = mongoose.Types.ObjectId(req.params.id);	
+
+		await updateStudyStreak(studentId);
+
+		return res.status(200).json({ message: 'Student study streak updated!' });
+	} 
+	catch (error) {
+		console.error(error.message);
+		switch(error.code) {
+		case 'E0014':
+			return res.status(400).send({ error: error.message }); // 'Invalid id'
+		case 'E0019':
+			return res.status(500).send({ error: error.message }); //'Failed to update student study streak!'
+		default:
+			return res.status(500).json({ error: errorCodes['E0003'].message }); // 'Server could not be reached'
+		}
 	}
 });
 

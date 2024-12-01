@@ -278,6 +278,10 @@ module.exports = {
 		code: 'E0806',
 		message: 'Old password is incorrect.'
 	},
+	E0807: {
+		code: 'E0807',
+		message: 'Failed to update student study streak!'
+	},
 
 	// E09 - Answer Exercises Errors
 	E0901: {

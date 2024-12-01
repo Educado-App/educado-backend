@@ -14,6 +14,7 @@ const { PasswordResetToken } = require('../models/PasswordResetToken');
 const { EmailVerificationToken } = require('../models/EmailVerificationToken');
 const { validateEmail, validateName, validatePassword } = require('../helpers/validation');
 const { sendVerificationEmail } = require('../helpers/email');
+const { ensureStudyStreakConsistency } = require('../helpers/studentHelper');
 
 const bcrypt = require('bcrypt');
 // Utility function to encrypt the token or password
@@ -68,9 +69,10 @@ router.post('/login', async (req, res) => {
 
 		} else {
 			profile = await StudentModel.findOne({baseUser: user._id});
+
+			// Ensure student is on a study streak, else reset their streak
+			ensureStudyStreakConsistency(profile._id, profile.lastStudyDate);	// <- Notice: here 'profile' is the student object
 		}
-
-
 
 		// If the passwords match, return a success message
 		if (result) {

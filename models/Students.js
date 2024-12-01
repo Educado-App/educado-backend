@@ -16,6 +16,18 @@ const studentSchema = new Schema({
 		type: Number,
 		default: 1
 	},
+	studyStreak: {
+		type: Number,
+		default: 0
+	},
+	lastStudyDate: {
+		type: Date,
+		default: () => {
+			const yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			return yesterday;
+		}
+	},
 	subscriptions: [{
 		type: Schema.Types.ObjectId,
 		ref: 'Courses'
