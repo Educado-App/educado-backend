@@ -38,6 +38,7 @@ router.get('/', async (req, res) => {
 	}
 });
 
+
 //  Route for getting specific content creator
 router.get('/:id', async (req, res) => {
 	try {

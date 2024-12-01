@@ -1,6 +1,6 @@
 module.exports = {
 
-  
+
 	// E00 - General errors
 	E0000: {
 		code: 'E0000',
@@ -194,7 +194,7 @@ module.exports = {
 		code: 'E0406',
 		message: 'Too many requests. Please try again later.'
 	},
-  
+
 	// E05 - Verification errors
 	E0501: {
 		code: 'E0501',
@@ -278,6 +278,10 @@ module.exports = {
 		code: 'E0806',
 		message: 'Old password is incorrect.'
 	},
+	E0807: {
+		code: 'E0807',
+		message: 'Failed to update student study streak!'
+	},
 
 	// E09 - Answer Exercises Errors
 	E0901: {
@@ -334,7 +338,7 @@ module.exports = {
 		code: 'E1101',
 		message: 'The component array has reached its maximum size'
 	},
-  
+
 	E1102: {
 		code: 'E1102',
 		message: 'The component array reached its maximum number of lectures'
@@ -356,7 +360,7 @@ module.exports = {
 		code: 'E1106',
 		message: 'Lecture not found'
 	},
-  
+
 	// E12 - Institutinal Onboarding Errors
 	E1201: {
 		code: 'E1201',
@@ -382,7 +386,7 @@ module.exports = {
 		code: 'E1206',
 		message: 'Institution not found'
 	},
-  
+
 	// E13 - Feedback Errors
 	E1301: {
 		code: 'E1301',
@@ -408,5 +412,61 @@ module.exports = {
 		code: 'E1306',
 		message: 'Rating must be between 1 and 5'
 	},
-
+	E1307: {
+		code: 'E1307',
+		message: 'Could not find any feedback for this course'
+	},
+	//course creation errors
+	E1401: {
+		code: 'E1401',
+		message: 'Could not save course'
+	},
+	E1402: {
+		code: 'E1402',
+		message: 'Could not save sections'
+	},
+	E1403: {
+		code: 'E1403',
+		message: 'Could not save components'
+	},
+	E1404: {
+		code: 'E1404',
+		message: 'Could not save lecture'
+	},
+	E1405: {
+		code: 'E1405',
+		message: 'Could not save exercise'
+	},
+	E1406: {
+		code: 'E1406',
+		message: 'Could not save media'
+	},
+	E1407: {
+		code: 'E1407',
+		message: 'Could not delete sections'
+	},
+	E1408: {
+		code: 'E1408',
+		message: 'Could not delete components'
+	},
+	E1409: {
+		code: 'E1409',
+		message: 'Could not update exercise'
+	},
+	E1410: {
+		code: 'E1410',
+		message: 'Could not update lecture'
+	},
+	E1411: {
+		code: 'E1411',
+		message: 'Could not update section'
+	},
+	E1412: {
+		code: 'E1412',
+		message: 'Could not update course'
+	},
+	E1413: {
+		code: 'E1413',
+		message: 'Could not find section in database'
+	},
 };

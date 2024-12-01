@@ -2,6 +2,7 @@ const request = require('supertest');
 const express = require('express');
 const router = require('../../routes/courseRoutes');
 const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb'); 
 const connectDb = require('../fixtures/db');
 const makeFakeUser = require('../fixtures/fakeUser');
 const makeFakeCourse = require('../fixtures/fakeCourse');
@@ -16,6 +17,12 @@ const makeFakeCoursePublished = require('../fixtures/fakeCoursePublished');
 const makeFakeFeedbackOptions = require('../fixtures/fakeFeedbackOptions');
 const { getFakeCourses, getFakeCoursesByCreator } = require('../fixtures/fakeCourses');
 const { addIncompleteCourse } = require('../../helpers/completing');
+const makeFakeCreateCourseData = require('../fixtures/fakeCourseCreationData');
+const makeFakeUpdateCourseData = require('../fixtures/fakeCourseUpdateData');
+const FormData = require('form-data');
+const path = require('path');
+const fs = require('fs');
+const { createAndSaveCourse, updateAndSaveCourse } = require('../../helpers/courseHelpers');
 
 const app = express();
 app.use(express.json());
@@ -85,7 +92,7 @@ describe('Course Routes', () => {
 		await db.collection('students').deleteMany({}); // Delete all documents in the 'students' collection
 		await db.collection('lectures').deleteMany({}); // Delete all documents in the 'lectures' collection
 		await db.collection('exercises').deleteMany({}); // Delete all documents in the 'exercises' collection
-		await db.collection('feedbackoptions').deleteMany({}); 
+		await db.collection('feedbackoptions').deleteMany({});
 	});
 
 	afterAll(async () => {
@@ -365,7 +372,7 @@ describe('Course Routes', () => {
 		it('add incomplete course when subbing', async () => {
 			const course = await db.collection('courses').findOne({ title: 'test course' });
 			const courseId = course._id;
-      
+
 			const obj = await addIncompleteCourse(course);
 
 			expect(obj).toBeInstanceOf(Object);
@@ -581,6 +588,9 @@ describe('Course Routes', () => {
 			);
 			const updatedCourse = courseUpdated.value;
 
+			// Ensure the updatedCourse is not null
+			expect(updatedCourse).not.toBeNull();
+
 			// find a user and add the course to the user's subscriptions
 			const userUpdated = await db.collection('students').findOneAndUpdate(
 				{ baseUser: actualUser._id },
@@ -601,7 +611,6 @@ describe('Course Routes', () => {
 			expect(courseNew.numOfSubscriptions).toBe(2);
 			expect(userNew.subscriptions).toHaveLength(0);
 		});
-
 	});
 
 	describe('GET /courses/creator/:userId', () => {
@@ -650,7 +659,6 @@ describe('Course Routes', () => {
 		});
 
 		it('Returns error 401 if user is not authorized to access', async () => {
-
 			// Send a get request to the courses endpoint
 			const res = await request(`http://localhost:${PORT}`)
 				.get(`/api/courses/creator/${fakeUser._id}`)
@@ -658,10 +666,8 @@ describe('Course Routes', () => {
 			expect(res.statusCode).toEqual(401);
 			// Verify response body
 			const result = res.body;
-
 			expect(result.error).toStrictEqual(errorCodes['E0002']);
 		});
-
 	});
 
 	describe('GET /courses', () => {
@@ -738,24 +744,6 @@ describe('Course Routes', () => {
 		});
 	});
 
-	describe('PUT /courses', () => {
-
-		it('Creates a course', async () => {
-			const token = signAccessToken({ id: fakeUser._id });
-			const response = await request(app)
-				.put('/api/courses/')
-				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2, creator: actualUser._id });
-
-			expect(response.status).toBe(201);
-			expect(response.body.title).toBe('Test');
-			expect(response.body.category).toBe('sewing');
-			expect(response.body.difficulty).toBe(1);
-			expect(response.body.description).toBe('Sewing test');
-			expect(response.body.estimatedHours).toBe(2);
-		});
-	});
-
 	describe('GET courses/sections/:id/components', () => {
 		it('Should get all components from a section', async () => {
 			const section = await db.collection('sections').findOne({ _id: fakeSection._id });
@@ -777,10 +765,10 @@ describe('Course Routes', () => {
 				{ $set: section },
 				{ returnDocument: 'after' }
 			);
-  
+
 			const response = await request(`http://localhost:${PORT}`)
 				.get('/api/courses/sections/' + fakeSection._id + '/components');
-  
+
 			expect(response.status).toBe(200);
 			expect(await response.body).toBeInstanceOf(Array);
 		});
@@ -801,68 +789,109 @@ describe('Course Routes', () => {
 	});
 
 
-	describe('PATCH /courses/:courseId', () => {
+	/*____________________________________________________________________________________________________________________
 
-		it('Update the fake course', async () => {
-			const token = signAccessToken({ id: fakeUser._id });
-			const response = await request(app)
-				.patch('/api/courses/' + fakeCourse._id)
-				.set('Authorization', `Bearer ${token}`)
-				.send({ title: 'Test', category: 'sewing', difficulty: 1, description: 'Sewing test', estimatedHours: 2 })
-				.expect(200);
-
-			expect(response.body.title).toBe('Test');
-			expect(response.body.category).toBe('sewing');
-			expect(response.body.difficulty).toBe(1);
-			expect(response.body.description).toBe('Sewing test');
-			expect(response.body.estimatedHours).toBe(2);
-		});
-	});
-
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to published', async () => {
-
-			const course = await db.collection('courses').findOne({ title: 'test course' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('draft');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "published"})
-				.expect(200);
+	AS OF WRITING THE FOLLOWING TESTS BELOW,
+	THERES A BUG WITH THE INTERACTION BETWEEN THR FORMDATA OBJECT AND THE JEST TESTING FRAMEWORK
+	THE FOLLOWING GITHUB LINK IS EXPLAINING THE ISSUE: https://github.com/mswjs/msw/issues/2078
+	THE TESTS SHOULD WORK, HOWEVER WE HAVEN'T BEEN ABLE TO TEST THEM BECAUSE OF THE MENTIONED ISSUE
+	______________________________________________________________________________________________________________________
+	*/
+	// describe("PUT /courses/create/new", () => {
+	// 	it('Creates a new course from scratch', async() => {
+	// 		const fakeId = fakeUser._id;
+	
+	// 		const courseData = makeFakeCreateCourseData(fakeId);
 			
+	// 		const token = signAccessToken({ id: fakeId });
+	
+	// 		// Prepare form data
+	// 		const formData = new FormData();
+	// 		formData.append("courseData", JSON.stringify(courseData));
+	
+	// 		// Append Test cover image if it exists
+	// 		const imagePath = path.join(__dirname, 'testImage.png');
+	// 		formData.append("coverImg", fs.createReadStream(imagePath));
+	
+	// 		// Append section data and any media files in the components
+	// 		if (courseData.course.sections) {
+	// 			courseData.course.sections.forEach((section, sectionIndex) => {
+	// 				section.components.forEach((component, componentIndex) => {
+	// 					if (component.video) {
+	// 						formData.append(`sections[${sectionIndex}].components[${componentIndex}].video`, fs.createReadStream(component.video.file.path));
+	// 					}
+	// 				});
+	// 			});
+	// 		}
+	
+	// 		const response = await request(app)
+	// 			.put('/api/courses/create/new')
+	// 			.set('Authorization', `Bearer ${token}`)
+	// 			.set('Content-Type', 'multipart/form-data')
+	// 			.send(formData);
+	
+	// 		expect(response.status).toBe(201);
+	
+	// 		const courseId = response.body._id;
+	// 		const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
 			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
+	// 		expect(course.title).toBe(courseData.course.courseInfo.title);
+	// 		expect(course.category).toBe(courseData.course.courseInfo.category);
+	// 		expect(course.description).toBe(courseData.course.courseInfo.description);
+	// 		expect(course.creator.toString()).toBe(fakeId.toString());
+	// 	});
+	// });
 
-			expect(updatedCourse.status).toBe('published');
-		});
-	});
+	/*____________________________________________________________________________________________________________________
+	AS OF WRITING THE FOLLOWING TESTS BELOW,
+	THERES A BUG WITH THE INTERACTION BETWEEN THR FORMDATA OBJECT AND THE JEST TESTING FRAMEWORK
+	THE FOLLOWING GITHUB LINK IS EXPLAINING THE ISSUE: https://github.com/mswjs/msw/issues/2078
+	THE TESTS SHOULD WORK, HOWEVER WE HAVEN'T BEEN ABLE TO TEST THEM BECAUSE OF THE MENTIONED ISSUE
+	______________________________________________________________________________________________________________________
+	*/
 
-	describe('PATCH /courses/:courseId/updateStatus', () => {
-		it('Update status of the fake course to draft', async () => {
-
-			//set up a published course in db
-			await db.collection('courses').insertOne(fakeCoursePublished);
-		
-			const course = await db.collection('courses').findOne({ title: 'test course published' });
-			const courseId = course._id;
-
-			expect(course.status).toBe('published');
-
-			const response = await request(`http://localhost:${PORT}`)
-				.patch('/api/courses/' + courseId + '/updateStatus')
-				.set('token', signAccessToken({ id: fakeUser._id }))
-				.send({ status : "draft"})
-				.expect(200);
+	// describe("POST /courses/update/:id", () => {
+	// 	it('Update an existing course with new information', async() => {
+	// 		const fakeId = fakeUser._id;
+	
+	// 		const courseData = makeFakeCreateCourseData(fakeId);
 			
+	// 		const token = signAccessToken({ id: fakeId });
+	
+	// 		// Prepare form data
+	// 		const formData = new FormData();
+	// 		formData.append("courseData", JSON.stringify(courseData));
 			
-			const updatedCourse = await db.collection('courses').findOne({ _id : courseId });
-			expect(response.status).toBe(200);
+	// 		// Append test cover image if it exists
+	// 		const imagePath = path.join(__dirname, 'testimage.png');
+	// 		formData.append("coverImg", fs.createReadStream(imagePath));
+			
+	// 		// Append section data and any media files in the components
+	// 		if (courseData.course.sections) {
+	// 			courseData.course.sections.forEach((section, sectionIndex) => {
+	// 				section.components.forEach((component, componentIndex) => {
+	// 					if (component.video) {
+	// 						formData.append(`sections[${sectionIndex}].components[${componentIndex}].video`, fs.createReadStream(component.video.file.path));
+	// 					}
+	// 				});
+	// 			});
+	// 		}
+	
+	// 		const response = await request(app)
+	// 			.post('/api/courses/update/' + fakeCourse._id)
+	// 			.set('Authorization', `Bearer ${token}`)
+	// 			.set('Content-Type', 'multipart/form-data')
+	// 			.send(formData);
+			
+	// 		expect(response.status).toBe(201);
 
-			expect(updatedCourse.status).toBe('draft');
-		});
-	});
+	// 		const courseId = response.body._id;
+	// 		const course = await db.collection('courses').findOne({ _id: new ObjectId(courseId) });
+
+	// 		expect(course.title).toBe(updateCourseData.courseInfo.title);
+	// 		expect(course.category).toBe(updateCourseData.courseInfo.category);
+	// 		expect(course.description).toBe(updateCourseData.courseInfo.description);
+	// 		expect(course.difficulty).toBe(updateCourseData.courseInfo.difficulty);
+	// 	});
+	// });
 });

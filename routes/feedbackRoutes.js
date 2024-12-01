@@ -3,9 +3,11 @@ const errorCodes = require('../helpers/errorCodes');
 
 // Models
 const { FeedbackOptionsModel } = require('../models/FeedbackOptions');
+const { FeedbackModel } = require('../models/Feedback');
 
 const { saveFeedback, getAllFeedback, getFeedbackForCourse } = require('../helpers/feedbackHelpers.js');
 const { populate } = require('../helpers/populateFeedbackOptions');
+const mongoose = require('mongoose');
 
 
 /**
@@ -22,7 +24,7 @@ router.post('/:courseId', async (req, res) => {
 	try {
 		await saveFeedback(courseId, rating, feedbackText, feedbackOptions);
 		res.send('OK');
-	} catch (e){
+	} catch (e) {
 		//handle what http request to return based on error code
 		switch (e.code) {
 		case 'E006':
@@ -59,6 +61,22 @@ router.post('/populate/new', async (req, res) => {
 	}
 });
 
+// Get all feedback for a given course
+router.get('/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+
+	// Check if courseId is a valid ObjectId
+	if (!mongoose.Types.ObjectId.isValid(courseId)) {
+		return res.status(400).json({ error: errorCodes.E0014 });
+	}
+
+	try {
+		const feedbacks = await FeedbackModel.find({ courseId: mongoose.Types.ObjectId(courseId) });
+		res.status(200).send(feedbacks);
+	} catch (error) {
+		res.status(500).send('Internal Server Error:' + error);
+	}
+});
 
 router.get('/getAllFeedback', async (req, res) => {
 	try {
@@ -78,9 +96,5 @@ router.get('/getFeedbackForCourse/:courseId', async (req, res) => {
 		return res.status(400).json({ 'error': e.message });
 	}
 });
-
-
-
-
 
 module.exports = router;

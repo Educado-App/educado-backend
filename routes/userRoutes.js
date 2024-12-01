@@ -20,18 +20,18 @@ router.delete('/:id', requireLogin, async (req, res) => {
 	try {
 		// Ensure passed in id is valid
 		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
-		const id = mongoose.Types.ObjectId(req.params.id);	
+		const id = mongoose.Types.ObjectId(req.params.id);
 
 		// Ensure user is actually existing
 		assert(await UserModel.findById({ _id: id }), errorCodes.E0004);
-		
+
 		await handleAccountDeletion(id);
-		
+
 		return res.status(200).send({ message: 'Account successfully deleted!' });
-		
+
 	} catch (error) {
 		console.error(error.message);
-		switch(error.code) {
+		switch (error.code) {
 		case 'E0014':
 			return res.status(400).send({ error: error.message }); // 'Invalid id'
 		case 'E0004':
@@ -41,7 +41,7 @@ router.delete('/:id', requireLogin, async (req, res) => {
 		default:
 			return res.status(400).send({ error: errorCodes.E0000.message }); // 'Unknown error'
 		}
-	} 
+	}
 });
 
 // GET User by ID

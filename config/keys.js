@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 
 // Load environment variables based on NODE_ENV
 
-/* global process */
 if (process.env.NODE_ENV === 'production') {
 	dotenv.config({ path: './config/.env.prod' });
 } else {

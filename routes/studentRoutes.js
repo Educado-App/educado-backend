@@ -3,7 +3,6 @@ const errorCodes = require('../helpers/errorCodes');
 const { markAsCompleted } = require('../helpers/completing');
 const requireLogin = require('../middlewares/requireLogin');
 const mongoose = require('mongoose');
-const { findTop100Students } = require('../helpers/leaderboard');
 const { addIncompleteCourse } = require('../helpers/completing');
 const { StudentModel } = require('../models/Students');
 const { CourseModel } = require('../models/Courses');
@@ -11,10 +10,23 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const process = require('process');
+const { getLeaderboard } = require('../helpers/leaderboard');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const { updateStudyStreak } = require('../helpers/studentHelper');
+const { assert } = require('../helpers/error');
+
 
 const serviceUrl = process.env.TRANSCODER_SERVICE_URL;
+
+router.get('/all', async (req, res) => {
+	try {
+		const students = await StudentModel.find({});
+		return res.status(200).json(students);
+	} catch (error) {
+		return res.status(500).json({ error: errorCodes['E0003'] });
+	}
+});
 
 router.get('/:id/info', async (req, res) => {
 	try {
@@ -369,25 +381,46 @@ router.put('/:id/extraPoints', requireLogin, async (req, res) => {
 	}
 });
 
-/* NOT USED  */
 // Get the 100 students with the highest points, input is the time interval (day, week, month, all)
-router.get('/leaderboard', async (req, res) => {
+router.post('/leaderboard', requireLogin, async (req, res) => {
 	try {
-		const { timeInterval } = req.body;
+		const { timeInterval, userId } = req.body; 
 
-		if (!timeInterval) {
-			throw errorCodes['E0015'];
+		if (!userId) {
+			return res.status(400).json({ error: 'User ID is required' });
 		}
 
-		const leaderboard = await findTop100Students(timeInterval);
+		if (!timeInterval || !['day', 'week', 'month', 'all', 'everyMonth'].includes(timeInterval)) {
+			return res.status(400).json({ error: errorCodes['E0015'] });
+		}
 
-		res.status(200).send(leaderboard);
+		const { leaderboard, currentUserRank } = await getLeaderboard(timeInterval, userId);
+		res.status(200).json({ leaderboard, currentUserRank });
 	} catch (error) {
-		// Handle errors appropriately
-		if (error === errorCodes['E0015']) {
-			res.status(500).json({ 'error': errorCodes['E0015'] });
-		} else {
-			res.status(500).json({ 'error': errorCodes['E0003'] });
+		res.status(500).json({ error: errorCodes['E0003'], message: error.message });
+	}
+});
+
+// Update studyStreak
+router.patch('/:id/updateStudyStreak', async (req, res) => {
+	try {
+		// Ensure passed in id is valid
+		assert(mongoose.Types.ObjectId.isValid(req.params.id), errorCodes.E0014);
+		const studentId = mongoose.Types.ObjectId(req.params.id);	
+
+		await updateStudyStreak(studentId);
+
+		return res.status(200).json({ message: 'Student study streak updated!' });
+	} 
+	catch (error) {
+		console.error(error.message);
+		switch(error.code) {
+		case 'E0014':
+			return res.status(400).send({ error: error.message }); // 'Invalid id'
+		case 'E0019':
+			return res.status(500).send({ error: error.message }); //'Failed to update student study streak!'
+		default:
+			return res.status(500).json({ error: errorCodes['E0003'].message }); // 'Server could not be reached'
 		}
 	}
 });
