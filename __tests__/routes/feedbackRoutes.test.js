@@ -31,7 +31,7 @@ let fakeCourse = makeFakeCourse();
 let fakeFeedbackOptions = makeFakeFeedbackOptions();
 
 
-describe('Course Routes', () => {
+describe('Feedback Routes', () => {
 
 	let db, actualUser;
 
